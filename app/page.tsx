@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { LogoSVG, LogoSVGSmall, CheckIcon } from '@/app/components/Logo'
+import { LogoSVG, LogoSVGSmall, CheckIcon } from './components/Logo'
 import HomeClientScripts from './scripts/HomeClientScripts'
 
 export default function HomePage() {
