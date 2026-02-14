@@ -343,7 +343,7 @@ export default function HomePage() {
                 <h4 style={{ marginTop: '20px' }}>Accepted</h4>
                 <ul>
                   <li><a href="#">USDT — BEP20</a></li>
-                  <li><a href="#">USDC — TRC20</a></li>
+                  <li><a href="#">USDT — TRC20</a></li>
                 </ul>
               </div>
             </div>

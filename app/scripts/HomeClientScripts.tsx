@@ -527,7 +527,7 @@ function buildFaq() {
     { q: "Suitable for beginners?", a: "Yes, the interface is clean. A basic understanding of technical analysis is recommended." },
     { q: "Are alerts included?", a: "Yes, fully integrated: email, mobile push or webhook." },
     { q: "Can I change plans?", a: "Upgrade anytime. Downgrade at end of period." },
-    { q: "What cryptocurrencies are accepted?", a: "USDT on BSC (BEP20) and USDC on TRON (TRC20)." },
+    { q: "What cryptocurrencies are accepted?", a: "USDT on BSC (BEP20) and USDT on TRON (TRC20)." },
     { q: "What is the Lifetime plan?", a: "A one-time payment of $1,599 for permanent access to all current indicators only (not the future indicators). Limited to the first 50 members — after that, only annual subscriptions will be available." }
   ]
   const fb2 = document.getElementById('fb')

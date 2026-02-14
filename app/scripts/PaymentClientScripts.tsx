@@ -154,7 +154,7 @@ export default function PaymentClientScripts() {
       summaryBox.innerHTML = `
         <div class="summary-row"><span class="sr-label">Plan</span><span class="sr-value">${plan.label}</span></div>
         <div class="summary-row"><span class="sr-label">Amount</span><span class="sr-value">${plan.price}</span></div>
-        <div class="summary-row"><span class="sr-label">Payment</span><span class="sr-value">${selectedCrypto === 'usdt-bep20' ? 'USDT (BEP20)' : 'USDC (TRC20)'}</span></div>
+        <div class="summary-row"><span class="sr-label">Payment</span><span class="sr-value">${selectedCrypto === 'usdt-bep20' ? 'USDT (BEP20)' : 'USDT (TRC20)'}</span></div>
         <div class="summary-row"><span class="sr-label">Email</span><span class="sr-value">${email}</span></div>
         <div class="summary-row"><span class="sr-label">TradingView</span><span class="sr-value">${tvUser}</span></div>
         <div class="summary-row"><span class="sr-label">TX Hash</span><span class="sr-value" style="font-size:11px;word-break:break-all">${txHash}</span></div>
