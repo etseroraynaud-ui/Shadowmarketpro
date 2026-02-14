@@ -62,7 +62,7 @@ export default function PaymentClientScripts() {
 
   const updateWalletVisibility = () => {
     const walletBep20 = document.getElementById('wallet-usdt-bep20')
-    const walletTrc20 = document.getElementById('wallet-usdc-trc20')
+    const walletTrc20 = document.getElementById('wallet-usdt-trc20')
     if (!walletBep20 || !walletTrc20) return
 
     if (selectedCrypto === 'usdt-bep20') {
