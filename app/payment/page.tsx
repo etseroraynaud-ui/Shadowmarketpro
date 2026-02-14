@@ -97,7 +97,7 @@ function PaymentContent() {
             </div>
 
             <div className="wallet-section" id="wallet-usdt-trc20" style={{ display: 'none' }}>
-              <div className="wallet-label">USDC — TRC20 (Tron)</div>
+              <div className="wallet-label">USDT — TRC20 (Tron)</div>
               <div className="wallet-box">
                 <span className="wallet-addr" id="walletAddrTrc20">TPD9kF4CEDQXCfghKHPq41vEiyNrSEtLvL</span>
                 <button className="copy-btn" onClick={(e) => {
@@ -114,7 +114,7 @@ function PaymentContent() {
                 <line x1="12" y1="9" x2="12" y2="13"/>
                 <line x1="12" y1="17" x2="12.01" y2="17"/>
               </svg>
-              <p><strong>Important:</strong> Only send the selected cryptocurrency on the correct network. USDT on BEP20 (BSC) or USDC on TRC20 (Tron). Sending funds on the wrong network will result in <strong>irreversible loss of funds</strong>.</p>
+              <p><strong>Important:</strong> Only send the selected cryptocurrency on the correct network. USDT on BEP20 (BSC) or USDT on TRC20 (Tron). Sending funds on the wrong network will result in <strong>irreversible loss of funds</strong>.</p>
             </div>
 
             {/* Plan selector */}
@@ -219,7 +219,7 @@ function PaymentContent() {
               <div className="how-num">2</div>
               <div className="how-text">
                 <h4>Send the exact amount</h4>
-                <p>Transfer the exact USD amount in USDT (BEP20) or USDC (TRC20) to the wallet address shown above.</p>
+                <p>Transfer the exact USD amount in USDT (BEP20) or USDT (TRC20) to the wallet address shown above.</p>
               </div>
             </div>
             <div className="how-step">
@@ -249,7 +249,7 @@ function PaymentContent() {
             <ul className="disc-list">
               <li>All payments are non-refundable once processed.</li>
               <li>Indicator access is linked to your TradingView account and is non-transferable.</li>
-              <li>Only USDT (BEP20) and USDC (TRC20) are accepted. No other coins or networks.</li>
+              <li>Only USDT (BEP20) and USDT (TRC20) are accepted. No other coins or networks.</li>
               <li>Sending funds on an incorrect network will result in permanent loss — we cannot recover these funds.</li>
               <li>ShadowMarketPro™ indicators are analytical tools, not financial advice.</li>
             </ul>
