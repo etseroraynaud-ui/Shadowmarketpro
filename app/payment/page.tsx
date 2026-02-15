@@ -173,7 +173,7 @@ function PaymentContent() {
             </div>
             <div className="fg">
               <label>Transaction ID / Hash</label>
-              <input type="text" id="txHash" placeholder="Paste your transaction hash here" required />
+              <input type="text" id="txHash" placeholder="(optional) Paste your transaction hash here" />
               <div className="helper">Copy this from your wallet after completing the transfer.</div>
             </div>
 
