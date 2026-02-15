@@ -27,35 +27,11 @@ function verifyNowSig(body: any, sigHeader: string | null, secret: string) {
   return safeEqualHex(h, sigHeader);
 }
 
-// ⚠️ Tentative de payout seulement si tu as une vraie payout key
-async function trySendAffiliatePayoutUSDTTRC20(amount: number, address: string) {
-  const payoutKey = process.env.NOWPAYMENTS_PAYOUT_API_KEY;
-  if (!payoutKey) {
-    return { skipped: true, reason: "NO_PAYOUT_KEY" as const };
-  }
-
-  const PAYOUT_URL = "https://api.nowpayments.io/v1/payout"; // dépend de l’accès Custody/Mass payouts
-
-  const payload = {
-    currency: "usdttrc20",
-    amount,
-    address,
-  };
-
-  const r = await fetch(PAYOUT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": payoutKey,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok) {
-    return { skipped: true, reason: "PAYOUT_FAILED" as const, details: data };
-  }
-  return { skipped: false, data };
+function mapPaymentStatus(npStatus: string): "pending" | "confirmed" | "failed" {
+  const s = (npStatus || "").toLowerCase();
+  if (["finished", "confirmed"].includes(s)) return "confirmed";
+  if (["failed", "expired", "refunded"].includes(s)) return "failed";
+  return "pending";
 }
 
 export async function POST(req: Request) {
@@ -70,25 +46,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
+  // ✅ Signature OK (on garde)
   if (!verifyNowSig(body, sig, secret)) {
     return NextResponse.json({ error: "Bad signature" }, { status: 401 });
   }
 
   const paymentId = String(body.payment_id ?? "");
-  const status = String(body.payment_status ?? "");
+  const npStatus = String(body.payment_status ?? "");
   const payCurrency = String(body.pay_currency ?? "");
-  const payAmount = Number(body.pay_amount ?? 0); // amount demandé
-  const actuallyPaid = Number(body.actually_paid ?? body.pay_amount ?? 0); // NOWPayments envoie souvent actually_paid
+  const actuallyPaid = Number(body.actually_paid ?? body.pay_amount ?? 0);
 
-  const orderId = String(body.order_id ?? ""); // IMPORTANT: on l’utilise comme clé DB
+  const orderId = String(body.order_id ?? "");
   if (!orderId) return NextResponse.json({ ok: true, warning: "missing order_id" });
 
-  // On ne gère que USDT TRC20 pour l’instant (comme tu veux)
+  // Si tu veux rester strict USDT TRC20 comme avant
   if (payCurrency !== "usdttrc20") {
     return NextResponse.json({ ok: true, ignored: "wrong currency", payCurrency });
   }
 
-  // 1) récupère l’ordre
+  // 1) récupérer l’ordre
   const { data: order, error: oErr } = await supabaseAdmin
     .from("orders")
     .select("*")
@@ -98,87 +74,58 @@ export async function POST(req: Request) {
   if (oErr) return NextResponse.json({ error: "DB error", details: oErr.message }, { status: 500 });
   if (!order) return NextResponse.json({ ok: true, warning: "unknown order_id" });
 
-  // 2) update status (idempotent) + store payment_id/amount_paid
-  // NOWPayments spam l’IPN => on fait des updates safe
+  const payment_status = mapPaymentStatus(npStatus);
+  const nowIso = new Date().toISOString();
+
+  // 2) update order (idempotent)
   await supabaseAdmin
     .from("orders")
     .update({
       nowpayments_payment_id: paymentId || order.nowpayments_payment_id,
-      status,
+      status: npStatus,              // legacy
+      payment_status,                // ✅ nouveau champ propre
       amount_paid: actuallyPaid,
-      updated_at: new Date().toISOString(),
+      updated_at: nowIso,
     })
     .eq("order_id", orderId);
 
-  // 3) on ne déclenche la logique "split" que quand c’est FINAL
-  // ("finished" chez NOWPayments)
-  if (status !== "finished") {
-    return NextResponse.json({ ok: true, status });
+  // 3) On déclenche la commission uniquement en FINAL
+  if (npStatus.toLowerCase() !== "finished") {
+    return NextResponse.json({ ok: true, status: npStatus, payment_status });
   }
 
-  // 4) si pas de coupon / pas de wallet / déjà fait => stop
-  const influencerWallet = order.influencer_wallet as string | null;
+  // 4) Créer la commission (affiliate_payouts) si influencer_id existe
+  //    split_percent = coupons.percent (ou fallback env) déjà stocké sur order
+  const influencerId = order.influencer_id as string | null;
   const splitPercent = Number(order.split_percent ?? 0);
 
-  if (!influencerWallet || !splitPercent || order.payout_done) {
-    // marquer payout_done si pas de split à faire
-    if (!order.payout_done) {
-      await supabaseAdmin
-        .from("orders")
-        .update({ payout_done: true, updated_at: new Date().toISOString() })
-        .eq("order_id", orderId);
+  if (influencerId && splitPercent > 0) {
+    // base: amount_usd si présent sinon amount_expected
+    const baseUsd = Number(order.amount_usd ?? order.amount_expected ?? 0);
+    const commissionUsd = Math.round(baseUsd * splitPercent * 100) / 100;
+
+    const { error: apErr } = await supabaseAdmin
+      .from("affiliate_payouts")
+      .insert({
+        influencer_id: influencerId,
+        order_id: order.id,          // ✅ uuid orders.id (FK)
+        amount_usd: commissionUsd,
+        status: "due",
+      });
+
+    // unique(order_id) => si déjà existant on ignore
+    if (apErr && !String(apErr.message).toLowerCase().includes("duplicate")) {
+      return NextResponse.json({ error: "affiliate_payouts insert failed", details: apErr.message }, { status: 500 });
     }
-    return NextResponse.json({ ok: true, payout: "none" });
   }
 
-  // 5) calc payout
-  const affiliateAmount = Math.round(actuallyPaid * splitPercent * 1e6) / 1e6;
-
-  // 6) crée un payout record (idempotent: un seul par order_id + target)
-  // -> si tu peux, ajoute une contrainte unique en DB plus tard
-  const { data: payoutRow, error: pErr } = await supabaseAdmin
-    .from("payouts")
-    .insert({
-      order_id: order.id, // si payouts.order_id référence uuid "orders.id"
-      target: "affiliate",
-      address: influencerWallet,
-      amount: affiliateAmount,
-      status: "pending",
-      nowpayments_payout_id: null,
-    })
-    .select("*")
-    .maybeSingle();
-
-  if (pErr) {
-    // si déjà créé, on continue sans casser
-    // (souvent erreur "duplicate" si tu ajoutes une contrainte unique plus tard)
-  }
-
-  // 7) tente le payout auto si possible (sinon reste pending)
-  const payoutAttempt = await trySendAffiliatePayoutUSDTTRC20(affiliateAmount, influencerWallet);
-
-  if (!payoutAttempt.skipped) {
-    await supabaseAdmin
-      .from("payouts")
-      .update({
-        status: "sent",
-        nowpayments_payout_id: String((payoutAttempt as any).data?.id ?? ""),
-      })
-      .eq("id", payoutRow?.id ?? null);
-
+  // 5) On marque payout_done (legacy) pour éviter retriggers dans ton code actuel
+  if (!order.payout_done) {
     await supabaseAdmin
       .from("orders")
-      .update({ payout_done: true, updated_at: new Date().toISOString() })
+      .update({ payout_done: true, updated_at: nowIso })
       .eq("order_id", orderId);
-
-    return NextResponse.json({ ok: true, payout: "sent" });
   }
 
-  // pas de payout key / feature non activée => on laisse pending
-  await supabaseAdmin
-    .from("orders")
-    .update({ payout_done: true, updated_at: new Date().toISOString() })
-    .eq("order_id", orderId);
-
-  return NextResponse.json({ ok: true, payout: "queued", reason: payoutAttempt.reason });
+  return NextResponse.json({ ok: true, status: npStatus, payment_status, commission_created: true });
 }
