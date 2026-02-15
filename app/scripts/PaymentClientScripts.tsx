@@ -128,26 +128,59 @@ export default function PaymentClientScripts() {
     promoMsg.textContent = 'Invalid promo code'
   }
 
-  const submitForm = () => {
-    const email = (document.getElementById('email') as HTMLInputElement)?.value
-    const tvUser = (document.getElementById('tvUser') as HTMLInputElement)?.value
-    const txHash = (document.getElementById('txHash') as HTMLInputElement)?.value
+const submitForm = async () => {
+  const email = (document.getElementById('email') as HTMLInputElement)?.value?.trim()
+  const tvUser = (document.getElementById('tvUser') as HTMLInputElement)?.value?.trim()
+  const promo = (document.getElementById('promoInput') as HTMLInputElement)?.value?.trim()
+  const planSelect = (document.getElementById('planSelect') as HTMLSelectElement)
+  const plan = planSelect?.value || selectedPlan
 
-    if (!email || !tvUser || !txHash) {
-      alert('Please fill in all required fields.')
+  if (!email || !tvUser) {
+    alert('Please fill in Email + TradingView.')
+    return
+  }
+
+  const btn = document.getElementById('submitBtn') as HTMLButtonElement | null
+  const old = btn?.textContent
+
+  try {
+    if (btn) {
+      btn.disabled = true
+      btn.textContent = 'Creating invoice...'
+    }
+
+    const r = await fetch('/api/nowpayments/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan,
+        coupon: promo ? promo.toUpperCase() : null,
+        email,
+        tradingview_id: tvUser,
+      }),
+    })
+
+    const data = await r.json().catch(() => ({}))
+
+    if (!r.ok || !data.invoice_url) {
+      console.error(data)
+      alert('Payment setup failed.')
       return
     }
 
-    // Show success card
-    const payCard = document.getElementById('payCard')
-    const successCard = document.getElementById('successCard')
-    const summaryBox = document.getElementById('summaryBox')
-
-    if (payCard) payCard.style.display = 'none'
-    if (successCard) {
-      successCard.style.display = 'block'
-      successCard.classList.add('show')
+    // 🔥 Redirection vers NOWPayments
+    window.location.href = data.invoice_url
+  } catch (e) {
+    console.error(e)
+    alert('Network error.')
+  } finally {
+    if (btn) {
+      btn.disabled = false
+      btn.textContent = old || 'Proceed to payment'
     }
+  }
+}
+
 
     if (summaryBox) {
       const plan = plans[selectedPlan]
