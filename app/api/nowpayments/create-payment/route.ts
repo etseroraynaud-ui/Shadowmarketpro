@@ -16,11 +16,22 @@ function getPlanUSD(plan: string) {
 
 const upper = (s?: string | null) => (s || "").trim().toUpperCase();
 
+type Body = {
+  plan?: "monthly" | "quarterly" | "yearly" | "lifetime" | string;
+  coupon?: string | null;
+  email?: string | null;
+  tradingview_id?: string | null;
+};
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}));
-    const plan = String(body.plan ?? "monthly");
+    const body: Body = await req.json().catch(() => ({}));
+
+    const plan = String(body.plan ?? "monthly").toLowerCase();
     const coupon = body.coupon ? upper(String(body.coupon)) : null;
+
+    const email = body.email ? String(body.email).trim() : null;
+    const tradingview_id = body.tradingview_id ? String(body.tradingview_id).trim() : null;
 
     const priceAmountUSD = getPlanUSD(plan);
 
@@ -29,21 +40,29 @@ export async function POST(req: Request) {
 
     const payCurrency = "usdttrc20";
 
-    // 1) Resolve coupon -> influencer wallet + percent
+    // 1) Resolve coupon -> influencer_id + wallet + percent
+    let influencer_id: string | null = null;
     let influencer_wallet: string | null = null;
     let split_percent: number | null = null;
 
     if (coupon) {
-      // coupon en DB (si tu l’utilises)
-      const { data: cRow } = await supabaseAdmin
+      const { data: cRow, error: cErr } = await supabaseAdmin
         .from("coupons")
-        .select("code,influencer_wallet,percent,active")
+        .select("code,influencer_id,influencer_wallet,percent,active")
         .eq("code", coupon)
         .maybeSingle();
 
+      if (cErr) {
+        return NextResponse.json(
+          { error: "Coupon lookup failed", details: cErr.message },
+          { status: 500 }
+        );
+      }
+
       if (cRow?.active) {
-        influencer_wallet = cRow.influencer_wallet;
-        split_percent = Number(cRow.percent);
+        influencer_id = cRow.influencer_id ?? null;
+        influencer_wallet = cRow.influencer_wallet ?? null;
+        split_percent = cRow.percent != null ? Number(cRow.percent) : null;
       }
 
       // fallback env "TEST_COUPON"
@@ -57,7 +76,10 @@ export async function POST(req: Request) {
     const order_id = crypto.randomUUID();
 
     const { error: insErr } = await supabaseAdmin.from("orders").insert({
+      // clé stable NOWPayments
       order_id,
+
+      // legacy (tu avais déjà)
       status: "created",
       currency: "usd",
       amount_expected: priceAmountUSD,
@@ -66,6 +88,20 @@ export async function POST(req: Request) {
       influencer_wallet,
       split_percent,
       payout_done: false,
+
+      // nouveau schéma (Retool/portal)
+      email,
+      tradingview_id,
+      plan:
+        plan === "monthly" ? "Monthly" :
+        plan === "quarterly" ? "Quarterly" :
+        plan === "yearly" ? "Annual" :
+        plan === "lifetime" ? "Lifetime" :
+        null,
+
+      amount_usd: priceAmountUSD,
+      payment_status: "pending",
+      influencer_id,
     });
 
     if (insErr) {
@@ -80,7 +116,7 @@ export async function POST(req: Request) {
       price_amount: priceAmountUSD,
       price_currency: "usd",
       pay_currency: payCurrency,
-      order_id, // IMPORTANT: order_id = UUID stable
+      order_id, // IMPORTANT
       order_description: `ShadowMarketPro ${plan}`,
       ipn_callback_url: ipnUrl,
       success_url: `${siteUrl}/payment?success=1&order_id=${order_id}`,
@@ -101,7 +137,7 @@ export async function POST(req: Request) {
     if (!r.ok) {
       await supabaseAdmin
         .from("orders")
-        .update({ status: "create_payment_failed" })
+        .update({ status: "create_payment_failed", payment_status: "failed" })
         .eq("order_id", order_id);
 
       return NextResponse.json(
@@ -116,6 +152,7 @@ export async function POST(req: Request) {
       .update({
         nowpayments_payment_id: String(data.payment_id),
         status: "pending",
+        payment_status: "pending",
       })
       .eq("order_id", order_id);
 
