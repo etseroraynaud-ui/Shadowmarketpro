@@ -132,7 +132,7 @@ const submitForm = async () => {
   const email = (document.getElementById('email') as HTMLInputElement)?.value?.trim()
   const tvUser = (document.getElementById('tvUser') as HTMLInputElement)?.value?.trim()
   const promo = (document.getElementById('promoInput') as HTMLInputElement)?.value?.trim()
-  const planSelect = (document.getElementById('planSelect') as HTMLSelectElement)
+  const planSelect = document.getElementById('planSelect') as HTMLSelectElement | null
   const plan = planSelect?.value || selectedPlan
 
   if (!email || !tvUser) {
@@ -168,7 +168,6 @@ const submitForm = async () => {
       return
     }
 
-    // 🔥 Redirection vers NOWPayments
     window.location.href = data.invoice_url
   } catch (e) {
     console.error(e)
