@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     // 1) Resolve coupon -> influencer_id + wallet + percent
     let influencer_id: string | null = null;
     let influencer_wallet: string | null = null;
-    split_percent: split_percent ?? 0,
+    let split_percent: number | null = null;
 
     if (coupon) {
       const { data: cRow, error: cErr } = await supabaseAdmin
