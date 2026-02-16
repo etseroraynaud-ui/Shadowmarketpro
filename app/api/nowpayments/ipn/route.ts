@@ -2,6 +2,33 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "../../../lib/supabase/admin";
 
+const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || "";
+const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || "";
+const EMAILJS_TEMPLATE_ADMIN = process.env.EMAILJS_TEMPLATE_ADMIN || "template_9v05vy8";
+
+async function sendAdminPaidEmail(params: Record<string, any>) {
+  if (!EMAILJS_SERVICE_ID || !EMAILJS_PUBLIC_KEY || !EMAILJS_TEMPLATE_ADMIN) return;
+
+  const r = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_TEMPLATE_ADMIN,
+      user_id: EMAILJS_PUBLIC_KEY,
+      template_params: params,
+    }),
+  });
+
+  if (!r.ok) {
+    const t = await r.text().catch(() => "");
+    throw new Error(`EmailJS failed (${r.status}): ${t}`);
+  }
+}
+
+
+
+
 function stableStringify(obj: any): string {
   if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
   if (Array.isArray(obj)) return `[${obj.map(stableStringify).join(",")}]`;
@@ -53,17 +80,18 @@ export async function POST(req: Request) {
 
   const paymentId = String(body.payment_id ?? "");
   const npStatus = String(body.payment_status ?? "");
-  const payCurrency = String(body.pay_currency ?? "");
+  const payCurrency = String(body.pay_currency ?? "").toLowerCase();
   const actuallyPaid = Number(body.actually_paid ?? body.pay_amount ?? 0);
 
-  const orderId = String(body.order_id ?? "");
-  if (!orderId) return NextResponse.json({ ok: true, warning: "missing order_id" });
+const orderId = String(body.order_id ?? "");
+if (!orderId) return NextResponse.json({ ok: true, warning: "missing order_id" });
 
-  // Si tu veux rester strict USDT TRC20 comme avant
-  if (payCurrency !== "usdttrc20") {
-    return NextResponse.json({ ok: true, ignored: "wrong currency", payCurrency });
-  }
+// Rester "strict TRC20" mais tolérant sur le format
+if (!payCurrency.includes("trc20")) {
+  return NextResponse.json({ ok: true, ignored: "wrong currency", payCurrency });
+}
 
+   
   // 1) récupérer l’ordre
   const { data: order, error: oErr } = await supabaseAdmin
     .from("orders")
@@ -92,7 +120,41 @@ export async function POST(req: Request) {
   // 3) On déclenche la commission uniquement en FINAL
   if (npStatus.toLowerCase() !== "finished") {
     return NextResponse.json({ ok: true, status: npStatus, payment_status });
+  } 
+
+  // ✅ EMAIL ADMIN (1 seule fois) quand paiement confirmé
+if (!order.admin_email_sent) {
+  try {
+    await sendAdminPaidEmail({
+      title: `Payment confirmed — ${order.plan ?? "subscription"}`,
+      name: "NOWPayments",
+      time: new Date().toISOString(),
+      message: `Payment confirmed (finished)
+
+Order: ${orderId}
+Payment ID: ${paymentId}
+Amount paid: ${actuallyPaid} ${payCurrency}
+
+Customer email: ${order.email ?? ""}
+TradingView: ${order.tradingview_id ?? ""}`,
+      email: order.email ?? "",
+      plan: order.plan ?? "",
+      payment_id: paymentId,
+      order_id: orderId,
+      amount_paid: actuallyPaid,
+      pay_currency: payCurrency,
+    });
+
+    await supabaseAdmin
+      .from("orders")
+      .update({ admin_email_sent: true, updated_at: nowIso })
+      .eq("order_id", orderId);
+
+  } catch (e) {
+    console.error("EmailJS admin send failed:", e);
+    // on continue quand même (ne bloque pas l’IPN)
   }
+}
 
   // 4) Créer la commission (affiliate_payouts) si influencer_id existe
   //    split_percent = coupons.percent (ou fallback env) déjà stocké sur order
