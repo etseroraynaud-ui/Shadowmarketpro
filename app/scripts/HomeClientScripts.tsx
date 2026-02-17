@@ -500,22 +500,61 @@ function initNavScroll() {
 }
 
 function buildIndicatorCards() {
-  const inds: IndicatorConfig[] = [
-    { t: "Trend Channel Pro", pitch: "Adaptive Gaussian channel with trap detection and internal momentum reading.", bul: ["Immediate visual reading of directional bias and probability zones", "Early reversal detection via early flip and residual Z-score", "Automatic trap identification: false breakouts, volume divergences"], tech: "Built on a multi-kernel trend engine with adaptive bands modulated by an institutional flow proxy.", ideal: "Ideal for: swing trading, entry/exit zones, false signal filtering.", draw: drawTCP },
-    { t: "Oscillator MarketTiming", pitch: "One of the only indicators in the suite to generate explicit actionable signals.", bul: ["Gold Long / Gold Short / Early signals with multi-condition validation", "Combination of momentum, mean reversion and noise filters", "Clean conditional alerts — every signal is a setup"], tech: "Regime + timing + cross-validation logic. Signals emitted only when multiple conditions converge.", ideal: "Ideal for: entry timing, setup confirmation.", draw: drawOSC },
-    { t: "Markov Regime Engine (MRE-VWAP)", pitch: "Quantitative regime classification engine built on Markov modeling, VWAP structure and conditional probability.", bul: ["Segments the market from price–VWAP structure, spread volatility, and normalized momentum", "Continuous Regime Wave synthesizes directional probability, chaos risk, and conditional expectancy", "Identifies when the market allows a real edge — not what to trade, but when to trade"], tech: "Markov-based state estimation using VWAP directional structure, volatility compression/expansion, and conditional regime transitions.", ideal: "Ideal for: regime filtering, setup qualification, risk context.", draw: drawMRE },
-    { t: "True Adaptive Trend Detector", pitch: "Macro-directional bias via adaptive filtering and oscillator transformation.", bul: ["Clean directional bias via adaptive price series filtering", "Color-coded histogram by OB/OS zones with midline", "Macro-regime reading to confirm or invalidate a bias"], tech: "Adaptive filtering on the price series before derivation of a transformed oscillator.", ideal: "Ideal for: directional bias confirmation, macro-regime reading.", draw: drawATTD }
+  const inds = [
+    {
+      t: "Trend Channel Pro",
+      pitch: "Adaptive Gaussian channel with trap detection and internal momentum reading.",
+      bul: ["Immediate visual reading of directional bias and probability zones", "Early reversal detection via early flip and residual Z-score", "Automatic trap identification: false breakouts, volume divergences"],
+      tech: "Built on a multi-kernel trend engine with adaptive bands modulated by an institutional flow proxy.",
+      ideal: "Ideal for: swing trading, entry/exit zones, false signal filtering.",
+      img: "/indicators/trend-channel-pro.png"
+    },
+    {
+      t: "Oscillator MarketTiming",
+      pitch: "One of the only indicators in the suite to generate explicit actionable signals.",
+      bul: ["Gold Long / Gold Short / Early signals with multi-condition validation", "Combination of momentum, mean reversion and noise filters", "Clean conditional alerts — every signal is a setup"],
+      tech: "Regime + timing + cross-validation logic. Signals emitted only when multiple conditions converge.",
+      ideal: "Ideal for: entry timing, setup confirmation.",
+      img: "/indicators/oscillator-markettiming.png"
+    },
+    {
+      t: "Markov Regime Engine (MRE-VWAP)",
+      pitch: "Quantitative regime classification engine built on Markov modeling, VWAP structure and conditional probability.",
+      bul: ["Segments the market from price–VWAP structure, spread volatility, and normalized momentum", "Continuous Regime Wave synthesizes directional probability, chaos risk, and conditional expectancy", "Identifies when the market allows a real edge — not what to trade, but when to trade"],
+      tech: "Markov-based state estimation using VWAP directional structure, volatility compression/expansion, and conditional regime transitions.",
+      ideal: "Ideal for: regime filtering, setup qualification, risk context.",
+      img: "/indicators/markov-regime-engine.png"
+    },
+    {
+      t: "True Adaptive Trend Detector",
+      pitch: "Macro-directional bias via adaptive filtering and oscillator transformation.",
+      bul: ["Clean directional bias via adaptive price series filtering", "Color-coded histogram by OB/OS zones with midline", "Macro-regime reading to confirm or invalidate a bias"],
+      tech: "Adaptive filtering on the price series before derivation of a transformed oscillator.",
+      ideal: "Ideal for: directional bias confirmation, macro-regime reading.",
+      img: "/indicators/rsi-supertrend.png"
+    }
   ]
+
   const ig2 = document.getElementById('ig')
   if (!ig2) return
-  inds.forEach((ind, i) => {
+
+  inds.forEach((ind) => {
     const el = document.createElement('div')
     el.className = 'gl glh ic'
-    el.innerHTML = `<div class="iss"><canvas id="c${i}"></canvas></div><div class="ib"><h3>${ind.t}</h3><div class="pitch">${ind.pitch}</div><ul class="ibu">${ind.bul.map(b => `<li>${b}</li>`).join('')}</ul><div class="tech-block">${ind.tech}</div><div class="ideal">${ind.ideal}</div></div>`
+    el.innerHTML = `
+      <div class="iss">
+        <img src="${ind.img}" alt="${ind.t}" loading="lazy" />
+      </div>
+      <div class="ib">
+        <h3>${ind.t}</h3>
+        <div class="pitch">${ind.pitch}</div>
+        <ul class="ibu">${ind.bul.map(b => `<li>${b}</li>`).join('')}</ul>
+        <div class="tech-block">${ind.tech}</div>
+        <div class="ideal">${ind.ideal}</div>
+      </div>
+    `
     ig2.appendChild(el)
   })
-  setTimeout(() => { inds.forEach((ind, i) => { const cv = document.getElementById('c' + i) as HTMLCanvasElement; if (cv) ind.draw(cv) }) }, 60)
-  window.addEventListener('resize', () => { inds.forEach((ind, i) => { const cv = document.getElementById('c' + i) as HTMLCanvasElement; if (cv) ind.draw(cv) }) })
 }
 
 function buildFaq() {
