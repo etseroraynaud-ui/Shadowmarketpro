@@ -6,11 +6,11 @@ const NOW_BASE = "https://api.nowpayments.io/v1";
 
 function getPlanUSD(plan: string) {
   switch (plan) {
-    case "monthly": return 99;
+    case "monthly":   return 99;
     case "quarterly": return 279;
-    case "yearly": return 999;
-    case "lifetime": return 1699;
-    default: return 99;
+    case "yearly":    return 999;
+    case "lifetime":  return 1699;
+    default:          return 99;
   }
 }
 
@@ -35,16 +35,21 @@ export async function POST(req: Request) {
     const coupon = body.coupon ? upper(String(body.coupon)) : null;
 
     const email = body.email ? String(body.email).trim() : null;
-    const tradingview_id = body.tradingview_id ? String(body.tradingview_id).trim() : null;
+    const tradingview_id = body.tradingview_id
+      ? String(body.tradingview_id).trim()
+      : null;
 
     const basePriceUSD = getPlanUSD(plan);
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     const ipnUrl = `${siteUrl}/api/nowpayments/ipn`;
 
     const payCurrency = "usdttrc20";
 
-    // 1) Resolve coupon -> influencer_id + wallet + percent
+    /* ──────────────────────────────────────────────
+       1) Resolve coupon → influencer_id + wallet + percent
+       ────────────────────────────────────────────── */
     let influencer_id: string | null = null;
     let influencer_wallet: string | null = null;
     let split_percent: number | null = null;
@@ -68,11 +73,15 @@ export async function POST(req: Request) {
         influencer_id = cRow.influencer_id ?? null;
         influencer_wallet = cRow.influencer_wallet ?? null;
         // Force 15% commission si wallet affilié existe
-        split_percent = cRow.influencer_wallet ? 0.15 : (cRow.percent != null ? Number(cRow.percent) : null);
+        split_percent = cRow.influencer_wallet
+          ? 0.15
+          : cRow.percent != null
+            ? Number(cRow.percent)
+            : null;
 
         // -10% discount si code valide
         if (VALID_PROMO_CODES.includes(coupon)) {
-          discount_percent = 0.10;
+          discount_percent = 0.1;
         }
       }
 
@@ -86,7 +95,7 @@ export async function POST(req: Request) {
       if (!influencer_wallet && coupon === "PREDACRYPTO") {
         influencer_wallet = PREDACRYPTO_FALLBACK_WALLET;
         split_percent = 0.15;
-        discount_percent = 0.10;
+        discount_percent = 0.1;
       }
     }
 
@@ -96,18 +105,25 @@ export async function POST(req: Request) {
     }
 
     // Appliquer remise -10%
-    const priceAmountUSD = discount_percent > 0
-      ? Math.round(basePriceUSD * (1 - discount_percent) * 100) / 100
-      : basePriceUSD;
+    const priceAmountUSD =
+      discount_percent > 0
+        ? Math.round(basePriceUSD * (1 - discount_percent) * 100) / 100
+        : basePriceUSD;
 
-    // 2) Create order in DB FIRST
+    /* ──────────────────────────────────────────────
+       2) Create order in DB FIRST
+       ────────────────────────────────────────────── */
     const order_id = crypto.randomUUID();
 
-    const { error: insErr } = await supabaseAdmin.from("orders").insert({
-      // clé stable NOWPayments
-      order_id,
+    const planLabel =
+      plan === "monthly"   ? "Monthly"  :
+      plan === "quarterly" ? "Quarterly":
+      plan === "yearly"    ? "Annual"   :
+      plan === "lifetime"  ? "Lifetime" :
+      null;
 
-      // legacy (tu avais déjà)
+    const { error: insErr } = await supabaseAdmin.from("orders").insert({
+      order_id,
       status: "created",
       currency: "usd",
       amount_expected: priceAmountUSD,
@@ -116,85 +132,133 @@ export async function POST(req: Request) {
       influencer_wallet,
       split_percent,
       payout_done: false,
-
-      // nouveau schéma (Retool/portal)
       email,
       tradingview_id,
-      plan:
-        plan === "monthly" ? "Monthly" :
-        plan === "quarterly" ? "Quarterly" :
-        plan === "yearly" ? "Annual" :
-        plan === "lifetime" ? "Lifetime" :
-        null,
-
+      plan: planLabel,
       amount_usd: priceAmountUSD,
       payment_status: "pending",
       influencer_id,
     });
 
     if (insErr) {
+      console.error("[create-payment] DB insert failed:", insErr.message);
       return NextResponse.json(
         { error: "DB insert failed", details: insErr.message },
         { status: 500 }
       );
     }
 
-    // 3) Create NOWPayments payment
-    const payload = {
-      price_amount: priceAmountUSD,
-      price_currency: "usd",
-      pay_currency: payCurrency,
-      order_id, // IMPORTANT
-      order_description: `ShadowMarketPro ${plan}`,
-      ipn_callback_url: ipnUrl,
-      success_url: `${siteUrl}/payment?success=1&order_id=${order_id}`,
-      cancel_url: `${siteUrl}/payment?canceled=1&order_id=${order_id}`,
+    /* ──────────────────────────────────────────────
+       3) Create NOWPayments INVOICE (hosted checkout)
+       ──────────────────────────────────────────────
+       POST /v1/invoice renvoie TOUJOURS un invoice_url
+       contrairement à POST /v1/payment qui peut ne pas
+       en renvoyer selon le contexte.
+       ────────────────────────────────────────────── */
+    const invoicePayload = {
+      price_amount:      priceAmountUSD,
+      price_currency:    "usd",
+      pay_currency:      payCurrency,
+      order_id,
+      order_description: `ShadowMarketPro ${planLabel ?? plan}`,
+      ipn_callback_url:  ipnUrl,
+      success_url:       `${siteUrl}/payment?success=1&order_id=${order_id}`,
+      cancel_url:        `${siteUrl}/payment?canceled=1&order_id=${order_id}`,
+      // is_fixed_rate n'est pas obligatoire pour /v1/invoice
+      // on le laisse absent → NOWPayments applique le taux live
     };
 
-    const r = await fetch(`${NOW_BASE}/payment`, {
+    console.log("[create-payment] Calling NOWPayments /v1/invoice for order:", order_id);
+
+    const r = await fetch(`${NOW_BASE}/invoice`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-api-key": process.env.NOWPAYMENTS_API_KEY || "",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(invoicePayload),
     });
 
-    const data = await r.json();
+    const data = await r.json().catch(() => null);
 
-    if (!r.ok) {
+    /* ── Erreur NOWPayments ── */
+    if (!r.ok || !data) {
+      console.error("[create-payment] NOWPayments invoice error:", r.status, data);
+
       await supabaseAdmin
         .from("orders")
         .update({ status: "create_payment_failed", payment_status: "failed" })
         .eq("order_id", order_id);
 
       return NextResponse.json(
-        { error: "NOWPayments create payment failed", details: data },
-        { status: 500 }
+        {
+          error: "NOWPayments invoice creation failed",
+          details: data ?? `HTTP ${r.status}`,
+        },
+        { status: 502 }
       );
     }
 
-    // 4) Save NOWPayments payment id in DB
+    /* ── Parse tolérant : invoice_url peut être sous différentes clés ── */
+    const invoice_url: string | undefined =
+      data.invoice_url ?? data.invoiceUrl ?? data.url ?? undefined;
+
+    if (!invoice_url) {
+      console.error(
+        "[create-payment] invoice_url MISSING in NOWPayments response:",
+        JSON.stringify(data).slice(0, 500)
+      );
+
+      await supabaseAdmin
+        .from("orders")
+        .update({ status: "create_payment_failed", payment_status: "failed" })
+        .eq("order_id", order_id);
+
+      return NextResponse.json(
+        {
+          error: "NOWPayments returned no invoice_url",
+          details: data,
+        },
+        { status: 502 }
+      );
+    }
+
+    /* ── Parse invoice_id (string) ── */
+    const invoice_id: string | null =
+      data.id != null ? String(data.id) : null;
+
+    /* ──────────────────────────────────────────────
+       4) Save invoice reference in DB
+       ────────────────────────────────────────────── */
     await supabaseAdmin
       .from("orders")
       .update({
-        nowpayments_payment_id: String(data.payment_id),
+        nowpayments_payment_id: invoice_id ?? "",
         status: "pending",
         payment_status: "pending",
       })
       .eq("order_id", order_id);
 
+    console.log(
+      `[create-payment] Invoice created: order=${order_id} invoice_id=${invoice_id} url=${invoice_url}`
+    );
+
+    /* ──────────────────────────────────────────────
+       5) Return to frontend
+       ────────────────────────────────────────────── */
     return NextResponse.json({
       order_id,
-      payment_id: data.payment_id,
-      pay_address: data.pay_address,
-      pay_amount: data.pay_amount,
-      pay_currency: data.pay_currency,
-      invoice_url: data.invoice_url,
+      invoice_url,
+      invoice_id,
+      // Debug / optional fields
+      amount_usd: priceAmountUSD,
+      plan: planLabel,
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[create-payment] Unexpected error:", msg);
     return NextResponse.json(
-      { error: "Server error", details: e?.message },
+      { error: "Server error", details: msg },
       { status: 500 }
     );
   }
