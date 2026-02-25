@@ -2,12 +2,11 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "../../../../lib/supabase/admin";
 
-/* ─── EmailJS ─── */
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || "";
 const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || "";
 const EMAILJS_TEMPLATE_ADMIN = process.env.EMAILJS_TEMPLATE_ADMIN || "template_9v05vy8";
 
-async function sendAdminPaidEmail(params: Record<string, unknown>) {
+async function sendAdminPaidEmail(params: Record<string, any>) {
   if (!EMAILJS_SERVICE_ID || !EMAILJS_PUBLIC_KEY || !EMAILJS_TEMPLATE_ADMIN) return;
 
   const r = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
@@ -27,32 +26,34 @@ async function sendAdminPaidEmail(params: Record<string, unknown>) {
   }
 }
 
-/* ─── Signature verification ───
-   CRITICAL: HMAC SHA-512 must be computed on the EXACT raw body string
-   received from NOWPayments. Do NOT use JSON.stringify or stableStringify.
-   NOWPayments signs the raw bytes they send — any re-serialisation changes
-   key ordering or whitespace and breaks the signature.
-*/
-function verifyNowSig(rawBody: string, sigHeader: string | null, secret: string): boolean {
-  if (!sigHeader || !secret) return false;
 
-  const computed = crypto
-    .createHmac("sha512", secret)
-    .update(rawBody)
-    .digest("hex");
 
-  // Constant-time comparison
+
+function stableStringify(obj: any): string {
+  if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
+  if (Array.isArray(obj)) return `[${obj.map(stableStringify).join(",")}]`;
+  const keys = Object.keys(obj).sort();
+  return `{${keys.map(k => JSON.stringify(k) + ":" + stableStringify(obj[k])).join(",")}}`;
+}
+
+function safeEqualHex(a: string, b: string) {
   try {
-    const a = Buffer.from(computed, "hex");
-    const b = Buffer.from(sigHeader, "hex");
-    if (a.length !== b.length) return false;
-    return crypto.timingSafeEqual(a, b);
+    const aa = Buffer.from(a, "hex");
+    const bb = Buffer.from(b, "hex");
+    if (aa.length !== bb.length) return false;
+    return crypto.timingSafeEqual(aa, bb);
   } catch {
     return false;
   }
 }
 
-/* ─── Status mapping ─── */
+function verifyNowSig(body: any, sigHeader: string | null, secret: string) {
+  if (!sigHeader || !secret) return false;
+  const payload = stableStringify(body);
+  const h = crypto.createHmac("sha512", secret).update(payload).digest("hex");
+  return safeEqualHex(h, sigHeader);
+}
+
 function mapPaymentStatus(npStatus: string): "pending" | "confirmed" | "failed" {
   const s = (npStatus || "").toLowerCase();
   if (["finished", "confirmed"].includes(s)) return "confirmed";
@@ -60,25 +61,20 @@ function mapPaymentStatus(npStatus: string): "pending" | "confirmed" | "failed" 
   return "pending";
 }
 
-/* ─── IPN Handler ─── */
 export async function POST(req: Request) {
   const sig = req.headers.get("x-nowpayments-sig");
   const secret = process.env.NOWPAYMENTS_IPN_SECRET || "";
 
-  // 1) Read raw body ONCE — used for both signature & parsing
   const rawText = await req.text();
-
-  let body: Record<string, unknown>;
+  let body: any;
   try {
     body = JSON.parse(rawText);
   } catch {
-    console.error("[IPN] Invalid JSON body");
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  // 2) Verify HMAC on the EXACT raw text
-  if (!verifyNowSig(rawText, sig, secret)) {
-    console.error("[IPN] Bad HMAC signature");
+  // ✅ Signature OK (on garde)
+  if (!verifyNowSig(body, sig, secret)) {
     return NextResponse.json({ error: "Bad signature" }, { status: 401 });
   }
 
@@ -86,105 +82,87 @@ export async function POST(req: Request) {
   const npStatus = String(body.payment_status ?? "");
   const payCurrency = String(body.pay_currency ?? "").toLowerCase();
   const actuallyPaid = Number(body.actually_paid ?? body.pay_amount ?? 0);
-  const orderId = String(body.order_id ?? "");
 
-  console.log(`[IPN] Received: order=${orderId} payment=${paymentId} status=${npStatus} paid=${actuallyPaid} ${payCurrency}`);
+const orderId = String(body.order_id ?? "");
+if (!orderId) return NextResponse.json({ ok: true, warning: "missing order_id" });
 
-  if (!orderId) {
-    return NextResponse.json({ ok: true, warning: "missing order_id" });
-  }
+// Rester "strict TRC20" mais tolérant sur le format
+if (!payCurrency.includes("trc20")) {
+  return NextResponse.json({ ok: true, ignored: "wrong currency", payCurrency });
+}
 
-  // Accept any TRC20-related currency string
-  if (!payCurrency.includes("trc20")) {
-    console.log(`[IPN] Ignored non-TRC20 currency: ${payCurrency}`);
-    return NextResponse.json({ ok: true, ignored: "wrong currency", payCurrency });
-  }
-
-  // 3) Fetch order from DB
+   
+  // 1) récupérer l’ordre
   const { data: order, error: oErr } = await supabaseAdmin
     .from("orders")
     .select("*")
     .eq("order_id", orderId)
     .maybeSingle();
 
-  if (oErr) {
-    console.error("[IPN] DB error:", oErr.message);
-    return NextResponse.json({ error: "DB error", details: oErr.message }, { status: 500 });
-  }
-  if (!order) {
-    console.warn(`[IPN] Unknown order_id: ${orderId}`);
-    return NextResponse.json({ ok: true, warning: "unknown order_id" });
-  }
+  if (oErr) return NextResponse.json({ error: "DB error", details: oErr.message }, { status: 500 });
+  if (!order) return NextResponse.json({ ok: true, warning: "unknown order_id" });
 
   const payment_status = mapPaymentStatus(npStatus);
   const nowIso = new Date().toISOString();
 
-  // 4) Idempotency: if order already confirmed or failed, skip
-  if (order.payment_status === "confirmed" || order.payment_status === "failed") {
-    console.log(`[IPN] Order ${orderId} already terminal (${order.payment_status}), skipping`);
-    return NextResponse.json({ ok: true, already: order.payment_status });
-  }
-
-  // 5) Update order
+  // 2) update order (idempotent)
   await supabaseAdmin
     .from("orders")
     .update({
       nowpayments_payment_id: paymentId || order.nowpayments_payment_id,
-      status: npStatus,
-      payment_status,
+      status: npStatus,              // legacy
+      payment_status,                // ✅ nouveau champ propre
       amount_paid: actuallyPaid,
       updated_at: nowIso,
     })
     .eq("order_id", orderId);
 
-  // 6) Final actions only on "finished" or "confirmed" from NOWPayments
-  const isFinal = ["finished", "confirmed"].includes(npStatus.toLowerCase());
-  if (!isFinal) {
-    return NextResponse.json({ ok: true, status: npStatus, payment_status });
+  const s = npStatus.toLowerCase();
+if (!["finished", "confirmed"].includes(s)) {
+  return NextResponse.json({ ok: true, status: npStatus, payment_status });
+}
+
+  // ✅ EMAIL ADMIN (1 seule fois) quand paiement confirmé
+if (!order.admin_email_sent) {
+  try {
+    await sendAdminPaidEmail({
+      title: `Payment confirmed — ${order.plan ?? "subscription"}`,
+      name: "NOWPayments",
+      time: new Date().toISOString(),
+      message: `Payment confirmed (finished)
+
+Order: ${orderId}
+Payment ID: ${paymentId}
+Amount paid: ${actuallyPaid} ${payCurrency}
+
+Customer email: ${order.email ?? ""}
+TradingView: ${order.tradingview_id ?? ""}`,
+      email: order.email ?? "",
+      plan: order.plan ?? "",
+      payment_id: paymentId,
+      order_id: orderId,
+      amount_paid: actuallyPaid,
+      pay_currency: payCurrency,
+    });
+
+    await supabaseAdmin
+      .from("orders")
+      .update({ admin_email_sent: true, updated_at: nowIso })
+      .eq("order_id", orderId);
+
+  } catch (e) {
+    console.error("EmailJS admin send failed:", e);
+    // on continue quand même (ne bloque pas l’IPN)
   }
+}
 
-  // 7) Admin email (once)
-  if (!order.admin_email_sent) {
-    try {
-      await sendAdminPaidEmail({
-        title: `Payment confirmed — ${order.plan ?? "subscription"}`,
-        name: "NOWPayments",
-        time: nowIso,
-        message: [
-          `Payment confirmed (${npStatus})`,
-          "",
-          `Order: ${orderId}`,
-          `Payment ID: ${paymentId}`,
-          `Amount paid: ${actuallyPaid} ${payCurrency}`,
-          "",
-          `Customer email: ${order.email ?? ""}`,
-          `TradingView: ${order.tradingview_id ?? ""}`,
-        ].join("\n"),
-        email: order.email ?? "",
-        plan: order.plan ?? "",
-        payment_id: paymentId,
-        order_id: orderId,
-        amount_paid: actuallyPaid,
-        pay_currency: payCurrency,
-      });
-
-      await supabaseAdmin
-        .from("orders")
-        .update({ admin_email_sent: true, updated_at: nowIso })
-        .eq("order_id", orderId);
-
-      console.log(`[IPN] Admin email sent for order ${orderId}`);
-    } catch (e) {
-      console.error("[IPN] EmailJS send failed:", e);
-      // Don't block the IPN response
-    }
-  }
-
-  // 8) Create affiliate commission (idempotent via unique constraint)
+  // 4) Créer la commission (affiliate_payouts) si influencer_wallet existe
+  //    Commission fixe 15% sur prix final (amount_usd)
   const influencerId = order.influencer_id as string | null;
   const influencerWallet = order.influencer_wallet as string | null;
 
   if (influencerWallet && influencerId) {
+    // Commission 15% fixe sur prix final (après remise)
     const baseUsd = Number(order.amount_usd ?? order.amount_expected ?? 0);
     const commissionUsd = Math.round(baseUsd * 0.15 * 100) / 100;
 
@@ -192,24 +170,18 @@ export async function POST(req: Request) {
       .from("affiliate_payouts")
       .insert({
         influencer_id: influencerId,
-        order_id: order.id, // uuid FK
+        order_id: order.id,          // ✅ uuid orders.id (FK)
         amount_usd: commissionUsd,
         status: "due",
       });
 
-    // Unique constraint on order_id → duplicate = already created = OK
+    // unique(order_id) => si déjà existant on ignore
     if (apErr && !String(apErr.message).toLowerCase().includes("duplicate")) {
-      console.error("[IPN] affiliate_payouts insert error:", apErr.message);
-      return NextResponse.json(
-        { error: "affiliate_payouts insert failed", details: apErr.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "affiliate_payouts insert failed", details: apErr.message }, { status: 500 });
     }
-
-    console.log(`[IPN] Commission ${commissionUsd} USD created for influencer ${influencerId}`);
   }
 
-  // 9) Mark payout_done (legacy)
+  // 5) On marque payout_done (legacy) pour éviter retriggers dans ton code actuel
   if (!order.payout_done) {
     await supabaseAdmin
       .from("orders")
@@ -217,6 +189,5 @@ export async function POST(req: Request) {
       .eq("order_id", orderId);
   }
 
-  console.log(`[IPN] Order ${orderId} fully processed ✅`);
   return NextResponse.json({ ok: true, status: npStatus, payment_status, commission_created: true });
 }
