@@ -7,14 +7,18 @@ const NOW_BASE = "https://api.nowpayments.io/v1";
 function getPlanUSD(plan: string) {
   switch (plan) {
     case "monthly": return 99;
-    case "quarterly": return 259;
-    case "yearly": return 899;
-    case "lifetime": return 1599;
+    case "quarterly": return 279;
+    case "yearly": return 999;
+    case "lifetime": return 1699;
     default: return 99;
   }
 }
 
 const upper = (s?: string | null) => (s || "").trim().toUpperCase();
+
+// Coupons valides pour -10%
+const VALID_PROMO_CODES = ["PREDACRYPTO", "SUNRIZE", "ANOUSH"];
+const PREDACRYPTO_FALLBACK_WALLET = "TBJLWktw3gyjdXY4fGXvQ4Fo3Uuh9Efzu2";
 
 type Body = {
   plan?: "monthly" | "quarterly" | "yearly" | "lifetime" | string;
@@ -33,7 +37,7 @@ export async function POST(req: Request) {
     const email = body.email ? String(body.email).trim() : null;
     const tradingview_id = body.tradingview_id ? String(body.tradingview_id).trim() : null;
 
-    const priceAmountUSD = getPlanUSD(plan);
+    const basePriceUSD = getPlanUSD(plan);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     const ipnUrl = `${siteUrl}/api/nowpayments/ipn`;
@@ -44,6 +48,7 @@ export async function POST(req: Request) {
     let influencer_id: string | null = null;
     let influencer_wallet: string | null = null;
     let split_percent: number | null = null;
+    let discount_percent = 0;
 
     if (coupon) {
       const { data: cRow, error: cErr } = await supabaseAdmin
@@ -62,15 +67,38 @@ export async function POST(req: Request) {
       if (cRow?.active) {
         influencer_id = cRow.influencer_id ?? null;
         influencer_wallet = cRow.influencer_wallet ?? null;
-        split_percent = cRow.percent != null ? Number(cRow.percent) : null;
+        // Force 15% commission si wallet affilié existe
+        split_percent = cRow.influencer_wallet ? 0.15 : (cRow.percent != null ? Number(cRow.percent) : null);
+
+        // -10% discount si code valide
+        if (VALID_PROMO_CODES.includes(coupon)) {
+          discount_percent = 0.10;
+        }
       }
 
       // fallback env "TEST_COUPON"
       if (!influencer_wallet && coupon === upper(process.env.TEST_COUPON)) {
         influencer_wallet = process.env.AFFILIATE_WALLET_TRC20 || null;
-        split_percent = Number(process.env.AFFILIATE_PERCENT || "0.15");
+        split_percent = 0.15;
+      }
+
+      // fallback wallet PREDACRYPTO
+      if (!influencer_wallet && coupon === "PREDACRYPTO") {
+        influencer_wallet = PREDACRYPTO_FALLBACK_WALLET;
+        split_percent = 0.15;
+        discount_percent = 0.10;
       }
     }
+
+    // Force split_percent = 0.15 si influencer_wallet existe
+    if (influencer_wallet) {
+      split_percent = 0.15;
+    }
+
+    // Appliquer remise -10%
+    const priceAmountUSD = discount_percent > 0
+      ? Math.round(basePriceUSD * (1 - discount_percent) * 100) / 100
+      : basePriceUSD;
 
     // 2) Create order in DB FIRST
     const order_id = crypto.randomUUID();

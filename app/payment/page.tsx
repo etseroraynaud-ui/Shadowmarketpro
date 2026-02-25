@@ -134,9 +134,9 @@ function PaymentContent() {
                 }
               }}>
                 <option value="monthly">Monthly — $99 USD</option>
-                <option value="quarterly">Quarterly — $259 USD</option>
-                <option value="yearly">Annual — $899 USD</option>
-                <option value="lifetime">Lifetime — $1,599 USD (Limited: 50 spots)</option>
+                <option value="quarterly">Quarterly — $279 USD</option>
+                <option value="yearly">Annual — $999 USD</option>
+                <option value="lifetime">Lifetime — $1,699 USD (Limited: 50 spots)</option>
               </select>
             </div>
 

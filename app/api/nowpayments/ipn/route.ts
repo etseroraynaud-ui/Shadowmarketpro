@@ -156,15 +156,15 @@ TradingView: ${order.tradingview_id ?? ""}`,
   }
 }
 
-  // 4) Créer la commission (affiliate_payouts) si influencer_id existe
-  //    split_percent = coupons.percent (ou fallback env) déjà stocké sur order
+  // 4) Créer la commission (affiliate_payouts) si influencer_wallet existe
+  //    Commission fixe 15% sur prix final (amount_usd)
   const influencerId = order.influencer_id as string | null;
-  const splitPercent = Number(order.split_percent ?? 0);
+  const influencerWallet = order.influencer_wallet as string | null;
 
-  if (influencerId && splitPercent > 0) {
-    // base: amount_usd si présent sinon amount_expected
+  if (influencerWallet && influencerId) {
+    // Commission 15% fixe sur prix final (après remise)
     const baseUsd = Number(order.amount_usd ?? order.amount_expected ?? 0);
-    const commissionUsd = Math.round(baseUsd * splitPercent * 100) / 100;
+    const commissionUsd = Math.round(baseUsd * 0.15 * 100) / 100;
 
     const { error: apErr } = await supabaseAdmin
       .from("affiliate_payouts")

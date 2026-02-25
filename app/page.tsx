@@ -209,7 +209,7 @@ export default function HomePage() {
               <div className="gl pc">
                 <div style={{ height: '24px', marginBottom: '14px' }}></div>
                 <h3>Monthly</h3>
-                <div className="pam">$95<small>USD /mo</small></div>
+                <div className="pam">$99<small>USD /mo</small></div>
                 <p className="ppm">Billed monthly</p>
                 <div className="ps2">&nbsp;</div>
                 <div className="gline" style={{ marginBottom: '22px' }}></div>
@@ -226,9 +226,9 @@ export default function HomePage() {
               <div className="gl pc">
                 <span className="pb2 pop">Popular</span>
                 <h3>Quarterly</h3>
-                <div className="pam">$289<small>USD /qtr</small></div>
-                <p className="ppm">Equiv. <strong>~$86/mo</strong></p>
-                <div className="ps2">Save 13%</div>
+                <div className="pam">$279<small>USD /qtr</small></div>
+                <p className="ppm">Equiv. <strong>~$93/mo</strong></p>
+                <div className="ps2">Save 7%</div>
                 <div className="gline" style={{ marginBottom: '22px' }}></div>
                 <ul className="pf">
                   <li><CheckIcon />4 indicators</li>
@@ -244,8 +244,8 @@ export default function HomePage() {
                 <span className="pb2 best">Best Value</span>
                 <h3>Annual</h3>
                 <div className="pam">$999<small>USD /yr</small></div>
-                <p className="ppm">Equiv. <strong>~$75/mo</strong></p>
-                <div className="ps2">Save 24%</div>
+                <p className="ppm">Equiv. <strong>~$83/mo</strong></p>
+                <div className="ps2">Save 16%</div>
                 <div className="gline" style={{ marginBottom: '22px' }}></div>
                 <ul className="pf">
                   <li><CheckIcon />4 indicators</li>
@@ -260,7 +260,7 @@ export default function HomePage() {
               <div className="gl pc" style={{ borderColor: 'rgba(250,204,21,.15)' }}>
                 <span className="pb2 ltd">Limited — 50 spots</span>
                 <h3>Lifetime</h3>
-                <div className="pam">$1,799<small>USD once</small></div>
+                <div className="pam">$1,699<small>USD once</small></div>
                 <p className="ppm">One-time payment</p>
                 <div className="ps2">Forever access</div>
                 <div className="gline" style={{ marginBottom: '22px' }}></div>
@@ -289,8 +289,8 @@ export default function HomePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr><td>Total price</td><td>$99</td><td>$259</td><td>$899</td><td>$1,599</td></tr>
-                    <tr><td>Cost / month</td><td>$99</td><td>~$86</td><td>~$75</td><td>—</td></tr>
+                    <tr><td>Total price</td><td>$99</td><td>$279</td><td>$999</td><td>$1,699</td></tr>
+                    <tr><td>Cost / month</td><td>$99</td><td>~$93</td><td>~$83</td><td>—</td></tr>
                     <tr><td>4 indicators</td><td className="ck">✓</td><td className="ck">✓</td><td className="ck">✓</td><td className="ck">✓</td></tr>
                     <tr><td>Future indicators</td><td className="ck">✓</td><td className="ck">✓</td><td className="ck">✓</td><td className="ck">✓</td></tr>
                     <tr><td>Priority support</td><td className="da">—</td><td className="ck">✓</td><td className="ck">✓</td><td className="ck">✓</td></tr>
