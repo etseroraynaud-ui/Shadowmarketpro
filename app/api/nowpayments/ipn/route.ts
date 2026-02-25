@@ -4,20 +4,44 @@ import { supabaseAdmin } from "../../../../lib/supabase/admin";
 
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID || "";
 const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || "";
+const EMAILJS_PRIVATE_KEY = process.env.EMAILJS_PRIVATE_KEY || "";
 const EMAILJS_TEMPLATE_ADMIN = process.env.EMAILJS_TEMPLATE_ADMIN || "template_9v05vy8";
 
+// Safe env check — logs presence only, never the actual values
+console.log("[IPN:EmailJS] env check:", {
+  SERVICE_ID: !!EMAILJS_SERVICE_ID,
+  PUBLIC_KEY: !!EMAILJS_PUBLIC_KEY,
+  PRIVATE_KEY: !!EMAILJS_PRIVATE_KEY,
+  TEMPLATE_ADMIN: !!EMAILJS_TEMPLATE_ADMIN,
+});
+
 async function sendAdminPaidEmail(params: Record<string, any>) {
-  if (!EMAILJS_SERVICE_ID || !EMAILJS_PUBLIC_KEY || !EMAILJS_TEMPLATE_ADMIN) return;
+  if (!EMAILJS_SERVICE_ID || !EMAILJS_PUBLIC_KEY || !EMAILJS_TEMPLATE_ADMIN) {
+    console.warn("[IPN:EmailJS] Skipped — missing env vars");
+    return;
+  }
+
+  // Build request body with accessToken (private key) for server-side auth.
+  // Without this, EmailJS returns 403 "API calls are disabled for non-browser applications".
+  // Docs: https://www.emailjs.com/docs/rest-api/send/
+  const emailPayload: Record<string, unknown> = {
+    service_id: EMAILJS_SERVICE_ID,
+    template_id: EMAILJS_TEMPLATE_ADMIN,
+    user_id: EMAILJS_PUBLIC_KEY,
+    template_params: params,
+  };
+
+  // accessToken = private key — required for server-side (Node/Vercel) calls
+  if (EMAILJS_PRIVATE_KEY) {
+    emailPayload.accessToken = EMAILJS_PRIVATE_KEY;
+  } else {
+    console.warn("[IPN:EmailJS] EMAILJS_PRIVATE_KEY is missing — request may fail with 403");
+  }
 
   const r = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      service_id: EMAILJS_SERVICE_ID,
-      template_id: EMAILJS_TEMPLATE_ADMIN,
-      user_id: EMAILJS_PUBLIC_KEY,
-      template_params: params,
-    }),
+    body: JSON.stringify(emailPayload),
   });
 
   if (!r.ok) {
