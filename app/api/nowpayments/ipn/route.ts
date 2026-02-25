@@ -189,6 +189,7 @@ Auto-accepted (>=97%): ${paidEnough ? "YES" : "NO"}
 Customer email: ${order.email ?? ""}
 TradingView: ${order.tradingview_id ?? ""}`,
         email: order.email ?? "",
+        tradingview_id: order.tradingview_id ?? "",
         plan: order.plan ?? "",
         payment_id: paymentId,
         order_id: orderId,
