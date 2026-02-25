@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { LogoSVGNav } from '@/components/Logo'
-import PaymentClientScripts from '@/scripts/PaymentClientScripts'
+import { LogoSVGNav } from '../components/Logo'
+import PaymentClientScripts from '../scripts/PaymentClientScripts'
 
 
 function PaymentContent() {

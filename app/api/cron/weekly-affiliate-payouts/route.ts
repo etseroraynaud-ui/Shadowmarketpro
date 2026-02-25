@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "../../../../lib/supabase/admin";
+import { supabaseAdmin } from "../../../lib/supabase/admin";
 
 const NOW_BASE = "https://api.nowpayments.io/v1";
 const MIN_PAYOUT = Number(process.env.MIN_AFFILIATE_PAYOUT_USD || "20");
