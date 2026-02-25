@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { supabaseAdmin } from "../../../lib/supabase/admin";
+import { supabaseAdmin } from "../../../../lib/supabase/admin";
 
 const NOW_BASE = "https://api.nowpayments.io/v1";
 
