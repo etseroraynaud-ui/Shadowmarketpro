@@ -9,15 +9,6 @@ interface CandleData {
   c: number
 }
 
-interface IndicatorConfig {
-  t: string
-  pitch: string
-  bul: string[]
-  tech: string
-  ideal: string
-  draw: (cv: HTMLCanvasElement) => void
-}
-
 interface Particle {
   x: number
   y: number
@@ -30,6 +21,15 @@ interface Particle {
 interface FaqItem {
   q: string
   a: string
+}
+
+interface IndicatorData {
+  t: string
+  teaser: string
+  img: string
+  purpose: string
+  build: string[]
+  edge: string[]
 }
 
 function sm(a: number[], w: number): number[] {
@@ -499,61 +499,363 @@ function initNavScroll() {
   window.addEventListener('scroll', handleScroll, { passive: true })
 }
 
-function buildIndicatorCards() {
-  const inds = [
-    {
-      t: "Trend Channel Pro",
-      pitch: "Adaptive Gaussian channel with trap detection and internal momentum reading.",
-      bul: ["Immediate visual reading of directional bias and probability zones", "Early reversal detection via early flip and residual Z-score", "Automatic trap identification: false breakouts, volume divergences"],
-      tech: "Built on a multi-kernel trend engine with adaptive bands modulated by an institutional flow proxy.",
-      ideal: "Ideal for: swing trading, entry/exit zones, false signal filtering.",
-      img: "/indicators/trend-channel-pro.png"
-    },
-    {
-      t: "Oscillator MarketTiming",
-      pitch: "One of the only indicators in the suite to generate explicit actionable signals.",
-      bul: ["Gold Long / Gold Short / Early signals with multi-condition validation", "Combination of momentum, mean reversion and noise filters", "Clean conditional alerts — every signal is a setup"],
-      tech: "Regime + timing + cross-validation logic. Signals emitted only when multiple conditions converge.",
-      ideal: "Ideal for: entry timing, setup confirmation.",
-      img: "/indicators/oscillator-markettiming.png"
-    },
-    {
-      t: "Markov Regime Engine (MRE-VWAP)",
-      pitch: "Quantitative regime classification engine built on Markov modeling, VWAP structure and conditional probability.",
-      bul: ["Segments the market from price–VWAP structure, spread volatility, and normalized momentum", "Continuous Regime Wave synthesizes directional probability, chaos risk, and conditional expectancy", "Identifies when the market allows a real edge — not what to trade, but when to trade"],
-      tech: "Markov-based state estimation using VWAP directional structure, volatility compression/expansion, and conditional regime transitions.",
-      ideal: "Ideal for: regime filtering, setup qualification, risk context.",
-      img: "/indicators/markov-regime-engine.png"
-    },
-    {
-      t: "True Adaptive Trend Detector",
-      pitch: "Macro-directional bias via adaptive filtering and oscillator transformation.",
-      bul: ["Clean directional bias via adaptive price series filtering", "Color-coded histogram by OB/OS zones with midline", "Macro-regime reading to confirm or invalidate a bias"],
-      tech: "Adaptive filtering on the price series before derivation of a transformed oscillator.",
-      ideal: "Ideal for: directional bias confirmation, macro-regime reading.",
-      img: "/indicators/rsi-supertrend.png"
+/* ───────────────────────────────────────────────────
+   Indicator data – 8 cards
+   ─────────────────────────────────────────────────── */
+const INDICATORS: IndicatorData[] = [
+  {
+    t: "EV Monte Carlo HMM",
+    teaser: "Probabilistic fan chart with Monte Carlo simulation and Markov regime switching.",
+    img: "/indicators/expected-value-monte-carlo-markov-dirvol.png",
+    purpose: "Project a probabilistic distribution of future price paths (fan chart) + stats (EV, Win Rate, Sharpe, CVaR) to decide if the trade is worth the risk.",
+    build: [
+      "Simulates thousands of Monte Carlo scenarios over a given horizon (paths).",
+      "Switches drift/vol according to Markov regime (Bull/Bear/Neutral) + optional directional volatility (VQI) for an asymmetric fan.",
+      "Displays quantiles (P50, P25\u2013P75, P05\u2013P95) + illustrative pseudo-candles + risk table."
+    ],
+    edge: [
+      "You trade a probability zone, not a single-line \u201Cprediction.\u201D",
+      "CVaR + extreme bands = rational stops/targets and cleaner sizing."
+    ]
+  },
+  {
+    t: "Fast Trend Channel (Hull Ribbon)",
+    teaser: "Adaptive trend channel with breakout, reversal and trap detection on price.",
+    img: "/indicators/fast-ou-trend-channel-hull-ribbon.png",
+    purpose: "Read trend structure (adaptive channel), spot breakouts, reversals and especially traps directly on price.",
+    build: [
+      "A central Filter/Trend Engine line that switches Bull/Bear/Neutral (color).",
+      "Adaptive upper/lower bands driven by Money Flow (variable width).",
+      "Table with Z-score + reversion probability + HTF + trap detection (X)."
+    ],
+    edge: [
+      "Know when to follow (trend + flow aligned) and when not to chase (extreme Z-score / high reversion).",
+      "Trap \u201CX\u201D markers protect you from fakeouts that destroy traders."
+    ]
+  },
+  {
+    t: "Kaufmann Volume Zone Oscillator",
+    teaser: "Directional volume pressure oscillator \u2014 is money flowing in or out?",
+    img: "/indicators/kaufmann-volume-zone-oscillator.png",
+    purpose: "Measure buying/selling pressure through directional volume: \u201CIs money flowing in or out?\u201D",
+    build: [
+      "VZO oscillator (\u2013100 to +100) + MA: cyan/red fill based on VZO vs MA.",
+      "Normalized VZO Wave (\u20131 to +1) filtered by Kaufman Efficiency Ratio (ER): distinguishes real direction vs noise.",
+      "Regimes via \u201Cspheres\u201D (compression/expansion) + absorption signals (volume pushes but price no longer follows)."
+    ],
+    edge: [
+      "Filters \u201Cfuel-less\u201D moves: price moving without volume = fragile signal.",
+      "Absorption gives early warnings of trend exhaustion."
+    ]
+  },
+  {
+    t: "Lumina SmartMoney Fusion",
+    teaser: "All-in-one cockpit: direction + momentum + flow + signals in cascade.",
+    img: "/indicators/lumina-vmc-fusion-v4.png",
+    purpose: "An all-in-one cockpit: direction (EMA cloud) + momentum (WaveTrend) + flow (Money Flow) + signals (squeeze/divergences) for cascade trading.",
+    build: [
+      "EMA cloud (multi-EMA ribbon) on price: Bull/Bear/Neutral + COIL (compression) detection.",
+      "WaveTrend around 0 (zones +53/+80, \u221253/\u221280) + crossover/shadow logic.",
+      "Money Flow in background: confirms or invalidates momentum + signals (SQUEEZE, DIV, WTDiv\u2026)."
+    ],
+    edge: [
+      "Anti-emotional trading: you don\u2019t enter on a single point \u2192 you wait for alignment (cloud + wave + flow).",
+      "Compression\u2192expansion detection (COIL) = explosive \u201Cspring\u201D setups."
+    ]
+  },
+  {
+    t: "Markov Regime Engine (MRE-VWAP)",
+    teaser: "Traffic-light permission filter \u2014 Long allowed? Short allowed? Or Avoid.",
+    img: "/indicators/markov-regime-engine.png",
+    purpose: "A permission filter (traffic light): Long allowed? Short allowed? Or Avoid (chaos/voltrap/no edge).",
+    build: [
+      "Combines Trend (VWAP deviation z-score) + Vol (sigma regime) + Mom (MACD slope normalized ATR).",
+      "Encodes these components into Markov states and estimates P(up), P(chaos), E[ret] on recent history.",
+      "Discrete histogram (+1/0/\u22121) = quick alert, Wave = filtered validation."
+    ],
+    edge: [
+      "Tells you when NOT to trade (Avoid/Chaos/VolTrap) \u2014 that\u2019s where most traders get crushed.",
+      "Gives a quantified edge (probabilities + expected return), not an opinion."
+    ]
+  },
+  {
+    t: "Renko Momentum Oscillator",
+    teaser: "Noise-free momentum via Renko bricks on a neural-smoothed RSI.",
+    img: "/indicators/renko-momentum-oscillator.png",
+    purpose: "A momentum oscillator that only moves when it matters: Renko applied to a neural-smoothed RSI, with clean color flips.",
+    build: [
+      "Smoothed RSI (NN-type) then converted to Renko bricks (fixed threshold) on the oscillator.",
+      "Cyan vs fuchsia color = bull vs bear momentum; flips = cleaner reversals.",
+      "3D heatmap: intensity = distance to 0 + \u201Cridge\u201D modulation (short vs long vol)."
+    ],
+    edge: [
+      "Reduces RSI noise \u2192 fewer false flips, more \u201Cclean\u201D signals.",
+      "On Daily/Weekly: bear zones = accumulation zones (DCA), bull flip = recovery."
+    ]
+  },
+  {
+    t: "Supertrend + KHRSI Macro Regime",
+    teaser: "Define macro regime (bull/bear market) to avoid trading against the cycle.",
+    img: "/indicators/supertrend-khrsi-macro-regime.png",
+    purpose: "Define the macro regime (bull market / bear market) so you never trade against the cycle, on any timeframe.",
+    build: [
+      "Kalman filter (adaptive smoothing) + Hull MA (reactivity) then RSI on the filtered signal.",
+      "Displayed as histogram around 50, with zones (55\u201362.5, 62.5\u201375, 75\u201390, >90 / <50 etc.).",
+      "Stable in long trends unlike classic RSI \u2192 fewer false \u201C50-crosses.\u201D"
+    ],
+    edge: [
+      "Gives you the \u201Cmode\u201D: trend-follow in bull, defensive/DCA in bear.",
+      "Stays stable in prolonged trends \u2014 no premature regime flip."
+    ]
+  },
+  {
+    t: "VQI Shadow",
+    teaser: "Volatility quality index \u2014 is volatility producing a net move or just chaos?",
+    img: "/indicators/vqi-dexquant.png",
+    purpose: "Measure the directional quality of volatility: is volatility producing a net displacement (efficient trend) or chaos/chop?",
+    build: [
+      "VQI score as Z-score (0 = chop, >0 bull, <0 bear) + \u00B11\u03C3/\u00B12\u03C3/\u00B13\u03C3 bands.",
+      "Chop detection via hysteresis (grey zone = signals OFF).",
+      "Rare \u201CPower Breakout\u201D signals after strict filters (exit chop + breakout + compression\u2192expansion + volume + confirmation)."
+    ],
+    edge: [
+      "Ultra-discriminant filter: you trade when volatility is efficient, not when it\u2019s choppy.",
+      "Power Breakout = high-conviction entries after prolonged compression."
+    ]
+  }
+]
+
+/* ───────────────────────────────────────────────────
+   Inject modal CSS once
+   ─────────────────────────────────────────────────── */
+function injectModalStyles() {
+  if (document.getElementById('ind-modal-css')) return
+  const style = document.createElement('style')
+  style.id = 'ind-modal-css'
+  style.textContent = `
+    .ind-card-clickable { cursor:pointer }
+
+    /* overlay */
+    .ind-overlay {
+      position:fixed; inset:0; z-index:9999;
+      background:rgba(0,0,0,.72); backdrop-filter:blur(12px);
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; transition:opacity .25s ease;
+      padding:20px;
     }
-  ]
+    .ind-overlay.ind-visible { opacity:1 }
 
-  const ig2 = document.getElementById('ig')
-  if (!ig2) return
+    /* modal panel */
+    .ind-modal {
+      position:relative;
+      background:rgba(14,14,20,.96);
+      border:1px solid rgba(45,45,55,.45);
+      border-radius:18px;
+      max-width:560px; width:100%;
+      max-height:85vh; overflow-y:auto;
+      transform:scale(.94); opacity:0;
+      transition:transform .25s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+      box-shadow:0 24px 80px rgba(0,0,0,.55);
+    }
+    .ind-overlay.ind-visible .ind-modal { transform:scale(1); opacity:1 }
 
-  inds.forEach((ind) => {
+    /* scrollbar */
+    .ind-modal::-webkit-scrollbar { width:5px }
+    .ind-modal::-webkit-scrollbar-track { background:transparent }
+    .ind-modal::-webkit-scrollbar-thumb { background:rgba(255,255,255,.08); border-radius:4px }
+
+    /* close */
+    .ind-close {
+      position:sticky; top:0; float:right; z-index:2;
+      width:36px; height:36px; margin:12px 12px 0 0;
+      border:1px solid rgba(148,163,184,.15); border-radius:10px;
+      background:rgba(14,14,20,.85); backdrop-filter:blur(8px);
+      color:rgba(244,244,245,.65); font-size:18px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:all .2s;
+    }
+    .ind-close:hover { background:rgba(255,255,255,.08); color:#fff }
+
+    .ind-modal-img {
+      width:100%; border-radius:16px 16px 0 0;
+      display:block; margin-top:-36px;
+    }
+
+    .ind-modal-body { padding:24px 28px 28px }
+
+    .ind-modal-body h2 {
+      font-family:'Outfit',sans-serif; font-weight:700;
+      font-size:22px; color:#fff; margin:0 0 6px; letter-spacing:-.02em
+    }
+
+    .ind-modal-body .ind-purpose {
+      font-size:14px; color:rgba(244,244,245,.65);
+      font-style:italic; margin-bottom:20px; line-height:1.55
+    }
+
+    .ind-modal-body h4 {
+      font-family:'Outfit',sans-serif; font-weight:600;
+      font-size:13px; color:rgba(6,182,212,.85);
+      text-transform:uppercase; letter-spacing:.08em;
+      margin:0 0 10px
+    }
+
+    .ind-modal-body ul {
+      list-style:none; padding:0; margin:0 0 20px
+    }
+    .ind-modal-body ul li {
+      display:flex; align-items:flex-start; gap:10px;
+      font-size:13px; color:rgba(244,244,245,.6);
+      margin-bottom:8px; line-height:1.55
+    }
+    .ind-modal-body ul li::before {
+      content:''; flex-shrink:0; width:5px; height:5px;
+      border-radius:50%; margin-top:7px
+    }
+    .ind-modal-body .ind-build li::before { background:rgba(6,182,212,.6) }
+    .ind-modal-body .ind-edge li::before  { background:rgba(34,197,94,.6) }
+  `
+  document.head.appendChild(style)
+}
+
+/* ───────────────────────────────────────────────────
+   Modal controller
+   ─────────────────────────────────────────────────── */
+let activeOverlay: HTMLElement | null = null
+let previousFocus: HTMLElement | null = null
+
+function openModal(ind: IndicatorData) {
+  closeModal() // ensure no stale modal
+
+  previousFocus = document.activeElement as HTMLElement
+
+  const overlay = document.createElement('div')
+  overlay.className = 'ind-overlay'
+  overlay.setAttribute('role', 'dialog')
+  overlay.setAttribute('aria-modal', 'true')
+  overlay.setAttribute('aria-label', ind.t)
+
+  overlay.innerHTML = `
+    <div class="ind-modal">
+      <button class="ind-close" aria-label="Close">&times;</button>
+      <img class="ind-modal-img" src="${ind.img}" alt="${ind.t}" />
+      <div class="ind-modal-body">
+        <h2>${ind.t}</h2>
+        <p class="ind-purpose">${ind.purpose}</p>
+        <h4>How it\u2019s built</h4>
+        <ul class="ind-build">${ind.build.map(b => `<li>${b}</li>`).join('')}</ul>
+        <h4>Edge</h4>
+        <ul class="ind-edge">${ind.edge.map(e => `<li>${e}</li>`).join('')}</ul>
+      </div>
+    </div>
+  `
+
+  document.body.appendChild(overlay)
+  document.body.style.overflow = 'hidden'
+  activeOverlay = overlay
+
+  // force reflow then animate in
+  void overlay.offsetWidth
+  overlay.classList.add('ind-visible')
+
+  // focus close button
+  const closeBtn = overlay.querySelector('.ind-close') as HTMLElement
+  closeBtn?.focus()
+
+  // click outside
+  overlay.addEventListener('mousedown', (e) => {
+    if (e.target === overlay) closeModal()
+  })
+
+  // close button
+  closeBtn?.addEventListener('click', closeModal)
+
+  // ESC
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') { closeModal(); return }
+    // basic focus trap
+    if (e.key === 'Tab') {
+      const focusable = overlay.querySelectorAll<HTMLElement>('button, [href], [tabindex]:not([tabindex="-1"])')
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus() }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
+  }
+  document.addEventListener('keydown', onKey)
+  ;(overlay as any)._keyHandler = onKey
+}
+
+function closeModal() {
+  if (!activeOverlay) return
+  const overlay = activeOverlay
+  const onKey = (overlay as any)._keyHandler
+  if (onKey) document.removeEventListener('keydown', onKey)
+
+  overlay.classList.remove('ind-visible')
+  document.body.style.overflow = ''
+
+  setTimeout(() => { overlay.remove() }, 260)
+  activeOverlay = null
+
+  if (previousFocus && typeof previousFocus.focus === 'function') {
+    previousFocus.focus()
+    previousFocus = null
+  }
+}
+
+/* ───────────────────────────────────────────────────
+   Build 8 indicator cards
+   ─────────────────────────────────────────────────── */
+function buildIndicatorCards() {
+  const ig = document.getElementById('ig')
+  if (!ig) return
+
+  injectModalStyles()
+
+  // Build all cards HTML in one shot
+  const fragment = document.createDocumentFragment()
+
+  INDICATORS.forEach((ind, idx) => {
     const el = document.createElement('div')
-    el.className = 'gl glh ic'
+    el.className = 'gl glh ic ind-card-clickable'
+    el.setAttribute('role', 'button')
+    el.setAttribute('tabindex', '0')
+    el.setAttribute('aria-label', `View details: ${ind.t}`)
+    el.dataset.idx = String(idx)
     el.innerHTML = `
       <div class="iss">
         <img src="${ind.img}" alt="${ind.t}" loading="lazy" />
       </div>
       <div class="ib">
         <h3>${ind.t}</h3>
-        <div class="pitch">${ind.pitch}</div>
-        <ul class="ibu">${ind.bul.map(b => `<li>${b}</li>`).join('')}</ul>
-        <div class="tech-block">${ind.tech}</div>
-        <div class="ideal">${ind.ideal}</div>
+        <div class="pitch">${ind.teaser}</div>
       </div>
     `
-    ig2.appendChild(el)
+    fragment.appendChild(el)
+  })
+
+  ig.appendChild(fragment)
+
+  // Event delegation on the grid
+  ig.addEventListener('click', (e) => {
+    const card = (e.target as HTMLElement).closest<HTMLElement>('.ind-card-clickable')
+    if (!card) return
+    const idx = Number(card.dataset.idx)
+    if (!isNaN(idx) && INDICATORS[idx]) openModal(INDICATORS[idx])
+  })
+
+  ig.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return
+    const card = (e.target as HTMLElement).closest<HTMLElement>('.ind-card-clickable')
+    if (!card) return
+    e.preventDefault()
+    const idx = Number(card.dataset.idx)
+    if (!isNaN(idx) && INDICATORS[idx]) openModal(INDICATORS[idx])
   })
 }
 
@@ -567,7 +869,7 @@ function buildFaq() {
     { q: "Are alerts included?", a: "Yes, fully integrated: email, mobile push or webhook." },
     { q: "Can I change plans?", a: "Upgrade anytime. Downgrade at end of period." },
     { q: "What cryptocurrencies are accepted?", a: "USDT on BSC (BEP20) and USDT on TRON (TRC20)." },
-    { q: "What is the Lifetime plan?", a: "A one-time payment of $1,699 for permanent access to all current indicators only (not the future indicators). Limited to the first 50 members — after that, only annual subscriptions will be available." }
+    { q: "What is the Lifetime plan?", a: "A one-time payment of $1,699 for permanent access to all current indicators only (not the future indicators). Limited to the first 50 members \u2014 after that, only annual subscriptions will be available." }
   ]
   const fb2 = document.getElementById('fb')
   if (!fb2) return
