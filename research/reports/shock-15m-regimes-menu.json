@@ -1,0 +1,1704 @@
+{
+ "tf": 15,
+ "costs": "script",
+ "regimes": [
+  "haussier · calme",
+  "haussier · agité",
+  "neutre · calme",
+  "neutre · agité",
+  "baissier · calme",
+  "baissier · agité"
+ ],
+ "summary": {
+  "regime": {
+   "ret": -0.03341718633380286,
+   "cagr": -0.004370880799823174,
+   "sharpe": -0.07849009993893453,
+   "dd": -0.19440175665758974
+  },
+  "global": {
+   "ret": 0.034630957312761446,
+   "cagr": 0.004397383094573382,
+   "sharpe": 0.1897937871142004,
+   "dd": -0.051699825527383614
+  },
+  "script": {
+   "ret": -0.6825569923598974,
+   "cagr": -0.13747048257863503,
+   "sharpe": -0.5568712856949676,
+   "dd": -0.7900920330756043
+  },
+  "user": {
+   "ret": -0.2907128324982381,
+   "cagr": -0.04330448537427334,
+   "sharpe": -0.5848620330374397,
+   "dd": -0.35218187837891557
+  },
+  "hold": {
+   "ret": 21.958064603471033,
+   "cagr": 0.49761195189275975,
+   "sharpe": 0.9669792376801475,
+   "dd": -0.7666336091416392
+  }
+ },
+ "final": [
+  {
+   "regime": "haussier · calme",
+   "cand": 1,
+   "score": 1.2295999691886594,
+   "n": 256,
+   "params": {
+    "highActivityMode": true,
+    "volWin": 80,
+    "kMain": 2.2,
+    "useMicroShock": true,
+    "kMicro": 1.3,
+    "rangeWin": 20,
+    "wickThr": 0.5,
+    "cooldownBars": 6,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "onlyHighLam": false,
+    "useHTF": true,
+    "htfMinutes": 60,
+    "htfEmaLen": 50,
+    "useVolFilter": true,
+    "volZWin": 30,
+    "volZThr": 0.2,
+    "volFadeMax": 1,
+    "useCompression": false,
+    "atrZWin": 30,
+    "compThr": 0,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": true,
+    "atrLen": 14,
+    "atrStopMult": 1.5,
+    "atrTrailMult": 1.8,
+    "useTP1": true,
+    "tp1AtrMult": 1.2,
+    "tp1QtyPct": 50,
+    "useVWAPExit": true,
+    "vwapLen": 30,
+    "useFlipExit": true,
+    "flipMainOnly": false,
+    "flipIncludeFade": true,
+    "flipMinLifeATR": 0,
+    "longLamPct": 55,
+    "htfSlopeBars": 3,
+    "htfSlopeMode": "chart",
+    "allowLong": true,
+    "allowShort": false,
+    "useImpulse": true
+   }
+  },
+  {
+   "regime": "haussier · agité",
+   "cand": -1,
+   "score": 0.16991271538826108,
+   "n": 240,
+   "params": null
+  },
+  {
+   "regime": "neutre · calme",
+   "cand": -1,
+   "score": -0.20811389217403306,
+   "n": 355,
+   "params": null
+  },
+  {
+   "regime": "neutre · agité",
+   "cand": -1,
+   "score": 0.5341904673201199,
+   "n": 88,
+   "params": null
+  },
+  {
+   "regime": "baissier · calme",
+   "cand": -1,
+   "score": 0.26560982329852556,
+   "n": 118,
+   "params": null
+  },
+  {
+   "regime": "baissier · agité",
+   "cand": -1,
+   "score": 0.3638290025449104,
+   "n": 122,
+   "params": null
+  }
+ ],
+ "folds": [
+  {
+   "test": "2019-01-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": -0.9718421828961474,
+     "n": 63
+    },
+    {
+     "cand": -1,
+     "score": -1.0428959363637327,
+     "n": 276
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    },
+    {
+     "cand": -1,
+     "score": -1.1817062654955828,
+     "n": 89
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.17045708539249502,
+    "n": 226
+   }
+  },
+  {
+   "test": "2019-04-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": -0.9718421828961474,
+     "n": 79
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    },
+    {
+     "cand": -1,
+     "score": -0.5311972593624761,
+     "n": 136
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.10950290888781233,
+    "n": 199
+   }
+  },
+  {
+   "test": "2019-07-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": -0.3788334950686184,
+     "n": 47
+    },
+    {
+     "cand": -1,
+     "score": -0.7205324412474593,
+     "n": 133
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    },
+    {
+     "cand": -1,
+     "score": null,
+     "n": 0
+    },
+    {
+     "cand": 9,
+     "score": 1.0623116727242043,
+     "n": 138
+    },
+    {
+     "cand": -1,
+     "score": -0.6854852442932446,
+     "n": 136
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.2057849238784693,
+    "n": 238
+   }
+  },
+  {
+   "test": "2019-10-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": -0.18006574931752334,
+     "n": 47
+    },
+    {
+     "cand": -1,
+     "score": -0.29837901714218173,
+     "n": 150
+    },
+    {
+     "cand": -1,
+     "score": 0.2987351250107745,
+     "n": 113
+    },
+    {
+     "cand": -1,
+     "score": 0.29503499036924413,
+     "n": 112
+    },
+    {
+     "cand": 9,
+     "score": 1.0426232891775313,
+     "n": 148
+    },
+    {
+     "cand": -1,
+     "score": -0.7403220559664837,
+     "n": 152
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.6167961871244115,
+    "n": 256
+   }
+  },
+  {
+   "test": "2020-01-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": -0.18006574931752334,
+     "n": 47
+    },
+    {
+     "cand": -1,
+     "score": -0.29837901714218173,
+     "n": 150
+    },
+    {
+     "cand": -1,
+     "score": 0.41638226044876925,
+     "n": 93
+    },
+    {
+     "cand": -1,
+     "score": -0.4671929713363726,
+     "n": 132
+    },
+    {
+     "cand": 9,
+     "score": 1.624308916617099,
+     "n": 201
+    },
+    {
+     "cand": -1,
+     "score": -0.7403220559664837,
+     "n": 160
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.4809062043804083,
+    "n": 269
+   }
+  },
+  {
+   "test": "2020-04-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.3998617660641779,
+     "n": 37
+    },
+    {
+     "cand": -1,
+     "score": -0.23009226280451855,
+     "n": 153
+    },
+    {
+     "cand": -1,
+     "score": 0.522093415793109,
+     "n": 102
+    },
+    {
+     "cand": -1,
+     "score": -0.06843918528192007,
+     "n": 145
+    },
+    {
+     "cand": 9,
+     "score": 1.4569336211921369,
+     "n": 205
+    },
+    {
+     "cand": -1,
+     "score": -0.7403220559664837,
+     "n": 201
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.5014004421399375,
+    "n": 349
+   }
+  },
+  {
+   "test": "2020-07-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.6269228998340154,
+     "n": 54
+    },
+    {
+     "cand": -1,
+     "score": -0.3174826265967119,
+     "n": 166
+    },
+    {
+     "cand": -1,
+     "score": 0.5043837224267201,
+     "n": 110
+    },
+    {
+     "cand": -1,
+     "score": -0.45402308803549674,
+     "n": 156
+    },
+    {
+     "cand": 9,
+     "score": 1.5603567028217713,
+     "n": 205
+    },
+    {
+     "cand": -1,
+     "score": -0.8155035292806869,
+     "n": 231
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.4671779023439126,
+    "n": 378
+   }
+  },
+  {
+   "test": "2020-10-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.6269228998340154,
+     "n": 59
+    },
+    {
+     "cand": -1,
+     "score": -0.33074749428008116,
+     "n": 169
+    },
+    {
+     "cand": -1,
+     "score": 0.3087366898320084,
+     "n": 116
+    },
+    {
+     "cand": -1,
+     "score": -0.5215907537605305,
+     "n": 35
+    },
+    {
+     "cand": 9,
+     "score": 1.2222842844990085,
+     "n": 221
+    },
+    {
+     "cand": -1,
+     "score": -0.8212057880383172,
+     "n": 64
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.3665561478876211,
+    "n": 414
+   }
+  },
+  {
+   "test": "2021-01-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.6269228998340154,
+     "n": 63
+    },
+    {
+     "cand": -1,
+     "score": -0.5684469200500987,
+     "n": 55
+    },
+    {
+     "cand": -1,
+     "score": 0.3087366898320084,
+     "n": 123
+    },
+    {
+     "cand": -1,
+     "score": -0.5215907537605305,
+     "n": 35
+    },
+    {
+     "cand": 9,
+     "score": 1.3931183936081792,
+     "n": 227
+    },
+    {
+     "cand": 1,
+     "score": 1.518590569040979,
+     "n": 38
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.3935298990602533,
+    "n": 464
+   }
+  },
+  {
+   "test": "2021-04-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.6269228998340154,
+     "n": 64
+    },
+    {
+     "cand": -1,
+     "score": -0.16298186963773953,
+     "n": 170
+    },
+    {
+     "cand": -1,
+     "score": 0.29465844512253275,
+     "n": 123
+    },
+    {
+     "cand": -1,
+     "score": -0.4960279503970916,
+     "n": 56
+    },
+    {
+     "cand": 9,
+     "score": 1.5472106966546884,
+     "n": 227
+    },
+    {
+     "cand": 1,
+     "score": 1.314020579232362,
+     "n": 38
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.4101446819307699,
+    "n": 502
+   }
+  },
+  {
+   "test": "2021-07-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.36880700963314916,
+     "n": 66
+    },
+    {
+     "cand": -1,
+     "score": -0.11683346137530636,
+     "n": 171
+    },
+    {
+     "cand": -1,
+     "score": 0.11235995713784769,
+     "n": 133
+    },
+    {
+     "cand": -1,
+     "score": -0.4960279503970916,
+     "n": 58
+    },
+    {
+     "cand": 9,
+     "score": 1.5472106966546884,
+     "n": 227
+    },
+    {
+     "cand": 1,
+     "score": 1.314020579232362,
+     "n": 41
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.3731600366364759,
+    "n": 515
+   }
+  },
+  {
+   "test": "2021-10-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.28947492524118645,
+     "n": 89
+    },
+    {
+     "cand": -1,
+     "score": 0.3537083565398216,
+     "n": 171
+    },
+    {
+     "cand": -1,
+     "score": 0.1359389694290259,
+     "n": 134
+    },
+    {
+     "cand": -1,
+     "score": -0.5215907537605305,
+     "n": 41
+    },
+    {
+     "cand": 9,
+     "score": 1.5472106966546884,
+     "n": 235
+    },
+    {
+     "cand": 1,
+     "score": 1.314020579232362,
+     "n": 41
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.5058716169816693,
+    "n": 129
+   }
+  },
+  {
+   "test": "2022-01-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.7282049898410238,
+     "n": 103
+    },
+    {
+     "cand": -1,
+     "score": 0.41247101685089754,
+     "n": 173
+    },
+    {
+     "cand": -1,
+     "score": 0.09664306362124653,
+     "n": 147
+    },
+    {
+     "cand": -1,
+     "score": -0.15692852536955573,
+     "n": 47
+    },
+    {
+     "cand": 11,
+     "score": 1.5138737035211018,
+     "n": 208
+    },
+    {
+     "cand": 1,
+     "score": 1.314020579232362,
+     "n": 42
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.5803924366278134,
+    "n": 566
+   }
+  },
+  {
+   "test": "2022-04-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.5025920958221618,
+     "n": 106
+    },
+    {
+     "cand": -1,
+     "score": 0.31612877855637617,
+     "n": 174
+    },
+    {
+     "cand": -1,
+     "score": 0.1359389694290259,
+     "n": 152
+    },
+    {
+     "cand": -1,
+     "score": -0.05828255594670124,
+     "n": 42
+    },
+    {
+     "cand": -1,
+     "score": 0.7853099930119498,
+     "n": 343
+    },
+    {
+     "cand": 1,
+     "score": 1.314020579232362,
+     "n": 45
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.6870649572303331,
+    "n": 589
+   }
+  },
+  {
+   "test": "2022-07-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.4316695346043217,
+     "n": 107
+    },
+    {
+     "cand": -1,
+     "score": 0.31612877855637617,
+     "n": 174
+    },
+    {
+     "cand": -1,
+     "score": -0.08424191124805344,
+     "n": 231
+    },
+    {
+     "cand": -1,
+     "score": 0.01739995613326419,
+     "n": 42
+    },
+    {
+     "cand": -1,
+     "score": 0.8057058205186123,
+     "n": 383
+    },
+    {
+     "cand": 1,
+     "score": 1.3464370743603329,
+     "n": 54
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.812828851036061,
+    "n": 605
+   }
+  },
+  {
+   "test": "2022-10-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.5992338597232584,
+     "n": 109
+    },
+    {
+     "cand": -1,
+     "score": 0.31612877855637617,
+     "n": 174
+    },
+    {
+     "cand": -1,
+     "score": -0.3002911109199233,
+     "n": 245
+    },
+    {
+     "cand": -1,
+     "score": 0.2389018147730095,
+     "n": 48
+    },
+    {
+     "cand": -1,
+     "score": 0.2663632741534035,
+     "n": 407
+    },
+    {
+     "cand": -1,
+     "score": 0.7867936201626476,
+     "n": 70
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.5121053252689173,
+    "n": 641
+   }
+  },
+  {
+   "test": "2023-01-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.6664029111120482,
+     "n": 349
+    },
+    {
+     "cand": -1,
+     "score": 0.31612877855637617,
+     "n": 174
+    },
+    {
+     "cand": -1,
+     "score": -0.18187700115118285,
+     "n": 269
+    },
+    {
+     "cand": -1,
+     "score": 0.2389018147730095,
+     "n": 48
+    },
+    {
+     "cand": -1,
+     "score": 0.43472067682141147,
+     "n": 117
+    },
+    {
+     "cand": -1,
+     "score": 0.8072926029088168,
+     "n": 71
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.7885664212596899,
+    "n": 656
+   }
+  },
+  {
+   "test": "2023-04-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.911281460007905,
+     "n": 395
+    },
+    {
+     "cand": -1,
+     "score": 0.3282212167632746,
+     "n": 182
+    },
+    {
+     "cand": -1,
+     "score": 0.06173270009802758,
+     "n": 278
+    },
+    {
+     "cand": -1,
+     "score": 0.039872585811490245,
+     "n": 49
+    },
+    {
+     "cand": -1,
+     "score": 0.3468953140971494,
+     "n": 117
+    },
+    {
+     "cand": -1,
+     "score": 0.8072926029088168,
+     "n": 71
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.8828395941717959,
+    "n": 686
+   }
+  },
+  {
+   "test": "2023-07-01",
+   "picks": [
+    {
+     "cand": 1,
+     "score": 1.0775995507532499,
+     "n": 132
+    },
+    {
+     "cand": -1,
+     "score": 0.3282212167632746,
+     "n": 182
+    },
+    {
+     "cand": -1,
+     "score": -0.25347469780104187,
+     "n": 291
+    },
+    {
+     "cand": -1,
+     "score": 0.4478721034288144,
+     "n": 52
+    },
+    {
+     "cand": -1,
+     "score": 0.3468953140971494,
+     "n": 123
+    },
+    {
+     "cand": -1,
+     "score": 0.29511212505960666,
+     "n": 60
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.7274898950974319,
+    "n": 711
+   }
+  },
+  {
+   "test": "2023-10-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.9901155679276957,
+     "n": 145
+    },
+    {
+     "cand": -1,
+     "score": 0.5470845525368253,
+     "n": 182
+    },
+    {
+     "cand": -1,
+     "score": -0.47300702475764905,
+     "n": 398
+    },
+    {
+     "cand": -1,
+     "score": 0.6591703912947737,
+     "n": 52
+    },
+    {
+     "cand": -1,
+     "score": 0.3468953140971494,
+     "n": 129
+    },
+    {
+     "cand": -1,
+     "score": 0.1629262180509599,
+     "n": 62
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.6572857121540381,
+    "n": 733
+   }
+  },
+  {
+   "test": "2024-01-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.9186036403302463,
+     "n": 155
+    },
+    {
+     "cand": -1,
+     "score": 0.5873114988565075,
+     "n": 204
+    },
+    {
+     "cand": -1,
+     "score": -0.48989239365998927,
+     "n": 410
+    },
+    {
+     "cand": -1,
+     "score": 0.6591703912947737,
+     "n": 52
+    },
+    {
+     "cand": -1,
+     "score": 0.3468953140971494,
+     "n": 129
+    },
+    {
+     "cand": -1,
+     "score": 0.1629262180509599,
+     "n": 62
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.800271863234466,
+    "n": 769
+   }
+  },
+  {
+   "test": "2024-04-01",
+   "picks": [
+    {
+     "cand": 1,
+     "score": 1.4422844104770935,
+     "n": 172
+    },
+    {
+     "cand": -1,
+     "score": 0.5423819844313962,
+     "n": 216
+    },
+    {
+     "cand": -1,
+     "score": -0.32047033010793824,
+     "n": 414
+    },
+    {
+     "cand": -1,
+     "score": 0.5966765320935238,
+     "n": 56
+    },
+    {
+     "cand": -1,
+     "score": 0.2509667057120209,
+     "n": 129
+    },
+    {
+     "cand": -1,
+     "score": 0.08817786829573762,
+     "n": 63
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.8068436927819056,
+    "n": 808
+   }
+  },
+  {
+   "test": "2024-07-01",
+   "picks": [
+    {
+     "cand": 1,
+     "score": 1.3517552857256157,
+     "n": 173
+    },
+    {
+     "cand": -1,
+     "score": 0.614858217252413,
+     "n": 219
+    },
+    {
+     "cand": -1,
+     "score": -0.32047033010793824,
+     "n": 433
+    },
+    {
+     "cand": -1,
+     "score": 0.7826450711924036,
+     "n": 70
+    },
+    {
+     "cand": -1,
+     "score": 0.2509667057120209,
+     "n": 129
+    },
+    {
+     "cand": -1,
+     "score": 0.1791273334727932,
+     "n": 70
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.8037686624685396,
+    "n": 842
+   }
+  },
+  {
+   "test": "2024-10-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.8525263600094036,
+     "n": 173
+    },
+    {
+     "cand": -1,
+     "score": 0.39464854040726105,
+     "n": 219
+    },
+    {
+     "cand": -1,
+     "score": -0.08686095501145724,
+     "n": 352
+    },
+    {
+     "cand": -1,
+     "score": 0.6297434697803039,
+     "n": 74
+    },
+    {
+     "cand": -1,
+     "score": 0.3664128946830151,
+     "n": 134
+    },
+    {
+     "cand": -1,
+     "score": 0.4394287732258726,
+     "n": 82
+    }
+   ],
+   "global": {
+    "cand": 1,
+    "score": 1.0015508591357323,
+    "n": 873
+   }
+  },
+  {
+   "test": "2025-01-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.8525263600094036,
+     "n": 200
+    },
+    {
+     "cand": -1,
+     "score": 0.03394813113907799,
+     "n": 228
+    },
+    {
+     "cand": -1,
+     "score": 0.0034926463302686057,
+     "n": 356
+    },
+    {
+     "cand": -1,
+     "score": 0.6297434697803039,
+     "n": 74
+    },
+    {
+     "cand": -1,
+     "score": 0.3664128946830151,
+     "n": 134
+    },
+    {
+     "cand": -1,
+     "score": 0.4394287732258726,
+     "n": 82
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.9643075273248463,
+    "n": 919
+   }
+  },
+  {
+   "test": "2025-04-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.8525263600094036,
+     "n": 205
+    },
+    {
+     "cand": -1,
+     "score": 0.2847127720761868,
+     "n": 229
+    },
+    {
+     "cand": -1,
+     "score": 0.1777181685860636,
+     "n": 382
+    },
+    {
+     "cand": -1,
+     "score": 0.6297434697803039,
+     "n": 74
+    },
+    {
+     "cand": -1,
+     "score": 0.39666967846756324,
+     "n": 136
+    },
+    {
+     "cand": -1,
+     "score": 0.5296181361451276,
+     "n": 87
+    }
+   ],
+   "global": {
+    "cand": 1,
+    "score": 1.076675891051656,
+    "n": 938
+   }
+  },
+  {
+   "test": "2025-07-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.8525263600094036,
+     "n": 223
+    },
+    {
+     "cand": -1,
+     "score": 0.05040250404041808,
+     "n": 229
+    },
+    {
+     "cand": -1,
+     "score": 0.1777181685860636,
+     "n": 388
+    },
+    {
+     "cand": -1,
+     "score": 0.7314288894004111,
+     "n": 79
+    },
+    {
+     "cand": -1,
+     "score": 0.3160331154379887,
+     "n": 693
+    },
+    {
+     "cand": -1,
+     "score": 0.5296181361451276,
+     "n": 87
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.9447167003989435,
+    "n": 965
+   }
+  },
+  {
+   "test": "2025-10-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.9939767082986479,
+     "n": 240
+    },
+    {
+     "cand": -1,
+     "score": -0.03572188177104882,
+     "n": 229
+    },
+    {
+     "cand": -1,
+     "score": 0.03898282431494784,
+     "n": 313
+    },
+    {
+     "cand": -1,
+     "score": 0.7858695791569325,
+     "n": 79
+    },
+    {
+     "cand": -1,
+     "score": 0.22986237823235878,
+     "n": 718
+    },
+    {
+     "cand": -1,
+     "score": 0.5296181361451276,
+     "n": 87
+    }
+   ],
+   "global": {
+    "cand": 1,
+    "score": 1.0284121049847545,
+    "n": 999
+   }
+  },
+  {
+   "test": "2026-01-01",
+   "picks": [
+    {
+     "cand": -1,
+     "score": 0.9939767082986479,
+     "n": 240
+    },
+    {
+     "cand": -1,
+     "score": -0.03572188177104882,
+     "n": 229
+    },
+    {
+     "cand": -1,
+     "score": 0.1142960152524373,
+     "n": 315
+    },
+    {
+     "cand": -1,
+     "score": 0.8601276079326696,
+     "n": 80
+    },
+    {
+     "cand": -1,
+     "score": 0.16441920486984757,
+     "n": 112
+    },
+    {
+     "cand": -1,
+     "score": 0.3917497488762307,
+     "n": 100
+    }
+   ],
+   "global": {
+    "cand": 1,
+    "score": 1.0251396799873849,
+    "n": 1025
+   }
+  },
+  {
+   "test": "2026-04-01",
+   "picks": [
+    {
+     "cand": 1,
+     "score": 1.4085710916323224,
+     "n": 242
+    },
+    {
+     "cand": -1,
+     "score": -0.03572188177104882,
+     "n": 229
+    },
+    {
+     "cand": -1,
+     "score": 0.04853563529405498,
+     "n": 324
+    },
+    {
+     "cand": -1,
+     "score": 0.6949809617236258,
+     "n": 85
+    },
+    {
+     "cand": -1,
+     "score": 0.3189684069937184,
+     "n": 747
+    },
+    {
+     "cand": -1,
+     "score": 0.504254140114205,
+     "n": 114
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.9116384399742304,
+    "n": 1052
+   }
+  },
+  {
+   "test": "2026-07-01",
+   "picks": [
+    {
+     "cand": 1,
+     "score": 1.2352723997823305,
+     "n": 251
+    },
+    {
+     "cand": -1,
+     "score": 0.026126226860776976,
+     "n": 233
+    },
+    {
+     "cand": -1,
+     "score": 0.1184304714600445,
+     "n": 336
+    },
+    {
+     "cand": -1,
+     "score": 0.771441044964446,
+     "n": 88
+    },
+    {
+     "cand": -1,
+     "score": 0.3105695059244616,
+     "n": 754
+    },
+    {
+     "cand": -1,
+     "score": 0.3638290025449104,
+     "n": 122
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.985062839390049,
+    "n": 1081
+   }
+  },
+  {
+   "test": "2026-10-01",
+   "picks": [
+    {
+     "cand": 1,
+     "score": 1.2295999691886594,
+     "n": 256
+    },
+    {
+     "cand": -1,
+     "score": 0.16991271538826108,
+     "n": 240
+    },
+    {
+     "cand": -1,
+     "score": -0.20811389217403306,
+     "n": 355
+    },
+    {
+     "cand": -1,
+     "score": 0.5341904673201199,
+     "n": 88
+    },
+    {
+     "cand": -1,
+     "score": 0.26560982329852556,
+     "n": 118
+    },
+    {
+     "cand": -1,
+     "score": 0.3638290025449104,
+     "n": 122
+    }
+   ],
+   "global": {
+    "cand": -1,
+    "score": 0.8653683216693958,
+    "n": 1112
+   }
+  }
+ ],
+ "candidates": [
+  {
+   "name": "script, long + short",
+   "over": {}
+  },
+  {
+   "name": "script, longs",
+   "over": {
+    "allowShort": false
+   }
+  },
+  {
+   "name": "script, shorts",
+   "over": {
+    "allowLong": false
+   }
+  },
+  {
+   "name": "tes réglages, long + short",
+   "over": {
+    "highActivityMode": false,
+    "volWin": 80,
+    "kMain": 2.2,
+    "useMicroShock": true,
+    "kMicro": 1.3,
+    "rangeWin": 20,
+    "wickThr": 0.5,
+    "cooldownBars": 6,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "onlyHighLam": false,
+    "useHTF": true,
+    "htfMinutes": 4320,
+    "htfEmaLen": 50,
+    "useVolFilter": true,
+    "volZWin": 55,
+    "volZThr": 0.2,
+    "volFadeMax": 1,
+    "useCompression": true,
+    "atrZWin": 30,
+    "compThr": 0,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": false,
+    "atrLen": 18,
+    "atrStopMult": 2,
+    "atrTrailMult": 1.5,
+    "useTP1": true,
+    "tp1AtrMult": 2,
+    "tp1QtyPct": 70,
+    "useVWAPExit": true,
+    "vwapLen": 30,
+    "useFlipExit": true,
+    "flipMainOnly": true,
+    "flipIncludeFade": true,
+    "flipMinLifeATR": 0
+   }
+  },
+  {
+   "name": "tes réglages, longs",
+   "over": {
+    "highActivityMode": false,
+    "volWin": 80,
+    "kMain": 2.2,
+    "useMicroShock": true,
+    "kMicro": 1.3,
+    "rangeWin": 20,
+    "wickThr": 0.5,
+    "cooldownBars": 6,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "onlyHighLam": false,
+    "useHTF": true,
+    "htfMinutes": 4320,
+    "htfEmaLen": 50,
+    "useVolFilter": true,
+    "volZWin": 55,
+    "volZThr": 0.2,
+    "volFadeMax": 1,
+    "useCompression": true,
+    "atrZWin": 30,
+    "compThr": 0,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": false,
+    "atrLen": 18,
+    "atrStopMult": 2,
+    "atrTrailMult": 1.5,
+    "useTP1": true,
+    "tp1AtrMult": 2,
+    "tp1QtyPct": 70,
+    "useVWAPExit": true,
+    "vwapLen": 30,
+    "useFlipExit": true,
+    "flipMainOnly": true,
+    "flipIncludeFade": true,
+    "flipMinLifeATR": 0,
+    "allowShort": false
+   }
+  },
+  {
+   "name": "tes réglages, shorts",
+   "over": {
+    "highActivityMode": false,
+    "volWin": 80,
+    "kMain": 2.2,
+    "useMicroShock": true,
+    "kMicro": 1.3,
+    "rangeWin": 20,
+    "wickThr": 0.5,
+    "cooldownBars": 6,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "onlyHighLam": false,
+    "useHTF": true,
+    "htfMinutes": 4320,
+    "htfEmaLen": 50,
+    "useVolFilter": true,
+    "volZWin": 55,
+    "volZThr": 0.2,
+    "volFadeMax": 1,
+    "useCompression": true,
+    "atrZWin": 30,
+    "compThr": 0,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": false,
+    "atrLen": 18,
+    "atrStopMult": 2,
+    "atrTrailMult": 1.5,
+    "useTP1": true,
+    "tp1AtrMult": 2,
+    "tp1QtyPct": 70,
+    "useVWAPExit": true,
+    "vwapLen": 30,
+    "useFlipExit": true,
+    "flipMainOnly": true,
+    "flipIncludeFade": true,
+    "flipMinLifeATR": 0,
+    "allowLong": false
+   }
+  },
+  {
+   "name": "tes réglages + filtre 60 min, long + short",
+   "over": {
+    "highActivityMode": false,
+    "volWin": 80,
+    "kMain": 2.2,
+    "useMicroShock": true,
+    "kMicro": 1.3,
+    "rangeWin": 20,
+    "wickThr": 0.5,
+    "cooldownBars": 6,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "onlyHighLam": false,
+    "useHTF": true,
+    "htfMinutes": 60,
+    "htfEmaLen": 50,
+    "useVolFilter": true,
+    "volZWin": 55,
+    "volZThr": 0.2,
+    "volFadeMax": 1,
+    "useCompression": true,
+    "atrZWin": 30,
+    "compThr": 0,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": false,
+    "atrLen": 18,
+    "atrStopMult": 2,
+    "atrTrailMult": 1.5,
+    "useTP1": true,
+    "tp1AtrMult": 2,
+    "tp1QtyPct": 70,
+    "useVWAPExit": true,
+    "vwapLen": 30,
+    "useFlipExit": true,
+    "flipMainOnly": true,
+    "flipIncludeFade": true,
+    "flipMinLifeATR": 0
+   }
+  },
+  {
+   "name": "tes réglages + filtre 60 min, longs",
+   "over": {
+    "highActivityMode": false,
+    "volWin": 80,
+    "kMain": 2.2,
+    "useMicroShock": true,
+    "kMicro": 1.3,
+    "rangeWin": 20,
+    "wickThr": 0.5,
+    "cooldownBars": 6,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "onlyHighLam": false,
+    "useHTF": true,
+    "htfMinutes": 60,
+    "htfEmaLen": 50,
+    "useVolFilter": true,
+    "volZWin": 55,
+    "volZThr": 0.2,
+    "volFadeMax": 1,
+    "useCompression": true,
+    "atrZWin": 30,
+    "compThr": 0,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": false,
+    "atrLen": 18,
+    "atrStopMult": 2,
+    "atrTrailMult": 1.5,
+    "useTP1": true,
+    "tp1AtrMult": 2,
+    "tp1QtyPct": 70,
+    "useVWAPExit": true,
+    "vwapLen": 30,
+    "useFlipExit": true,
+    "flipMainOnly": true,
+    "flipIncludeFade": true,
+    "flipMinLifeATR": 0,
+    "allowShort": false
+   }
+  },
+  {
+   "name": "tes réglages + filtre 60 min, shorts",
+   "over": {
+    "highActivityMode": false,
+    "volWin": 80,
+    "kMain": 2.2,
+    "useMicroShock": true,
+    "kMicro": 1.3,
+    "rangeWin": 20,
+    "wickThr": 0.5,
+    "cooldownBars": 6,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "onlyHighLam": false,
+    "useHTF": true,
+    "htfMinutes": 60,
+    "htfEmaLen": 50,
+    "useVolFilter": true,
+    "volZWin": 55,
+    "volZThr": 0.2,
+    "volFadeMax": 1,
+    "useCompression": true,
+    "atrZWin": 30,
+    "compThr": 0,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": false,
+    "atrLen": 18,
+    "atrStopMult": 2,
+    "atrTrailMult": 1.5,
+    "useTP1": true,
+    "tp1AtrMult": 2,
+    "tp1QtyPct": 70,
+    "useVWAPExit": true,
+    "vwapLen": 30,
+    "useFlipExit": true,
+    "flipMainOnly": true,
+    "flipIncludeFade": true,
+    "flipMinLifeATR": 0,
+    "allowLong": false
+   }
+  },
+  {
+   "name": "script sélectif (z > 1,8, cooldown 12), long + short",
+   "over": {
+    "kMicro": 2,
+    "cooldownBars": 24
+   }
+  },
+  {
+   "name": "script sélectif (z > 1,8, cooldown 12), longs",
+   "over": {
+    "kMicro": 2,
+    "cooldownBars": 24,
+    "allowShort": false
+   }
+  },
+  {
+   "name": "script sélectif (z > 1,8, cooldown 12), shorts",
+   "over": {
+    "kMicro": 2,
+    "cooldownBars": 24,
+    "allowLong": false
+   }
+  }
+ ]
+}

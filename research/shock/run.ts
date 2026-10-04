@@ -1,13 +1,13 @@
 // Un backtest du Shock Engine.
 //
 //   node research/shock/run.ts --tf 5 [--from 2017-01-01] [--to 2026-10-01] [--costs script|realistic]
-//                              [--set kMain=2.4 --set useFlipExit=false ...] [--trades trades.csv]
+//                              [--preset user2026] [--set kMain=2.4 --set useFlipExit=false ...] [--trades trades.csv]
 
 import { writeFileSync } from 'node:fs'
 import { loadBtc, dayMs, indexAtOrAfter } from '../lib/data.ts'
 import { metricsOf, pct, num } from '../lib/stats.ts'
 import { makeMarket, runShock } from './engine.ts'
-import { DEFAULT_PARAMS, SCRIPT_COSTS, REALISTIC_COSTS, withParams } from './params.ts'
+import { DEFAULT_PARAMS, SCRIPT_COSTS, REALISTIC_COSTS, USER_2026, withParams } from './params.ts'
 
 export function parseArgs(argv: string[]) {
   const a: Record<string, string> = {}
@@ -31,7 +31,7 @@ function main() {
   const m = makeMarket(bars, tf, loadBtc(60))
   const start = indexAtOrAfter(bars, dayMs(a.from ?? '2017-01-01'))
   const end = a.to ? indexAtOrAfter(bars, dayMs(a.to)) - 1 : bars.n - 1
-  const p = withParams(DEFAULT_PARAMS, sets)
+  const p = withParams(a.preset === 'user2026' ? withParams(DEFAULT_PARAMS, USER_2026) : DEFAULT_PARAMS, sets)
   const costs = a.costs === 'realistic' ? REALISTIC_COSTS : SCRIPT_COSTS
   const t0 = performance.now()
   const r = runShock(m, p, costs, start, end)
@@ -40,6 +40,8 @@ function main() {
   const days = (bars.t[end] - bars.t[start]) / 86400000
   console.log(`BTC ${tf}m ${new Date(bars.t[start]).toISOString().slice(0, 10)} → ${new Date(bars.t[end]).toISOString().slice(0, 10)} · coûts ${a.costs ?? 'script'} · ${ms.toFixed(0)} ms`)
   console.log(`rendement ${pct(mt.totalReturn)} · CAGR ${pct(mt.cagr)} · max DD ${pct(mt.maxDrawdown)} · Sharpe ${num(mt.sharpe)} · PF ${num(mt.profitFactor)}`)
+  const tvTrades = r.positions.reduce((k, q) => k + q.exits.length, 0)
+  console.log(`trades façon TradingView (une ligne par sortie, partielles comprises) : ${tvTrades}`)
   console.log(`positions ${mt.trades} (${(mt.trades / days).toFixed(2)}/jour) · longs ${mt.longTrades} · shorts ${mt.shortTrades} · gagnantes ${pct(mt.winRate)} · moyenne ${pct(mt.avgTradePct, 3)} · frais ${num(mt.fees, 0)}`)
   if (a.trades) {
     const lines = ['entry_time,dir,tag,entry,exit_time,exit,pnl,pnl_pct,exits,mae_atr,mfe_atr']

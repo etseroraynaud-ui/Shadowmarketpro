@@ -79,3 +79,29 @@ test('artefact de pente 60 min : en 5 min, les longs n\'entrent qu\'autour du ch
   for (const mm of chart) assert.ok([55, 0, 5].includes(mm), `minute ${mm}`)
   assert.ok(minutesOf('htf').size > 6)
 })
+
+test('plusieurs jeux identiques en alternance = le script seul ; aucun jeu = aucune position', async () => {
+  const { simulate } = await import('../shock/engine.ts')
+  const ref = runShock(m, DEFAULT_PARAMS, SCRIPT_COSTS, start, end)
+  const sel = new Int8Array(m.bars.n)
+  for (let i = 0; i < sel.length; i++) sel[i] = i % 2
+  const alt = simulate(m, [DEFAULT_PARAMS, { ...DEFAULT_PARAMS }], SCRIPT_COSTS, start, end, sel)
+  assert.deepEqual(alt.positions.map(p => [p.entryIdx, p.exitIdx, p.dir]), ref.positions.map(p => [p.entryIdx, p.exitIdx, p.dir]))
+  const none = simulate(m, [DEFAULT_PARAMS], SCRIPT_COSTS, start, end, new Int8Array(m.bars.n).fill(-1))
+  assert.equal(none.positions.length, 0)
+})
+
+test('régimes : seulement des journées closes', async () => {
+  const { classify } = await import('../shock/regimes.ts')
+  const full = classify(m.bars, tf, hour)
+  const cutT = m.bars.t[Math.floor(m.bars.n / 2)]
+  const hourCut = sliceHour(cutT)
+  const part = classify(m.bars, tf, hourCut)
+  for (let i = 0; i < m.bars.n && m.bars.t[i] + tf * 60000 <= cutT; i++) assert.equal(part.id[i], full.id[i], `barre ${i}`)
+})
+
+function sliceHour(t: number) {
+  let k = 0
+  while (k < hour.n && hour.t[k] < t) k++
+  return { n: k, t: hour.t.subarray(0, k), o: hour.o.subarray(0, k), h: hour.h.subarray(0, k), l: hour.l.subarray(0, k), c: hour.c.subarray(0, k), v: hour.v.subarray(0, k) }
+}

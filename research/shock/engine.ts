@@ -23,6 +23,7 @@
 
 import type { Bars } from '../../lib/backtest/types.ts'
 import { sma, ema, stdev, highest, lowest, atr } from '../../lib/backtest/indicators.ts'
+import { resample } from '../../lib/backtest/data.ts'
 import type { Costs, ShockParams } from './params.ts'
 
 const EPS = 1e-10
@@ -30,16 +31,17 @@ const EPS = 1e-10
 export interface Market {
   bars: Bars
   tfMin: number
-  /** Barres du timeframe supérieur (60 min) pour le filtre de tendance. */
+  /** Barres 60 min, source du filtre de tendance (regroupées si le script demande plus long). */
   htf: Bars
   htfMin: number
+  htfCache: Map<number, Bars>
   /** syminfo.mintick. */
   mintick: number
   memo: Map<string, Float64Array | Uint8Array>
 }
 
 export function makeMarket(bars: Bars, tfMin: number, htf: Bars, htfMin = 60, mintick = 0.01): Market {
-  return { bars, tfMin, htf, htfMin, mintick, memo: new Map() }
+  return { bars, tfMin, htf, htfMin, mintick, memo: new Map(), htfCache: new Map() }
 }
 
 const MEMO_MAX = 64
@@ -49,7 +51,7 @@ function memo<T extends Float64Array | Uint8Array>(m: Market, key: string, f: ()
   if (hit) return hit as T
   if (m.memo.size >= MEMO_MAX) {
     // Mémoire bornée pendant les optimisations : on garde les séries qui ne dépendent d'aucun paramètre.
-    for (const k of [...m.memo.keys()]) if (k !== 'r' && k !== 'htfIdx') m.memo.delete(k)
+    for (const k of [...m.memo.keys()]) if (k !== 'r' && !k.startsWith('htfIdx')) m.memo.delete(k)
   }
   const v = f()
   m.memo.set(key, v)
@@ -82,11 +84,22 @@ export function percentrank(src: Float64Array, len: number): Float64Array {
 }
 
 /** Valeur 60 min connue à la clôture de chaque barre du graphique (lookahead_off). */
-function htfIndex(m: Market): Float64Array {
-  const { bars, htf } = m
+/** Barres du timeframe du filtre (input « HTF Timeframe »), alignées sur l'époque Unix. */
+function htfOf(m: Market, minutes: number): Bars {
+  if (minutes === m.htfMin) return m.htf
+  let b = m.htfCache.get(minutes)
+  if (!b) {
+    b = resample(m.htf, minutes * 60000)
+    m.htfCache.set(minutes, b)
+  }
+  return b
+}
+
+function htfIndex(m: Market, htf: Bars, minutes: number): Float64Array {
+  const { bars } = m
   const idx = new Float64Array(bars.n).fill(-1)
   const tfMs = m.tfMin * 60000
-  const hMs = m.htfMin * 60000
+  const hMs = minutes * 60000
   let k = -1
   for (let i = 0; i < bars.n; i++) {
     const closeT = bars.t[i] + tfMs
@@ -177,9 +190,11 @@ export function prepare(m: Market, p: ShockParams): Prepared {
     for (let i = 0; i < n; i++) hlc3[i] = (h[i] + l[i] + c[i]) / 3
     return sma(hlc3, p.vwapLen)
   })
-  const htfIdx = memo(m, 'htfIdx', () => htfIndex(m))
-  const htfSma = memo(m, `htfSma:${p.htfEmaLen}`, () => sma(m.htf.c, p.htfEmaLen))
-  const htfVal = memo(m, `htfVal:${p.htfEmaLen}`, () => {
+  const htfBars = htfOf(m, p.htfMinutes)
+  const hk = `${p.htfMinutes}:${p.htfEmaLen}`
+  const htfIdx = memo(m, `htfIdx:${p.htfMinutes}`, () => htfIndex(m, htfBars, p.htfMinutes))
+  const htfSma = memo(m, `htfSma:${hk}`, () => sma(htfBars.c, p.htfEmaLen))
+  const htfVal = memo(m, `htfVal:${hk}`, () => {
     const out = new Float64Array(n).fill(NaN)
     for (let i = 0; i < n; i++) {
       const k = htfIdx[i]
@@ -187,7 +202,7 @@ export function prepare(m: Market, p: ShockParams): Prepared {
     }
     return out
   })
-  const htfPrev = memo(m, `htfPrev:${p.htfEmaLen}:${p.htfSlopeMode}:${p.htfSlopeBars}`, () => {
+  const htfPrev = memo(m, `htfPrev:${hk}:${p.htfSlopeMode}:${p.htfSlopeBars}`, () => {
     const out = new Float64Array(n).fill(NaN)
     for (let i = 0; i < n; i++) {
       if (p.htfSlopeMode === 'chart') out[i] = i >= p.htfSlopeBars ? htfVal[i - p.htfSlopeBars] : NaN
@@ -277,6 +292,8 @@ export interface PositionRecord {
   maeAtr: number
   mfeAtr: number
   tp1Filled: boolean
+  /** Jeu de paramètres qui a ouvert la position. */
+  set: number
 }
 
 export interface ShockResult {
@@ -293,6 +310,7 @@ export interface ShockResult {
 }
 
 interface Pos {
+  set: number
   dir: 1 | -1
   qty: number
   avg: number
@@ -325,11 +343,23 @@ export interface EntryOverride {
 }
 
 export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end = m.bars.n - 1, override?: EntryOverride): ShockResult {
+  return simulate(m, [p], costs, start, end, null, override)
+}
+
+/**
+ * Exécution avec plusieurs jeux de paramètres : `select[i]` donne le jeu qui décide des entrées à
+ * la barre i (-1 = pas de nouvelle entrée). Une position garde jusqu'à sa sortie les réglages du
+ * jeu qui l'a ouverte (stop, TP1, trailing, VWAP, flip). Avec un seul jeu et `select` nul, c'est
+ * exactement le script.
+ */
+export function simulate(
+  m: Market, sets: ShockParams[], costs: Costs, start = 0, end = m.bars.n - 1, select: Int8Array | null = null, override?: EntryOverride,
+): ShockResult {
   const { bars } = m
   const { o, h, l, c } = bars
   const n = bars.n
-  const pr = prepare(m, p)
-  const effCooldown = p.highActivityMode ? Math.max(Math.trunc(p.cooldownBars / 2), 2) : p.cooldownBars
+  const prs = sets.map(p => prepare(m, p))
+  const cool = sets.map(p => (p.highActivityMode ? Math.max(Math.trunc(p.cooldownBars / 2), 2) : p.cooldownBars))
   const comm = costs.commissionPct / 100
   const slipFix = costs.slippageTicks * costs.mintick
   const slipPct = costs.slippagePct / 100
@@ -377,7 +407,7 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
         pnl: q.realized - q.fees, fees: q.fees, pnlPct: (q.realized - q.fees) / q.notional, exits: q.exits,
         maeAtr: q.dir === 1 ? (q.lo - q.avg) / atrE : (q.avg - q.hi) / atrE,
         mfeAtr: q.dir === 1 ? (q.hi - q.avg) / atrE : (q.avg - q.lo) / atrE,
-        tp1Filled: q.tp1Filled,
+        tp1Filled: q.tp1Filled, set: q.set,
       })
       pos = null
     }
@@ -392,7 +422,7 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
     const t = q.best - q.dir * q.trailDist
     return q.dir === 1 ? Math.max(q.stop, t) : Math.min(q.stop, t)
   }
-  const tp1Qty = (q: Pos) => q.qty * Math.min(1, Math.max(0, p.tp1QtyPct / 100))
+  const tp1Qty = (q: Pos) => q.qty * Math.min(1, Math.max(0, sets[q.set].tp1QtyPct / 100))
   const trailAct = (q: Pos) => q.avg + q.dir * q.trailDist
 
   /** Test d'un niveau à un prix ponctuel (ouverture ou clôture). */
@@ -400,7 +430,7 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
     const q = pos!
     const s = effStop(q)
     if (q.dir === 1 ? px <= s : px >= s) { closeAll(i, px, stopTag(q, s)); return }
-    if (p.useTP1 && !q.tp1Filled && (q.dir === 1 ? px >= q.tp : px <= q.tp)) {
+    if (sets[q.set].useTP1 && !q.tp1Filled && (q.dir === 1 ? px >= q.tp : px <= q.tp)) {
       q.tp1Filled = true
       fill(i, tp1Qty(q), px, 'TP1')
       if (!pos) return
@@ -422,7 +452,7 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
       if (b === a) continue
       const favorable = q.dir === 1 ? b > a : b < a
       if (favorable) {
-        if (p.useTP1 && !q.tp1Filled && (q.dir === 1 ? b >= q.tp : b <= q.tp)) {
+        if (sets[q.set].useTP1 && !q.tp1Filled && (q.dir === 1 ? b >= q.tp : b <= q.tp)) {
           q.tp1Filled = true
           fill(i, tp1Qty(q), q.tp, 'TP1')
           if (!pos) return
@@ -440,7 +470,8 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
     }
   }
 
-  const open = (i: number, dir: 1 | -1, tag: PositionRecord['tag']) => {
+  const capitalNow = (i: number) => costs.capital + realized + (pos ? pos.dir * (c[i] - pos.avg) * pos.qty : 0)
+  const open = (i: number, dir: 1 | -1, tag: PositionRecord['tag'], set: number) => {
     const eq = capitalNow(i)
     if (eq <= 0) return
     const qty = (eq * costs.qtyPct) / 100 / c[i]
@@ -449,73 +480,85 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
     realized -= fee
     fills++
     pos = {
-      dir, qty, avg: px, entryIdx: i, tag, notional: px * qty, equityAtEntry: eq, atrAtEntry: pr.atr[i], fees: fee, realized: 0,
+      dir, qty, avg: px, entryIdx: i, tag, set, notional: px * qty, equityAtEntry: eq, atrAtEntry: prs[set].atr[i], fees: fee, realized: 0,
       exitValue: 0, exitQty: 0, exits: [], exitsActive: false, stop: NaN, tp: NaN, tp1Filled: false, trailDist: NaN,
       trailActive: false, best: NaN, hi: px, lo: px,
     }
   }
-  const capitalNow = (i: number) => costs.capital + realized + (pos ? pos.dir * (c[i] - pos.avg) * pos.qty : 0)
 
   for (let i = 0; i < start; i++) equity[i] = costs.capital
   for (let i = start; i <= end; i++) {
-    const inWin = true
     // 1. Ordres de sortie actifs, dans la barre.
     if (pos && pos.exitsActive) intrabar(i)
     if (pos && pos.entryIdx < i) { pos.hi = Math.max(pos.hi, h[i]); pos.lo = Math.min(pos.lo, l[i]) }
 
     // 2. Calcul du script à la clôture.
-    if (inWin) {
-      const posNow = pos ? pos.dir : 0
-      const isLong = posNow === 1
-      const isShort = posNow === -1
-      const isFlat = posNow === 0
-      const cooldownOK = Number.isNaN(lastTradeBar) || i - lastTradeBar > effCooldown
-      const allowLambda = pr.allowLambda[i] === 1
-      const sigLong = override ? override.long[i] === 1 : pr.impulseEntryLong[i] === 1 || pr.fadeEntryLong[i] === 1
-      const sigShort = override ? override.short[i] === 1 : pr.impulseEntryShort[i] === 1 || pr.fadeEntryShort[i] === 1
-      const enterLong = allowLambda && cooldownOK && sigLong && p.allowLong
-      const enterShort = allowLambda && cooldownOK && sigShort && p.allowShort
-      const last = i === end
-      let orderLong = false
-      let orderShort = false
-      let tagL: PositionRecord['tag'] = 'FADE'
-      let tagS: PositionRecord['tag'] = 'FADE'
-      if (enterLong && posNow <= 0 && !last) {
-        orderLong = true
-        tagL = pr.impulseLong[i] ? (pr.mainShock[i] ? 'IMP' : 'μIMP') : 'FADE'
-        lastWasFade = pr.fadeLong[i] === 1
-        entryPrice = c[i]
-        entryATR = pr.atr[i]
-        lastTradeBar = i
-      }
-      if (enterShort && posNow >= 0 && !last) {
-        orderShort = true
-        tagS = pr.impulseShort[i] ? (pr.mainShock[i] ? 'IMP' : 'μIMP') : 'FADE'
-        lastWasFade = pr.fadeShort[i] === 1
-        entryPrice = c[i]
-        entryATR = pr.atr[i]
-        lastTradeBar = i
-      }
-      const atrSafe = Math.max(Number.isNaN(entryATR) ? pr.atr[i] : entryATR, costs.mintick)
+    const posNow = pos ? pos.dir : 0
+    const isLong = posNow === 1
+    const isShort = posNow === -1
+    const isFlat = posNow === 0
+    // Jeu qui décide des entrées (E) et jeu de la position ouverte (Q).
+    const e = select ? select[i] : 0
+    const qi = pos ? (pos as Pos).set : e
+    const E = e >= 0 ? sets[e] : null
+    const ER = e >= 0 ? prs[e] : null
+    const Q = qi >= 0 ? sets[qi] : null
+    const QR = qi >= 0 ? prs[qi] : null
+    const cooldownE = e >= 0 && (Number.isNaN(lastTradeBar) || i - lastTradeBar > cool[e])
+    const cooldownQ = qi >= 0 && (Number.isNaN(lastTradeBar) || i - lastTradeBar > cool[qi])
+    let enterLong = false
+    let enterShort = false
+    if (E && ER) {
+      const allow = ER.allowLambda[i] === 1
+      const sigLong = override ? override.long[i] === 1 : ER.impulseEntryLong[i] === 1 || ER.fadeEntryLong[i] === 1
+      const sigShort = override ? override.short[i] === 1 : ER.impulseEntryShort[i] === 1 || ER.fadeEntryShort[i] === 1
+      enterLong = allow && cooldownE && sigLong && E.allowLong
+      enterShort = allow && cooldownE && sigShort && E.allowShort
+    }
+    const last = i === end
+    let orderLong = false
+    let orderShort = false
+    let tagL: PositionRecord['tag'] = 'FADE'
+    let tagS: PositionRecord['tag'] = 'FADE'
+    if (enterLong && posNow <= 0 && !last) {
+      const R = ER!
+      orderLong = true
+      tagL = R.impulseLong[i] ? (R.mainShock[i] ? 'IMP' : 'μIMP') : 'FADE'
+      lastWasFade = R.fadeLong[i] === 1
+      entryPrice = c[i]
+      entryATR = R.atr[i]
+      lastTradeBar = i
+    }
+    if (enterShort && posNow >= 0 && !last) {
+      const R = ER!
+      orderShort = true
+      tagS = R.impulseShort[i] ? (R.mainShock[i] ? 'IMP' : 'μIMP') : 'FADE'
+      lastWasFade = R.fadeShort[i] === 1
+      entryPrice = c[i]
+      entryATR = R.atr[i]
+      lastTradeBar = i
+    }
+    let placedNow = false
+    let closeTag: ExitTag | null = null
+    if (Q && QR) {
+      const atrSafe = Math.max(Number.isNaN(entryATR) ? QR.atr[i] : entryATR, costs.mintick)
       const ep = Number.isNaN(entryPrice) ? c[i] : entryPrice
-      const tp1Long = ep + p.tp1AtrMult * atrSafe
-      const tp1Short = ep - p.tp1AtrMult * atrSafe
-      let placedNow = false
-      let closeTag: ExitTag | null = null
+      const tp1Long = ep + Q.tp1AtrMult * atrSafe
+      const tp1Short = ep - Q.tp1AtrMult * atrSafe
       if (pos && (isLong || isShort)) {
         const q = pos as Pos
-        q.stop = isLong ? ep - p.atrStopMult * atrSafe : ep + p.atrStopMult * atrSafe
+        q.stop = isLong ? ep - Q.atrStopMult * atrSafe : ep + Q.atrStopMult * atrSafe
         q.tp = isLong ? tp1Long : tp1Short
-        q.trailDist = p.atrTrailMult * atrSafe
+        q.trailDist = Q.atrTrailMult * atrSafe
         if (!q.exitsActive) { q.exitsActive = true; placedNow = true }
-        if (p.useVWAPExit && lastWasFade && (isLong ? c[i] >= pr.vwap[i] : c[i] <= pr.vwap[i])) closeTag = 'VWAP'
+        if (Q.useVWAPExit && lastWasFade && (isLong ? c[i] >= QR.vwap[i] : c[i] <= QR.vwap[i])) closeTag = 'VWAP'
       }
       // Bloc flip exit.
       const justEntered = posNow !== 0 && prevExecPos === 0
       if (justEntered) entryRef = (pos as Pos | null)?.avg ?? NaN
       if (isFlat) entryRef = NaN
       if (justEntered || isFlat) tp1Hit = false
-      if (p.useTP1 && !tp1Hit) {
+      if (Q.useTP1 && !tp1Hit) {
         if (isLong) tp1Hit = h[i] >= tp1Long
         if (isShort) tp1Hit = l[i] <= tp1Short
       }
@@ -524,30 +567,35 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
       if (isShort) mfeFlip = Math.min(Number.isNaN(mfeFlip) ? c[i] : mfeFlip, l[i])
       if (isFlat) mfeFlip = NaN
       const mfeMove = isLong ? (Number.isNaN(mfeFlip) ? c[i] : mfeFlip) - entryRef : isShort ? entryRef - (Number.isNaN(mfeFlip) ? c[i] : mfeFlip) : 0
-      const flipLifeOK = p.flipMinLifeATR <= 0 || mfeMove >= p.flipMinLifeATR * atrSafe
-      const main = pr.mainShock[i] === 1
-      const rawLong = p.useFlipExit && allowLambda && cooldownOK && ((pr.impulseLong[i] === 1 && (!p.flipMainOnly || main)) || (p.flipIncludeFade && pr.fadeEntryLong[i] === 1))
-      const rawShort = p.useFlipExit && allowLambda && cooldownOK && ((pr.impulseShort[i] === 1 && (!p.flipMainOnly || main)) || (p.flipIncludeFade && pr.fadeEntryShort[i] === 1))
+      const flipLifeOK = Q.flipMinLifeATR <= 0 || mfeMove >= Q.flipMinLifeATR * atrSafe
+      const main = QR.mainShock[i] === 1
+      const allowQ = QR.allowLambda[i] === 1
+      const rawLong = Q.useFlipExit && allowQ && cooldownQ && ((QR.impulseLong[i] === 1 && (!Q.flipMainOnly || main)) || (Q.flipIncludeFade && QR.fadeEntryLong[i] === 1))
+      const rawShort = Q.useFlipExit && allowQ && cooldownQ && ((QR.impulseShort[i] === 1 && (!Q.flipMainOnly || main)) || (Q.flipIncludeFade && QR.fadeEntryShort[i] === 1))
       if (isShort && rawLong && !tp1Hit && flipLifeOK) closeTag = 'FLIP'
       if (isLong && rawShort && !tp1Hit && flipLifeOK) closeTag = 'FLIP'
-      prevExecPos = posNow
-
-      // 3. Exécutions à la clôture : fermetures au marché, sorties tout juste passées, entrées.
-      if (pos && closeTag) closeAll(i, c[i], closeTag)
-      if (pos && placedNow && !orderLong && !orderShort) checkAt(i, c[i])
-      if (orderLong) {
-        if (pos && (pos as Pos).dir === -1) closeAll(i, c[i], 'REV')
-        if (!pos) { open(i, 1, tagL); entryLong[i] = 1 }
-      }
-      if (orderShort) {
-        if (pos && (pos as Pos).dir === 1) closeAll(i, c[i], 'REV')
-        if (!pos) { open(i, -1, tagS); entryShort[i] = 1 }
-      }
-      if (last && pos) closeAll(i, c[i], 'END')
+    } else if (isFlat) {
+      entryRef = NaN
+      tp1Hit = false
+      mfeFlip = NaN
     }
+    prevExecPos = posNow
+
+    // 3. Exécutions à la clôture : fermetures au marché, sorties tout juste passées, entrées.
+    if (pos && closeTag) closeAll(i, c[i], closeTag)
+    if (pos && placedNow && !orderLong && !orderShort) checkAt(i, c[i])
+    if (orderLong) {
+      if (pos && (pos as Pos).dir === -1) closeAll(i, c[i], 'REV')
+      if (!pos) { open(i, 1, tagL, e); entryLong[i] = 1 }
+    }
+    if (orderShort) {
+      if (pos && (pos as Pos).dir === 1) closeAll(i, c[i], 'REV')
+      if (!pos) { open(i, -1, tagS, e); entryShort[i] = 1 }
+    }
+    if (last && pos) closeAll(i, c[i], 'END')
     position[i] = pos ? (pos as Pos).dir : 0
     equity[i] = capitalNow(i)
   }
   for (let i = end + 1; i < n; i++) equity[i] = equity[end]
-  return { equity, position, positions, fills, start, end, entryLong, entryShort, prep: pr }
+  return { equity, position, positions, fills, start, end, entryLong, entryShort, prep: prs[0] }
 }

@@ -36,7 +36,12 @@ Une différence connue reste à confirmer : quand deux `strategy.exit` visent la
 particulière. Le port applique le comportement voulu : TP1 ferme 50 % une fois, le stop et le
 stop suiveur couvrent tout le reste.
 
-Réglages de recherche ajoutés (valeur par défaut = script inchangé) : `htfSlopeMode`
+Le moteur accepte aussi plusieurs jeux de réglages à la fois (`simulate`) : à chaque barre, un
+jeu décide des entrées, et chaque position garde jusqu'à sa sortie les réglages du jeu qui
+l'a ouverte. C'est la base de l'algo qui choisit ses réglages selon le régime.
+
+Réglages de recherche ajoutés (valeur par défaut = script inchangé) : `htfMinutes` (timeframe
+du filtre HTF : 60, 240, 1440, 4320), `htfSlopeMode`
 (`chart` comme le script, `htf` pour mesurer la pente sur 3 barres de 60 min), `longLamPct`
 (le 55 codé en dur), `allowLong`, `allowShort`, `useImpulse`.
 
@@ -46,6 +51,7 @@ Réglages de recherche ajoutés (valeur par défaut = script inchangé) : `htfSl
 npm run research:run -- --tf 30 [--from 2017-01-01] [--costs realistic] [--set allowShort=false --set atrTrailMult=50] [--trades trades.csv]
 npm run research:diagnose -- --tf 30
 npm run research:walkforward -- --tf 30 [--space reduced] [--train 24] [--test 3] [--samples 300] [--costs realistic]
+npm run research:regimes -- --tf 15 [--regimes full|trend|vol] [--pool random|menu] [--samples 200] [--seed 5] [--costs realistic]
 npm run research:compare-tv -- --tf 5 --tv liste_des_trades.csv
 npm run test:research
 ```
@@ -66,9 +72,14 @@ Les rapports sont écrits dans `research/reports/`.
 - **Entrées au hasard à sorties identiques** (`diagnose.ts`, section 10) : on garde les mêmes
   règles de sortie et on remplace seulement les entrées par des barres tirées au hasard. Seul
   test qui sépare le timing des entrées de la tendance du marché et de la forme des sorties.
+- **Paramètres par régime** (`regime-wf.ts`) : classification causale des régimes (tendance
+  journalière × volatilité), sélection du meilleur jeu par régime sur une fenêtre qui
+  s'agrandit, test sur les 3 mois suivants avec le moteur qui change de réglages selon le
+  régime ; bêta et alpha face au BTC ; rang en test des jeux choisis.
 - **Vérification contre TradingView** (`compare-tv.ts`) : retrouve chaque trade de l'export du
   Strategy Tester dans le port.
 
 ## Résultats
 
-Synthèse du premier passage : [`reports/SYNTHESE.md`](reports/SYNTHESE.md).
+Synthèse des deux passages (diagnostic, walk-forward, paramètres par régime) :
+[`reports/SYNTHESE.md`](reports/SYNTHESE.md).

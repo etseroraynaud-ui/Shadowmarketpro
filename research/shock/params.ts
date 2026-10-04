@@ -20,6 +20,8 @@ export interface ShockParams {
   onlyHighLam: boolean
   // Filtre de tendance 60 min
   useHTF: boolean
+  /** HTF Timeframe, en minutes (60 = « 60 », 4320 = « 3 jours »). */
+  htfMinutes: number
   htfEmaLen: number
   // Volume
   useVolFilter: boolean
@@ -78,6 +80,7 @@ export const DEFAULT_PARAMS: ShockParams = {
   lamPctThr: 50,
   onlyHighLam: false,
   useHTF: true,
+  htfMinutes: 60,
   htfEmaLen: 50,
   useVolFilter: true,
   volZWin: 30,
@@ -161,4 +164,24 @@ export function withParams(base: ShockParams, over: Partial<Record<keyof ShockPa
     else out[k] = v
   }
   return out as unknown as ShockParams
+}
+
+/**
+ * Réglages utilisés sur TradingView en octobre 2026 (captures d'écran) : 30 min,
+ * High Activity désactivé, filtre HTF en 3 jours, compression activée, stop 2 ATR, trailing
+ * 1,5 ATR, TP1 2 ATR sur 70 %, flip seulement sur choc principal.
+ */
+export const USER_2026: Partial<Record<keyof ShockParams, unknown>> = {
+  highActivityMode: false,
+  volWin: 80, kMain: 2.2, useMicroShock: true, kMicro: 1.3, rangeWin: 20, wickThr: 0.5,
+  cooldownBars: 6,
+  lamEmaWin: 150, lamNormWin: 300, lamPctThr: 50, onlyHighLam: false,
+  useHTF: true, htfMinutes: 4320, htfEmaLen: 50,
+  useVolFilter: true, volZWin: 55, volZThr: 0.2, volFadeMax: 1,
+  useCompression: true, atrZWin: 30, compThr: 0,
+  directionalOnly: true, fadeOnlyLowLam: false,
+  atrLen: 18, atrStopMult: 2, atrTrailMult: 1.5,
+  useTP1: true, tp1AtrMult: 2, tp1QtyPct: 70,
+  useVWAPExit: true, vwapLen: 30,
+  useFlipExit: true, flipMainOnly: true, flipIncludeFade: true, flipMinLifeATR: 0,
 }

@@ -97,3 +97,72 @@ ce ne sont pas des résultats hors échantillon au sens strict.
    shorts au hasard, mais reste sous zéro après frais).
 5. **Choisir le produit** : système intraday (longs, exposition de 3 à 4 %) ou système de
    tendance (variante sans trailing, exposition de 55 %).
+
+---
+
+# Deuxième passage : paramètres par régime de marché
+
+Objectif : un algo qui lit le régime du marché et applique, dans chaque régime, les réglages
+qui y ont le mieux marché (ou ne trade pas). Outil : `shock/regime-wf.ts`, rapports
+`shock-{15,30}m-regimes*.md`.
+
+## Méthode
+
+- **Régimes**, causaux (journées closes seulement) : tendance journalière (haussière, neutre,
+  baissière) × volatilité (calme ou agitée, contre sa médiane sur un an). Trois découpages
+  testés : 6 régimes, tendance seule (3), volatilité seule (2).
+- **Candidats** : le script, tes réglages, des variantes, et 200 jeux tirés au hasard dans un
+  espace de 26 réglages (dont le sens, le timeframe du filtre HTF, la compression, les sorties).
+  Variante « menu » : 12 configurations lisibles seulement.
+- **Sélection sans lecture du futur** : fenêtre d'entraînement qui s'agrandit depuis 2017, tests
+  de 3 mois de 2019 à 2026. Dans chaque régime, un jeu doit avoir un t-stat positif sur les deux
+  moitiés de l'entraînement ; sinon le régime n'est pas tradé.
+- **Mesures** : courbe hors échantillon, bêta et alpha face au BTC, rang en test du jeu choisi
+  parmi tous les jeux.
+
+## Résultats hors échantillon (2019 → 2026)
+
+Sharpe de l'algo par régime, contre le meilleur jeu unique choisi de la même façon :
+
+| timeframe | découpage | tirage 5 | tirage 9 | tirage 13 |
+| --- | --- | --- | --- | --- |
+| 30 min | 6 régimes | 0,48 contre 0,82 | | |
+| 30 min | tendance seule | 0,41 contre 0,82 | | |
+| 30 min | volatilité seule | **0,98** contre 0,82 | 0,10 contre 0,66 | 0,13 contre 0,18 |
+| 15 min | 6 régimes | 0,59 contre 0,71 | | |
+| 15 min | tendance seule | 0,00 contre 0,71 | | |
+| 15 min | volatilité seule | **1,48** contre 0,71 | 0,22 contre 0,50 | 0,85 contre 0,77 |
+| 30 min | menu court, 6 régimes | -0,41 contre 0,23 | | |
+
+- Le jeu retenu dans un régime finit en test au rang moyen de 41 à 62 % parmi tous les jeux
+  (50 % = hasard). Le choix par régime ne prédit presque pas la performance future.
+- Les résultats changent fortement d'un tirage de candidats à l'autre : c'est le signe qu'on
+  choisit surtout parmi du bruit.
+- Le découpage par tendance n'apporte rien. **Seule la volatilité (calme ou agitée) aide
+  parfois**, ce qui rejoint le diagnostic (edge des longs meilleur en volatilité basse ou
+  normale). C'est la seule piste de régime qui mérite d'être creusée.
+- Le meilleur jeu unique a un bêta quasi nul face au BTC (0,02 à 0,06) et un alpha de 9 à 21 %
+  par an selon le tirage (t de 1,1 à 2,1) : son edge ne vient pas de la hausse du BTC, mais il
+  reste à la limite de la significativité.
+- Tes réglages d'octobre 2026, dans le port : -50 % sur les tests 2019-2026 en 30 min, et +2,8 %
+  sur janvier 2025 → octobre 2026, contre +27,6 % sur TradingView. Avec le filtre HTF en 3 jours,
+  presque aucun long ne passe (la pente compare 3 barres de 30 min alors que la valeur ne change
+  que tous les 3 jours) : la stratégie ne fait que des shorts sous la moyenne 150 jours. L'écart
+  avec TradingView doit être expliqué avec ton export de trades avant toute conclusion sur tes
+  réglages.
+
+## Conclusion
+
+L'infrastructure de l'algo auto-adaptatif est en place (moteur multi-réglages, classification
+des régimes, sélection validée hors échantillon, tableau régime → réglages exporté en JSON).
+Mais avec les données actuelles, **choisir les réglages par régime n'est pas plus fiable que
+garder un seul jeu robuste**, sauf peut-être en distinguant volatilité calme et agitée. Mettre
+en production un sélecteur par régime aujourd'hui reviendrait à suivre du bruit.
+
+Pour la suite :
+1. Caler le port sur TradingView avec l'export de tes trades (écart de +27,6 % contre +2,8 %).
+2. Régime de volatilité seulement, avec une recherche structurée par régime (petite grille sur
+   les 4 ou 5 réglages qui comptent : sens, seuil de choc, stop, TP, trailing) au lieu de
+   200 tirages au hasard, et un vote des 5 meilleurs jeux plutôt que le seul meilleur.
+3. Plus de données pour valider la table régime → réglages : ETH, SOL, et le BTC d'une autre
+   source (Binance), sur lesquels la même table doit tenir.
