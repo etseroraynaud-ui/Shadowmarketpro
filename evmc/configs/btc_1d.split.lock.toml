@@ -1,0 +1,99 @@
+symbol = "BITSTAMP:BTCUSD"
+timeframe = "1d"
+data_hash = "9cb48fc90b73db06e4d539be2b02adc98f47d1ffd4993f5aed0d0403f6c71baf"
+n_bars = 5385
+warm_end = 750
+eval_start = 1500
+holdout_start = 4755
+data_end = 5385
+grid = [
+    1,
+    2,
+    3,
+    5,
+    7,
+    10,
+    14,
+    20,
+    30,
+    45,
+    60,
+    90,
+    120,
+]
+h_star_requested = 30
+h_star = 30
+m_target = 20
+holdout_bars = 630
+warmup_min_bars = 750
+min_train_bars = 750
+test_fold_bars = 250
+holdout_max_frac = 0.35
+min_dev_folds = 4
+created_utc = "2026-10-04T00:12:06Z"
+lock_hash = "ca40562eabbe89f8efebd326dd17727412ed19bb59fbbd1bd3d76259f4cb0f09"
+
+[[folds]]
+id = 0
+test_start = 1500
+test_end = 1750
+
+[[folds]]
+id = 1
+test_start = 1750
+test_end = 2000
+
+[[folds]]
+id = 2
+test_start = 2000
+test_end = 2250
+
+[[folds]]
+id = 3
+test_start = 2250
+test_end = 2500
+
+[[folds]]
+id = 4
+test_start = 2500
+test_end = 2750
+
+[[folds]]
+id = 5
+test_start = 2750
+test_end = 3000
+
+[[folds]]
+id = 6
+test_start = 3000
+test_end = 3250
+
+[[folds]]
+id = 7
+test_start = 3250
+test_end = 3500
+
+[[folds]]
+id = 8
+test_start = 3500
+test_end = 3750
+
+[[folds]]
+id = 9
+test_start = 3750
+test_end = 4000
+
+[[folds]]
+id = 10
+test_start = 4000
+test_end = 4250
+
+[[folds]]
+id = 11
+test_start = 4250
+test_end = 4500
+
+[[folds]]
+id = 12
+test_start = 4500
+test_end = 4755

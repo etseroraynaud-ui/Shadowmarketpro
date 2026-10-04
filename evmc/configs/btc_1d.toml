@@ -1,0 +1,110 @@
+# EVMC : BTC/USD journalier, Bitstamp, barres UTC agrégées depuis les barres à la minute.
+# Source : github.com/ff137/bitstamp-btcusd-minute-data (licence MIT), figée au 2026-10-02.
+# Reconstruire le CSV : evmc data resample --input <historique.csv> --input <mises_a_jour.csv>
+#                       --out data/btcusd_bitstamp_1d.csv --timeframe 1d
+
+[run]
+name    = "btc_1d"
+seed    = 20261003
+profile = "normal"              # fast | normal | validation
+threads = 0                     # 0 = tous les coeurs
+
+[data]
+symbol        = "BITSTAMP:BTCUSD"
+timeframe     = "1d"
+path          = "data/btcusd_bitstamp_1d.csv"
+ts_convention = "open_utc_ms"   # open_utc_ms | open_utc_s | close_utc_ms | open_iso
+# Barres de 4 heures : ancre du VWAP « 4h » du script Pine.
+aux           = [{ timeframe = "4h", path = "data/btcusd_bitstamp_4h.csv" }]
+
+[horizons]
+grid = [1, 2, 3, 5, 7, 10, 14, 20, 30, 45, 60, 90, 120]
+
+[warmup]
+min_bars = 750
+
+[split]
+lock_file        = "configs/btc_1d.split.lock.toml"
+min_train_bars   = 750
+test_fold_bars   = 250
+holdout_h_star   = 30
+holdout_m_target = 20
+holdout_max_frac = 0.35
+min_dev_folds    = 4
+
+[vol]
+ewma_lambda = 0.94
+lr_len      = 500
+garch_alpha = 0.06              # fixes en P0, estimés en P1
+garch_beta  = 0.92
+h_cap_mult  = 25.0
+pool_size   = 750
+pool_min    = 250
+resid_clamp = 8.0
+
+[sim.fast]
+n_min = 1000
+n_max = 4000
+batch = 500
+tol_p = 0.015
+tol_q = 0.07
+tol_mean = 0.03
+
+[sim.normal]
+n_min = 2000
+n_max = 20000
+batch = 1000
+tol_p = 0.0075
+tol_q = 0.035
+tol_mean = 0.015
+
+[sim.validation]
+n_min = 10000
+n_max = 100000
+batch = 5000
+tol_p = 0.003
+tol_q = 0.015
+tol_mean = 0.006
+
+[alpha]
+target_clamp  = 4.0
+alpha_z_cap   = 0.5
+ridge_lambda0 = 50.0
+standardize   = true
+
+[models]
+# Baselines, puis le port du script Pine. Les modèles v2_* arrivent au jalon M4.
+enabled = [
+  "b1_coin", "b2_clim", "b3_zero", "b4_rw", "b5_drift", "b6_ewma",
+  "b7a_garch_gauss", "b7_garch_fhs",
+  "legacy_full",                # le script Pine, porté tel quel, avec son chemin typique
+]
+legacy_defaults = "configs/legacy_defaults.toml"
+legacy_target   = "rstab"       # rstab | final
+
+[models.features]
+v2_drift  = []
+v2_score  = ["score_raw"]
+v2_dstate = ["d_state"]
+v2_phase  = ["score_raw", "phase_range", "phase_coil"]
+v2_markov = ["score_raw", "mk_bull", "mk_bear"]
+v2_ridge  = ["f_d", "f_v", "f_r", "f_a", "f_m", "f_z", "compression", "log_vol_ratio"]
+
+[eval]
+support          = "per_horizon" # per_horizon | common_origin
+bootstrap_reps   = 2000
+block_mult       = [1.0, 2.0, 3.0]
+block_min        = 10
+ci_level         = 0.95
+hac              = true
+reliability_bins = 10
+logloss_clip     = 1e-4
+warn_n_over_h    = 30
+
+[output]
+dir         = "runs"
+compression = "zstd"
+
+[legacy]
+h24     = true                  # marché ouvert en continu (crypto) : semaine de 7 jours
+mintick = 1.0                   # pas de cotation de BITSTAMP:BTCUSD sur TradingView

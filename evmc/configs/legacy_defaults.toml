@@ -1,0 +1,194 @@
+# Inputs du Pine « EVMC Directional », figés pour le port legacy (jalons M3 et M5).
+# Généré à partir des valeurs par défaut du script fourni : une clé par input, au nom d'origine.
+# À CORRIGER si les valeurs réellement utilisées sur le graphique diffèrent des valeurs par défaut,
+# puis à ne plus modifier : ce fichier entre dans le hash de configuration.
+# Les inputs d'affichage (couleurs, tracés, tables) sont conservés pour mémoire ; le moteur les ignore.
+
+
+# --- Projection
+i_anchor_mode     = "Last confirmed"             # Anchor
+i_H               = 120                          # Projection horizon (bars)
+i_useRef          = true                         # Run the whole model on the reference timeframe
+i_refTf           = "D"                          # Reference timeframe (used when the chart is finer)
+i_engine          = "Monte Carlo FHS-GARCH"      # Fan engine
+i_sims            = 1500                         # MC simulations (requested)
+i_mcBudget        = 240000                       # MC budget (sims x horizon)
+i_bins            = 81                           # Terminal histogram bins (tilt)
+
+# --- Volatility — EWMA / GARCH / FHS
+i_ewma_lambda     = 0.94                         # EWMA lambda
+i_lrLen           = 500                          # Long-run variance length
+i_gAlpha          = 0.06                         # GARCH alpha
+i_gBeta           = 0.92                         # GARCH beta (alpha+beta capped 0.998)
+i_useFHS          = true                         # FHS: bootstrap standardized residuals
+i_poolN           = 750                          # FHS residual pool size
+i_atrLen          = 14                           # ATR length
+
+# --- Drift — multi-horizon shrinkage
+i_dL1             = 20                           # Short horizon
+i_dL2             = 60                           # Medium horizon
+i_dL3             = 200                          # Long horizon
+i_dW1             = 0.25                         # Weight short
+i_dW2             = 0.35                         # Weight medium
+i_dW3             = 0.40                         # Weight long
+i_t0              = 1.0                          # Shrinkage t0
+i_driftCap        = 0.30                         # Drift cap per bar (sigma)
+
+# --- Directional score
+i_wD              = 1.0                          # Weight D (drift)
+i_wV              = 0.8                          # Weight V (VWAP)
+i_wR              = 0.6                          # Weight R (S/R)
+i_wA              = 0.4                          # Weight A (absorption proxy)
+i_wM              = 1.0                          # Weight M (exhaustion)
+i_wZ              = 1.4                          # Weight Z (accumulation / distribution zones)
+i_maxShare        = 0.50                         # Max share per family
+i_scoreGain       = 2.6                          # Score gain (before tanh)
+i_extThr          = 1.0                          # Exhaustion: extension threshold (z)
+i_extWidth        = 1.5                          # Exhaustion: ramp width (z)
+i_useRsi          = true                         # RSI as auxiliary exhaustion input
+
+# --- Anchored VWAPs (from last HTF pivot)
+i_rvShow          = true                         # Plot anchored VWAPs
+i_avL             = 3                            # HTF pivot left bars
+i_avR             = 2                            # HTF pivot right bars (confirmation)
+i_avMode          = "Latest pivot (high or low)" # Anchor on
+i_rvWW            = 1.0                          # Weight weekly
+i_rvWD            = 0.6                          # Weight daily
+i_rvW4            = 0.35                         # Weight 4h
+i_rvZ             = 1.0                          # VWAP wall strength in zone factor
+i_rvCross         = 0.8                          # Path/target: cost to break an anchored VWAP
+
+# --- Support / Resistance
+i_pvL             = 5                            # Pivot left bars
+i_pvR             = 5                            # Pivot right bars (confirmation delay)
+i_clusterTol      = 0.5                          # Cluster tolerance (ATR)
+i_testTol         = 0.25                         # Test tolerance (ATR)
+i_resolveBars     = 5                            # Bars to resolve a test
+i_maxLevels       = 60                           # Max tracked levels (incl. controls)
+i_ctrlOff         = 1.5                          # Control level offset (ATR)
+i_srPrior         = 4.0                          # Rejection prior strength
+i_srDecay         = 2.5                          # Distance decay (ATR)
+i_srGain          = 1.0                          # S/R field gain
+i_srCross         = 0.5                          # Path crossing cost
+
+# --- Accumulation zones (contrarian)
+i_zoneBinPct      = 0.0                          # Price bin (%, 0 = auto by timeframe)
+i_zoneSmooth      = 0.35                         # Profile smoothing (x ATR)
+i_zoneTPO         = 0.5                          # Time-at-price weight (vs volume)
+i_zoneFlowW       = 0.7                          # Accumulation/distribution flow bonus
+i_zoneMin         = 0.3                          # Min wall strength (path/target)
+i_zoneTau         = 2000                         # Memory decay (bars)
+i_zoneWin         = 8.0                          # Score window (+/- ATR)
+i_zoneDecay       = 1.5                          # Proximity decay (ATR)
+i_zoneContra      = 1.0                          # Approach amplification (falling into support / rising into resistance)
+i_zoneGain        = 1.2                          # Zone factor gain
+i_zoneCross       = 1.0                          # Path: cost to break through a zone
+i_zoneTarget      = 0.6                          # Target: zone barrier strength
+i_showZones       = true                         # Show strongest zones
+i_zoneN           = 3                            # Zones shown per side
+
+# --- Market phases (impulse -> range, compression -> trap)
+i_phEnable        = true                         # Enable phase scenarios
+i_impDays         = 15.0                         # Impulse window (days)
+i_impZ            = 2.2                          # Impulse threshold (move in sigma)
+i_impER           = 0.40                         # Impulse min efficiency (few pullbacks)
+i_rangeMult       = 4.0                          # Range duration (x impulse window)
+i_rangeRetr       = 0.35                         # Expected range depth (retracement of the impulse)
+i_rangeSwings     = 5                            # Range swings
+i_rangeKappa      = 1.0                          # Range mean-reversion strength
+i_rangeVol        = 1.0                          # Range volatility (x bounded-walk level)
+i_rangeDecay      = 0.33                         # Vol decay to range level (x impulse window)
+i_rangeAmp        = 0.7                          # First swing amplitude (x distance to bound)
+i_postDir         = 0.4                          # Directional carry after the range
+i_coilThr         = 0.6                          # Compression threshold (score)
+i_coilDays        = 25.0                         # Compression duration to arm a trap (days)
+i_trapDays        = 7.0                          # Trap duration (days)
+i_trapSweep       = 0.25                         # Liquidity sweep beyond the range (x height)
+i_expMult         = 1.5                          # Real move after the trap (x range height)
+i_coilAmp         = 0.5                          # Compression amplitude boost
+i_showPhase       = true                         # Show phase box (range / compression)
+
+# --- Compression
+i_compLen         = 250                          # Percentile lookback
+i_lambdaComp      = 0.5                          # Amplitude lambda
+i_compVol         = 0.20                         # Long-run vol expansion
+
+# --- Hysteresis / stability
+i_alphaStable     = 0.80                         # Score smoothing alpha
+i_enterThr        = 0.12                         # Enter threshold
+i_flipThr         = 0.25                         # Flip threshold (> enter)
+i_confirmN        = 2                            # Confirmation bars
+i_floorStr        = 0.25                         # Min strength while regime held
+i_minGain         = 0.10                         # Target min gain
+i_maxGain         = 0.80                         # Target max gain
+
+# --- Tilt & directional path
+i_beta            = 1.2                          # Exponential tilt beta
+i_kDir            = 0.08                         # Directional drift k (sigma/bar)
+i_dirCapSig       = 0.30                         # Directional drift cap (sigma/bar)
+i_dirInFan        = true                         # Inject directional drift into the fan (MC + analytic)
+i_tailQ           = 0.01                         # Target tail clip (quantile)
+i_G               = 61                           # Viterbi price grid
+i_Wmax            = 5                            # Max bins per step
+i_lamSmooth       = 0.5                          # Curvature penalty
+i_lamTurn         = 0.3                          # Turn penalty
+i_termWin         = 2                            # Terminal window (+/- bins)
+
+# --- Markov Chain
+i_mk_enable       = true                         # Enable Markov regime switching
+i_mk_len          = 50                           # Markov lookback (transitions)
+i_mk_alpha        = 1.0                          # Laplace smoothing alpha
+i_mk_detector     = "Price Z-score"              # Regime detector
+i_mk_z_thr        = 0.333                        # Z threshold (+/-)
+i_mk_thr_bull     = 1.0                          # Custom Z bull thr
+i_mk_thr_bear     = -1.0                         # Custom Z bear thr
+i_mk_w1           = 0.333                        # Weight 1
+i_mk_w2           = 0.333                        # Weight 2
+i_mk_w3           = 0.333                        # Weight 3
+i_mk_deadzone     = 0.05                         # Consensus deadzone
+i_mkKBull         = 0.08                         # Bull: drift offset (sigma/bar, centred)
+i_mkKBear         = -0.08                        # Bear: drift offset (sigma/bar, centred)
+i_mkKNeu          = 0.0                          # Neutral: drift offset (sigma/bar, centred)
+i_sig_bull        = 0.8                          # Bull: vol multiplier
+i_sig_bear        = 1.3                          # Bear: vol multiplier
+i_sig_neutral     = 1.0                          # Neutral: vol multiplier
+i_flip_mr_enable  = true                         # Enable flip-probability MR
+i_flip_thr        = 0.55                         # Flip probability threshold
+i_flip_width      = 0.10                         # Flip transition width
+i_flip_kappa      = 0.05                         # Flip MR strength (kappa)
+
+# --- Calibration
+i_hitThr          = 0.10                         # Directional call threshold (sigmaH)
+
+# --- Historical backtest
+i_position_size   = 1000.0                       # Position size ($)
+i_trade_duration  = 252                          # Trade duration (bars)
+i_lookback_bars   = 2500                         # Historical lookback (bars)
+i_use_tp_sl       = false                        # Use TP/SL
+i_tp_pct          = 10.0                         # Take profit (%)
+i_sl_pct          = 5.0                          # Stop loss (%)
+i_risk_free_rate  = 5.0                          # Annual risk-free rate (%)
+
+# --- Display
+i_font            = "Normal"                     # Table font size
+i_fanTransp       = 88                           # Fan transparency
+i_showLabels      = true                         # Show end labels
+i_showP50         = false                        # Show P50 line
+i_showBackbone    = true                         # Show directional backbone line
+
+# --- Typical path candles (deterministic)
+i_show_candles    = true                         # Show typical-path candles
+i_candleH         = 120                          # Candle horizon (bars, <= horizon)
+i_texAmp          = 0.70                         # Texture amplitude (x sigma)
+i_anL             = 24                           # Analogue context length (bars)
+i_anK             = 5                            # Number of analogues (k-NN)
+i_anTau           = 0.5                          # Analogue distance temperature
+i_anSep           = 0                            # Min spacing between analogues (bars, 0 = half context, 1 = none)
+i_anKeepVol       = true                         # Keep candle volatility when averaging analogues
+i_anBuf           = 3000                         # Analogue history buffer (bars)
+i_anWS            = 1.0                          # Analogue weight: direction score
+i_anWV            = 1.0                          # Analogue weight: vol regime
+i_anHyst          = 0.15                         # Analogue switch margin
+i_bodyW           = 5                            # Body width (px)
+i_fineBars        = 200                          # Chart-resolution candles when the model runs on the reference timeframe
+i_candleTransp    = 45                           # Candle transparency

@@ -1,0 +1,2249 @@
+<title>Quant Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Poste de travail : barre d'outils, onglets, grand graphique de prix avec panneaux latéraux. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0e; --panel: #121417; --panel-2: #181b1f; --line: #23272d; --line-2: #343a42;
+  --ink: #e9ebee; --ink-2: #aab1ba; --muted: #7c8590;
+  --accent: #3987e5; --s1: #3987e5; --s2: #d95926; --ctx: #5b626c;
+  --o1: #256abf; --o2: #5598e7; --o3: #b7d3f6;
+  --good: #0ca30c; --warn: #fab219; --crit: #d03b3b; --good-ink: #2fbf2f; --crit-ink: #ee7b7b;
+  --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #2a2e34;
+  --grid: #1c2025; --axis: #343a42; --help: #151a21;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #f3f4f6; --panel: #ffffff; --panel-2: #f6f7f9; --line: #e2e5e9; --line-2: #cdd2d8;
+    --ink: #14171a; --ink-2: #4b535d; --muted: #737b85;
+    --accent: #2a78d6; --s1: #2a78d6; --s2: #eb6834; --ctx: #a5abb3;
+    --o1: #86b6ef; --o2: #3987e5; --o3: #104281;
+    --good: #0ca30c; --warn: #fab219; --crit: #d03b3b; --good-ink: #006300; --crit-ink: #b02a2a;
+    --div-pos: #2a78d6; --div-neg: #e34948; --div-mid: #eceef1;
+    --grid: #eef0f3; --axis: #cdd2d8; --help: #f1f5fb;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f4f6; --panel: #ffffff; --panel-2: #f6f7f9; --line: #e2e5e9; --line-2: #cdd2d8;
+  --ink: #14171a; --ink-2: #4b535d; --muted: #737b85;
+  --accent: #2a78d6; --s1: #2a78d6; --s2: #eb6834; --ctx: #a5abb3;
+  --o1: #86b6ef; --o2: #3987e5; --o3: #104281;
+  --good: #0ca30c; --warn: #fab219; --crit: #d03b3b; --good-ink: #006300; --crit-ink: #b02a2a;
+  --div-pos: #2a78d6; --div-neg: #e34948; --div-mid: #eceef1;
+  --grid: #eef0f3; --axis: #cdd2d8; --help: #f1f5fb;
+}
+html, body { margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font: 13px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+.app { max-width: 1720px; margin: 0 auto; padding-inline: 16px; padding-block: 0 40px; }
+.mono, td.n, th.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* --- barre d'outils */
+.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-block: 10px; border-bottom: 1px solid var(--line); background: var(--bg); }
+@media (min-width: 1000px) { .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; } }
+.brand { font-weight: 600; font-size: 15px; letter-spacing: .01em; }
+.brand span { color: var(--muted); font-weight: 400; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { font-family: var(--mono); font-size: 11.5px; padding: 2px 8px; border: 1px solid var(--line-2); border-radius: 4px; color: var(--ink-2); white-space: nowrap; }
+.chip.sym { color: var(--ink); font-weight: 500; }
+.chip.warn { border-color: var(--warn); color: var(--ink); }
+.chip.lock { border-color: var(--good); color: var(--ink); }
+.tabs { display: flex; flex-wrap: wrap; gap: 2px; margin-left: 4px; }
+.tab { font: inherit; color: var(--ink-2); background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 10px; cursor: pointer; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+.spacer { flex: 1 1 auto; }
+.picks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.field { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+select, input[type="number"], input[type="text"] { font: 12px var(--font); color: var(--ink); background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 4px; padding: 5px 8px; min-width: 0; max-width: 100%; }
+input[type="number"] { width: 72px; font-family: var(--mono); }
+input[type="file"] { font: 12px var(--font); color: var(--ink-2); max-width: 100%; }
+select:focus-visible, input:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn { font: 12px var(--font); color: var(--ink-2); background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 4px; padding: 5px 9px; cursor: pointer; }
+.btn:hover { color: var(--ink); border-color: var(--muted); }
+.btn[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel-2)); }
+.seg { display: inline-flex; flex-wrap: wrap; row-gap: 4px; }
+.seg .btn { border-radius: 0; margin-left: -1px; }
+.seg .btn:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+.seg .btn:last-child { border-radius: 0 4px 4px 0; }
+
+/* --- panneaux */
+.view { padding-top: 12px; display: grid; gap: 12px; }
+.ws { display: grid; grid-template-columns: minmax(0, 1fr) 430px; gap: 12px; align-items: start; }
+.side { display: grid; gap: 12px; min-width: 0; }
+.bench { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) 320px; gap: 12px; align-items: start; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 1180px) { .ws, .bench { grid-template-columns: minmax(0, 1fr); } .grid3 { grid-template-columns: minmax(0, 1fr); } .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .grid4 { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+.ph { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 9px 12px 0; }
+.ph h2 { font-size: 12.5px; font-weight: 600; margin: 0; text-wrap: balance; }
+.ph .sub { color: var(--muted); font-size: 11.5px; }
+.ph .btn { margin-left: auto; padding: 2px 7px; font-size: 11px; }
+.ph .btn + .btn { margin-left: 0; }
+.ph .acts { margin-left: auto; display: flex; gap: 6px; }
+.ph .acts .btn { margin-left: 0; }
+.pb { padding: 8px 12px 12px; min-width: 0; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+.bar h2 { font-size: 13px; font-weight: 600; margin: 0 6px 0 0; }
+.note { color: var(--muted); font-size: 11.5px; margin: 0; max-width: 78ch; }
+.lead { color: var(--ink-2); margin: 0; max-width: 100ch; font-size: 13px; }
+.lead b { color: var(--ink); font-weight: 600; }
+
+/* --- encadrés d'explication : visibles quand « Explications » est actif */
+.help { display: none; margin: 8px 12px 0; padding: 8px 10px; background: var(--help); border-left: 2px solid var(--accent); border-radius: 0 4px 4px 0; color: var(--ink-2); font-size: 12px; max-width: 110ch; }
+.help b { color: var(--ink); font-weight: 600; }
+.help p { margin: 0 0 4px; }
+.help p:last-child { margin: 0; }
+.help-on .help { display: block; }
+.verdict { margin: 0; padding: 10px 12px; font-size: 13px; color: var(--ink-2); max-width: 120ch; }
+.verdict b { color: var(--ink); font-weight: 600; }
+
+/* --- graphiques */
+.plot { position: relative; min-width: 0; }
+.plot svg { display: block; overflow: visible; max-width: 100%; }
+.tbl { display: none; max-height: 340px; overflow: auto; }
+.show-table .tbl { display: block; }
+.show-table .plot, .show-table .grid4 { display: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--ink-2); font-size: 11.5px; padding: 0 12px; min-height: 18px; }
+.key { display: inline-flex; align-items: center; gap: 6px; }
+.key i { display: inline-block; width: 14px; height: 0; border-top: 2px solid var(--c, var(--ink-2)); }
+.key i.dash { border-top-style: dashed; }
+.key i.box { height: 10px; border: 0; background: var(--c); opacity: .9; border-radius: 2px; }
+.key i.wash { height: 10px; border: 0; background: var(--c); opacity: .28; border-radius: 2px; }
+.key i.dot { width: 8px; height: 8px; border: 0; border-radius: 50%; background: var(--c); }
+.g line, .g path { stroke: var(--grid); stroke-width: 1; fill: none; shape-rendering: crispEdges; }
+.ax { stroke: var(--axis); stroke-width: 1; fill: none; shape-rendering: crispEdges; }
+.tk { fill: var(--muted); font: 10.5px var(--mono); }
+.lb { fill: var(--ink-2); font: 11px var(--font); }
+.ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.thin { stroke-width: 1; }
+.dashed { stroke-dasharray: 2 4; }
+.xh { stroke: var(--muted); stroke-width: 1; shape-rendering: crispEdges; pointer-events: none; }
+.hit { fill: transparent; }
+.c-s1 { stroke: var(--s1); } .f-s1 { fill: var(--s1); }
+.c-s2 { stroke: var(--s2); } .f-s2 { fill: var(--s2); }
+.c-ctx { stroke: var(--ctx); } .f-ctx { fill: var(--ctx); }
+.c-ink { stroke: var(--ink); } .f-ink { fill: var(--ink); }
+.c-ink2 { stroke: var(--ink-2); } .f-ink2 { fill: var(--ink-2); }
+.f-o1 { fill: var(--o1); } .f-o2 { fill: var(--o2); } .f-o3 { fill: var(--o3); }
+.c-good { stroke: var(--good); } .f-good { fill: var(--good); }
+.c-crit { stroke: var(--crit); } .f-crit { fill: var(--crit); }
+.ring { stroke: var(--panel); stroke-width: 2; }
+.wash { fill-opacity: .10; stroke: none; }
+.wash2 { fill-opacity: .22; stroke: none; }
+.candle-up { fill: var(--panel); stroke: var(--ink-2); stroke-width: 1; }
+.candle-dn { fill: var(--ink-2); stroke: var(--ink-2); stroke-width: 1; }
+.wick { stroke: var(--ink-2); stroke-width: 1; }
+.tc-up { fill: var(--good); fill-opacity: .85; stroke: none; }
+.tc-dn { fill: var(--crit); fill-opacity: .85; stroke: none; }
+.tw-up { stroke: var(--good); stroke-opacity: .85; stroke-width: 1; }
+.tw-dn { stroke: var(--crit); stroke-opacity: .85; stroke-width: 1; }
+.zone { fill: var(--panel-2); }
+.wall-s { fill: var(--good); fill-opacity: .10; stroke: var(--good); stroke-opacity: .35; stroke-width: 1; }
+.wall-r { fill: var(--crit); fill-opacity: .10; stroke: var(--crit); stroke-opacity: .35; stroke-width: 1; }
+.ohlc { position: absolute; left: 10px; top: 6px; font: 11.5px var(--mono); color: var(--ink-2); pointer-events: none; display: flex; flex-wrap: wrap; gap: 2px 12px; max-width: calc(100% - 80px); }
+.ohlc b { color: var(--ink); font-weight: 500; }
+.empty { color: var(--muted); padding: 28px 12px; text-align: center; }
+
+/* --- infobulle */
+.tip { position: fixed; z-index: 50; pointer-events: none; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line-2); border-radius: 5px; padding: 7px 9px; font-size: 11.5px; max-width: 320px; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
+.tip .tt { color: var(--ink-2); margin-bottom: 4px; }
+.tip .tr { display: grid; grid-template-columns: 14px auto 1fr; gap: 0 7px; align-items: center; }
+.tip .tr i { border-top: 2px solid var(--c, transparent); width: 12px; }
+.tip .tr b { font: 500 11.5px var(--mono); }
+.tip .tr span { color: var(--ink-2); text-align: right; }
+
+/* --- tableaux */
+table { border-collapse: collapse; width: 100%; font-size: 12px; }
+th { text-align: left; color: var(--muted); font-weight: 500; padding: 5px 8px; border-bottom: 1px solid var(--line); background: var(--panel); white-space: nowrap; }
+.tbl th, .vscroll th { position: sticky; top: 0; }
+td { padding: 4px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th.n, td.n { text-align: right; }
+th[data-sort] { cursor: pointer; }
+tr:last-child td { border-bottom: 0; }
+tr.total td { border-top: 1px solid var(--line-2); font-weight: 600; }
+.scroll { overflow-x: auto; }
+#origin-table th, #origin-table td { padding: 4px 6px; font-size: 11.5px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; margin: 0; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.kv dd small { color: var(--muted); font-size: 11px; display: block; }
+.up { color: var(--good-ink); } .dn { color: var(--crit-ink); }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 1px 7px; border-radius: 9px; border: 1px solid var(--line-2); color: var(--ink-2); white-space: nowrap; }
+.pill.wr { border-color: var(--warn); color: var(--ink); }
+
+/* --- facteurs : barres divergentes */
+.fac { display: grid; grid-template-columns: 22px 1fr 46px; gap: 4px 8px; align-items: center; margin-top: 8px; }
+.fac .nm { font: 500 11.5px var(--mono); color: var(--ink-2); }
+.fac .tr { position: relative; height: 10px; background: var(--panel-2); border-radius: 2px; }
+.fac .tr::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--axis); }
+.fac .tr i { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+.fac .vl { font: 11px var(--mono); text-align: right; color: var(--ink-2); }
+
+/* --- défilement des origines */
+.scrub { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 12px 10px; border-top: 1px solid var(--line); }
+.scrub input[type="range"] { flex: 1 1 220px; min-width: 120px; accent-color: var(--accent); }
+.scrub .when { font-family: var(--mono); font-size: 12px; min-width: 104px; }
+
+/* --- cartes thermiques */
+.heat { display: grid; gap: 2px; font: 11px var(--mono); min-width: max-content; }
+.heat .rl { padding: 4px 10px 4px 0; color: var(--ink-2); font-family: var(--font); white-space: nowrap; display: flex; align-items: center; }
+.heat .rl[role="button"] { cursor: pointer; }
+.heat .rl.on { color: var(--ink); font-weight: 600; }
+.heat .cl { color: var(--muted); text-align: center; padding-bottom: 3px; }
+.heat .cell { min-width: 54px; padding: 5px 4px; text-align: center; border-radius: 3px; }
+.scale { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--muted); font-size: 11px; padding: 6px 12px 0; }
+.scale i { display: block; width: 160px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--div-neg), var(--div-mid), var(--div-pos)); }
+.mini h3 { font-size: 11.5px; font-weight: 500; color: var(--ink-2); margin: 0 0 2px; }
+details > summary { cursor: pointer; padding: 9px 12px; color: var(--ink-2); }
+details[open] > summary { border-bottom: 1px solid var(--line); }
+.params { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+.params .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); min-width: 84px; }
+@media (prefers-reduced-motion: no-preference) { .btn, .tab { transition: color .12s, border-color .12s, background-color .12s; } }
+</style>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">Quant <span>Studio</span></div>
+    <div class="chips" id="chips"></div>
+    <nav class="tabs" role="tablist" aria-label="Vues">
+      <button class="tab" role="tab" id="tab-graphique" data-tab="graphique">Graphique</button>
+      <button class="tab" role="tab" id="tab-backtest" data-tab="backtest">Backtest</button>
+      <button class="tab" role="tab" id="tab-chemin" data-tab="chemin">Chemin typique</button>
+      <button class="tab" role="tab" id="tab-previsions" data-tab="previsions">Prévisions</button>
+      <button class="tab" role="tab" id="tab-donnees" data-tab="donnees">Données</button>
+    </nav>
+    <div class="spacer"></div>
+    <div class="picks">
+      <label class="field">Modèle <select id="sel-focus"></select></label>
+      <label class="field">Comparer à <select id="sel-compare"></select></label>
+      <label class="field">Horizon <select id="sel-h"></select></label>
+      <button class="btn" id="tg-help" aria-pressed="true" title="Afficher ou masquer les encadrés d'explication de chaque module">Explications</button>
+    </div>
+  </header>
+
+  <!-- ===== Vue 1 : graphique ===== -->
+  <section class="view" id="view-graphique">
+    <div class="ws">
+      <div class="side">
+      <div class="panel">
+        <div class="bar">
+          <h2 id="main-title">Prix et prévision</h2>
+          <div class="seg" id="zoom" role="group" aria-label="Profondeur d'historique"></div>
+          <button class="btn" id="tg-path" aria-pressed="true" title="Bougies du chemin typique EVMC et squelette directionnel">Chemin typique</button>
+          <button class="btn" id="tg-fan" aria-pressed="true" title="Éventail de probabilité du modèle choisi">Éventail</button>
+          <button class="btn" id="tg-trades" aria-pressed="true" title="Trades de la stratégie de l'onglet Backtest">Trades</button>
+          <button class="btn" id="tg-folds" aria-pressed="false">Plis</button>
+          <button class="btn" id="tg-log" aria-pressed="false" title="Échelle logarithmique des prix : un même écart vertical vaut une même variation en %">Log</button>
+        </div>
+        <div class="help">
+          <p><b>Ce que tu vois.</b> Les chandeliers gris sont le prix réel. Tout ce qui part de la ligne « origine » est une prévision faite ce jour-là, sans connaître la suite : les bougies réelles tracées par-dessus montrent ce qui s'est passé ensuite.</p>
+          <p><b>Chemin typique.</b> Bougies vertes et rouges : la trajectoire qu'EVMC juge la plus représentative, barre par barre. Le pointillé est son squelette directionnel, qui mène à la cible. <b>Éventail.</b> Zone bleue foncée : une trajectoire sur deux y reste ; zone claire : neuf sur dix.</p>
+          <p><b>Pour naviguer.</b> Clique sur le graphique ou déplace le curseur du bas pour changer d'origine ; « Lecture » fait défiler les jours.</p>
+        </div>
+        <div class="legend" id="main-legend" style="padding-top:8px"></div>
+        <div class="plot" id="main-plot"><div class="ohlc ovl" id="main-ohlc"></div></div>
+        <div class="scrub">
+          <button class="btn" id="or-first" title="Première origine">⏮</button>
+          <button class="btn" id="or-prev" title="Origine précédente">◀</button>
+          <button class="btn" id="or-play" aria-pressed="false">Lecture</button>
+          <button class="btn" id="or-next" title="Origine suivante">▶</button>
+          <button class="btn" id="or-last" title="Dernière origine">⏭</button>
+          <input type="range" id="or-range" min="0" value="0" aria-label="Date d'origine de la prévision">
+          <span class="when" id="or-when"></span>
+        </div>
+      </div>
+        <div class="panel">
+          <div class="ph"><h2>Annoncé et réalisé</h2><span class="sub" id="ot-sub"></span></div>
+          <div class="help"><p>Une ligne par nombre de barres après l'origine. <b>Chemin</b> : variation annoncée par le chemin typique. <b>P05 à P95</b> : intervalle à 90 % du modèle choisi. <b>Réalisé</b> : ce que le prix a fait. ✓ : le chemin avait le bon sens ; ✕ : le mauvais.</p></div>
+          <div class="pb scroll"><table id="origin-table"></table></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="panel" id="card-evmc">
+          <div class="ph"><h2>État d'EVMC à l'origine</h2><span class="sub" id="ev-sub"></span></div>
+          <div class="help">
+            <p><b>Régime</b> : sens retenu par le script après confirmation. <b>Score</b> : somme pondérée des six facteurs, de −1 (baissier) à +1 (haussier). <b>Cible</b> : rendement visé à 120 barres.</p>
+            <p><b>Facteurs</b> : D dérive, V position face aux VWAP ancrés, R supports et résistances, A absorption, M épuisement, Z murs de volume. Barre à droite : pousse à la hausse.</p>
+            <p><b>Phase</b> : scénario imposé au chemin. « Range » : oscillations attendues après une impulsion. « Compression » : piège puis vrai mouvement.</p>
+          </div>
+          <div class="pb"><dl class="kv" id="evmc-state"></dl><div class="fac" id="evmc-factors"></div></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><h2>Mesures du modèle</h2><span class="sub" id="qs-sub"></span></div>
+          <div class="help"><p>Notes du modèle choisi sur toute la zone notée, à l'horizon choisi. <b>Skill</b> positif : meilleur que la référence ; un point ● : écart significatif. <b>Couverture à 90 %</b> : doit valoir 90 % ; en dessous, l'intervalle est trop étroit.</p></div>
+          <div class="pb"><dl class="kv" id="quick-stats"></dl></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Vue 2 : backtest ===== -->
+  <section class="view" id="view-backtest" hidden>
+    <div class="panel">
+      <div class="params">
+        <span class="lbl">Stratégie</span>
+        <label class="field"><select id="bt-strat" aria-label="Stratégie"></select></label>
+        <span id="bt-params" class="picks"></span>
+        <div class="spacer"></div>
+        <span class="pill" id="st-trials" title="Chaque réglage essayé sur ce run compte comme un essai."></span>
+      </div>
+      <div class="params" id="bt-import" hidden>
+        <span class="lbl">Import</span>
+        <input type="file" id="imp-file" accept=".csv,.txt,text/csv">
+        <label class="field" id="imp-col-f" hidden>Colonne <select id="imp-col"></select></label>
+        <label class="field" id="imp-a-f" hidden>Long si &gt; <input type="number" id="imp-a" step="any" value="0"></label>
+        <label class="field" id="imp-b-f" hidden>Short si &lt; <input type="number" id="imp-b" step="any" value="0"></label>
+        <label class="field" id="imp-carry-f" hidden><input type="checkbox" id="imp-carry"> garder le dernier signal</label>
+        <span class="note" id="imp-info">Fichier CSV : liste de trades exportée du Strategy Tester de TradingView, ou série de signaux avec une colonne de date.</span>
+      </div>
+      <div class="params">
+        <span class="lbl">Exécution</span>
+        <label class="field">Sens <select id="st-dir"><option value="long">Long seulement</option><option value="short">Short seulement</option><option value="both">Long et short</option></select></label>
+        <label class="field">Sortie <select id="st-exit"><option value="bars">après N barres</option><option value="signal">quand le signal change</option></select></label>
+        <label class="field" id="st-hold-f">N <input type="number" id="st-hold" min="1" max="500" step="1"></label>
+        <label class="field">Objectif % <input type="number" id="st-tp" min="0" step="0.5"></label>
+        <label class="field">Stop % <input type="number" id="st-sl" min="0" step="0.5"></label>
+        <label class="field">Coûts (pb par côté) <input type="number" id="st-cost" min="0" step="1"></label>
+      </div>
+      <div class="help">
+        <p><b>Principe.</b> Une stratégie lit une information connue à la clôture d'une barre et en tire une position : acheteuse, vendeuse ou hors marché. L'ordre part à l'ouverture de la barre suivante ; une seule position à la fois. Le stop est testé avant l'objectif dans une même barre, par prudence.</p>
+        <p><b>Importer.</b> Deux formats : la liste de trades du Strategy Tester de TradingView (colonnes Type, Date, Prix), rejouée avec ses propres prix ; ou une série de signaux (une date et une colonne numérique, par exemple l'export « Export chart data » d'un indicateur), convertie en positions par les deux seuils.</p>
+        <p><b>Attention.</b> Chaque réglage essayé est compté : plus on en essaie, plus le meilleur doit au hasard. Le test porte sur la zone notée ; le holdout n'est pas dans la page.</p>
+      </div>
+      <p class="verdict" id="st-rule"></p>
+    </div>
+    <div class="bench">
+      <div class="panel" id="card-perf">
+        <div class="ph"><h2 id="perf-title">Performance</h2><span class="sub" id="perf-sub"></span><span class="acts"><button class="btn" id="tg-perflog" aria-pressed="false" title="Échelle logarithmique : un même écart vertical vaut une même variation en %">Log</button><button class="btn" data-table>Tableau</button></span></div>
+        <div class="help"><p>Courbe bleue : capital de la stratégie, gains réinvestis. Courbe grise : acheter au début et ne plus toucher. Si la bleue finit sous la grise, la stratégie a fait moins bien que ne rien faire. Zone rouge du bas : drawdown, la perte depuis le dernier sommet du capital.</p></div>
+        <div class="legend" id="perf-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="perf-plot"></div><div class="tbl" id="perf-tbl"></div><div class="plot" id="dd-plot"></div></div>
+      </div>
+      <div class="panel" id="card-behav">
+        <div class="ph"><h2>Comportement après l'entrée</h2><span class="sub">résultat avant coûts, par barre</span><button class="btn" data-table>Tableau</button></div>
+        <div class="help"><p>Ce que fait une position, barre après barre, depuis l'entrée. Verte : moyenne des trades gagnants ; rouge : des perdants ; grise : médiane de tous. Une médiane qui monte régulièrement est bon signe ; si elle reste à zéro, le signal n'apporte rien.</p></div>
+        <div class="legend" id="behav-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="behav-plot"></div><div class="tbl" id="behav-tbl"></div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2>Statistiques</h2><span class="sub" id="stats-sub"></span></div>
+        <div class="help">
+          <p><b>Profit factor</b> : gains cumulés divisés par pertes cumulées ; au-dessus de 1, la stratégie gagne. <b>Sharpe</b> : rendement moyen rapporté à sa variabilité, annualisé ; au-dessus de 1, c'est bon. <b>Drawdown maximal</b> : pire chute du capital depuis un sommet.</p>
+          <p><b>Rang face au hasard</b> : on rejoue 300 stratégies aux entrées tirées au sort, avec le même nombre de trades, les mêmes durées et les mêmes sens. Un rang au-dessus de 95 % est difficile à obtenir par chance ; autour de 50 %, la stratégie ne fait pas mieux qu'entrer au hasard.</p>
+        </div>
+        <div class="pb"><dl class="kv" id="stats"></dl></div>
+      </div>
+    </div>
+    <details class="panel" id="trades-details">
+      <summary id="trades-summary">Liste des trades</summary>
+      <div class="scroll vscroll" style="max-height:360px;overflow:auto"><table id="trades-table"></table></div>
+    </details>
+  </section>
+
+  <!-- ===== Vue 3 : chemin typique ===== -->
+  <section class="view" id="view-chemin" hidden>
+    <div class="panel">
+      <div class="bar">
+        <h2>À quel horizon le chemin prédit-il le mieux ?</h2>
+        <label class="field">Chemin <select id="pt-model"></select></label>
+        <label class="field">Origines <select id="pt-slice"></select></label>
+      </div>
+      <div class="help">
+        <p><b>La question.</b> À chaque origine, le chemin annonce un prix pour chacune des 120 barres suivantes. On compare, barre par barre, l'annonce à ce qui s'est passé, sur toutes les origines de la zone notée.</p>
+        <p><b>La référence.</b> Sur un actif qui monte, dire « hausse » tous les jours donne déjà raison plus d'une fois sur deux. La courbe orange « dérive » est cette prévision paresseuse : c'est elle qu'il faut battre, pas 50 %.</p>
+      </div>
+      <p class="verdict" id="pt-verdict"></p>
+    </div>
+    <div class="grid2">
+      <div class="panel" id="card-pt-hit">
+        <div class="ph"><h2>Taux de bonne direction</h2><span class="sub">part des origines où le sens annoncé était le bon, selon le nombre de barres</span><button class="btn" data-table>Tableau</button></div>
+        <div class="help"><p>50 % : pile ou face. La bande bleue est l'intervalle à 95 % : si elle contient la courbe orange, le chemin ne se distingue pas de la référence à cet horizon.</p></div>
+        <div class="legend" id="pt-hit-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="pt-hit"></div><div class="tbl" id="pt-hit-tbl"></div></div>
+      </div>
+      <div class="panel" id="card-pt-edge">
+        <div class="ph"><h2>Avantage sur la dérive</h2><span class="sub">taux du chemin moins taux de la référence, en points</span><button class="btn" data-table>Tableau</button></div>
+        <div class="help"><p>Au-dessus de zéro, le chemin fait mieux que la référence. Un point plein marque un écart significatif aux trois longueurs de bloc du bootstrap. Une bande qui chevauche zéro : pas de preuve, dans un sens ou dans l'autre.</p></div>
+        <div class="legend" id="pt-edge-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="pt-edge"></div><div class="tbl" id="pt-edge-tbl"></div></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel" id="card-pt-ic">
+        <div class="ph"><h2>Corrélation annoncé et réalisé</h2><span class="sub">coefficient de corrélation entre le rendement annoncé et le rendement réalisé</span><button class="btn" data-table>Tableau</button></div>
+        <div class="help"><p>Zéro : l'amplitude annoncée ne dit rien de l'amplitude réalisée. Entre 0,05 et 0,10 : information faible mais réelle. Au-dessus de 0,20 : information nette. Négatif : le chemin annonce plutôt l'inverse de ce qui arrive.</p></div>
+        <div class="legend" id="pt-ic-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="pt-ic"></div><div class="tbl" id="pt-ic-tbl"></div></div>
+      </div>
+      <div class="panel" id="card-pt-mae">
+        <div class="ph"><h2>Précision face au prix inchangé</h2><span class="sub">réduction de l'erreur absolue par rapport à l'hypothèse « le prix ne bouge pas », en %</span><button class="btn" data-table>Tableau</button></div>
+        <div class="help"><p>Positif : le chemin tombe plus près du prix réalisé que si l'on avait supposé le prix inchangé. Négatif : il tombe plus loin. Un chemin très découpé (bougies amples) est pénalisé ici même s'il a le bon sens.</p></div>
+        <div class="legend" id="pt-mae-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="pt-mae"></div><div class="tbl" id="pt-mae-tbl"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="bar">
+        <h2>Par régime de marché</h2>
+        <div class="seg" id="pt-metric" role="group" aria-label="Mesure"></div>
+        <div class="spacer"></div>
+        <p class="note" id="pt-reg-note"></p>
+      </div>
+      <div class="help"><p>Les origines sont classées selon l'état du marché le jour de la prévision : volatilité basse, normale ou haute (seuils du script), régime directionnel d'EVMC, phase du scénario, état de la chaîne de Markov. Chaque case donne la mesure choisie pour ce groupe et ce nombre de barres. Les groupes peu fournis sont fragiles : regarde l'effectif.</p></div>
+      <div class="scale"><span id="pt-heat-min"></span><i></i><span id="pt-heat-max"></span><span id="pt-heat-what"></span></div>
+      <div class="pb scroll"><div class="heat" id="pt-heat"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="ph"><h2>Meilleur horizon, choisi sur le passé puis noté sur la suite</h2></div>
+        <div class="help"><p>Choisir le meilleur horizon et le noter sur les mêmes données flatte toujours le résultat. Ici, pour chaque pli, l'horizon est choisi sur les plis précédents seulement, puis noté sur le pli lui-même. C'est la mesure honnête de ce que vaut « le meilleur horizon ».</p></div>
+        <div class="bar" style="border-bottom:0;padding-bottom:0"><div class="seg" id="pt-crit" role="group" aria-label="Critère de choix"></div></div>
+        <div class="pb scroll"><table id="pt-select"></table></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2 id="pt-fold-title">Stabilité par pli</h2><span class="sub">même mesure, pli par pli</span></div>
+        <div class="help"><p>Un résultat solide se retrouve dans la plupart des plis. Si le signe change d'un pli à l'autre, la moyenne globale tient à quelques périodes.</p></div>
+        <div class="pb scroll"><div class="heat" id="pt-fold"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Vue 4 : qualité des prévisions ===== -->
+  <section class="view" id="view-previsions" hidden>
+    <div class="panel">
+      <div class="bar">
+        <h2>Skill</h2>
+        <div class="seg" id="q-metric" role="group" aria-label="Métrique"></div>
+        <label class="field">contre <select id="q-base"></select></label>
+        <div class="spacer"></div>
+        <p class="note" id="q-lead"></p>
+      </div>
+      <div class="help">
+        <p><b>Skill</b> : gain relatif d'un modèle sur une référence. +5 % : erreur réduite de 5 %. Négatif : le modèle fait moins bien que la référence.</p>
+        <p><b>CRPS</b> note toute la distribution annoncée : il récompense un éventail à la fois bien centré et de la bonne largeur. <b>Brier</b> note la seule probabilité de hausse. Références : b2_clim, la distribution historique des rendements ; b1_coin, 50 % de chances de hausse.</p>
+      </div>
+      <div class="scale"><span id="heat-min"></span><i></i><span id="heat-max"></span><span>· un point marque une différence significative aux trois longueurs de bloc</span></div>
+      <div class="pb scroll"><div class="heat" id="heat-skill"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel" id="card-skill">
+        <div class="ph"><h2 id="skill-title">Skill selon l'horizon</h2><span class="sub">en %, intervalle à 95 % du modèle choisi</span><button class="btn" data-table>Tableau</button></div>
+        <div class="legend" id="skill-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="skill-plot"></div><div class="tbl" id="skill-tbl"></div></div>
+      </div>
+      <div class="panel" id="card-z">
+        <div class="ph"><h2>Écart-type de l'erreur normalisée</h2><span class="sub">attendu : 1 ; au-dessus, sigma prédit trop petit</span><button class="btn" data-table>Tableau</button></div>
+        <div class="help"><p>L'erreur de prévision divisée par l'écart-type annoncé. À 1, le modèle annonce la bonne incertitude. À 2, les surprises sont deux fois plus grandes qu'annoncé : le modèle est trop sûr de lui.</p></div>
+        <div class="legend" id="z-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="z-plot"></div><div class="tbl" id="z-tbl"></div></div>
+      </div>
+    </div>
+    <div class="panel" id="card-cov">
+      <div class="ph"><h2>Couverture des intervalles</h2><span class="sub">part des réalisés dans l'intervalle, en %, selon l'horizon ; la ligne grise est le niveau nominal</span><button class="btn" data-table>Tableau</button></div>
+      <div class="help"><p>Un intervalle « à 90 % » doit contenir le prix réalisé 9 fois sur 10. Courbe sous la ligne grise : intervalle trop étroit, le modèle sous-estime le risque. Au-dessus : trop large.</p></div>
+      <div class="legend" id="cov-legend" style="padding-top:6px"></div>
+      <div class="pb"><div class="grid4" id="cov-grid"></div><div class="tbl" id="cov-tbl"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel" id="card-pit">
+        <div class="ph"><h2 id="pit-title">Histogramme de PIT</h2><span class="sub">plat à 10 % si la loi prédite est la bonne</span><button class="btn" data-table>Tableau</button></div>
+        <div class="help"><p>Où tombe le réalisé dans la distribution annoncée. Barres égales : distribution juste. Barres hautes aux deux bouts : éventail trop étroit. Barre haute à droite seulement : le modèle sous-estime les hausses.</p></div>
+        <div class="pb"><div class="plot" id="pit-plot"></div><div class="tbl" id="pit-tbl"></div></div>
+      </div>
+      <div class="panel" id="card-rel">
+        <div class="ph"><h2 id="rel-title">Fiabilité de P(hausse)</h2><span class="sub">fréquence observée contre probabilité annoncée, par classe</span><button class="btn" data-table>Tableau</button></div>
+        <div class="help"><p>Quand le modèle annonce 70 % de chances de hausse, le prix monte-t-il 7 fois sur 10 ? Points sur la diagonale : oui. Points sous la diagonale à droite : le modèle est trop optimiste quand il est confiant.</p></div>
+        <div class="legend" id="rel-legend" style="padding-top:6px"></div>
+        <div class="pb"><div class="plot" id="rel-plot"></div><div class="tbl" id="rel-tbl"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2 id="stab-title">Stabilité par pli</h2><span class="sub">même skill, calculé pli par pli</span></div>
+      <div class="pb scroll"><div class="heat" id="heat-fold"></div></div>
+    </div>
+    <div class="panel">
+      <div class="bar">
+        <h2>Excursions</h2>
+        <div class="seg" id="x-side" role="group" aria-label="Côté"></div>
+        <div class="seg" id="x-scale" role="group" aria-label="Échelle"></div>
+        <div class="spacer"></div>
+        <p class="note">Quantiles 50, 75 et 90 sur toutes les origines notées, indépendants de tout modèle.</p>
+      </div>
+      <div class="help"><p>Pour une position prise à l'origine et tenue jusqu'à l'horizon : le meilleur gain latent atteint en route (MFE) et la pire perte latente (MAE). Utile pour placer un stop ou un objectif : un stop plus serré que la MAE médiane est touché plus d'une fois sur deux.</p></div>
+      <div class="legend" id="x-legend" style="padding-top:8px"></div>
+      <div class="pb"><div class="grid3">
+        <div class="mini" id="card-x1"><h3>Excursion favorable maximale (MFE)</h3><div class="plot" id="x-mfe"></div></div>
+        <div class="mini" id="card-x2"><h3>Excursion adverse maximale (MAE)</h3><div class="plot" id="x-mae"></div></div>
+        <div class="mini" id="card-x3"><h3 id="x-pre-title">MAE avant le MFE</h3><div class="plot" id="x-pre"></div></div>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- ===== Vue 5 : données ===== -->
+  <section class="view" id="view-donnees" hidden>
+    <div class="grid2">
+      <div class="panel">
+        <div class="ph"><h2>Run</h2></div>
+        <div class="help"><p>Un run est identifié par le hash de ce qui détermine ses résultats : code, configuration, données, découpage. Deux runs de même identifiant donnent les mêmes chiffres.</p></div>
+        <div class="pb"><dl class="kv" id="run-info"></dl></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2>Découpage</h2><span class="sub">en barres</span></div>
+        <div class="help"><p><b>Warm-up</b> et <b>amorçage</b> : les indicateurs et les modèles prennent leurs marques, rien n'est noté. <b>Zone notée</b> : chaque barre est une origine de prévision, comparée à ce qui a suivi. <b>Holdout</b> : les dernières barres, mises sous clé pour une vérification finale unique ; elles ne sont ni affichées ni utilisées.</p></div>
+        <div class="pb"><div class="plot" id="split-plot"></div><dl class="kv" id="split-info" style="margin-top:8px"></dl></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="bar">
+        <h2>Métriques de la zone notée</h2>
+        <label class="field">Filtre <input type="text" id="d-filter" placeholder="modèle, métrique, baseline…" style="width:230px"></label>
+        <label class="field">Horizon <select id="d-h"></select></label>
+        <div class="spacer"></div>
+        <span class="note" id="d-count"></span>
+      </div>
+      <div class="scroll vscroll" style="max-height:560px;overflow:auto"><table id="d-table"></table></div>
+    </div>
+  </section>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script type="application/json" id="evmc-data">{{EVMC_DATA}}</script>
+
+<script id="evmc-core">
+// Calculs purs, sans accès à la page : décodage des données, stratégies, exécution, import.
+(function (root) {
+  'use strict';
+  function dec(s, T) {
+    const b = atob(s), u = new Uint8Array(b.length);
+    for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+    return new T(u.buffer);
+  }
+  function load(D) {
+    const B = { n: D.bars.n, tf: D.bars.tf_secs, ts: dec(D.bars.ts, Float64Array), o: dec(D.bars.open, Float64Array),
+      h: dec(D.bars.high, Float64Array), l: dec(D.bars.low, Float64Array), c: dec(D.bars.close, Float64Array) };
+    const G = D.grid, NH = G.length, OR = D.fc.origins, RS = D.fc.ret_scale;
+    // Quantiles en points de base (entiers 16 bits), probabilités sur 16 bits.
+    const FC = {};
+    for (const id in D.fc.models) FC[id] = { q: dec(D.fc.models[id].q, Int16Array), p: dec(D.fc.models[id].p, Uint16Array) };
+    const barToOr = new Int32Array(B.n).fill(-1);
+    OR.forEach((b, o) => { if (b < B.n) barToOr[b] = o; });
+    const MX = D.metrics, mKey = new Map();
+    for (let i = 0; i < MX.v.length; i++) mKey.set(MX.m[i] + '|' + MX.b[i] + '|' + MX.h[i] + '|' + MX.k[i] + '|' + MX.p[i], i);
+    const FX = D.folds, fKey = new Map();
+    for (let i = 0; i < FX.v.length; i++) fKey.set(FX.m[i] + '|' + FX.b[i] + '|' + FX.h[i] + '|' + FX.k[i] + '|' + FX.f[i], FX.v[i]);
+    const EX = D.exc, eKey = new Map();
+    for (let i = 0; i < EX.v.length; i++) eKey.set(EX.h[i] + '|' + EX.names[EX.k[i]], { v: EX.v[i], lo: EX.lo[i], hi: EX.hi[i] });
+    const RL = D.rel, rKey = new Map();
+    for (let i = 0; i < RL.p.length; i++) {
+      const k = RL.m[i] + '|' + RL.h[i];
+      if (!rKey.has(k)) rKey.set(k, []);
+      rKey.get(k).push({ bin: RL.bin[i], p: RL.p[i], y: RL.y[i], n: RL.n[i], lo: RL.lo[i], hi: RL.hi[i] });
+    }
+    const span = (B.ts[B.n - 1] - B.ts[0]) / (365.25 * 86400e3);
+    let pLo = Infinity, pHi = 0;
+    for (let i = 0; i < B.n; i++) { if (B.l[i] < pLo) pLo = B.l[i]; if (B.h[i] > pHi) pHi = B.h[i]; }
+    // Port du script Pine : chemins par origine et par pas (1..h), état par origine.
+    let L = null;
+    if (D.legacy) {
+      const X = D.legacy, h = X.h;
+      const typ = dec(X.typ, Int16Array), bb = dec(X.bb, Int16Array), sg = dec(X.sig, Uint16Array), wu = dec(X.wu, Uint8Array), wd = dec(X.wd, Uint8Array);
+      L = {
+        h, st: X.state, pm: X.pm, select: X.select, model: X.model,
+        // log-rendement annoncé au pas k (0 à l'origine)
+        path: (which, o, k) => k <= 0 ? 0 : (which === 'bb' ? bb : typ)[o * h + k - 1] * X.ret_scale,
+        sigma: (o, k) => sg[o * h + k - 1] * X.ret_scale,
+        wickUp: (o, k) => wu[o * h + k - 1] * X.wick_scale,
+        wickDn: (o, k) => wd[o * h + k - 1] * X.wick_scale,
+      };
+    }
+    const ctx = {
+      D, B, G, NH, HMAX: G[NH - 1], OR, NO: OR.length, FC, barToOr, L,
+      priceSpan: pLo > 0 ? pHi / pLo : 1,
+      barsPerYear: span > 0 ? (B.n - 1) / span : 365,
+      mIdx: id => D.models.findIndex(m => m.id === id),
+      q: (id, o, g, j) => FC[id].q[(o * NH + g) * 5 + j] * RS,
+      p: (id, o, g) => FC[id].p[o * NH + g] / 65535,
+      met(m, name, g, base, pk) {
+        const k = MX.names.indexOf(name);
+        if (k < 0) return null;
+        const i = mKey.get(m + '|' + (base == null ? -1 : base) + '|' + g + '|' + k + '|' + (pk == null ? -1 : pk));
+        if (i === undefined) return null;
+        return { v: MX.v[i], lo: MX.lo[i], hi: MX.hi[i], sig: MX.sig[i], n: MX.n[i], bl: MX.bl[i], hac: MX.hac[i] };
+      },
+      // Skill et significativité : la décision porte sur la différence de pertes appariée.
+      skill(m, kind, g, base) {
+        const s = ctx.met(m, kind + '_skill', g, base), d = ctx.met(m, kind + '_diff', g, base);
+        if (!s) return null;
+        return { v: s.v, lo: s.lo, hi: s.hi, sig: d ? d.sig : null, n: s.n };
+      },
+      fold(m, name, g, base, f) {
+        const k = MX.names.indexOf(name);
+        const v = fKey.get(m + '|' + (base == null ? -1 : base) + '|' + g + '|' + k + '|' + f);
+        return v === undefined ? null : v;
+      },
+      exc: (g, name) => eKey.get(g + '|' + name) || null,
+      rel: (m, g) => rKey.get(m + '|' + g) || [],
+      pkIdx: name => MX.pk.indexOf(name),
+    };
+    return ctx;
+  }
+
+  // ------------------------------------------------------------------ indicateurs classiques
+  function sma(x, n) {
+    const out = new Float64Array(x.length).fill(NaN);
+    let s = 0;
+    for (let i = 0; i < x.length; i++) { s += x[i]; if (i >= n) s -= x[i - n]; if (i >= n - 1) out[i] = s / n; }
+    return out;
+  }
+  // RSI de Wilder.
+  function rsi(c, n) {
+    const out = new Float64Array(c.length).fill(NaN);
+    let u = 0, d = 0;
+    for (let i = 1; i < c.length; i++) {
+      const ch = c[i] - c[i - 1], up = Math.max(ch, 0), dn = Math.max(-ch, 0);
+      if (i <= n) { u += up / n; d += dn / n; } else { u += (up - u) / n; d += (dn - d) / n; }
+      if (i >= n) out[i] = d === 0 ? 100 : 100 - 100 / (1 + u / d);
+    }
+    return out;
+  }
+
+  // ------------------------------------------------------------------ stratégies
+  // Une stratégie rend, pour chaque barre de la zone notée, la position voulue à sa clôture :
+  // +1 acheteuse, -1 vendeuse, 0 hors marché. `info` : la valeur lue, affichée dans la liste des trades.
+  const fr = v => String(v).replace('.', ',');
+  const bars = n => n + (n > 1 ? ' barres' : ' barre');
+  const STRATS = [
+    { id: 'evmc_path', name: 'EVMC · chemin typique', needs: 'legacy', exit: 'bars',
+      params: [{ k: 'which', label: 'Chemin', type: 'select', opts: [['typ', 'chemin typique'], ['bb', 'squelette directionnel']], def: 'typ' },
+        { k: 'h', label: 'Pas lu (barres)', type: 'int', min: 1, max: 120, def: 20 },
+        { k: 'thr', label: 'Seuil (σ de l\'horizon)', type: 'num', min: 0, max: 5, step: 0.05, def: 0.25 }],
+      hold: p => p.h,
+      rule: p => 'Achat si le ' + (p.which === 'bb' ? 'squelette' : 'chemin typique') + ' annonce, à ' + bars(p.h) + ', plus de ' + fr(p.thr) + ' σ de hausse ; vente s\'il annonce plus de ' + fr(p.thr) + ' σ de baisse',
+      run(ctx, p) {
+        const { B, L, barToOr } = ctx, sig = new Int8Array(B.n), info = new Float64Array(B.n).fill(NaN);
+        const k = Math.max(1, Math.min(L.h, p.h | 0));
+        for (let i = 0; i < B.n; i++) {
+          const o = barToOr[i]; if (o < 0) continue;
+          const z = L.path(p.which, o, k) / Math.max(L.sigma(o, k), 1e-9);
+          info[i] = z; sig[i] = z > p.thr ? 1 : z < -p.thr ? -1 : 0;
+        }
+        return { sig, info, infoName: 'Annonce (σ)' };
+      } },
+    { id: 'evmc_regime', name: 'EVMC · régime directionnel', needs: 'legacy', exit: 'signal', params: [],
+      hold: () => 20,
+      rule: () => 'Achat quand le régime d\'EVMC est haussier, vente quand il est baissier',
+      run(ctx) {
+        const { B, L, barToOr } = ctx, sig = new Int8Array(B.n), info = new Float64Array(B.n).fill(NaN);
+        for (let i = 0; i < B.n; i++) { const o = barToOr[i]; if (o < 0) continue; sig[i] = L.st.dir[o]; info[i] = L.st.stable[o]; }
+        return { sig, info, infoName: 'Score' };
+      } },
+    { id: 'pup', name: 'Probabilité de hausse d\'un modèle', exit: 'bars',
+      params: [{ k: 'model', label: 'Modèle', type: 'model' }, { k: 'g', label: 'Horizon', type: 'horizon' },
+        { k: 'theta', label: 'Seuil P(hausse)', type: 'num', min: 0.5, max: 0.99, step: 0.01, def: 0.55 }],
+      hold: (p, ctx) => ctx.G[p.g],
+      rule: (p, ctx) => 'Achat si P(hausse) ≥ ' + fr(p.theta) + ', vente si P(hausse) ≤ ' + fr(Math.round(100 * (1 - p.theta)) / 100) + ', lue sur ' + p.model + ' à ' + bars(ctx.G[p.g]),
+      run(ctx, p, X) {
+        const { B, barToOr, NH } = ctx, sig = new Int8Array(B.n), info = new Float64Array(B.n).fill(NaN);
+        const fc = ctx.FC[p.model]; if (!fc) return { sig, info, infoName: 'P(hausse)' };
+        for (let i = 0; i < B.n; i++) {
+          const o = barToOr[i]; if (o < 0) continue;
+          const pu = fc.p[o * NH + p.g] / 65535; info[i] = pu;
+          if (X.dir !== 'short' && pu >= p.theta) sig[i] = 1; else if (X.dir !== 'long' && pu <= 1 - p.theta) sig[i] = -1;
+        }
+        return { sig, info, infoName: 'P(hausse)' };
+      } },
+    { id: 'ma', name: 'Croisement de moyennes mobiles', exit: 'signal',
+      params: [{ k: 'fast', label: 'Rapide', type: 'int', min: 2, max: 400, def: 20 }, { k: 'slow', label: 'Lente', type: 'int', min: 3, max: 800, def: 100 }],
+      hold: () => 20,
+      rule: p => 'Achat quand la moyenne ' + p.fast + ' barres passe au-dessus de la moyenne ' + p.slow + ' barres, vente quand elle passe dessous',
+      run(ctx, p) {
+        const { B } = ctx, sig = new Int8Array(B.n), info = new Float64Array(B.n).fill(NaN);
+        const f = sma(B.c, p.fast), s = sma(B.c, p.slow);
+        for (let i = 0; i < B.n; i++) { if (isNaN(f[i]) || isNaN(s[i])) continue; info[i] = f[i] / s[i] - 1; sig[i] = f[i] > s[i] ? 1 : f[i] < s[i] ? -1 : 0; }
+        return { sig, info, infoName: 'Écart des moyennes' };
+      } },
+    { id: 'donchian', name: 'Cassure de canal (Donchian)', exit: 'signal',
+      params: [{ k: 'n', label: 'Canal (barres)', type: 'int', min: 5, max: 400, def: 55 }],
+      hold: () => 20,
+      rule: p => 'Achat quand la clôture dépasse le plus haut des ' + p.n + ' barres précédentes, vente quand elle casse le plus bas ; la position est tenue jusqu\'à la cassure inverse',
+      run(ctx, p) {
+        const { B } = ctx, sig = new Int8Array(B.n), info = new Float64Array(B.n).fill(NaN);
+        let st = 0;
+        for (let i = p.n; i < B.n; i++) {
+          let hi = -Infinity, lo = Infinity;
+          for (let j = i - p.n; j < i; j++) { if (B.h[j] > hi) hi = B.h[j]; if (B.l[j] < lo) lo = B.l[j]; }
+          if (B.c[i] > hi) st = 1; else if (B.c[i] < lo) st = -1;
+          sig[i] = st; info[i] = (B.c[i] - lo) / Math.max(hi - lo, 1e-12);
+        }
+        return { sig, info, infoName: 'Position dans le canal' };
+      } },
+    { id: 'rsi', name: 'RSI, retour à la moyenne', exit: 'signal',
+      params: [{ k: 'n', label: 'Période', type: 'int', min: 2, max: 100, def: 14 }, { k: 'lo', label: 'Achat sous', type: 'num', min: 1, max: 49, step: 1, def: 30 }, { k: 'hi', label: 'Vente au-dessus', type: 'num', min: 51, max: 99, step: 1, def: 70 }],
+      hold: () => 20,
+      rule: p => 'Achat quand le RSI ' + p.n + ' passe sous ' + p.lo + ', vente quand il passe au-dessus de ' + p.hi + ' ; sortie au retour à 50',
+      run(ctx, p) {
+        const { B } = ctx, sig = new Int8Array(B.n), info = rsi(B.c, p.n);
+        let st = 0;
+        for (let i = 0; i < B.n; i++) {
+          const r = info[i]; if (isNaN(r)) continue;
+          if (r < p.lo) st = 1; else if (r > p.hi) st = -1; else if ((st > 0 && r >= 50) || (st < 0 && r <= 50)) st = 0;
+          sig[i] = st;
+        }
+        return { sig, info, infoName: 'RSI' };
+      } },
+    { id: 'bh', name: 'Achat conservé', exit: 'signal', params: [], hold: () => 20,
+      rule: () => 'Acheteur en permanence : la référence « ne rien faire »',
+      run(ctx) { return { sig: new Int8Array(ctx.B.n).fill(1), info: null, infoName: '' }; } },
+    { id: 'import', name: 'Stratégie importée (CSV)', exit: 'signal', params: [], hold: () => 20,
+      rule: () => 'Positions lues dans le fichier importé' },
+  ];
+
+  // ------------------------------------------------------------------ exécution
+  // Signal lu à la clôture de la barre i - 1, entrée à l'ouverture de la barre i, une seule
+  // position à la fois. Dans la barre : stop testé avant l'objectif (convention pessimiste).
+  // Sortie « bars » : clôture après `hold` barres. Sortie « signal » : ouverture de la barre
+  // qui suit le changement de signal. Coûts à l'entrée et à la sortie.
+  function tradesFromSignals(ctx, sig, X) {
+    const { B } = ctx, n = B.n, E = ctx.D.split.eval_start, cost = (X.cost || 0) / 1e4;
+    const allow = d => d > 0 ? X.dir !== 'short' : d < 0 ? X.dir !== 'long' : false;
+    const trades = [];
+    let pos = null;
+    const shut = (i, px, why) => {
+      const gross = Math.max(-1, pos.dir * (px / pos.entry - 1));
+      trades.push({ t: pos.t, e: pos.e, x: i, dir: pos.dir, entry: pos.entry, exit: px, why, gross,
+        net: (1 - cost) * (1 - cost) * (1 + gross) - 1, p: pos.p });
+      pos = null;
+    };
+    for (let i = E + 1; i < n; i++) {
+      if (pos && pos.out) shut(i, B.o[i], 'signal');
+      if (!pos) {
+        const s = sig[i - 1];
+        if (s && allow(s)) pos = { t: i - 1, e: i, dir: s, entry: B.o[i], p: X.info ? X.info[i - 1] : null, out: false };
+      }
+      if (!pos) continue;
+      const d = pos.dir, en = pos.entry, o_ = B.o[i], hi = B.h[i], lo = B.l[i], c = B.c[i];
+      const sl = X.sl > 0 ? en * (1 - d * X.sl / 100) : null;
+      const tp = X.tp > 0 ? en * (1 + d * X.tp / 100) : null;
+      if (d > 0) {
+        if (sl !== null && lo <= sl) shut(i, Math.min(o_, sl), 'stop');
+        else if (tp !== null && hi >= tp) shut(i, Math.max(o_, tp), 'objectif');
+      } else {
+        if (sl !== null && hi >= sl) shut(i, Math.max(o_, sl), 'stop');
+        else if (tp !== null && lo <= tp) shut(i, Math.min(o_, tp), 'objectif');
+      }
+      if (!pos) continue;
+      if (X.exit === 'bars' && i - pos.e + 1 >= X.hold) shut(i, c, 'durée');
+      else if (i === n - 1) shut(i, c, 'fin des données');
+      else if (X.exit === 'signal' && sig[i] !== d) pos.out = true;
+    }
+    return trades;
+  }
+
+  // Courbe de capital, drawdown et statistiques d'une liste de trades qui ne se chevauchent pas.
+  function evaluate(ctx, trades, costBp, hb) {
+    const { B } = ctx, n = B.n, E = ctx.D.split.eval_start, N = Math.max(0, n - E), cost = (costBp || 0) / 1e4;
+    const eq = new Float64Array(N);
+    let equity = 1, cursor = E, inPos = 0;
+    for (const t of trades) {
+      for (let j = cursor; j < t.e; j++) eq[j - E] = equity;
+      const eq0 = equity * (1 - cost);
+      for (let j = t.e; j < t.x; j++) eq[j - E] = eq0 * (1 + Math.max(-1, t.dir * (B.c[j] / t.entry - 1)));
+      equity = eq0 * (1 + t.gross) * (1 - cost);
+      eq[t.x - E] = equity;
+      cursor = t.x + 1;
+      inPos += t.x - t.e + 1;
+    }
+    for (let j = cursor; j < n; j++) eq[j - E] = equity;
+    let peak = 1, maxDD = 0, s = 0, s2 = 0, prev = 1;
+    const dd = new Float64Array(N);
+    for (let i = 0; i < N; i++) {
+      peak = Math.max(peak, eq[i]);
+      dd[i] = eq[i] / peak - 1;
+      maxDD = Math.min(maxDD, dd[i]);
+      const r = eq[i] / prev - 1;
+      s += r; s2 += r * r; prev = eq[i];
+    }
+    const mean = N ? s / N : 0, vr = N > 1 ? (s2 - N * mean * mean) / (N - 1) : 0;
+    const wins = trades.filter(t => t.net > 0), losses = trades.filter(t => t.net <= 0);
+    const sum = a => a.reduce((x, t) => x + t.net, 0);
+    const gw = sum(wins), gl = -sum(losses);
+    const stats = {
+      n: trades.length,
+      net: N ? eq[N - 1] - 1 : 0,
+      asset: N ? B.c[n - 1] / B.c[E] - 1 : 0,
+      winRate: trades.length ? wins.length / trades.length : null,
+      nWins: wins.length, nLosses: losses.length,
+      maxDD,
+      avgWin: wins.length ? gw / wins.length : null,
+      avgLoss: losses.length ? -gl / losses.length : null,
+      avg: trades.length ? sum(trades) / trades.length : null,
+      pf: gl > 0 ? gw / gl : null,
+      exposure: N ? Math.min(1, inPos / N) : 0,
+      sharpe: vr > 0 ? mean / Math.sqrt(vr) * Math.sqrt(ctx.barsPerYear) : null,
+      bars: N,
+    };
+    // chemins après l'entrée : résultat brut par barre, figé après la sortie
+    const paths = trades.map(t => {
+      const a = new Float64Array(hb + 1);
+      for (let k = 1; k <= hb; k++) {
+        const j = t.e + k - 1;
+        a[k] = j < t.x ? Math.max(-1, t.dir * (B.c[j] / t.entry - 1)) : t.gross;
+      }
+      return a;
+    });
+    return { trades, eq, dd, stats, paths, H: hb, E };
+  }
+
+  // Banc d'essai historique sur P(hausse) : même convention que `runStrategy` avec sortie après H barres.
+  function backtest(ctx, P) {
+    const X = { dir: P.dir, exit: 'bars', hold: ctx.G[P.g], tp: P.tp, sl: P.sl, cost: P.cost };
+    const r = STRATS.find(s => s.id === 'pup').run(ctx, { model: P.model, g: P.g, theta: P.theta }, X);
+    X.info = r.info;
+    return evaluate(ctx, tradesFromSignals(ctx, r.sig, X), P.cost, X.hold);
+  }
+
+  function runStrategy(ctx, id, prm, X, imported) {
+    const S = STRATS.find(s => s.id === id);
+    let trades, infoName = '';
+    if (id === 'import') {
+      if (!imported) return Object.assign(evaluate(ctx, [], X.cost, 20), { infoName });
+      if (imported.kind === 'trades') trades = withCosts(imported.trades, X.cost);
+      else { const sg = seriesSignals(ctx, imported, prm); trades = tradesFromSignals(ctx, sg.sig, Object.assign({}, X, { info: sg.info })); infoName = imported.cols[prm.col] || ''; }
+    } else {
+      const r = S.run(ctx, prm, X);
+      infoName = r.infoName;
+      trades = tradesFromSignals(ctx, r.sig, Object.assign({}, X, { info: r.info }));
+    }
+    let hb = X.exit === 'bars' && id !== 'import' ? X.hold : 20;
+    if (!(X.exit === 'bars' && id !== 'import') && trades.length) {
+      const d = trades.map(t => t.x - t.e + 1).sort((a, b) => a - b);
+      hb = Math.max(5, Math.min(120, d[Math.floor(0.9 * (d.length - 1))]));
+    }
+    return Object.assign(evaluate(ctx, trades, X.cost, hb), { infoName });
+  }
+
+  // ------------------------------------------------------------------ référence aléatoire
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  // M stratégies aux entrées tirées au sort : mêmes durées, mêmes sens, même nombre de trades,
+  // entrée à l'ouverture, sortie à la clôture de la dernière barre tenue. Rend le rang du résultat réel.
+  function randomRef(ctx, trades, costBp, net, M, seed) {
+    const { B } = ctx, n = B.n, E = ctx.D.split.eval_start, cost = (costBp || 0) / 1e4, k = trades.length;
+    if (!k) return null;
+    const lens = trades.map(t => t.x - t.e + 1), dirs = trades.map(t => t.dir);
+    const free = (n - E - 1) - lens.reduce((a, b) => a + b, 0);
+    if (free < 1) return null;
+    const rnd = mulberry32(seed), nets = new Float64Array(M), idx = new Int32Array(k), cuts = new Float64Array(k);
+    for (let m = 0; m < M; m++) {
+      for (let i = 0; i < k; i++) idx[i] = i;
+      for (let i = k - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)), t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
+      for (let i = 0; i < k; i++) cuts[i] = Math.floor(rnd() * (free + 1));
+      cuts.sort();
+      let eqv = 1, pos = E + 1, prev = 0;
+      for (let i = 0; i < k; i++) {
+        pos += cuts[i] - prev; prev = cuts[i];
+        const x = pos + lens[idx[i]] - 1;
+        eqv *= (1 - cost) * (1 - cost) * (1 + Math.max(-1, dirs[idx[i]] * (B.c[x] / B.o[pos] - 1)));
+        pos = x + 1;
+      }
+      nets[m] = eqv - 1;
+    }
+    nets.sort();
+    let below = 0; for (let m = 0; m < M; m++) if (nets[m] < net) below++;
+    return { rank: below / M, median: nets[Math.floor(M / 2)], q05: nets[Math.floor(0.05 * (M - 1))], q95: nets[Math.floor(0.95 * (M - 1))], m: M };
+  }
+
+  // ------------------------------------------------------------------ import CSV
+  function parseCsv(text) {
+    text = text.replace(/^﻿/, '');
+    const first = text.split(/\r?\n/, 1)[0] || '';
+    const count = ch => first.split(ch).length - 1;
+    const delim = count('\t') > count(',') && count('\t') >= count(';') ? '\t' : count(';') > count(',') ? ';' : ',';
+    const rows = [];
+    let row = [], cur = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === delim) { row.push(cur); cur = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(cur); cur = '';
+        if (row.length > 1 || row[0].trim() !== '') rows.push(row);
+        row = [];
+      } else cur += ch;
+    }
+    row.push(cur);
+    if (row.length > 1 || row[0].trim() !== '') rows.push(row);
+    const head = (rows.shift() || []).map(s => s.trim());
+    return { head, rows };
+  }
+  // Date en millisecondes UTC : nombre (secondes ou millisecondes) ou texte ISO, avec ou sans heure.
+  function parseTime(s) {
+    s = String(s == null ? '' : s).trim();
+    if (!s) return NaN;
+    if (/^-?\d+(\.\d+)?$/.test(s)) { const v = +s; return v > 1e11 ? v : v * 1000; }
+    let t = s.replace(' ', 'T');
+    if (!/([zZ]|[+-]\d\d:?\d\d)$/.test(t)) t += t.length <= 10 ? 'T00:00:00Z' : 'Z';
+    return Date.parse(t);
+  }
+  // Barre qui contient l'instant donné, ou -1.
+  function barAt(ctx, ms) {
+    const { B } = ctx;
+    let lo = 0, hi = B.n;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (B.ts[m] > ms) hi = m; else lo = m + 1; }
+    return lo < B.n && ms >= B.ts[lo] - B.tf * 1000 ? lo : -1;
+  }
+  const numOf = s => { const v = parseFloat(String(s).replace(/\s/g, '').replace(',', '.')); return isFinite(v) ? v : NaN; };
+  function readImport(ctx, text) {
+    const { head, rows } = parseCsv(text);
+    if (!head.length || !rows.length) return { error: 'Fichier vide ou sans ligne d\'en-tête.' };
+    const low = head.map(h => h.toLowerCase());
+    const find = re => low.findIndex(h => re.test(h));
+    let tc = find(/^(time|date|datetime|timestamp|date\/time|date and time|date\/heure|date et heure|open_time)$/);
+    if (tc < 0) tc = find(/date|time|heure/);
+    if (tc < 0) return { error: 'Aucune colonne de date reconnue (time, date, datetime…).' };
+    const E = ctx.D.split.eval_start, n = ctx.B.n;
+    const typeC = find(/^type$/), priceC = find(/^(price|prix)/);
+    const isTrades = typeC >= 0 && priceC >= 0 && rows.some(r => /entr|exit|sortie/i.test(r[typeC] || ''));
+    if (isTrades) {
+      const numC = find(/trade|n°|#/);
+      const groups = new Map();
+      let seq = 0, open = null;
+      for (const r of rows) {
+        const ty = r[typeC] || '', isEntry = /entr/i.test(ty), isExit = /exit|sortie/i.test(ty);
+        if (!isEntry && !isExit) continue;
+        const rec = { ms: parseTime(r[tc]), px: numOf(r[priceC]), dir: /short|court/i.test(ty) ? -1 : 1 };
+        let key;
+        if (numC >= 0 && String(r[numC]).trim() !== '') key = 'n' + String(r[numC]).trim();
+        else { if (isEntry) { seq++; open = 's' + seq; } key = open || 's' + (++seq); }
+        if (!groups.has(key)) groups.set(key, {});
+        groups.get(key)[isEntry ? 'en' : 'ex'] = rec;
+      }
+      const trades = [];
+      let out = 0, bad = 0;
+      for (const g of groups.values()) {
+        if (!g.en || !g.ex || !(g.en.px > 0) || !(g.ex.px > 0) || isNaN(g.en.ms) || isNaN(g.ex.ms)) { bad++; continue; }
+        const e = barAt(ctx, g.en.ms), x = barAt(ctx, g.ex.ms);
+        if (e < E + 1 || x < e || x >= n) { out++; continue; }
+        trades.push({ t: e - 1, e, x, dir: g.en.dir, entry: g.en.px, exit: g.ex.px, why: 'importé', p: null });
+      }
+      trades.sort((a, b) => a.e - b.e || a.x - b.x);
+      const kept = [];
+      let overlap = 0;
+      for (const t of trades) { if (kept.length && t.e < kept[kept.length - 1].x) overlap++; else kept.push(t); }
+      return { kind: 'trades', trades: kept, total: groups.size, out, bad, overlap };
+    }
+    // série de signaux : valeurs par barre pour chaque colonne numérique
+    const cols = [], series = [];
+    for (let c = 0; c < head.length; c++) {
+      if (c === tc) continue;
+      const txt = rows.slice(0, 50).some(r => /long|short|buy|sell|achat|vente|flat/i.test(r[c] || ''));
+      const numeric = rows.slice(0, 50).some(r => !isNaN(numOf(r[c])));
+      if (txt || numeric) cols.push(c);
+    }
+    if (!cols.length) return { error: 'Aucune colonne numérique à lire comme signal.' };
+    let mapped = 0, out = 0;
+    for (const c of cols) series.push(new Float64Array(n).fill(NaN));
+    for (const r of rows) {
+      const i = barAt(ctx, parseTime(r[tc]));
+      if (i < 0) { out++; continue; }
+      mapped++;
+      cols.forEach((c, k) => {
+        const s = r[c] || '';
+        let v = numOf(s);
+        if (isNaN(v)) v = /long|buy|achat/i.test(s) ? 1 : /short|sell|vente/i.test(s) ? -1 : /flat|none|neutre/i.test(s) ? 0 : NaN;
+        if (!isNaN(v)) series[k][i] = v;
+      });
+    }
+    let def = cols.findIndex(c => /^(signal|position|pos|sig)$/.test(low[c]));
+    if (def < 0) def = cols.length - 1;
+    return { kind: 'series', cols: cols.map(c => head[c]), series, total: rows.length, mapped, out, def };
+  }
+  function seriesSignals(ctx, imp, prm) {
+    const n = ctx.B.n, sig = new Int8Array(n), info = new Float64Array(n).fill(NaN), v = imp.series[prm.col] || imp.series[0];
+    let last = 0;
+    for (let i = 0; i < n; i++) {
+      if (!isNaN(v[i])) { last = v[i] > prm.a ? 1 : v[i] < prm.b ? -1 : 0; info[i] = v[i]; sig[i] = last; }
+      else if (prm.carry) sig[i] = last;
+    }
+    return { sig, info };
+  }
+  function withCosts(trades, costBp) {
+    const cost = (costBp || 0) / 1e4;
+    return trades.map(t => { const gross = Math.max(-1, t.dir * (t.exit / t.entry - 1)); return Object.assign({}, t, { gross, net: (1 - cost) * (1 - cost) * (1 + gross) - 1 }); });
+  }
+
+  root.EVMC_CORE = { load, backtest, STRATS, runStrategy, tradesFromSignals, evaluate, randomRef, readImport, parseCsv, parseTime, barAt, sma, rsi };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+
+<script>
+(function () {
+  'use strict';
+  const D = JSON.parse(document.getElementById('evmc-data').textContent);
+  const CORE = EVMC_CORE;
+  const C = CORE.load(D);
+  const { B, G, NH, HMAX, OR, NO, L } = C;
+  const MODELS = D.models;
+  const DIST = MODELS.filter(m => m.dist).map(m => m.id);
+  const $ = id => document.getElementById(id);
+  const E0 = D.split.eval_start;
+
+  // ---------- état
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('qs.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('qs.' + k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } },
+  };
+  const has = (list, v) => list.indexOf(v) >= 0;
+  // Modèle de signal par défaut : celui dont P(hausse) varie le plus à l'horizon choisi.
+  function mostVariable(g) {
+    let best = DIST[0], bs = -1;
+    for (const id of DIST) {
+      let s = 0, s2 = 0;
+      for (let o = 0; o < NO; o++) { const v = C.p(id, o, g); s += v; s2 += v * v; }
+      const sd = NO ? Math.sqrt(Math.max(0, s2 / NO - (s / NO) * (s / NO))) : 0;
+      if (sd > bs) { bs = sd; best = id; }
+    }
+    return best;
+  }
+  const gDefault = Math.max(0, G.indexOf(20) >= 0 ? G.indexOf(20) : Math.floor(NH / 2));
+  const STRATS = CORE.STRATS.filter(s => s.needs !== 'legacy' || L);
+  const stratOf = id => STRATS.find(s => s.id === id) || STRATS[0];
+  const TABS = ['graphique', 'backtest'].concat(L ? ['chemin'] : []).concat(['previsions', 'donnees']);
+  const S = {
+    tab: 'graphique',
+    focus: store.get('focus', L && has(DIST, L.model) ? L.model : DIST[DIST.length - 1]),
+    compare: store.get('compare', ''),
+    g: store.get('g', gDefault),
+    origin: Math.max(0, NO - 1 - Math.round(HMAX * 1.5)),
+    zoom: store.get('zoom', 120),
+    showTrades: store.get('showTrades', false), showFolds: false,
+    showPath: store.get('showPath', true), showFan: store.get('showFan', true),
+    logPrice: store.get('logPrice', null), logPerf: store.get('logPerf', null),
+    help: store.get('help', true),
+    metric: 'crps', base: null,
+    xside: 'long', xscale: 'sig_h',
+    bt: Object.assign({ strat: STRATS[0].id, prm: {}, dir: 'long', exit: null, hold: null, tp: 0, sl: 0, cost: 5 }, store.get('bt', {})),
+    pt: { model: 'evmc_typical', slice: 'all', metric: 'hit_edge', crit: 'edge' },
+    sort: { key: 'h', asc: true },
+  };
+  if (!has(DIST, S.focus)) S.focus = DIST[DIST.length - 1];
+  if (S.compare && !has(DIST, S.compare)) S.compare = '';
+  if (!(S.g >= 0 && S.g < NH)) S.g = gDefault;
+  if (!STRATS.some(s => s.id === S.bt.strat)) S.bt.strat = STRATS[0].id;
+  let BT = null, IMP = null;
+
+  // Paramètres d'une stratégie : valeurs gardées, complétées par les valeurs par défaut.
+  function prmOf(id) {
+    const st = stratOf(id), saved = S.bt.prm[id] || {}, out = {};
+    for (const p of st.params) {
+      let v = saved[p.k];
+      if (p.type === 'model') { if (!has(DIST, v)) v = mostVariable(gDefault); }
+      else if (p.type === 'horizon') { if (!(v >= 0 && v < NH)) v = gDefault; }
+      else if (p.type === 'select') { if (!p.opts.some(o => o[0] === v)) v = p.def; }
+      else { v = parseFloat(v); if (!isFinite(v)) v = p.def; v = Math.max(p.min, Math.min(p.max, v)); if (p.type === 'int') v = Math.round(v); }
+      out[p.k] = v;
+    }
+    if (id === 'import') Object.assign(out, { col: 0, a: 0, b: 0, carry: false }, saved);
+    return out;
+  }
+
+  // ---------- formats
+  const NF = [0, 1, 2, 3, 4, 5].map(d => new Intl.NumberFormat('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }));
+  const minus = s => s.replace('-', '−');
+  const num = (x, d) => (x == null || !isFinite(x)) ? '—' : minus(NF[d == null ? 2 : d].format(x));
+  const pct = (x, d, sign) => (x == null || !isFinite(x)) ? '—' : (sign && x > 0 ? '+' : '') + minus(NF[d == null ? 1 : d].format(100 * x)) + ' %';
+  const pts = (x, d) => (x == null || !isFinite(x)) ? '—' : (x > 0 ? '+' : '') + minus(NF[d == null ? 1 : d].format(100 * x)) + ' pt';
+  const price = x => (x == null || !isFinite(x)) ? '—' : NF[x >= 1000 ? 0 : x >= 1 ? 2 : 5].format(x);
+  // Graduations : pas de zéros de remplissage, pour qu'un « 10 » ne se lise pas « 10 000 ».
+  const priceTick = x => x >= 1000 ? NF[0].format(x) : String(+x.toPrecision(4)).replace('.', ',');
+  const intraday = B.tf < 86400;
+  const DF = new Intl.DateTimeFormat('fr-FR', Object.assign({ day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }, intraday ? { hour: '2-digit', minute: '2-digit' } : {}));
+  const DFs = new Intl.DateTimeFormat('fr-FR', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+  const DFd = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', timeZone: 'UTC' });
+  const barTime = i => B.ts[Math.max(0, Math.min(B.n - 1, i))] - B.tf * 1000 + (i >= B.n ? (i - B.n + 1) * B.tf * 1000 : 0);
+  const dateOf = i => DF.format(new Date(barTime(i)));
+  const hLabel = g => 'H = ' + G[g];
+  const nb = n => n + (n > 1 ? ' barres' : ' barre');
+
+  // ---------- éléments
+  const NS = 'http://www.w3.org/2000/svg';
+  function sv(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function el(tag, attrs, text) {
+    const e = document.createElement(tag);
+    for (const k in attrs || {}) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function options(sel, items, value) {
+    sel.textContent = '';
+    for (const [v, t] of items) { const o = el('option', { value: v }, t); sel.appendChild(o); }
+    sel.value = value;
+  }
+  function segment(host, items, value, onpick) {
+    host.textContent = '';
+    for (const [v, t] of items) {
+      const b = el('button', { class: 'btn', 'aria-pressed': String(v === value) }, t);
+      b.addEventListener('click', () => onpick(v));
+      host.appendChild(b);
+    }
+  }
+  function legend(host, items) {
+    host.textContent = '';
+    for (const it of items) {
+      const k = el('span', { class: 'key' });
+      const i = el('i', { class: it.kind || '' });
+      i.style.setProperty('--c', it.color);
+      k.appendChild(i);
+      k.appendChild(document.createTextNode(it.label));
+      host.appendChild(k);
+    }
+  }
+  function table(host, head, rows) {
+    host.textContent = '';
+    const t = el('table'), tr = el('tr');
+    head.forEach((h_, i) => tr.appendChild(el('th', { class: i ? 'n' : '' }, h_)));
+    const th = el('thead'); th.appendChild(tr); t.appendChild(th);
+    const tb = el('tbody');
+    for (const r of rows) {
+      const row = el('tr');
+      r.forEach((c, i) => row.appendChild(el('td', { class: i ? 'n' : '' }, c)));
+      tb.appendChild(row);
+    }
+    t.appendChild(tb); host.appendChild(t);
+  }
+  function kv(host, rows) {
+    host.textContent = '';
+    for (const r of rows) {
+      host.appendChild(el('dt', null, r[0]));
+      const dd = el('dd', r[3] ? { class: r[3] } : null, r[1]);
+      if (r[2]) { dd.appendChild(document.createTextNode(' ')); dd.appendChild(el('small', null, r[2])); }
+      host.appendChild(dd);
+    }
+  }
+
+  // ---------- infobulle
+  const tipEl = $('tip');
+  function tip(evt, title, rows) {
+    tipEl.textContent = '';
+    if (title) tipEl.appendChild(el('div', { class: 'tt' }, title));
+    for (const r of rows) {
+      const d = el('div', { class: 'tr' });
+      const i = el('i'); if (r.color) i.style.setProperty('--c', r.color);
+      d.appendChild(i); d.appendChild(el('b', null, r.value)); d.appendChild(el('span', null, r.label));
+      tipEl.appendChild(d);
+    }
+    tipEl.hidden = false;
+    const w = tipEl.offsetWidth, h_ = tipEl.offsetHeight;
+    let x = evt.clientX + 14, y = evt.clientY + 14;
+    if (x + w > window.innerWidth - 8) x = evt.clientX - w - 14;
+    if (y + h_ > window.innerHeight - 8) y = evt.clientY - h_ - 14;
+    tipEl.style.left = Math.max(4, x) + 'px';
+    tipEl.style.top = Math.max(4, y) + 'px';
+  }
+  const untip = () => { tipEl.hidden = true; };
+
+  // ---------- outils de tracé
+  function ticks(lo, hi, n) {
+    const span = hi - lo;
+    if (!(span > 0)) return [lo];
+    const s0 = span / Math.max(1, n), mag = Math.pow(10, Math.floor(Math.log10(s0))), r = s0 / mag;
+    const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+    const out = [];
+    for (let v = Math.ceil(lo / step - 1e-9) * step; v <= hi + step * 1e-9; v += step) out.push(Math.abs(v) < step * 1e-9 ? 0 : v);
+    return out;
+  }
+  function frame(host, height, m) {
+    host.querySelectorAll('svg, .empty').forEach(s => s.remove());
+    const W = Math.max(150, Math.floor(host.clientWidth || 600)), H = height;
+    const s = sv('svg', { viewBox: '0 0 ' + W + ' ' + H, width: W, height: H, role: 'img' });
+    host.appendChild(s);
+    return { s, W, H, x0: m.l, x1: W - m.r, y0: m.t, y1: H - m.b };
+  }
+  const lin = (d0, d1, r0, r1) => v => r0 + (d1 === d0 ? 0.5 : (v - d0) / (d1 - d0)) * (r1 - r0);
+  // Graduations d'un axe logarithmique : 1, 2, 5 par décade ; puissances de dix seules si elles
+  // sont trop nombreuses ; graduations linéaires si l'étendue est trop courte pour en placer trois.
+  function logTicks(lo, hi, n) {
+    const out = [];
+    for (let k = Math.floor(Math.log10(lo)); k <= Math.ceil(Math.log10(hi)); k++) for (const m of [1, 2, 5]) { const v = m * Math.pow(10, k); if (v >= lo && v <= hi) out.push(v); }
+    if (out.length < 3) return ticks(lo, hi, n);
+    if (out.length > n + 3) return out.filter(v => { const l = Math.log10(v); return Math.abs(l - Math.round(l)) < 1e-9; });
+    return out;
+  }
+  // Échelle verticale, linéaire ou logarithmique : y(valeur), inv(pixel), ticks(n).
+  function scale(lo, hi, r0, r1, log) {
+    if (log && lo > 0 && hi > lo) {
+      const a = Math.log(lo), b = Math.log(hi), f = lin(a, b, r0, r1);
+      return { y: v => f(Math.log(Math.max(v, lo * 1e-9))), inv: p => Math.exp(a + (p - r0) / (r1 - r0) * (b - a)), ticks: n => logTicks(lo, hi, n) };
+    }
+    return { y: lin(lo, hi, r0, r1), inv: p => lo + (p - r0) / (r1 - r0) * (hi - lo), ticks: n => ticks(lo, hi, n) };
+  }
+  // Par défaut, l'échelle des prix est logarithmique quand la série couvre plus d'un ordre de grandeur.
+  const logPriceOn = () => S.logPrice == null ? C.priceSpan > 20 : S.logPrice;
+  function path(xs, ys) {
+    let d = '', pen = false;
+    for (let i = 0; i < xs.length; i++) {
+      if (ys[i] == null || !isFinite(ys[i])) { pen = false; continue; }
+      d += (pen ? 'L' : 'M') + xs[i].toFixed(1) + ' ' + ys[i].toFixed(1);
+      pen = true;
+    }
+    return d;
+  }
+  function band(xs, lo, hi) {
+    const p = [];
+    for (let i = 0; i < xs.length; i++) if (lo[i] != null && hi[i] != null && isFinite(lo[i]) && isFinite(hi[i])) p.push(i);
+    if (p.length < 2) return '';
+    return 'M' + p.map(i => xs[i].toFixed(1) + ' ' + hi[i].toFixed(1)).join('L') + 'L' + p.reverse().map(i => xs[i].toFixed(1) + ' ' + lo[i].toFixed(1)).join('L') + 'Z';
+  }
+  function yAxis(f, y, tks, fmt, side) {
+    const g = sv('g', { class: 'g' }, f.s);
+    for (const t of tks) {
+      const yy = Math.round(y(t)) + 0.5;
+      sv('line', { x1: f.x0, x2: f.x1, y1: yy, y2: yy }, g);
+      const tx = sv('text', { class: 'tk', x: side === 'right' ? f.x1 + 6 : f.x0 - 6, y: yy + 3.5, 'text-anchor': side === 'right' ? 'start' : 'end' }, f.s);
+      tx.textContent = fmt(t);
+    }
+  }
+  function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function rgb(hex) { const n = parseInt(hex.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function mix(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
+  const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
+  const V = name => 'var(--' + name + ')';
+
+  // Graphique en lignes sur un axe d'abscisses donné : séries {label, color, vals, lo, hi, sig, ctx, dash}.
+  // `xv` : valeurs d'abscisse (grille d'horizons, ou pas 1..H) ; `even` : espacement régulier des points.
+  function lineChart(host, o) {
+    const xv = o.xv, n = xv.length;
+    const m = { t: 10, r: o.endLabels ? 58 : 14, b: 36, l: 48 };
+    const f = frame(host, o.height || 240, m);
+    const all = [];
+    for (const s of o.series) { for (const v of s.vals) if (v != null && isFinite(v)) all.push(v); if (s.lo && !s.ctx) for (const v of s.lo.concat(s.hi)) if (v != null && isFinite(v)) all.push(v); }
+    if (o.ref != null) all.push(o.ref);
+    if (!all.length) { host.appendChild(el('div', { class: 'empty' }, 'Aucune valeur à afficher.')); return; }
+    let lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+    const pad = (hi - lo || Math.abs(hi) || 1) * 0.08; lo -= pad; hi += pad;
+    const y = lin(lo, hi, f.y1, f.y0);
+    const x = o.even ? i => f.x0 + (n === 1 ? 0.5 : i / (n - 1)) * (f.x1 - f.x0) : i => f.x0 + (xv[i] - xv[0]) / Math.max(1e-9, xv[n - 1] - xv[0]) * (f.x1 - f.x0);
+    const xs = xv.map((_, i) => x(i));
+    yAxis(f, y, ticks(lo, hi, 5), o.fmt, 'left');
+    if (o.even) {
+      const skip = Math.ceil(n / Math.max(2, Math.floor((f.x1 - f.x0) / 34)));
+      xv.forEach((v, i) => { if (i % skip === 0 || i === n - 1) { const t = sv('text', { class: 'tk', x: xs[i], y: f.y1 + 16, 'text-anchor': 'middle' }, f.s); t.textContent = v; } });
+    } else {
+      for (const v of [xv[0]].concat(ticks(xv[0], xv[n - 1], 6).filter(t => t > xv[0]))) {
+        const t = sv('text', { class: 'tk', x: f.x0 + (v - xv[0]) / (xv[n - 1] - xv[0]) * (f.x1 - f.x0), y: f.y1 + 16, 'text-anchor': 'middle' }, f.s); t.textContent = v;
+      }
+    }
+    if (o.ref != null) sv('line', { class: 'ax', x1: f.x0, x2: f.x1, y1: Math.round(y(o.ref)) + 0.5, y2: Math.round(y(o.ref)) + 0.5 }, f.s);
+    const ordered = o.series.filter(s => s.ctx).concat(o.series.filter(s => !s.ctx));
+    for (const s of ordered) {
+      const ys = s.vals.map(v => v == null ? null : y(v));
+      if (s.lo && !s.ctx) { const b = sv('path', { class: 'wash', d: band(xs, s.lo.map(v => v == null ? null : y(v)), s.hi.map(v => v == null ? null : y(v))) }, f.s); b.style.fill = s.color; }
+      const p = sv('path', { class: 'ln' + (s.ctx ? ' thin' : '') + (s.dash ? ' dashed' : ''), d: path(xs, ys) }, f.s);
+      p.style.stroke = s.color;
+      if (s.sig && !s.ctx) s.vals.forEach((v, i) => { if (v != null && s.sig[i] === 1) { const c = sv('circle', { class: 'ring', cx: xs[i], cy: ys[i], r: n > 40 ? 2.6 : 4 }, f.s); c.style.fill = s.color; if (n > 40) c.style.strokeWidth = 1; } });
+      if (o.endLabels && !s.ctx) {
+        let i = n - 1; while (i > 0 && s.vals[i] == null) i--;
+        if (s.vals[i] != null) { const t = sv('text', { class: 'lb', x: xs[i] + 7, y: ys[i] + 3.5 }, f.s); t.textContent = s.short || s.label; }
+      }
+    }
+    const xl = sv('text', { class: 'tk', x: f.x1, y: f.H - 2, 'text-anchor': 'end' }, f.s); xl.textContent = o.xlabel || 'horizon, en barres';
+    const xh = sv('line', { class: 'xh', y1: f.y0, y2: f.y1, visibility: 'hidden' }, f.s);
+    const hit = sv('rect', { class: 'hit', x: f.x0 - 10, y: f.y0, width: f.x1 - f.x0 + 20, height: f.y1 - f.y0 }, f.s);
+    hit.addEventListener('pointermove', e => {
+      const r = f.s.getBoundingClientRect(), px = (e.clientX - r.left) * f.W / r.width;
+      let i = 0, bd = Infinity; for (let k = 0; k < n; k++) { const d = Math.abs(xs[k] - px); if (d < bd) { bd = d; i = k; } }
+      xh.setAttribute('x1', xs[i]); xh.setAttribute('x2', xs[i]); xh.setAttribute('visibility', 'visible');
+      const main = o.series.filter(s => !s.ctx && s.vals[i] != null).map(s => ({ color: s.color, value: o.fmt(s.vals[i]) + (s.lo && s.lo[i] != null ? '  [' + o.fmt(s.lo[i]) + ' ; ' + o.fmt(s.hi[i]) + ']' : ''), label: s.label + (s.sig && s.sig[i] === 1 ? ' · significatif' : '') }));
+      const rest = o.series.filter(s => s.ctx && s.vals[i] != null).sort((a, b) => b.vals[i] - a.vals[i]).slice(0, 10).map(s => ({ color: s.color, value: o.fmt(s.vals[i]), label: s.label }));
+      tip(e, (o.xname || 'Horizon') + ' ' + xv[i] + ' barres' + (o.nOf ? ' · ' + NF[0].format(o.nOf(i)) + ' origines' : ''), main.concat(rest));
+    });
+    hit.addEventListener('pointerleave', () => { xh.setAttribute('visibility', 'hidden'); untip(); });
+  }
+  const horizonChart = (host, o) => lineChart(host, Object.assign({ xv: G, even: true }, o));
+
+  // ---------- séries de métriques
+  const mI = id => C.mIdx(id);
+  const col = (name, kind, base) => G.map((_, g) => kind ? C.skill(mI(name), kind, g, base) : null);
+  function metricSeries(id, name, base, pk) {
+    const rows = G.map((_, g) => C.met(mI(id), name, g, base, pk));
+    return { vals: rows.map(r => r ? r.v : null), lo: rows.map(r => r ? r.lo : null), hi: rows.map(r => r ? r.hi : null) };
+  }
+  function skillSeries(id, kind, base) {
+    const rows = col(id, kind, base);
+    return { vals: rows.map(r => r ? r.v : null), lo: rows.map(r => r ? r.lo : null), hi: rows.map(r => r ? r.hi : null), sig: rows.map(r => r ? r.sig : null) };
+  }
+  function baselines(kind) {
+    const cands = kind === 'crps' ? ['b2_clim', 'b7_garch_fhs'] : ['b1_coin', 'b2_clim'];
+    return cands.filter(id => mI(id) >= 0 && MODELS.some(m => C.skill(mI(m.id), kind, 0, mI(id))));
+  }
+
+  // =====================================================================
+  // Vue 1 : graphique
+  // =====================================================================
+  const SCEN = ['normale', 'range après impulsion', 'compression avant piège'];
+  function renderMain() {
+    const host = $('main-plot');
+    const t0 = OR[S.origin];
+    const tall = window.innerWidth >= 1180 ? 590 : window.innerWidth >= 760 ? 470 : 330;
+    const f = frame(host, tall, { t: 26, r: 62, b: 24, l: 6 });
+    const lookback = S.zoom === 0 ? t0 : S.zoom;
+    const a = Math.max(0, t0 - lookback), b = t0 + HMAX + 4;
+    const bw = (f.x1 - f.x0) / (b - a + 1);
+    const x = i => f.x0 + (i - a + 0.5) * bw;
+    const last = Math.min(b, B.n - 1);
+    let lo = Infinity, hi = -Infinity;
+    for (let i = a; i <= last; i++) { lo = Math.min(lo, B.l[i]); hi = Math.max(hi, B.h[i]); }
+    const p0 = B.c[t0];
+    const showPath = L && S.showPath, PH = L ? L.h : 0;
+    const fanModels = S.showFan ? [S.focus].concat(S.compare && S.compare !== S.focus ? [S.compare] : []) : [];
+    for (const id of fanModels) for (let g = 0; g < NH; g++) { lo = Math.min(lo, p0 * Math.exp(C.q(id, S.origin, g, 0))); hi = Math.max(hi, p0 * Math.exp(C.q(id, S.origin, g, 4))); }
+    // bougies du chemin typique : ouverture = clôture précédente du chemin
+    const tc = [];
+    if (showPath) for (let k = 1; k <= PH; k++) {
+      const o_ = p0 * Math.exp(L.path('typ', S.origin, k - 1)), c_ = p0 * Math.exp(L.path('typ', S.origin, k));
+      const h_ = Math.max(o_, c_) * Math.exp(L.wickUp(S.origin, k)), l_ = Math.min(o_, c_) * Math.exp(-L.wickDn(S.origin, k));
+      tc.push({ o: o_, c: c_, h: h_, l: l_ }); lo = Math.min(lo, l_); hi = Math.max(hi, h_);
+    }
+    const logY = logPriceOn() && lo > 0;
+    if (logY) { const k = Math.pow(hi / lo, 0.05); lo /= k; hi *= k; } else { const padY = (hi - lo) * 0.05; lo -= padY; hi += padY; }
+    const sc = scale(lo, hi, f.y1, f.y0, logY), y = sc.y;
+    // zone hors données : holdout verrouillé ou fin de série
+    if (b >= B.n) {
+      const zx = x(B.n - 0.5);
+      sv('rect', { class: 'zone', x: zx, y: f.y0, width: Math.max(0, f.x1 - zx), height: f.y1 - f.y0 }, f.s);
+      const t = sv('text', { class: 'tk', x: zx + 6, y: f.y0 + 12 }, f.s);
+      t.textContent = D.meta.holdout_opened ? 'fin des données' : 'holdout verrouillé';
+    }
+    yAxis(f, y, sc.ticks(7), priceTick, 'right');
+    const nt = Math.max(2, Math.floor((f.x1 - f.x0) / 110));
+    for (let k = 0; k <= nt; k++) {
+      const i = Math.round(a + (b - a) * k / nt);
+      const t = sv('text', { class: 'tk', x: x(i), y: f.y1 + 16, 'text-anchor': k === 0 ? 'start' : k === nt ? 'end' : 'middle' }, f.s);
+      t.textContent = (b - a > 400 ? DFs : DFd).format(new Date(barTime(i)));
+    }
+    if (S.showFolds) D.split.folds.forEach((fo, k) => {
+      if (fo[0] >= a && fo[0] <= b) {
+        sv('line', { class: 'ax', x1: x(fo[0] - 0.5), x2: x(fo[0] - 0.5), y1: f.y0, y2: f.y1 }, f.s);
+        const t = sv('text', { class: 'tk', x: x(fo[0] - 0.5) + 4, y: f.y1 - 5 }, f.s); t.textContent = 'pli ' + (k + 1);
+      }
+    });
+    // murs de volume retenus par le script : le plus fort sous le prix et le plus fort au-dessus
+    if (showPath) for (const [lo_, hi_, cls] of [[L.st.sup_lo[S.origin], L.st.sup_hi[S.origin], 'wall-s'], [L.st.res_lo[S.origin], L.st.res_hi[S.origin], 'wall-r']]) {
+      if (lo_ == null || hi_ == null || hi_ < lo || lo_ > hi) continue;
+      const ya = y(Math.min(hi_, hi)), yb = y(Math.max(lo_, lo));
+      sv('rect', { class: cls, x: x(t0), y: ya, width: Math.max(0, f.x1 - x(t0)), height: Math.max(1, yb - ya) }, f.s);
+    }
+    // éventails : bande à 90 %, bande à 50 %, médiane
+    const fx = [x(t0)].concat(G.map(h_ => x(t0 + h_)));
+    const qy = (id, j) => [y(p0)].concat(G.map((_, g) => y(p0 * Math.exp(C.q(id, S.origin, g, j)))));
+    if (fanModels.length) {
+      const id = S.focus;
+      sv('path', { class: 'wash f-s1', d: band(fx, qy(id, 0), qy(id, 4)) }, f.s);
+      sv('path', { class: 'wash2 f-s1', d: band(fx, qy(id, 1), qy(id, 3)) }, f.s);
+    }
+    if (fanModels.length > 1) {
+      const id = fanModels[1];
+      sv('path', { class: 'ln thin c-s2', d: path(fx, qy(id, 0)) }, f.s);
+      sv('path', { class: 'ln thin c-s2', d: path(fx, qy(id, 4)) }, f.s);
+      sv('path', { class: 'ln c-s2', d: path(fx, qy(id, 2)) }, f.s);
+    }
+    if (fanModels.length) sv('path', { class: 'ln c-s1', d: path(fx, qy(S.focus, 2)) }, f.s);
+    // chemin typique : bougies colorées si la place le permet, sinon ligne
+    const candles = bw >= 2.2, cw = Math.max(1.5, Math.min(11, bw * 0.68));
+    if (showPath) {
+      if (candles) {
+        const g = sv('g', null, f.s);
+        tc.forEach((c, k) => {
+          const cx = x(t0 + k + 1), up = c.c >= c.o;
+          sv('line', { class: up ? 'tw-up' : 'tw-dn', x1: cx, x2: cx, y1: y(c.h), y2: y(c.l) }, g);
+          const yt = y(Math.max(c.o, c.c)), yb = y(Math.min(c.o, c.c));
+          sv('rect', { class: up ? 'tc-up' : 'tc-dn', x: cx - cw / 2, y: yt, width: cw, height: Math.max(1, yb - yt) }, g);
+        });
+      } else {
+        const xs = [x(t0)], ys = [y(p0)];
+        tc.forEach((c, k) => { xs.push(x(t0 + k + 1)); ys.push(y(c.c)); });
+        sv('path', { class: 'ln thin c-ink', d: path(xs, ys) }, f.s);
+      }
+      const xs = [], ys = [];
+      for (let k = 0; k <= PH; k++) { xs.push(x(t0 + k)); ys.push(y(p0 * Math.exp(L.path('bb', S.origin, k)))); }
+      sv('path', { class: 'ln thin dashed c-ink', d: path(xs, ys) }, f.s);
+      const fr = L.st.final_r[S.origin], tl = sv('text', { class: 'lb', x: Math.min(f.x1 - 4, xs[PH] + 4), y: ys[PH] - 6, 'text-anchor': 'end' }, f.s);
+      tl.textContent = 'cible ' + pct(Math.exp(fr) - 1, 1, true);
+    }
+    // prix réel, par-dessus
+    if (candles) {
+      const g = sv('g', null, f.s);
+      for (let i = a; i <= last; i++) {
+        const cx = x(i), up = B.c[i] >= B.o[i];
+        sv('line', { class: 'wick', x1: cx, x2: cx, y1: y(B.h[i]), y2: y(B.l[i]) }, g);
+        const yt = y(Math.max(B.o[i], B.c[i])), yb = y(Math.min(B.o[i], B.c[i]));
+        sv('rect', { class: up ? 'candle-up' : 'candle-dn', x: cx - cw / 2, y: yt, width: cw, height: Math.max(1, yb - yt) }, g);
+      }
+    } else {
+      const xs = [], ys = [];
+      for (let i = a; i <= last; i++) { xs.push(x(i)); ys.push(y(B.c[i])); }
+      sv('path', { class: 'ln thin c-ink2', d: path(xs, ys) }, f.s);
+    }
+    sv('line', { class: 'ax', x1: x(t0), x2: x(t0), y1: f.y0, y2: f.y1 }, f.s);
+    const ol = sv('text', { class: 'lb', x: x(t0) - 5, y: f.y1 - 6, 'text-anchor': 'end' }, f.s); ol.textContent = 'origine';
+    sv('circle', { class: 'ring f-s1', cx: x(t0), cy: y(p0), r: 4 }, f.s);
+    // trades de la stratégie
+    if (S.showTrades && BT) {
+      const vis = BT.trades.filter(t => t.x >= a && t.e <= last);
+      const labels = vis.length <= 14 && candles;
+      for (const t of vis) {
+        const cls = t.net > 0 ? 'c-good' : 'c-crit', fc = t.net > 0 ? 'f-good' : 'f-crit';
+        const xe = x(Math.max(a, t.e)), xx = x(Math.min(last, t.x)), ye = y(t.entry), yx = y(t.exit);
+        sv('line', { class: 'ln thin ' + cls, x1: xe, x2: xx, y1: ye, y2: yx }, f.s);
+        if (t.e >= a) {
+          const d = t.dir > 0 ? 1 : -1, yb = y(t.dir > 0 ? B.l[t.e] : B.h[t.e]) + d * 9;
+          sv('path', { class: 'f-ink ring', d: 'M' + xe + ' ' + (yb - d * 6) + 'l5 ' + (d * 9) + 'h-10z' }, f.s);
+        }
+        sv('circle', { class: 'ring ' + fc, cx: xx, cy: yx, r: 4 }, f.s);
+        if (labels) { const tx = sv('text', { class: 'tk', x: xx, y: yx - 9, 'text-anchor': 'middle' }, f.s); tx.textContent = pct(t.net, 1, true); tx.style.fill = V(t.net > 0 ? 'good-ink' : 'crit-ink'); }
+      }
+    }
+    // réticule
+    const xv = sv('line', { class: 'xh', y1: f.y0, y2: f.y1, visibility: 'hidden' }, f.s);
+    const xhz = sv('line', { class: 'xh', x1: f.x0, x2: f.x1, visibility: 'hidden' }, f.s);
+    const hit = sv('rect', { class: 'hit', x: f.x0, y: f.y0, width: f.x1 - f.x0, height: f.y1 - f.y0, style: 'cursor:crosshair' }, f.s);
+    const barAt = e => { const r = f.s.getBoundingClientRect(); return Math.max(a, Math.min(b, a + Math.floor(((e.clientX - r.left) * f.W / r.width - f.x0) / bw))); };
+    const ohlc = i => {
+      const o = $('main-ohlc'); o.textContent = '';
+      o.appendChild(el('span', null, D.meta.symbol + ' · ' + D.meta.timeframe + ' · ' + dateOf(i)));
+      if (i < B.n) {
+        const sp = el('span');
+        for (const [k, v] of [['O', B.o[i]], ['H', B.h[i]], ['L', B.l[i]], ['C', B.c[i]]]) {
+          sp.appendChild(document.createTextNode(k + ' ')); sp.appendChild(el('b', null, price(v))); sp.appendChild(document.createTextNode('   '));
+        }
+        o.appendChild(sp);
+      }
+    };
+    ohlc(t0);
+    hit.addEventListener('pointermove', e => {
+      const i = barAt(e), r = f.s.getBoundingClientRect(), py = (e.clientY - r.top) * f.H / r.height;
+      xv.setAttribute('x1', x(i)); xv.setAttribute('x2', x(i)); xv.setAttribute('visibility', 'visible');
+      xhz.setAttribute('y1', py); xhz.setAttribute('y2', py); xhz.setAttribute('visibility', 'visible');
+      ohlc(i);
+      const rows = [];
+      if (i < B.n) rows.push({ value: price(B.c[i]), label: 'clôture' });
+      if (i > t0) {
+        const k = i - t0;
+        if (i < B.n) rows.push({ value: pct(B.c[i] / p0 - 1, 1, true), label: 'réalisé depuis l\'origine' });
+        if (showPath && k <= PH) {
+          rows.push({ color: V('ink'), value: pct(Math.exp(L.path('typ', S.origin, k)) - 1, 1, true), label: 'chemin typique' });
+          rows.push({ color: V('ink-2'), value: pct(Math.exp(L.path('bb', S.origin, k)) - 1, 1, true), label: 'squelette' });
+        }
+        if (fanModels.length && k <= HMAX) {
+          // quantiles interpolés entre les horizons de la grille
+          let g1 = 0; while (g1 < NH - 1 && G[g1] < k) g1++;
+          const hPrev = g1 === 0 ? 0 : G[g1 - 1], w = (k - hPrev) / (G[g1] - hPrev);
+          const qi = (id, j) => { const q0 = g1 === 0 ? 0 : C.q(id, S.origin, g1 - 1, j); return q0 + w * (C.q(id, S.origin, g1, j) - q0); };
+          rows.push({ color: V('s1'), value: pct(Math.exp(qi(S.focus, 2)) - 1, 1, true), label: 'médiane ' + S.focus });
+          rows.push({ color: V('s1'), value: pct(Math.exp(qi(S.focus, 0)) - 1, 1, true) + ' ; ' + pct(Math.exp(qi(S.focus, 4)) - 1, 1, true), label: 'intervalle à 90 %' });
+          if (fanModels.length > 1) rows.push({ color: V('s2'), value: pct(Math.exp(qi(fanModels[1], 0)) - 1, 1, true) + ' ; ' + pct(Math.exp(qi(fanModels[1], 4)) - 1, 1, true), label: '90 % ' + fanModels[1] });
+        }
+      }
+      rows.push({ value: price(sc.inv(py)), label: 'niveau du réticule' });
+      tip(e, dateOf(i) + (i > t0 ? ' · origine + ' + (i - t0) : ''), rows);
+    });
+    hit.addEventListener('pointerleave', () => { xv.setAttribute('visibility', 'hidden'); xhz.setAttribute('visibility', 'hidden'); untip(); ohlc(t0); });
+    hit.addEventListener('click', e => {
+      const i = barAt(e);
+      let best = 0, bd = Infinity;
+      for (let o = 0; o < NO; o++) { const d = Math.abs(OR[o] - i); if (d < bd) { bd = d; best = o; } }
+      setOrigin(best);
+    });
+    const items = [];
+    if (showPath) {
+      items.push({ label: 'chemin typique : bougie haussière', color: V('good'), kind: 'box' }, { label: 'baissière', color: V('crit'), kind: 'box' }, { label: 'squelette et cible', color: V('ink'), kind: 'dash' });
+      if (L.st.sup_lo[S.origin] != null || L.st.res_lo[S.origin] != null) items.push({ label: 'mur de support', color: V('good'), kind: 'wash' }, { label: 'mur de résistance', color: V('crit'), kind: 'wash' });
+    }
+    if (fanModels.length) items.push({ label: 'intervalle à 90 % · ' + S.focus, color: V('s1'), kind: 'wash' }, { label: 'à 50 %', color: V('s1'), kind: 'box' }, { label: 'médiane', color: V('s1') });
+    if (fanModels.length > 1) items.push({ label: S.compare + ' : médiane et bornes à 90 %', color: V('s2') });
+    if (S.showTrades && BT && BT.trades.length) { items.push({ label: 'trade gagnant', color: V('good'), kind: 'dot' }); items.push({ label: 'trade perdant', color: V('crit'), kind: 'dot' }); }
+    legend($('main-legend'), items);
+  }
+
+  function renderEvmc() {
+    const card = $('card-evmc');
+    if (!L) { card.hidden = true; return; }
+    const o = S.origin, st = L.st, t0 = OR[o], p0 = B.c[t0];
+    $('ev-sub').textContent = dateOf(t0);
+    const dir = st.dir[o], vr = st.vol[o], pm = L.pm;
+    const fr = st.final_r[o];
+    kv($('evmc-state'), [
+      ['Régime', dir > 0 ? 'HAUSSIER' : dir < 0 ? 'BAISSIER' : 'NEUTRE', 'depuis ' + st.age[o] + ' barre' + (st.age[o] > 1 ? 's' : ''), dir > 0 ? 'up' : dir < 0 ? 'dn' : ''],
+      ['Score de direction', num(st.stable[o], 2), 'brut ' + num(st.raw[o], 2), st.stable[o] > 0 ? 'up' : st.stable[o] < 0 ? 'dn' : ''],
+      ['Cible à ' + L.h + ' barres', pct(Math.exp(fr) - 1, 1, true), price(p0 * Math.exp(fr)), fr > 0 ? 'up' : fr < 0 ? 'dn' : ''],
+      ['P(hausse) à ' + L.h + ' barres', pct(st.p_up[o], 1)],
+      ['Confiance', pct(st.conf[o], 0)],
+      ['Phase', SCEN[st.scen[o]]],
+      ['Chaîne de Markov', ['haussier', 'baissier', 'neutre'][st.mk[o]]],
+      ['Volatilité', vr < pm.vol_low ? 'basse' : vr > pm.vol_high ? 'haute' : 'normale', '× ' + num(vr, 2) + ' de la moyenne longue'],
+      ['Compression', num(st.comp[o], 2)],
+      ['Murs de volume', st.sup_lo[o] == null ? '—' : price(st.sup_lo[o]) + ' – ' + price(st.sup_hi[o]), st.res_lo[o] == null ? 'pas de résistance' : 'résistance ' + price(st.res_lo[o]) + ' – ' + price(st.res_hi[o])],
+    ]);
+    const host = $('evmc-factors'); host.textContent = '';
+    ['D', 'V', 'R', 'A', 'M', 'Z'].forEach((nm, i) => {
+      const v = st.f[i][o];
+      host.appendChild(el('span', { class: 'nm', title: ['Dérive', 'VWAP ancrés', 'Supports et résistances', 'Absorption', 'Épuisement', 'Murs de volume'][i] }, nm));
+      const tr = el('span', { class: 'tr' }), bar = el('i');
+      const w = Math.min(50, Math.abs(v) * 50);
+      bar.style.left = (v >= 0 ? 50 : 50 - w) + '%'; bar.style.width = w + '%';
+      bar.style.background = V(v >= 0 ? 'div-pos' : 'div-neg');
+      tr.appendChild(bar); host.appendChild(tr);
+      host.appendChild(el('span', { class: 'vl' }, (v > 0 ? '+' : '') + num(v, 2)));
+    });
+  }
+
+  function renderOrigin() {
+    const t0 = OR[S.origin], p0 = B.c[t0], id = S.focus;
+    $('or-range').value = S.origin;
+    $('or-when').textContent = dateOf(t0);
+    $('ot-sub').textContent = id + ' · ' + dateOf(t0);
+    const host = $('origin-table'); host.textContent = '';
+    const head = el('tr');
+    ['H', L ? 'Chemin' : 'P(hausse)', 'P05', 'Médiane', 'P95', 'Réalisé'].forEach((t, i) => head.appendChild(el('th', { class: i ? 'n' : '' }, t)));
+    const th = el('thead'); th.appendChild(head); host.appendChild(th);
+    const tb = el('tbody');
+    for (let g = 0; g < NH; g++) {
+      const tr = el('tr'), pu = C.p(id, S.origin, g);
+      const q = j => Math.exp(C.q(id, S.origin, g, j)) - 1;
+      const pv = L && G[g] <= L.h ? Math.exp(L.path('typ', S.origin, G[g])) - 1 : null;
+      tr.appendChild(el('td', { class: 'mono' }, String(G[g])));
+      if (L) tr.appendChild(el('td', { class: 'n ' + (pv > 0 ? 'up' : pv < 0 ? 'dn' : '') }, pv == null ? '—' : pct(pv, 1, true)));
+      else tr.appendChild(el('td', { class: 'n' }, pct(pu, 1)));
+      tr.appendChild(el('td', { class: 'n' }, pct(q(0), 1, true)));
+      tr.appendChild(el('td', { class: 'n' }, pct(q(2), 1, true)));
+      tr.appendChild(el('td', { class: 'n' }, pct(q(4), 1, true)));
+      const j = t0 + G[g];
+      if (j < B.n) {
+        const r = B.c[j] / p0 - 1;
+        const ok = L ? (pv != null && pv !== 0 && Math.sign(pv) === Math.sign(r)) : (r >= q(0) && r <= q(4));
+        const td = el('td', { class: 'n', title: L ? (ok ? 'Le chemin avait le bon sens' : 'Le chemin avait le mauvais sens') : (ok ? 'Réalisé dans l\'intervalle à 90 %' : 'Réalisé hors de l\'intervalle à 90 %') });
+        td.appendChild(el('span', { class: r > 0 ? 'up' : 'dn' }, pct(r, 1, true)));
+        td.appendChild(document.createTextNode(ok ? '  ✓' : '  ✕'));
+        tr.appendChild(td);
+      } else {
+        tr.appendChild(el('td', { class: 'n', title: 'Hors des données exportées' }, 'à venir'));
+      }
+      tb.appendChild(tr);
+    }
+    host.appendChild(tb);
+  }
+
+  function renderQuick() {
+    const m = mI(S.focus), g = S.g, rows = [];
+    $('qs-sub').textContent = S.focus + ' · ' + hLabel(g) + ' · zone notée';
+    const ci = r => r && r.lo != null ? '[' + pct(r.lo, 1, true) + ' ; ' + pct(r.hi, 1, true) + ']' : '';
+    for (const [kind, base, lab] of [['crps', 'b2_clim', 'CRPS, skill contre b2_clim'], ['crps', 'b7_garch_fhs', 'CRPS, skill contre b7_garch_fhs'], ['brier', 'b1_coin', 'Brier, skill contre b1_coin']]) {
+      if (base === S.focus || mI(base) < 0) continue;
+      const r = C.skill(m, kind, g, mI(base));
+      if (r) rows.push([lab, pct(r.v, 1, true) + (r.sig === 1 ? ' ●' : ''), ci(r), r.v > 0 ? 'up' : r.v < 0 ? 'dn' : '']);
+    }
+    const c90 = C.met(m, 'cov90', g);
+    if (c90) rows.push(['Couverture à 90 %', pct(c90.v, 1), c90.lo != null ? '[' + pct(c90.lo, 1) + ' ; ' + pct(c90.hi, 1) + ']' : '']);
+    const z = C.met(m, 'z_std', g);
+    if (z) rows.push(['Écart-type de z', num(z.v, 3), z.lo != null ? '[' + num(z.lo, 2) + ' ; ' + num(z.hi, 2) + ']' : '']);
+    const bias = C.met(m, 'bias', g, null, C.pkIdx('mean'));
+    if (bias) rows.push(['Biais de la moyenne', pct(bias.v, 2, true), bias.lo != null ? '[' + pct(bias.lo, 2, true) + ' ; ' + pct(bias.hi, 2, true) + ']' : '']);
+    const n = D.horizons.n[g];
+    rows.push(['Lignes notées', NF[0].format(n), D.horizons.warn[g] ? 'peu de fenêtres disjointes : ' + Math.floor(n / G[g]) : '≈ ' + Math.floor(n / G[g]) + ' fenêtres disjointes']);
+    kv($('quick-stats'), rows);
+  }
+
+  // =====================================================================
+  // Vue 2 : backtest
+  // =====================================================================
+  const execOf = () => ({ dir: S.bt.dir, exit: S.bt.exit, hold: S.bt.hold, tp: S.bt.tp, sl: S.bt.sl, cost: S.bt.cost });
+  // Sortie et durée par défaut de la stratégie choisie.
+  function defaultsFor(id, keepUser) {
+    const st = stratOf(id), prm = prmOf(id);
+    if (!keepUser || !S.bt.exit) S.bt.exit = st.exit;
+    if (!keepUser || !(S.bt.hold >= 1)) S.bt.hold = st.hold(prm, C);
+  }
+  function runBench() {
+    const id = S.bt.strat, st = stratOf(id), prm = prmOf(id);
+    if (!S.bt.exit || !(S.bt.hold >= 1)) defaultsFor(id, true);
+    BT = CORE.runStrategy(C, id, prm, execOf(), IMP);
+    BT.ref = CORE.randomRef(C, BT.trades, S.bt.cost, BT.stats.net, 300, 20261003);
+    S.bt.prm[id] = prm;
+    store.set('bt', S.bt);
+    const key = 'trials.' + D.meta.run_id;
+    const seen = store.get(key, []);
+    const sig = JSON.stringify([id, prm, S.bt.dir, S.bt.exit, S.bt.hold, S.bt.tp, S.bt.sl, S.bt.cost, id === 'import' && IMP ? IMP.name : '']);
+    if (!has(seen, sig)) { seen.push(sig); store.set(key, seen); }
+    $('st-trials').textContent = seen.length + (seen.length > 1 ? ' réglages essayés sur ce run' : ' réglage essayé sur ce run');
+    $('st-trials').className = 'pill' + (seen.length >= 20 ? ' wr' : '');
+    const side = S.bt.dir === 'long' ? ' Seules les positions acheteuses sont prises.' : S.bt.dir === 'short' ? ' Seules les positions vendeuses sont prises.' : '';
+    const rule = $('st-rule'); rule.textContent = '';
+    rule.appendChild(el('b', null, st.name + '. '));
+    let txt = st.rule(prm, C) + '.' + side + ' Entrée à l\'ouverture suivante, une position à la fois ; ';
+    if (id === 'import' && IMP && IMP.kind === 'trades') txt = 'Trades rejoués avec les dates et les prix du fichier ; ';
+    else txt += S.bt.exit === 'bars' ? 'sortie à la clôture après ' + S.bt.hold + ' barre' + (S.bt.hold > 1 ? 's' : '') : 'sortie à l\'ouverture qui suit le changement de signal';
+    if (!(id === 'import' && IMP && IMP.kind === 'trades')) txt += (S.bt.sl > 0 ? ', ou au stop de ' + num(S.bt.sl, 1) + ' %' : '') + (S.bt.tp > 0 ? ', ou à l\'objectif de ' + num(S.bt.tp, 1) + ' %' : '') + ' ; ';
+    txt += 'coûts de ' + S.bt.cost + ' pb par côté.';
+    rule.appendChild(document.createTextNode(txt));
+  }
+  function renderParams() {
+    const id = S.bt.strat, st = stratOf(id), prm = prmOf(id), host = $('bt-params');
+    host.textContent = '';
+    for (const p of st.params) {
+      const lab = el('label', { class: 'field' }, p.label + ' ');
+      let inp;
+      if (p.type === 'select' || p.type === 'model' || p.type === 'horizon') {
+        inp = el('select');
+        const items = p.type === 'model' ? DIST.map(m => [m, m]) : p.type === 'horizon' ? G.map((h_, g) => [String(g), h_ + ' barres']) : p.opts;
+        options(inp, items, String(prm[p.k]));
+      } else {
+        inp = el('input', { type: 'number', min: p.min, max: p.max, step: p.step || 1 });
+        inp.value = prm[p.k];
+      }
+      inp.addEventListener('change', () => {
+        const saved = S.bt.prm[id] || (S.bt.prm[id] = {});
+        saved[p.k] = p.type === 'horizon' ? +inp.value : p.type === 'select' || p.type === 'model' ? inp.value : parseFloat(inp.value);
+        defaultsFor(id, false);
+        syncBench(); runBench(); renderBench();
+      });
+      lab.appendChild(inp); host.appendChild(lab);
+    }
+    $('bt-import').hidden = id !== 'import';
+    const series = IMP && IMP.kind === 'series';
+    for (const f of ['imp-col-f', 'imp-a-f', 'imp-b-f', 'imp-carry-f']) $(f).hidden = !series;
+    if (series) { options($('imp-col'), IMP.cols.map((c, i) => [String(i), c]), String(prm.col)); $('imp-a').value = prm.a; $('imp-b').value = prm.b; $('imp-carry').checked = !!prm.carry; }
+  }
+  function syncBench() {
+    options($('bt-strat'), STRATS.map(s => [s.id, s.name]), S.bt.strat);
+    $('st-dir').value = S.bt.dir; $('st-exit').value = S.bt.exit; $('st-hold').value = S.bt.hold;
+    $('st-tp').value = S.bt.tp; $('st-sl').value = S.bt.sl; $('st-cost').value = S.bt.cost;
+    $('st-hold-f').hidden = S.bt.exit !== 'bars';
+    renderParams();
+  }
+  function timeAxis(f, a, b, x) {
+    const nt = Math.max(2, Math.floor((f.x1 - f.x0) / 100));
+    for (let k = 0; k <= nt; k++) {
+      const i = Math.round(a + (b - a) * k / nt);
+      const t = sv('text', { class: 'tk', x: x(i), y: f.y1 + 16, 'text-anchor': k === 0 ? 'start' : k === nt ? 'end' : 'middle' }, f.s);
+      t.textContent = DFs.format(new Date(barTime(i)));
+    }
+  }
+
+  function renderBench() {
+    const st = BT.stats, E = BT.E, N = BT.eq.length, R = BT.ref;
+    $('perf-title').textContent = 'Performance : ' + pct(st.net, 1, true) + ' contre ' + pct(st.asset, 1, true) + ' pour l\'actif';
+    $('stats-sub').textContent = dateOf(E) + ' → ' + dateOf(B.n - 1);
+    const rows = [
+      ['Résultat net', pct(st.net, 1, true), '', st.net > 0 ? 'up' : st.net < 0 ? 'dn' : ''],
+      ['Actif sur la période', pct(st.asset, 1, true), 'achat conservé'],
+      ['Positions', NF[0].format(st.n), ''],
+      ['Gagnantes', st.winRate == null ? '—' : pct(st.winRate, 0), st.n ? '(' + st.nWins + ')' : ''],
+      ['Perdantes', st.winRate == null ? '—' : pct(1 - st.winRate, 0), st.n ? '(' + st.nLosses + ')' : ''],
+      ['Drawdown maximal', pct(st.maxDD, 1), ''],
+      ['Gain moyen', pct(st.avgWin, 2, true), ''],
+      ['Perte moyenne', pct(st.avgLoss, 2, true), ''],
+      ['Résultat moyen par trade', pct(st.avg, 2, true), ''],
+      ['Profit factor', st.pf == null ? '—' : num(st.pf, 2), ''],
+      ['Sharpe annualisé', st.sharpe == null ? '—' : num(st.sharpe, 2), ''],
+      ['Temps en position', pct(st.exposure, 0), ''],
+    ];
+    if (R) {
+      rows.push(['Rang face au hasard', pct(R.rank, 0), 'sur ' + R.m + ' tirages', R.rank >= 0.95 ? 'up' : R.rank <= 0.05 ? 'dn' : '']);
+      rows.push(['Résultat médian du hasard', pct(R.median, 0, true), 'de ' + pct(R.q05, 0, true) + ' à ' + pct(R.q95, 0, true)]);
+    } else if (st.n) rows.push(['Rang face au hasard', '—', 'toujours en position : aucun tirage possible']);
+    kv($('stats'), rows);
+
+    // --- performance : stratégie contre actif, puis drawdown sur le même axe des temps
+    const hp = $('perf-plot'), hd = $('dd-plot');
+    const f = frame(hp, 250, { t: 8, r: 54, b: 22, l: 6 });
+    const asset = new Float64Array(N);
+    // Multiples du capital de départ : 1 = capital intact. Le plancher évite log(0) après une ruine.
+    let mLo = 1, mHi = 1;
+    for (let i = 0; i < N; i++) { asset[i] = B.c[E + i] / B.c[E] - 1; const e = Math.max(BT.eq[i], 1e-4); mLo = Math.min(mLo, asset[i] + 1, e); mHi = Math.max(mHi, asset[i] + 1, e); }
+    const logP = S.logPerf == null ? mHi / mLo > 10 : S.logPerf;
+    $('tg-perflog').setAttribute('aria-pressed', String(logP));
+    $('perf-sub').textContent = logP ? 'multiple du capital de départ, échelle log' : 'en % du capital de départ';
+    // En log, l'axe porte le multiple (base 1) ; en linéaire, la variation en % (base 0).
+    const base = logP ? 1 : 0, val = m => logP ? Math.max(m, 1e-4) : m - 1;
+    let lo = val(mLo), hi = val(mHi);
+    if (logP) { const k = Math.pow(hi / lo, 0.06); lo /= k; hi *= k; } else { const pad = (hi - lo || 1) * 0.06; lo -= pad; hi += pad; }
+    const sc = scale(lo, hi, f.y1, f.y0, logP), y = sc.y, x = i => f.x0 + (N <= 1 ? 0 : i / (N - 1)) * (f.x1 - f.x0);
+    const mult = v => '×' + (v >= 1000 ? NF[0].format(v) : String(+v.toPrecision(3)).replace('.', ','));
+    yAxis(f, y, sc.ticks(5), logP ? mult : v => pct(v, 0), 'right');
+    timeAxis(f, E, E + N - 1, i => x(i - E));
+    sv('line', { class: 'ax', x1: f.x0, x2: f.x1, y1: Math.round(y(base)) + 0.5, y2: Math.round(y(base)) + 0.5 }, f.s);
+    const step = Math.max(1, Math.floor(N / 900));
+    const xs = [], ya = [], ye = [], z = [];
+    for (let i = 0; i < N; i += step) { xs.push(x(i)); ya.push(y(val(asset[i] + 1))); ye.push(y(val(BT.eq[i]))); z.push(y(base)); }
+    sv('path', { class: 'ln thin c-ctx', d: path(xs, ya) }, f.s);
+    sv('path', { class: 'wash f-s1', d: band(xs, z, ye) }, f.s);
+    sv('path', { class: 'ln c-s1', d: path(xs, ye) }, f.s);
+    const fd = frame(hd, 78, { t: 6, r: 54, b: 6, l: 6 });
+    const ddLo = Math.min(-0.01, BT.stats.maxDD * 1.1), yd = lin(ddLo, 0, fd.y1, fd.y0);
+    yAxis(fd, yd, [ddLo / 1.1, 0], v => pct(v, 0), 'right');
+    const ydd = []; for (let i = 0; i < N; i += step) ydd.push(yd(BT.dd[i]));
+    sv('path', { class: 'wash2 f-crit', d: band(xs, ydd, xs.map(() => yd(0))) }, fd.s);
+    const dl = sv('text', { class: 'tk', x: fd.x0 + 2, y: fd.y1 - 2 }, fd.s); dl.textContent = 'drawdown de la stratégie';
+    const xh = sv('line', { class: 'xh', y1: f.y0, y2: f.y1, visibility: 'hidden' }, f.s);
+    const hit = sv('rect', { class: 'hit', x: f.x0, y: f.y0, width: f.x1 - f.x0, height: f.y1 - f.y0 }, f.s);
+    hit.addEventListener('pointermove', e => {
+      const r = f.s.getBoundingClientRect(), px = (e.clientX - r.left) * f.W / r.width;
+      const i = Math.max(0, Math.min(N - 1, Math.round((px - f.x0) / (f.x1 - f.x0) * (N - 1))));
+      xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('visibility', 'visible');
+      tip(e, dateOf(E + i), [{ color: V('s1'), value: pct(BT.eq[i] - 1, 1, true), label: 'stratégie' }, { color: V('ctx'), value: pct(asset[i], 1, true), label: 'actif' }, { color: V('crit'), value: pct(BT.dd[i], 1), label: 'drawdown' }]);
+    });
+    hit.addEventListener('pointerleave', () => { xh.setAttribute('visibility', 'hidden'); untip(); });
+    legend($('perf-legend'), [{ label: 'stratégie', color: V('s1') }, { label: 'actif, achat conservé', color: V('ctx') }, { label: 'drawdown', color: V('crit'), kind: 'wash' }]);
+    const rowsP = [], every = Math.max(1, Math.floor(N / 60));
+    for (let i = 0; i < N; i += every) rowsP.push([dateOf(E + i), pct(BT.eq[i] - 1, 1, true), pct(asset[i], 1, true), pct(BT.dd[i], 1)]);
+    table($('perf-tbl'), ['Date', 'Stratégie', 'Actif', 'Drawdown'], rowsP);
+
+    // --- comportement après l'entrée
+    const hb = $('behav-plot'); hb.querySelectorAll('.empty').forEach(e => e.remove());
+    const H = BT.H, P = BT.paths;
+    if (!P.length) {
+      hb.querySelectorAll('svg').forEach(s => s.remove());
+      hb.appendChild(el('div', { class: 'empty' }, S.bt.strat === 'import' && !IMP ? 'Choisis un fichier CSV à importer.' : 'Aucune position avec ce réglage sur la zone notée. Assouplis le seuil ou change de stratégie.'));
+      legend($('behav-legend'), []); table($('behav-tbl'), ['Barre'], []);
+    } else {
+      const win = [], los = [];
+      BT.trades.forEach((t, i) => (t.net > 0 ? win : los).push(P[i]));
+      const mean = set => { const o = []; for (let k = 0; k <= H; k++) { if (!set.length) { o.push(null); continue; } let s = 0; for (const p of set) s += p[k]; o.push(s / set.length); } return o; };
+      const quant = q => { const o = []; for (let k = 0; k <= H; k++) { const v = P.map(p => p[k]).sort((a_, b_) => a_ - b_); const pos = q * (v.length - 1), i0 = Math.floor(pos); o.push(v[i0] + (pos - i0) * (v[Math.min(v.length - 1, i0 + 1)] - v[i0])); } return o; };
+      const mw = mean(win), ml = mean(los), med = quant(0.5), q10 = quant(0.1), q90 = quant(0.9);
+      const fb = frame(hb, 328, { t: 8, r: 46, b: 36, l: 6 });
+      let lo2 = Math.min.apply(null, q10.concat(ml.filter(v => v != null), [0])), hi2 = Math.max.apply(null, q90.concat(mw.filter(v => v != null), [0]));
+      const pd = (hi2 - lo2 || 0.01) * 0.08; lo2 -= pd; hi2 += pd;
+      const yb = lin(lo2, hi2, fb.y1, fb.y0), xb = k => fb.x0 + k / H * (fb.x1 - fb.x0);
+      yAxis(fb, yb, ticks(lo2, hi2, 5), v => pct(v, Math.abs(hi2 - lo2) < 0.05 ? 1 : 0), 'right');
+      const xk = []; for (let k = 0; k <= H; k++) xk.push(xb(k));
+      for (const k of ticks(0, H, Math.min(6, H))) { const t = sv('text', { class: 'tk', x: xb(k), y: fb.y1 + 16, 'text-anchor': k === 0 ? 'start' : 'middle' }, fb.s); t.textContent = k; }
+      const xl = sv('text', { class: 'tk', x: fb.x1, y: fb.H - 2, 'text-anchor': 'end' }, fb.s); xl.textContent = 'barres depuis l\'entrée';
+      sv('line', { class: 'ax', x1: fb.x0, x2: fb.x1, y1: Math.round(yb(0)) + 0.5, y2: Math.round(yb(0)) + 0.5 }, fb.s);
+      sv('path', { class: 'wash f-ctx', style: 'fill-opacity:.22', d: band(xk, q10.map(yb), q90.map(yb)) }, fb.s);
+      sv('path', { class: 'ln c-ink2', d: path(xk, med.map(yb)) }, fb.s);
+      sv('path', { class: 'ln c-good', d: path(xk, mw.map(v => v == null ? null : yb(v))) }, fb.s);
+      sv('path', { class: 'ln c-crit', d: path(xk, ml.map(v => v == null ? null : yb(v))) }, fb.s);
+      const xh2 = sv('line', { class: 'xh', y1: fb.y0, y2: fb.y1, visibility: 'hidden' }, fb.s);
+      const hit2 = sv('rect', { class: 'hit', x: fb.x0, y: fb.y0, width: fb.x1 - fb.x0, height: fb.y1 - fb.y0 }, fb.s);
+      hit2.addEventListener('pointermove', e => {
+        const r = fb.s.getBoundingClientRect(), px = (e.clientX - r.left) * fb.W / r.width;
+        const k = Math.max(0, Math.min(H, Math.round((px - fb.x0) / (fb.x1 - fb.x0) * H)));
+        xh2.setAttribute('x1', xb(k)); xh2.setAttribute('x2', xb(k)); xh2.setAttribute('visibility', 'visible');
+        tip(e, k + (k > 1 ? ' barres' : ' barre') + ' après l\'entrée', [
+          { color: V('good'), value: pct(mw[k], 2, true), label: 'moyenne des gagnants (' + win.length + ')' },
+          { color: V('crit'), value: pct(ml[k], 2, true), label: 'moyenne des perdants (' + los.length + ')' },
+          { color: V('ink-2'), value: pct(med[k], 2, true), label: 'médiane de tous les trades' },
+          { color: V('ctx'), value: pct(q10[k], 2, true) + ' ; ' + pct(q90[k], 2, true), label: '10e et 90e centiles' }]);
+      });
+      hit2.addEventListener('pointerleave', () => { xh2.setAttribute('visibility', 'hidden'); untip(); });
+      legend($('behav-legend'), [{ label: 'moyenne des gagnants', color: V('good') }, { label: 'moyenne des perdants', color: V('crit') }, { label: 'médiane', color: V('ink-2') }, { label: '10e à 90e centile', color: V('ctx'), kind: 'wash' }]);
+      const rb = []; for (const k of ticks(0, H, Math.min(12, H))) rb.push([String(k), pct(mw[k], 2, true), pct(ml[k], 2, true), pct(med[k], 2, true), pct(q10[k], 2, true), pct(q90[k], 2, true)]);
+      table($('behav-tbl'), ['Barre', 'Gagnants', 'Perdants', 'Médiane', '10e', '90e'], rb);
+    }
+
+    // --- liste des trades
+    $('trades-summary').textContent = 'Liste des trades (' + BT.trades.length + ')';
+    const tt = $('trades-table'); tt.textContent = '';
+    const hd2 = el('tr');
+    const info = BT.infoName || 'Signal lu';
+    ['N°', 'Sens', 'Décision', info, 'Entrée', 'Prix', 'Sortie', 'Prix', 'Motif', 'Barres', 'Résultat net'].forEach((t, i) => hd2.appendChild(el('th', { class: i > 2 ? 'n' : '' }, t)));
+    const th2 = el('thead'); th2.appendChild(hd2); tt.appendChild(th2);
+    const tb2 = el('tbody');
+    const fi = v => v == null || !isFinite(v) ? '—' : Math.abs(v) <= 1 && info === 'P(hausse)' ? pct(v, 1) : num(v, 2);
+    BT.trades.slice(0, 800).forEach((t, i) => {
+      const tr = el('tr');
+      const cells = [String(i + 1), t.dir > 0 ? 'long' : 'short', dateOf(t.t), fi(t.p), dateOf(t.e), price(t.entry), dateOf(t.x), price(t.exit), t.why, String(t.x - t.e + 1), pct(t.net, 2, true)];
+      cells.forEach((c, j) => tr.appendChild(el('td', { class: (j > 2 ? 'n ' : '') + (j === 10 ? (t.net > 0 ? 'up' : 'dn') : '') }, c)));
+      tb2.appendChild(tr);
+    });
+    tt.appendChild(tb2);
+  }
+
+  // =====================================================================
+  // Vue 3 : chemin typique
+  // =====================================================================
+  const PATH_LABEL = { evmc_typical: 'chemin typique', evmc_backbone: 'squelette directionnel', evmc_median: 'médiane de l\'éventail', ref_line: 'droite vers la cible', ref_drift: 'dérive', ref_zero: 'prix inchangé' };
+  const SLICE_LABEL = { all: 'toutes les origines', vol_low: 'volatilité basse', vol_normal: 'volatilité normale', vol_high: 'volatilité haute', dir_bull: 'régime haussier', dir_neutral: 'régime neutre', dir_bear: 'régime baissier', ph_normal: 'phase normale', ph_range: 'range après impulsion', ph_coil: 'compression', mk_bull: 'Markov haussier', mk_bear: 'Markov baissier', mk_neutral: 'Markov neutre' };
+  const PT_METRIC = { hit: ['Bonne direction', v => pct(v, 1)], hit_edge: ['Avantage sur la dérive', v => pts(v, 1)], ic: ['Corrélation', v => num(v, 2)] };
+  function renderPaths() {
+    if (!L) return;
+    const PM = L.pm, H = L.h, steps = []; for (let k = 1; k <= H; k++) steps.push(k);
+    const get = (map, metric, model, slice) => map[metric + '|' + model + '|' + slice] || null;
+    const mainPaths = ['evmc_typical', 'evmc_backbone', 'evmc_median', 'ref_line'];
+    const slices = PM.slices.filter(s => PM.n[s] && PM.n[s].some(v => v > 0));
+    if (!has(slices, S.pt.slice)) S.pt.slice = 'all';
+    options($('pt-model'), mainPaths.map(m => [m, PATH_LABEL[m]]), S.pt.model);
+    options($('pt-slice'), slices.map(s => [s, SLICE_LABEL[s] + ' (' + NF[0].format(Math.max.apply(null, PM.n[s].filter(v => v != null))) + ')']), S.pt.slice);
+    const md = S.pt.model, sl = S.pt.slice, nArr = PM.n[sl] || [];
+    const ser = (metric, model, extra) => Object.assign({ label: PATH_LABEL[model], vals: get(PM.v, metric, model, sl) || steps.map(() => null), lo: get(PM.lo, metric, model, sl), hi: get(PM.hi, metric, model, sl), sig: get(PM.sig, metric, model, sl) }, extra);
+    const others = mainPaths.filter(m => m !== md);
+    const chart = (host, metric, o) => {
+      const series = others.map(m => ser(metric, m, { color: V('ctx'), ctx: true }));
+      if (o.withRef) series.push(ser(metric, 'ref_drift', { color: V('s2'), lo: null, hi: null, label: 'dérive (référence)' }));
+      series.push(ser(metric, md, { color: V('s1') }));
+      lineChart($(host), { xv: steps, series, ref: o.ref, fmt: o.fmt, height: 260, xlabel: 'nombre de barres après l\'origine', xname: 'À', nOf: i => nArr[i] || 0 });
+      const leg = [{ label: PATH_LABEL[md] + (o.band ? ' et son intervalle à 95 %' : ''), color: V('s1') }];
+      if (o.withRef) leg.push({ label: 'dérive : la référence à battre', color: V('s2') });
+      leg.push({ label: 'autres chemins', color: V('ctx') });
+      legend($(host + '-legend'), leg);
+      const grid = G.filter(g => g <= H), cols = [md].concat(o.withRef ? ['ref_drift'] : []).concat(others);
+      table($(host + '-tbl'), ['Chemin'].concat(grid.map(String)), cols.map(m => [PATH_LABEL[m]].concat(grid.map(g => { const a = get(PM.v, metric, m, sl); return a && a[g - 1] != null ? o.fmt(a[g - 1]) : '—'; }))));
+    };
+    chart('pt-hit', 'hit', { ref: 0.5, fmt: v => pct(v, 1), withRef: true, band: true });
+    chart('pt-edge', 'hit_edge', { ref: 0, fmt: v => pts(v, 1), band: true });
+    chart('pt-ic', 'ic', { ref: 0, fmt: v => num(v, 2) });
+    chart('pt-mae', 'mae_skill', { ref: 0, fmt: v => pct(v, 0, true) });
+
+    // --- verdict en une phrase, calculé sur la sélection
+    const hitA = get(PM.v, 'hit', md, sl) || [], refA = get(PM.v, 'hit', 'ref_drift', sl) || [], edgeA = get(PM.v, 'hit_edge', md, sl) || [], sigA = get(PM.sig, 'hit_edge', md, sl) || [], icA = get(PM.v, 'ic', md, sl) || [];
+    const argmax = a => { let b = -1; a.forEach((v, i) => { if (v != null && (b < 0 || v > a[b])) b = i; }); return b; };
+    const kH = argmax(hitA), kI = argmax(icA), kE = argmax(edgeA);
+    const nPos = edgeA.filter(v => v != null && v > 0).length, nAll = edgeA.filter(v => v != null).length;
+    const nSigPos = edgeA.filter((v, i) => v != null && v > 0 && sigA[i] === 1).length, nSigNeg = edgeA.filter((v, i) => v != null && v < 0 && sigA[i] === 1).length;
+    const vd = $('pt-verdict'); vd.textContent = '';
+    if (kH >= 0) {
+      const add = (t, bold) => vd.appendChild(bold ? el('b', null, t) : document.createTextNode(t));
+      add(PATH_LABEL[md].charAt(0).toUpperCase() + PATH_LABEL[md].slice(1) + ', ' + SLICE_LABEL[sl] + '. ', true);
+      add('Le sens annoncé est le bon au mieux à ');
+      add(nb(kH + 1) + ' : ' + pct(hitA[kH], 1), true);
+      add(' ; au même horizon, annoncer toujours le sens de la dérive donne ' + pct(refA[kH], 1) + '. ');
+      add('Face à cette référence, le chemin fait mieux à ' + nPos + ' horizon' + (nPos > 1 ? 's' : '') + ' sur ' + nAll + (nSigPos ? ', dont ' + nSigPos + ' de façon significative' : ', jamais de façon significative') + (nSigNeg ? ', et significativement moins bien à ' + nSigNeg : '') + '. ');
+      if (kE >= 0) add('Son meilleur écart est de ' + pts(edgeA[kE], 1) + ' à ' + nb(kE + 1) + '. ');
+      if (kI >= 0) add('La corrélation entre l\'annonce et le réalisé culmine à ' + num(icA[kI], 2) + ' à ' + nb(kI + 1) + '.');
+    }
+
+    // --- par régime
+    const mt = S.pt.metric, grid = G.filter(g => g <= H);
+    segment($('pt-metric'), Object.keys(PT_METRIC).map(k => [k, PT_METRIC[k][0]]), mt, v => { S.pt.metric = v; renderPaths(); });
+    const fmtM = PT_METRIC[mt][1], centre = mt === 'hit' ? 0.5 : 0;
+    const rowsH = slices.map(s => ({
+      label: SLICE_LABEL[s] + ' · ' + NF[0].format((PM.n[s] || [])[19] || (PM.n[s] || [])[0] || 0), on: s === sl,
+      pick: () => { S.pt.slice = s; renderPaths(); },
+      cells: grid.map(g => { const a = get(PM.v, mt, md, s), lo_ = get(PM.lo, mt, md, s), hi_ = get(PM.hi, mt, md, s), sg = get(PM.sig, mt, md, s); return a && a[g - 1] != null ? { v: a[g - 1], t: a[g - 1] - centre, lo: lo_ ? lo_[g - 1] : null, hi: hi_ ? hi_[g - 1] : null, sig: sg ? sg[g - 1] : null } : null; }),
+    }));
+    let mx = 0.02; rowsH.forEach(r => r.cells.forEach(c => { if (c) mx = Math.max(mx, Math.abs(c.t)); })); mx = Math.min(mx, mt === 'ic' ? 0.4 : 0.2);
+    $('pt-heat-min').textContent = fmtM(centre - mx); $('pt-heat-max').textContent = fmtM(centre + mx);
+    $('pt-heat-what').textContent = '· ' + PATH_LABEL[md] + ' · ' + PT_METRIC[mt][0].toLowerCase() + (mt === 'hit_edge' ? ' · un point marque un écart significatif' : '');
+    $('pt-reg-note').textContent = 'Après chaque nom : nombre d\'origines du groupe. Clique sur un groupe pour le détailler dans les graphiques du haut.';
+    heat($('pt-heat'), grid.map(String), rowsH, { max: mx, fmt: fmtM, what: PT_METRIC[mt][0].toLowerCase(), colTitle: j => 'à ' + grid[j] + ' barres' });
+
+    // --- stabilité par pli
+    const fm = PM.folds[mt + '|' + md];
+    $('pt-fold-title').textContent = 'Stabilité par pli · ' + PATH_LABEL[md] + ' · ' + PT_METRIC[mt][0].toLowerCase();
+    if (fm) {
+      const fr = D.split.folds.map((fo, k) => ({ label: 'Pli ' + (k + 1) + ' · ' + DFs.format(new Date(barTime(fo[0]))) + ' → ' + DFs.format(new Date(barTime(fo[1] - 1))), cells: grid.map((g, j) => { const v = fm[k] ? fm[k][G.indexOf(g)] : null; return v == null ? null : { v, t: v - centre }; }) }));
+      let mf = 0.02; fr.forEach(r => r.cells.forEach(c => { if (c) mf = Math.max(mf, Math.abs(c.t)); })); mf = Math.min(mf, mt === 'ic' ? 0.6 : 0.35);
+      heat($('pt-fold'), grid.map(String), fr, { max: mf, fmt: fmtM, what: PT_METRIC[mt][0].toLowerCase(), colTitle: j => 'à ' + grid[j] + ' barres' });
+    } else $('pt-fold').textContent = '';
+
+    // --- meilleur horizon choisi sur le passé
+    segment($('pt-crit'), [['edge', 'choisi sur l\'avantage contre la dérive'], ['hit', 'choisi sur le taux de bonne direction']], S.pt.crit, v => { S.pt.crit = v; renderPaths(); });
+    const sel = L.select.filter(r => r.model === md && r.crit === S.pt.crit);
+    const host = $('pt-select'); host.textContent = '';
+    if (!sel.length) { host.appendChild(el('caption', { class: 'note' }, 'Ce choix n\'est calculé que pour le chemin typique, son squelette et la médiane de l\'éventail.')); return; }
+    const hr = el('tr');
+    ['Pli noté', 'Pas choisi', 'Sur le passé', 'Sur le pli', 'Dérive sur le pli', 'Écart'].forEach((t, i) => hr.appendChild(el('th', { class: i ? 'n' : '' }, t)));
+    const thd = el('thead'); thd.appendChild(hr); host.appendChild(thd);
+    const tb = el('tbody');
+    let sn = 0, sh = 0, sr = 0;
+    for (const r of sel) {
+      const fo = D.split.folds[r.fold], tr = el('tr');
+      const cells = ['Pli ' + (r.fold + 1) + ' · ' + DFs.format(new Date(barTime(fo[0]))), nb(r.step), S.pt.crit === 'hit' ? pct(r.ins, 1) : pts(r.ins, 1), pct(r.hit, 1), pct(r.ref, 1), pts(r.hit - r.ref, 1)];
+      cells.forEach((c, j) => tr.appendChild(el('td', { class: (j ? 'n ' : '') + (j === 5 ? (r.hit > r.ref ? 'up' : 'dn') : '') }, c)));
+      tb.appendChild(tr);
+      sn += r.n; sh += r.hit * r.n; sr += r.ref * r.n;
+    }
+    const tot = el('tr', { class: 'total' });
+    ['Ensemble des plis notés', '', '', pct(sh / sn, 1), pct(sr / sn, 1), pts((sh - sr) / sn, 1)].forEach((c, j) => tot.appendChild(el('td', { class: (j ? 'n ' : '') + (j === 5 ? (sh > sr ? 'up' : 'dn') : '') }, c)));
+    tb.appendChild(tot); host.appendChild(tb);
+  }
+
+  // =====================================================================
+  // Vue 4 : qualité des prévisions
+  // =====================================================================
+  // Cellule : {v, lo, hi, sig, t} ; `t` est la valeur qui fixe la couleur (par défaut v).
+  function heat(host, cols, rows, o) {
+    host.textContent = '';
+    host.style.gridTemplateColumns = 'max-content repeat(' + cols.length + ', minmax(54px, 1fr))';
+    const pos = rgb(cssVar('--div-pos')), neg = rgb(cssVar('--div-neg')), mid = rgb(cssVar('--div-mid'));
+    const ink = cssVar('--ink'), dark = '#0b0c0e', light = '#ffffff';
+    host.appendChild(el('div'));
+    cols.forEach(c => host.appendChild(el('div', { class: 'cl' }, c)));
+    for (const r of rows) {
+      const rl = el('div', { class: 'rl' + (r.on ? ' on' : ''), role: r.pick ? 'button' : null, tabindex: r.pick ? '0' : null }, r.label);
+      if (r.pick) { rl.addEventListener('click', r.pick); rl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); r.pick(); } }); }
+      host.appendChild(rl);
+      r.cells.forEach((c, j) => {
+        const d = el('div', { class: 'cell', tabindex: '0' });
+        if (c == null || c.v == null) { d.textContent = '—'; d.style.color = cssVar('--muted'); host.appendChild(d); return; }
+        const t = Math.max(-1, Math.min(1, (c.t == null ? c.v : c.t) / o.max)), rgbc = mix(mid, t >= 0 ? pos : neg, Math.abs(t));
+        d.style.background = 'rgb(' + rgbc.join(',') + ')';
+        d.style.color = Math.abs(t) < 0.25 ? ink : (lum(rgbc) > 0.18 ? dark : light);
+        d.textContent = o.fmt(c.v) + (c.sig === 1 ? ' ●' : '');
+        const show = e => tip(e.clientX != null ? e : { clientX: d.getBoundingClientRect().left, clientY: d.getBoundingClientRect().bottom }, r.label + ' · ' + o.colTitle(j),
+          [{ value: o.fmt(c.v), label: o.what }].concat(c.lo != null ? [{ value: '[' + o.fmt(c.lo) + ' ; ' + o.fmt(c.hi) + ']', label: 'intervalle à 95 %' }] : []).concat(c.sig != null ? [{ value: c.sig === 1 ? 'oui' : 'non', label: 'différence significative' }] : []));
+        d.addEventListener('pointermove', show); d.addEventListener('focus', show);
+        d.addEventListener('pointerleave', untip); d.addEventListener('blur', untip);
+        host.appendChild(d);
+      });
+    }
+  }
+
+  function renderQuality() {
+    const kind = S.metric, bases = baselines(kind);
+    if (!has(bases, S.base)) S.base = bases[0] || null;
+    segment($('q-metric'), [['crps', 'CRPS'], ['brier', 'Brier']], kind, v => { S.metric = v; renderQuality(); });
+    options($('q-base'), bases.map(b => [b, b]), S.base);
+    const base = mI(S.base), fm = mI(S.focus);
+    const rowsM = MODELS.filter(m => m.id !== S.base && C.skill(mI(m.id), kind, 0, base));
+    // --- carte thermique modèles x horizons
+    let mx = 0.01;
+    const cells = rowsM.map(m => G.map((_, g) => C.skill(mI(m.id), kind, g, base)));
+    cells.forEach(r => r.forEach(c => { if (c && c.v != null) mx = Math.max(mx, Math.abs(c.v)); }));
+    mx = Math.min(mx, 0.25);
+    $('heat-min').textContent = pct(-mx, 0); $('heat-max').textContent = pct(mx, 0, true);
+    const fmtS = v => pct(v, Math.abs(mx) < 0.05 ? 2 : 1, true);
+    heat($('heat-skill'), G.map(String), rowsM.map((m, i) => ({ label: m.id, on: m.id === S.focus, pick: m.dist ? () => { S.focus = m.id; store.set('focus', S.focus); syncSelectors(); renderAll(); } : null, cells: cells[i] })),
+      { max: mx, fmt: fmtS, what: 'skill ' + kind.toUpperCase() + ' contre ' + S.base, colTitle: j => 'horizon ' + G[j] });
+    const fs = skillSeries(S.focus, kind, base);
+    const nPos = fs.vals.filter(v => v != null && v > 0).length, nSig = fs.vals.filter((v, g) => v != null && v > 0 && fs.sig[g] === 1).length, nAll = fs.vals.filter(v => v != null).length;
+    $('q-lead').textContent = S.focus === S.base ? '' : S.focus + ' bat ' + S.base + ' sur ' + nPos + ' horizon' + (nPos > 1 ? 's' : '') + ' sur ' + nAll + ', dont ' + nSig + ' de façon significative.';
+
+    // --- skill selon l'horizon : modèle choisi, comparaison, autres en retrait
+    const others = rowsM.filter(m => m.id !== S.focus && m.id !== S.compare);
+    const ser = [];
+    for (const m of others) ser.push(Object.assign({ label: m.id, color: V('ctx'), ctx: true }, skillSeries(m.id, kind, base)));
+    if (S.compare && S.compare !== S.base && S.compare !== S.focus) ser.push(Object.assign({ label: S.compare, color: V('s2') }, skillSeries(S.compare, kind, base), { lo: null, hi: null }));
+    if (S.focus !== S.base) ser.push(Object.assign({ label: S.focus, color: V('s1') }, fs));
+    $('skill-title').textContent = 'Skill ' + kind.toUpperCase() + ' contre ' + S.base + ', selon l\'horizon';
+    horizonChart($('skill-plot'), { series: ser, ref: 0, fmt: v => pct(v, 1, true), height: 250 });
+    const leg = [];
+    if (S.focus !== S.base) leg.push({ label: S.focus + ' · point : significatif', color: V('s1') });
+    if (ser.some(s => s.color === V('s2'))) leg.push({ label: S.compare, color: V('s2') });
+    if (others.length) leg.push({ label: 'autres modèles', color: V('ctx') });
+    legend($('skill-legend'), leg);
+    table($('skill-tbl'), ['Modèle'].concat(G.map(String)), rowsM.map((m, i) => [m.id].concat(cells[i].map(c => c ? pct(c.v, 1, true) + (c.sig === 1 ? ' ●' : '') : '—'))));
+
+    // --- écart-type de z
+    const zm = MODELS.filter(m => C.met(mI(m.id), 'z_std', 0));
+    const zs = [];
+    for (const m of zm) if (m.id !== S.focus && m.id !== S.compare) zs.push(Object.assign({ label: m.id, color: V('ctx'), ctx: true }, metricSeries(m.id, 'z_std')));
+    if (S.compare && S.compare !== S.focus && C.met(mI(S.compare), 'z_std', 0)) zs.push(Object.assign({ label: S.compare, color: V('s2') }, metricSeries(S.compare, 'z_std'), { lo: null, hi: null }));
+    zs.push(Object.assign({ label: S.focus, color: V('s1') }, metricSeries(S.focus, 'z_std')));
+    horizonChart($('z-plot'), { series: zs, ref: 1, fmt: v => num(v, 2), height: 250 });
+    legend($('z-legend'), [{ label: S.focus, color: V('s1') }].concat(S.compare && S.compare !== S.focus ? [{ label: S.compare, color: V('s2') }] : []).concat([{ label: 'autres modèles', color: V('ctx') }]));
+    table($('z-tbl'), ['Modèle'].concat(G.map(String)), zm.map(m => [m.id].concat(G.map((_, g) => { const r = C.met(mI(m.id), 'z_std', g); return r ? num(r.v, 3) : '—'; }))));
+
+    // --- couverture : quatre petits graphiques
+    const cg = $('cov-grid'); cg.textContent = '';
+    const covRows = [];
+    for (const lv of [50, 80, 90, 95]) {
+      const box = el('div', { class: 'mini' }); box.appendChild(el('h3', null, 'Intervalle à ' + lv + ' %'));
+      const pl = el('div', { class: 'plot' }); box.appendChild(pl); cg.appendChild(box);
+      const s1 = metricSeries(S.focus, 'cov' + lv), ss = [];
+      if (S.compare && S.compare !== S.focus) ss.push(Object.assign({ label: S.compare, color: V('s2') }, metricSeries(S.compare, 'cov' + lv), { lo: null, hi: null }));
+      ss.push(Object.assign({ label: S.focus, color: V('s1') }, s1));
+      horizonChart(pl, { series: ss, ref: lv / 100, fmt: v => pct(v, 0), height: 170 });
+      covRows.push(['à ' + lv + ' %'].concat(s1.vals.map(v => pct(v, 1))));
+    }
+    legend($('cov-legend'), [{ label: S.focus + ' et son intervalle à 95 %', color: V('s1') }].concat(S.compare && S.compare !== S.focus ? [{ label: S.compare, color: V('s2') }] : []).concat([{ label: 'niveau nominal', color: V('axis') }]));
+    table($('cov-tbl'), [S.focus].concat(G.map(String)), covRows);
+
+    // --- PIT à l'horizon choisi
+    const g = S.g;
+    $('pit-title').textContent = 'Histogramme de PIT · ' + S.focus + ' · ' + hLabel(g);
+    const pit = []; for (let j = 0; j < 10; j++) { const r = C.met(fm, 'pit_bin_' + j, g); pit.push(r ? r.v : null); }
+    const hp = $('pit-plot');
+    {
+      const f = frame(hp, 230, { t: 10, r: 14, b: 36, l: 44 });
+      const hi = Math.max(0.2, Math.max.apply(null, pit.map(v => v || 0)) * 1.1), y = lin(0, hi, f.y1, f.y0);
+      yAxis(f, y, ticks(0, hi, 4), v => pct(v, 0), 'left');
+      const slot = (f.x1 - f.x0) / 10, w = Math.min(24, slot - 2);
+      pit.forEach((v, j) => {
+        const cx = f.x0 + slot * (j + 0.5);
+        const t = sv('text', { class: 'tk', x: cx, y: f.y1 + 16, 'text-anchor': 'middle' }, f.s); t.textContent = (j * 10) + '–' + (j * 10 + 10);
+        if (v == null) return;
+        const yt = y(v), hgt = f.y1 - yt, r = Math.min(4, hgt);
+        const bar = sv('path', { class: 'f-s1', d: 'M' + (cx - w / 2) + ' ' + f.y1 + 'V' + (yt + r) + 'q0 ' + (-r) + ' ' + r + ' ' + (-r) + 'h' + (w - 2 * r) + 'q' + r + ' 0 ' + r + ' ' + r + 'V' + f.y1 + 'Z' }, f.s);
+        const hitb = sv('rect', { class: 'hit', x: cx - slot / 2, y: f.y0, width: slot, height: f.y1 - f.y0 }, f.s);
+        const show = e => { bar.style.fillOpacity = '.75'; tip(e, 'PIT entre ' + (j * 10) + ' % et ' + (j * 10 + 10) + ' %', [{ color: V('s1'), value: pct(v, 1), label: 'part des réalisés' }, { value: pct(0.1, 0), label: 'attendu' }]); };
+        hitb.addEventListener('pointermove', show); hitb.addEventListener('pointerleave', () => { bar.style.fillOpacity = ''; untip(); });
+      });
+      sv('line', { class: 'ax', x1: f.x0, x2: f.x1, y1: Math.round(y(0.1)) + 0.5, y2: Math.round(y(0.1)) + 0.5 }, f.s);
+      const xl = sv('text', { class: 'tk', x: f.x1, y: f.H - 2, 'text-anchor': 'end' }, f.s); xl.textContent = 'PIT, en %';
+    }
+    table($('pit-tbl'), ['Classe', 'Part'], pit.map((v, j) => [(j * 10) + '–' + (j * 10 + 10) + ' %', pct(v, 1)]));
+
+    // --- fiabilité de P(hausse)
+    $('rel-title').textContent = 'Fiabilité de P(hausse) · ' + hLabel(g);
+    const hr = $('rel-plot');
+    {
+      const sets = [[S.focus, 's1']].concat(S.compare && S.compare !== S.focus ? [[S.compare, 's2']] : []).map(([id, c]) => ({ id, c, pts: C.rel(mI(id), g) })).filter(s => s.pts.length);
+      hr.querySelectorAll('.empty').forEach(e => e.remove());
+      if (!sets.length) { hr.querySelectorAll('svg').forEach(s => s.remove()); hr.appendChild(el('div', { class: 'empty' }, 'Ce modèle ne donne pas de probabilité de hausse.')); legend($('rel-legend'), []); table($('rel-tbl'), ['Classe'], []); }
+      else {
+        const f = frame(hr, 230, { t: 10, r: 14, b: 36, l: 44 });
+        let lo = 1, hi = 0;
+        sets.forEach(s => s.pts.forEach(p => { lo = Math.min(lo, p.p, p.lo); hi = Math.max(hi, p.p, p.hi); }));
+        const pd = Math.max(0.01, (hi - lo) * 0.08); lo = Math.max(0, lo - pd); hi = Math.min(1, hi + pd);
+        const y = lin(lo, hi, f.y1, f.y0), x = lin(lo, hi, f.x0, f.x1);
+        yAxis(f, y, ticks(lo, hi, 4), v => pct(v, 0), 'left');
+        for (const t of ticks(lo, hi, 5)) { const tx = sv('text', { class: 'tk', x: x(t), y: f.y1 + 16, 'text-anchor': 'middle' }, f.s); tx.textContent = pct(t, 0); }
+        sv('line', { class: 'ax', x1: x(lo), y1: y(lo), x2: x(hi), y2: y(hi), style: 'shape-rendering:auto' }, f.s);
+        const xl = sv('text', { class: 'tk', x: f.x1, y: f.H - 2, 'text-anchor': 'end' }, f.s); xl.textContent = 'P(hausse) annoncée';
+        for (const s of sets) for (const p of s.pts) {
+          const wl = sv('line', { class: 'ln thin', x1: x(p.p), x2: x(p.p), y1: y(p.lo), y2: y(p.hi) }, f.s); wl.style.stroke = V(s.c);
+          const dot = sv('circle', { class: 'ring', cx: x(p.p), cy: y(p.y), r: 4.5 }, f.s); dot.style.fill = V(s.c);
+          const hc = sv('circle', { class: 'hit', cx: x(p.p), cy: y(p.y), r: 13, tabindex: '0' }, f.s);
+          const show = e => tip(e.clientX != null ? e : { clientX: hc.getBoundingClientRect().left, clientY: hc.getBoundingClientRect().bottom }, s.id + ' · classe ' + (p.bin + 1), [{ color: V(s.c), value: pct(p.y, 1), label: 'fréquence observée' }, { value: pct(p.p, 1), label: 'probabilité annoncée' }, { value: '[' + pct(p.lo, 1) + ' ; ' + pct(p.hi, 1) + ']', label: 'intervalle à 95 %' }, { value: String(p.n), label: 'lignes' }]);
+          hc.addEventListener('pointermove', show); hc.addEventListener('focus', show); hc.addEventListener('pointerleave', untip); hc.addEventListener('blur', untip);
+        }
+        legend($('rel-legend'), sets.map(s => ({ label: s.id, color: V(s.c), kind: 'dot' })).concat([{ label: 'calibration parfaite', color: V('axis') }]));
+        table($('rel-tbl'), ['Classe', 'P annoncée', 'Fréquence', 'IC bas', 'IC haut', 'Lignes'], sets[0].pts.map(p => [String(p.bin + 1), pct(p.p, 1), pct(p.y, 1), pct(p.lo, 1), pct(p.hi, 1), String(p.n)]));
+      }
+    }
+
+    // --- stabilité par pli
+    $('stab-title').textContent = 'Stabilité par pli · ' + S.focus + ' · skill ' + kind.toUpperCase() + ' contre ' + S.base;
+    const fr = D.split.folds.map((fo, k) => ({ label: 'Pli ' + (k + 1) + ' · ' + DFs.format(new Date(barTime(fo[0]))) + ' → ' + DFs.format(new Date(barTime(fo[1] - 1))), cells: G.map((_, gg) => { const v = C.fold(fm, kind + '_skill', gg, base, k); return v == null ? null : { v }; }) }));
+    fr.push({ label: 'Zone notée entière', on: true, cells: G.map((_, gg) => C.skill(fm, kind, gg, base)) });
+    let mf = 0.01; fr.forEach(r => r.cells.forEach(c => { if (c && c.v != null) mf = Math.max(mf, Math.abs(c.v)); })); mf = Math.min(mf, 0.4);
+    heat($('heat-fold'), G.map(String), fr, { max: mf, fmt: v => pct(v, 1, true), what: 'skill', colTitle: j => 'horizon ' + G[j] });
+
+    // --- excursions
+    segment($('x-side'), [['long', 'Long'], ['short', 'Short']], S.xside, v => { S.xside = v; renderQuality(); });
+    segment($('x-scale'), [['sig_h', 'σ de l\'horizon'], ['sig_tau', 'σ à l\'extrême'], ['raw', 'en %']], S.xscale, v => { S.xscale = v; renderQuality(); });
+    const xf = S.xscale === 'raw' ? v => pct(v, 1) : v => num(v, 2);
+    const qs = [['q50', 'médiane', 'o1'], ['q75', 'q75', 'o2'], ['q90', 'q90', 'o3']];
+    const exSeries = stem => qs.map(([q, lab, c]) => { const r = G.map((_, gg) => C.exc(gg, stem + '_' + q)); return { label: lab + (lab === 'médiane' ? '' : ' (quantile ' + lab.slice(1) + ' %)'), short: lab, color: V(c), vals: r.map(v => v ? v.v : null), lo: null, hi: null }; });
+    horizonChart($('x-mfe'), { series: exSeries(S.xside + '_mfe_' + S.xscale), ref: 0, fmt: xf, height: 220, endLabels: true });
+    horizonChart($('x-mae'), { series: exSeries(S.xside + '_mae_' + S.xscale), ref: 0, fmt: xf, height: 220, endLabels: true });
+    const preScale = S.xscale === 'raw' ? 'raw' : 'sig_h';
+    $('x-pre-title').textContent = 'MAE avant le MFE, borne inclusive' + (S.xscale === 'sig_tau' ? ' (en σ de l\'horizon)' : '');
+    horizonChart($('x-pre'), { series: exSeries(S.xside + '_mae_pre_incl_' + preScale), ref: 0, fmt: xf, height: 220, endLabels: true });
+    legend($('x-legend'), [{ label: 'médiane', color: V('o1') }, { label: 'quantile 75 %', color: V('o2') }, { label: 'quantile 90 %', color: V('o3') }]);
+  }
+
+  // =====================================================================
+  // Vue 3 : données
+  // =====================================================================
+  function renderData() {
+    const M = D.meta, sp = D.split;
+    kv($('run-info'), [
+      ['Identifiant', M.run_id], ['Créé le', M.created_utc], ['Code', M.code_version],
+      ['Données', M.symbol + ' · ' + M.timeframe, NF[0].format(M.n_bars) + ' barres'],
+      ['Période', M.first_utc.slice(0, 10) + ' → ' + M.last_utc.slice(0, 10), M.n_gaps + ' trou(s)'],
+      ['Profil de simulation', M.profile, 'seed ' + M.seed],
+      ['Inférence', NF[0].format(M.bootstrap_reps) + ' répliques', 'blocs ' + M.block_mult.join(', ') + ' × H, minimum ' + M.block_min],
+      ['Hash des données', M.data_hash.slice(0, 16) + '…'], ['Hash du découpage', M.split_lock_hash.slice(0, 16) + '…'],
+    ].concat(M.tables.map(t => ['Table ' + t.name, NF[0].format(t.rows) + ' lignes', t.hash.slice(0, 12) + '…'])));
+    // frise du découpage
+    const host = $('split-plot');
+    const f = frame(host, 74, { t: 20, r: 6, b: 22, l: 6 });
+    const x = lin(0, sp.data_end, f.x0, f.x1);
+    const seg = (a, b, cls, op, lab) => { const r = sv('rect', { x: x(a) + 1, y: f.y0, width: Math.max(1, x(b) - x(a) - 2), height: f.y1 - f.y0, rx: 2, class: cls }, f.s); r.style.fillOpacity = op; if (lab && x(b) - x(a) > lab.length * 6.2) { const t = sv('text', { class: 'lb', x: (x(a) + x(b)) / 2, y: f.y0 - 6, 'text-anchor': 'middle' }, f.s); t.textContent = lab; } };
+    seg(0, sp.warm_end, 'f-ctx', 0.35, 'warm-up');
+    seg(sp.warm_end, sp.eval_start, 'f-ctx', 0.7, 'amorçage');
+    sp.folds.forEach((fo, k) => seg(fo[0], fo[1], 'f-s1', k % 2 ? 0.55 : 0.85, null));
+    { const t = sv('text', { class: 'lb', x: (x(sp.eval_start) + x(sp.holdout_start)) / 2, y: f.y0 - 6, 'text-anchor': 'middle' }, f.s); t.textContent = 'zone notée, ' + sp.folds.length + ' plis'; }
+    seg(sp.holdout_start, sp.data_end, 'f-ink2', 0.25, D.meta.holdout_opened ? 'holdout ouvert' : 'holdout verrouillé');
+    for (const b of [0, sp.warm_end, sp.eval_start, sp.holdout_start, sp.data_end]) { const t = sv('text', { class: 'tk', x: x(b), y: f.y1 + 14, 'text-anchor': b === 0 ? 'start' : b === sp.data_end ? 'end' : 'middle' }, f.s); t.textContent = NF[0].format(b); }
+    kv($('split-info'), [
+      ['Warm-up', '0 → ' + sp.warm_end], ['Amorçage', sp.warm_end + ' → ' + sp.eval_start],
+      ['Zone notée', sp.eval_start + ' → ' + sp.holdout_start, sp.folds.length + ' plis'],
+      ['Holdout', sp.holdout_start + ' → ' + sp.data_end, D.meta.holdout_opened ? 'ouvert' : 'verrouillé, non exporté'],
+      ['Horizon concluant en holdout', 'H* = ' + sp.h_star, 'demandé : ' + sp.h_star_requested],
+    ]);
+    renderMetricsTable();
+  }
+  function renderMetricsTable() {
+    const MX = D.metrics, q = $('d-filter').value.trim().toLowerCase().split(/\s+/).filter(Boolean), hsel = $('d-h').value;
+    const idx = [];
+    for (let i = 0; i < MX.v.length; i++) {
+      if (hsel !== '' && MX.h[i] !== +hsel) continue;
+      const txt = (MODELS[MX.m[i]].id + ' ' + MX.names[MX.k[i]] + ' ' + (MX.b[i] >= 0 ? MODELS[MX.b[i]].id : '') + ' ' + (MX.p[i] >= 0 ? MX.pk[MX.p[i]] : '')).toLowerCase();
+      if (q.every(w => txt.indexOf(w) >= 0)) idx.push(i);
+    }
+    const key = S.sort.key, dir = S.sort.asc ? 1 : -1;
+    const val = i => key === 'v' ? MX.v[i] : key === 'h' ? MX.h[i] : key === 'm' ? MODELS[MX.m[i]].id : MX.names[MX.k[i]];
+    idx.sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : a - b) * dir; });
+    $('d-count').textContent = NF[0].format(idx.length) + ' lignes' + (idx.length > 400 ? ', 400 affichées' : '');
+    const t = $('d-table'); t.textContent = '';
+    const hr = el('tr');
+    [['Modèle', 'm'], ['Horizon', 'h'], ['Métrique', 'k'], ['Baseline', null], ['Cible', null], ['Valeur', 'v'], ['IC bas', null], ['IC haut', null], ['Significatif', null], ['Bloc', null], ['Lignes', null]].forEach(([lab, k], i) => {
+      const th = el('th', { class: i === 1 || i > 4 ? 'n' : '', 'data-sort': k }, lab + (k && S.sort.key === k ? (S.sort.asc ? ' ▲' : ' ▼') : ''));
+      if (k) th.addEventListener('click', () => { S.sort = { key: k, asc: S.sort.key === k ? !S.sort.asc : true }; renderMetricsTable(); });
+      hr.appendChild(th);
+    });
+    const thd = el('thead'); thd.appendChild(hr); t.appendChild(thd);
+    const tb = el('tbody');
+    const g6 = v => v == null ? '—' : minus(Number(v).toPrecision(5));
+    for (const i of idx.slice(0, 400)) {
+      const tr = el('tr');
+      [MODELS[MX.m[i]].id, String(G[MX.h[i]]), MX.names[MX.k[i]], MX.b[i] >= 0 ? MODELS[MX.b[i]].id : '', MX.p[i] >= 0 ? MX.pk[MX.p[i]] : '', g6(MX.v[i]), g6(MX.lo[i]), g6(MX.hi[i]), MX.sig[i] == null ? '' : MX.sig[i] === 1 ? 'oui' : 'non', MX.bl[i] == null ? '' : String(MX.bl[i]), String(MX.n[i])]
+        .forEach((c, j) => tr.appendChild(el('td', { class: j === 1 || j > 4 ? 'n' : '' }, c)));
+      tb.appendChild(tr);
+    }
+    t.appendChild(tb);
+  }
+
+  // =====================================================================
+  // Assemblage
+  // =====================================================================
+  function chips() {
+    const h = $('chips'); h.textContent = '';
+    h.appendChild(el('span', { class: 'chip sym' }, D.meta.symbol));
+    h.appendChild(el('span', { class: 'chip' }, D.meta.timeframe));
+    if (/^synth/i.test(D.meta.symbol)) h.appendChild(el('span', { class: 'chip warn', title: 'Données générées, sans signal : les résultats ne disent rien d\'un marché réel.' }, '⚠ série synthétique'));
+    h.appendChild(el('span', { class: 'chip lock', title: 'Les dernières barres sont mises sous clé pour une vérification finale ; elles ne sont pas dans cette page.' }, D.meta.holdout_opened ? 'holdout ouvert' : '🔒 holdout verrouillé'));
+    if (D.fc.stride > 1) h.appendChild(el('span', { class: 'chip warn' }, '1 origine sur ' + D.fc.stride));
+  }
+  function syncSelectors() {
+    options($('sel-focus'), DIST.map(id => [id, id]), S.focus);
+    options($('sel-compare'), [['', 'aucun']].concat(DIST.filter(id => id !== S.focus).map(id => [id, id])), S.compare === S.focus ? '' : S.compare);
+    options($('sel-h'), G.map((h_, g) => [String(g), h_ + ' barres']), String(S.g));
+    options($('d-h'), [['', 'tous']].concat(G.map((h_, g) => [String(g), String(h_)])), '');
+    $('or-range').max = NO - 1;
+    segment($('zoom'), [[60, '60'], [120, '120'], [250, '250'], [500, '500'], [0, 'Tout']], S.zoom, v => { S.zoom = v; store.set('zoom', v); syncSelectors(); renderMain(); });
+    $('tg-trades').setAttribute('aria-pressed', String(S.showTrades));
+    $('tg-folds').setAttribute('aria-pressed', String(S.showFolds));
+    $('tg-path').setAttribute('aria-pressed', String(S.showPath));
+    $('tg-fan').setAttribute('aria-pressed', String(S.showFan));
+    $('tg-log').setAttribute('aria-pressed', String(logPriceOn()));
+    $('tg-help').setAttribute('aria-pressed', String(S.help));
+    $('app').classList.toggle('help-on', S.help);
+    $('tg-path').hidden = !L;
+    $('tab-chemin').hidden = !L;
+  }
+  function setOrigin(o) {
+    S.origin = Math.max(0, Math.min(NO - 1, o));
+    renderMain(); renderEvmc(); renderOrigin();
+  }
+  function renderAll() {
+    if (S.tab === 'graphique') { renderMain(); renderEvmc(); renderOrigin(); renderQuick(); }
+    else if (S.tab === 'backtest') renderBench();
+    else if (S.tab === 'chemin') renderPaths();
+    else if (S.tab === 'previsions') renderQuality();
+    else renderData();
+  }
+  function setTab(t) {
+    if (!has(TABS, t)) t = 'graphique';
+    S.tab = t;
+    for (const n of ['graphique', 'backtest', 'chemin', 'previsions', 'donnees']) { $('view-' + n).hidden = n !== t; $('tab-' + n).setAttribute('aria-selected', String(n === t)); }
+    renderAll();
+  }
+
+  // ---------- événements
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { try { history.replaceState(null, '', '#' + b.dataset.tab); } catch (e) { /* cadre sans historique */ } setTab(b.dataset.tab); }));
+  document.querySelectorAll('[data-table]').forEach(b => { b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { const on = b.closest('.panel').classList.toggle('show-table'); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Graphique' : 'Tableau'; if (!on) renderAll(); }); });
+  $('sel-focus').addEventListener('change', e => { S.focus = e.target.value; if (S.compare === S.focus) S.compare = ''; store.set('focus', S.focus); syncSelectors(); renderAll(); });
+  $('sel-compare').addEventListener('change', e => { S.compare = e.target.value; store.set('compare', S.compare); renderAll(); });
+  $('sel-h').addEventListener('change', e => { S.g = +e.target.value; store.set('g', S.g); renderAll(); });
+  $('q-base').addEventListener('change', e => { S.base = e.target.value; renderQuality(); });
+  $('tg-help').addEventListener('click', () => { S.help = !S.help; store.set('help', S.help); syncSelectors(); });
+  $('pt-model').addEventListener('change', e => { S.pt.model = e.target.value; renderPaths(); });
+  $('pt-slice').addEventListener('change', e => { S.pt.slice = e.target.value; renderPaths(); });
+
+  // --- backtest
+  const cl = (v, a, b, d) => { v = parseFloat(v); return isFinite(v) ? Math.max(a, Math.min(b, v)) : d; };
+  const rerun = () => { syncBench(); runBench(); renderBench(); };
+  $('bt-strat').addEventListener('change', e => { S.bt.strat = e.target.value; defaultsFor(S.bt.strat, false); rerun(); });
+  const execChange = () => {
+    S.bt.dir = $('st-dir').value; S.bt.exit = $('st-exit').value;
+    S.bt.hold = Math.round(cl($('st-hold').value, 1, 500, 20));
+    S.bt.tp = cl($('st-tp').value, 0, 1000, 0); S.bt.sl = cl($('st-sl').value, 0, 100, 0); S.bt.cost = cl($('st-cost').value, 0, 500, 0);
+    rerun();
+  };
+  ['st-dir', 'st-exit', 'st-hold', 'st-tp', 'st-sl', 'st-cost'].forEach(id => $(id).addEventListener('change', execChange));
+  const impChange = () => {
+    const saved = S.bt.prm.import || (S.bt.prm.import = {});
+    saved.col = +$('imp-col').value || 0; saved.a = cl($('imp-a').value, -1e12, 1e12, 0); saved.b = cl($('imp-b').value, -1e12, 1e12, 0); saved.carry = $('imp-carry').checked;
+    rerun();
+  };
+  ['imp-col', 'imp-a', 'imp-b', 'imp-carry'].forEach(id => $(id).addEventListener('change', impChange));
+  $('imp-file').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      const r = CORE.readImport(C, String(rd.result));
+      const info = $('imp-info');
+      if (r.error) { IMP = null; info.textContent = file.name + ' : ' + r.error; rerun(); return; }
+      IMP = Object.assign(r, { name: file.name });
+      if (r.kind === 'trades') {
+        info.textContent = file.name + ' : liste de trades, ' + r.trades.length + ' rejoués sur ' + r.total
+          + (r.out ? ' ; ' + r.out + ' hors de la zone notée ou dans le holdout' : '') + (r.bad ? ' ; ' + r.bad + ' incomplets' : '') + (r.overlap ? ' ; ' + r.overlap + ' écartés car ils chevauchent un autre trade' : '') + '.';
+      } else {
+        S.bt.prm.import = Object.assign({ a: 0, b: 0, carry: false }, S.bt.prm.import, { col: r.def });
+        S.bt.exit = 'signal';
+        info.textContent = file.name + ' : série de signaux, ' + r.mapped + ' lignes placées sur ' + r.total + (r.out ? ' ; ' + r.out + ' hors des barres de la page' : '') + '. Choisis la colonne et les deux seuils.';
+      }
+      rerun();
+    };
+    rd.readAsText(file);
+  });
+
+  // --- graphique
+  $('or-range').addEventListener('input', e => setOrigin(+e.target.value));
+  $('or-prev').addEventListener('click', () => setOrigin(S.origin - 1));
+  $('or-next').addEventListener('click', () => setOrigin(S.origin + 1));
+  $('or-first').addEventListener('click', () => setOrigin(0));
+  $('or-last').addEventListener('click', () => setOrigin(NO - 1));
+  let timer = null;
+  const stop = () => { if (timer) { clearInterval(timer); timer = null; } $('or-play').setAttribute('aria-pressed', 'false'); $('or-play').textContent = 'Lecture'; };
+  $('or-play').addEventListener('click', () => {
+    if (timer) return stop();
+    if (S.origin >= NO - 1) setOrigin(0);
+    $('or-play').setAttribute('aria-pressed', 'true'); $('or-play').textContent = 'Pause';
+    const slow = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    timer = setInterval(() => { if (S.origin >= NO - 1) return stop(); setOrigin(S.origin + (slow ? 5 : 1)); }, slow ? 900 : 140);
+  });
+  const toggle = (id, key) => $(id).addEventListener('click', () => { S[key] = !S[key]; store.set(key, S[key]); syncSelectors(); renderMain(); });
+  toggle('tg-trades', 'showTrades'); toggle('tg-path', 'showPath'); toggle('tg-fan', 'showFan');
+  $('tg-folds').addEventListener('click', () => { S.showFolds = !S.showFolds; syncSelectors(); renderMain(); });
+  $('tg-log').addEventListener('click', () => { S.logPrice = !logPriceOn(); store.set('logPrice', S.logPrice); syncSelectors(); renderMain(); });
+  $('tg-perflog').addEventListener('click', () => { S.logPerf = $('tg-perflog').getAttribute('aria-pressed') !== 'true'; store.set('logPerf', S.logPerf); renderBench(); });
+  $('d-filter').addEventListener('input', renderMetricsTable);
+  $('d-h').addEventListener('change', renderMetricsTable);
+  let rz = null, lastW = 0;
+  const onResize = () => { const w = $('app').clientWidth; if (w === lastW) return; lastW = w; clearTimeout(rz); rz = setTimeout(renderAll, 120); };
+  if (window.ResizeObserver) new ResizeObserver(onResize).observe($('app')); else window.addEventListener('resize', onResize);
+  if (window.matchMedia) { const mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', renderAll); }
+  if (window.MutationObserver) new MutationObserver(renderAll).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  // ---------- démarrage
+  chips();
+  syncSelectors();
+  defaultsFor(S.bt.strat, true);
+  syncBench();
+  runBench();
+  const hash = (location.hash || '').slice(1);
+  setTab(has(TABS, hash) ? hash : 'graphique');
+  lastW = $('app').clientWidth;
+})();
+</script>
