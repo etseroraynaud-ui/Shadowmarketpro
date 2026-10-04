@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import type { Bars, Metrics, Settings } from '../../../lib/backtest/types.ts'
-import type { RunOutput, StrategySource } from '../../../lib/backtest/index.ts'
+import type { AppOutput, AppSource } from '../types'
 import type { Dict, Lang } from '../i18n'
 import { fmtMoney, fmtNum, fmtPct, tone } from '../format'
 import { PriceChart, EquityChart } from './Charts'
@@ -18,12 +18,12 @@ type Quality = { label: string; cls: 'good' | 'ok' | 'bad' } | null
 export default function Results({
   out, bars, lang, t, settings, source, intraday, onApplyParams, onEnableSplit,
 }: {
-  out: RunOutput
+  out: AppOutput
   bars: Bars
   lang: Lang
   t: Dict
   settings: Settings
-  source: StrategySource
+  source: AppSource
   intraday: boolean
   onApplyParams: (v: Record<string, number>) => void
   onEnableSplit: () => void

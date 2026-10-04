@@ -39,7 +39,7 @@ function NumField({ label, value, onChange, step = 'any', min, suffix, placehold
   )
 }
 
-export default function SettingsPanel({ t, s, set }: { t: Dict; s: UiSettings; set: (p: Partial<UiSettings>) => void }) {
+export default function SettingsPanel({ t, s, set, native = false }: { t: Dict; s: UiSettings; set: (p: Partial<UiSettings>) => void; native?: boolean }) {
   const pos = (v: number | null) => (v != null && v > 0 ? v : null)
   return (
     <div className="bt-step-body">
@@ -55,7 +55,13 @@ export default function SettingsPanel({ t, s, set }: { t: Dict; s: UiSettings; s
         </label>
       </div>
 
+      {native && <p className="bt-note">{t.shockSettingsNote}</p>}
       <div className="bt-sub">{t.sizing}</div>
+      {native ? (
+        <div className="bt-form-grid">
+          <NumField label={t.sizing_percent} value={s.sizing === 'percent' ? s.sizeValue : 100} min={1} suffix="%" onChange={v => set({ sizing: 'percent', sizeValue: v ?? 100 })} />
+        </div>
+      ) : (
       <div className="bt-form-grid">
         <label className="bt-field">
           <span>{t.sizing}</span>
@@ -72,13 +78,15 @@ export default function SettingsPanel({ t, s, set }: { t: Dict; s: UiSettings; s
         <p className="bt-muted bt-small bt-span2">{t[`sizingHint_${s.sizing}` as const]}</p>
         {s.sizing === 'risk' && <NumField label={t.maxLeverage} value={s.maxLeverage} min={0.1} step={0.5} suffix="×" onChange={v => set({ maxLeverage: v ?? 1 })} />}
       </div>
+      )}
 
       <div className="bt-sub">{t.costs}</div>
       <div className="bt-form-grid bt-grid-3">
         <NumField label={t.feePct} value={s.feePct} min={0} step={0.01} suffix="%" onChange={v => set({ feePct: v ?? 0 })} />
         <NumField label={t.slippage} value={s.slippagePct} min={0} step={0.01} suffix="%" onChange={v => set({ slippagePct: v ?? 0 })} />
-        <NumField label={t.feeFixed} value={s.feeFixed} min={0} step={0.5} onChange={v => set({ feeFixed: v ?? 0 })} />
+        {!native && <NumField label={t.feeFixed} value={s.feeFixed} min={0} step={0.5} onChange={v => set({ feeFixed: v ?? 0 })} />}
       </div>
+      {!native && (<>
       <label className="bt-field">
         <span>{t.fill}</span>
         <div className="bt-seg bt-seg-sm">
@@ -96,6 +104,7 @@ export default function SettingsPanel({ t, s, set }: { t: Dict; s: UiSettings; s
         <NumField label={t.trailing} value={s.trailingPct} min={0} step={0.5} suffix="%" placeholder={t.off} onChange={v => set({ trailingPct: pos(v) })} />
         <NumField label={t.maxBars} value={s.maxBars} min={1} step={1} placeholder={t.off} onChange={v => set({ maxBars: v != null && v >= 1 ? Math.round(v) : null })} />
       </div>
+      </>)}
 
       <div className="bt-sub">{t.validation}</div>
       <div className="bt-seg bt-seg-sm">

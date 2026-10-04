@@ -1,0 +1,146 @@
+[
+ {
+  "file": "SYNTHESE.md",
+  "title": "Shock Engine sur BTC/USD : synthèse de la recherche",
+  "group": "synthese",
+  "tf": 0
+ },
+ {
+  "file": "shock-5m-diagnostic.md",
+  "title": "Shock Engine · BTC/USD 5 min · diagnostic",
+  "group": "diagnostic",
+  "tf": 5
+ },
+ {
+  "file": "shock-15m-diagnostic.md",
+  "title": "Shock Engine · BTC/USD 15 min · diagnostic",
+  "group": "diagnostic",
+  "tf": 15
+ },
+ {
+  "file": "shock-30m-diagnostic.md",
+  "title": "Shock Engine · BTC/USD 30 min · diagnostic",
+  "group": "diagnostic",
+  "tf": 30
+ },
+ {
+  "file": "shock-5m-walkforward.md",
+  "title": "Shock Engine · BTC/USD 5 min · walk-forward",
+  "group": "walkforward",
+  "tf": 5
+ },
+ {
+  "file": "shock-15m-walkforward-reduced-train24.md",
+  "title": "Shock Engine · BTC/USD 15 min · walk-forward",
+  "group": "walkforward",
+  "tf": 15
+ },
+ {
+  "file": "shock-15m-walkforward.md",
+  "title": "Shock Engine · BTC/USD 15 min · walk-forward",
+  "group": "walkforward",
+  "tf": 15
+ },
+ {
+  "file": "shock-30m-walkforward-reduced-train24-realistic.md",
+  "title": "Shock Engine · BTC/USD 30 min · walk-forward",
+  "group": "walkforward",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-walkforward-reduced-train24.md",
+  "title": "Shock Engine · BTC/USD 30 min · walk-forward",
+  "group": "walkforward",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-walkforward.md",
+  "title": "Shock Engine · BTC/USD 30 min · walk-forward",
+  "group": "walkforward",
+  "tf": 30
+ },
+ {
+  "file": "shock-15m-regimes-menu.md",
+  "title": "Shock Engine · BTC/USD 15 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 15
+ },
+ {
+  "file": "shock-15m-regimes-trend.md",
+  "title": "Shock Engine · BTC/USD 15 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 15
+ },
+ {
+  "file": "shock-15m-regimes-vol-seed13.md",
+  "title": "Shock Engine · BTC/USD 15 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 15
+ },
+ {
+  "file": "shock-15m-regimes-vol-seed9.md",
+  "title": "Shock Engine · BTC/USD 15 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 15
+ },
+ {
+  "file": "shock-15m-regimes-vol.md",
+  "title": "Shock Engine · BTC/USD 15 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 15
+ },
+ {
+  "file": "shock-15m-regimes.md",
+  "title": "Shock Engine · BTC/USD 15 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 15
+ },
+ {
+  "file": "shock-30m-regimes-menu.md",
+  "title": "Shock Engine · BTC/USD 30 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-regimes-realistic.md",
+  "title": "Shock Engine · BTC/USD 30 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-regimes-trend.md",
+  "title": "Shock Engine · BTC/USD 30 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-regimes-vol-realistic.md",
+  "title": "Shock Engine · BTC/USD 30 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-regimes-vol-seed13.md",
+  "title": "Shock Engine · BTC/USD 30 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-regimes-vol-seed9.md",
+  "title": "Shock Engine · BTC/USD 30 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-regimes-vol.md",
+  "title": "Shock Engine · BTC/USD 30 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 30
+ },
+ {
+  "file": "shock-30m-regimes.md",
+  "title": "Shock Engine · BTC/USD 30 min · paramètres par régime de marché",
+  "group": "regimes",
+  "tf": 30
+ }
+]

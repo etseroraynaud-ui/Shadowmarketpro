@@ -2,7 +2,7 @@
 
 import type { Bars, Metrics, Trade } from '../../lib/backtest/types.ts'
 import { computeMetrics } from '../../lib/backtest/metrics.ts'
-import type { PositionRecord, ShockResult } from '../shock/engine.ts'
+import type { PositionRecord, ShockResult } from '../../lib/strategies/shock/engine.ts'
 
 export function asTrades(bars: Bars, ps: PositionRecord[]): Trade[] {
   return ps.map((p, k) => ({

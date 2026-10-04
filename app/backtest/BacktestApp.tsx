@@ -3,7 +3,13 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { runStrategy } from '../../lib/backtest/index.ts'
-import type { RunOutput, StrategySource } from '../../lib/backtest/index.ts'
+import type { StrategySource } from '../../lib/backtest/index.ts'
+import { runShockBacktest, SHOCK_PRESETS } from '../../lib/strategies/shock/adapter.ts'
+import type { Adaptive } from '../../lib/strategies/shock/adapter.ts'
+import { DEFAULT_PARAMS } from '../../lib/strategies/shock/params.ts'
+import type { ShockParams } from '../../lib/strategies/shock/params.ts'
+import type { AppOutput, AppSource } from './types'
+import ShockPanel from './components/ShockPanel'
 import { ScriptError } from '../../lib/backtest/script/parser.ts'
 import { windowIndices } from '../../lib/backtest/engine.ts'
 import { TEMPLATES } from '../../lib/backtest/templates.ts'
@@ -31,6 +37,9 @@ interface Saved {
   ui?: UiSettings
   sample?: string
   mode?: StrategyMode
+  shockPreset?: string
+  shockParams?: ShockParams
+  shockEdited?: boolean
 }
 
 function readStore(): Saved {
@@ -82,7 +91,11 @@ export default function BacktestApp() {
   const [signalFile, setSignalFile] = useState<SignalFile | null>(null)
   const [signalOpts, setSignalOpts] = useState<SignalOptions>({ col: 0, mode: 'position', upper: 0, lower: 0 })
   const [ui, setUi] = useState<UiSettings>(DEFAULT_UI)
-  const [out, setOut] = useState<RunOutput | null>(null)
+  const [shockPreset, setShockPreset] = useState('script')
+  const [shockParams, setShockParams] = useState<ShockParams>(DEFAULT_PARAMS)
+  const [shockAdaptive, setShockAdaptive] = useState<Adaptive | null>(null)
+  const [shockEdited, setShockEdited] = useState(false)
+  const [out, setOut] = useState<AppOutput | null>(null)
   const [scriptErr, setScriptErr] = useState<ScriptErr | null>(null)
   const [inputs, setInputs] = useState<InputDef[]>([])
   const [busy, setBusy] = useState(false)
@@ -97,13 +110,20 @@ export default function BacktestApp() {
     if (s.overrides) setOverrides(s.overrides)
     if (s.ui) setUi({ ...DEFAULT_UI, ...s.ui })
     if (s.mode && s.mode !== 'signals') setMode(s.mode)
+    if (s.shockPreset) {
+      const pr = SHOCK_PRESETS.find(x => x.id === s.shockPreset)
+      setShockPreset(s.shockPreset)
+      if (pr) setShockAdaptive(pr.build().adaptive)
+    }
+    if (s.shockParams) setShockParams({ ...DEFAULT_PARAMS, ...s.shockParams })
+    if (s.shockEdited) { setShockEdited(true); setShockAdaptive(null) }
     setReady(true)
     loadSample(s.sample ?? 'btc1d').then(setData).catch(e => setDataError(String(e)))
   }, [])
 
   useEffect(() => {
-    if (ready) writeStore({ lang, code, overrides, ui, sample: data?.sample, mode })
-  }, [ready, lang, code, overrides, ui, data?.sample, mode])
+    if (ready) writeStore({ lang, code, overrides, ui, sample: data?.sample, mode, shockPreset, shockParams, shockEdited })
+  }, [ready, lang, code, overrides, ui, data?.sample, mode, shockPreset, shockParams, shockEdited])
 
   const settings: Settings | null = useMemo(() => {
     if (!data) return null
@@ -118,16 +138,30 @@ export default function BacktestApp() {
     return base
   }, [data, ui, from, to])
 
-  const source: StrategySource = useMemo(
-    () => (mode === 'signals' && signalFile ? { kind: 'signals', file: signalFile, options: signalOpts } : { kind: 'script', code, overrides }),
-    [mode, signalFile, signalOpts, code, overrides],
-  )
+  const source: AppSource = useMemo((): AppSource => {
+    if (mode === 'shock') return { kind: 'shock', params: shockParams, adaptive: shockAdaptive }
+    if (mode === 'signals' && signalFile) return { kind: 'signals', file: signalFile, options: signalOpts }
+    return { kind: 'script', code, overrides }
+  }, [mode, signalFile, signalOpts, code, overrides, shockParams, shockAdaptive])
 
   const run = useCallback(() => {
     if (!data || !settings) return
     setBusy(true)
     try {
-      const o = runStrategy(data.bars, source, settings)
+      const o = source.kind === 'shock' ? runShockBacktest(data.bars, source, settings) : runStrategy(data.bars, source as StrategySource, settings)
+      // Préréglage choisi par la recherche, testé sur la période où il a été choisi : résultat flatteur.
+      const pr = source.kind === 'shock' && !shockEdited ? SHOCK_PRESETS.find(x => x.id === shockPreset) : undefined
+      if (pr?.selectedOn) {
+        const r0 = o.result
+        const a = data.bars.t[r0.start]
+        const b = data.bars.t[r0.end]
+        if (a < pr.selectedOn.to && b > pr.selectedOn.from) {
+          o.warnings = [{
+            fr: `Ce préréglage a été choisi par la recherche sur 2017-2026 : sur cette période, le résultat affiché est en échantillon et donc flatteur. ${pr.selectedOn.oos.fr}`,
+            en: `This preset was chosen by the research on 2017-2026: on this period, the result shown is in sample and therefore flattering. ${pr.selectedOn.oos.en}`,
+          }, ...o.warnings]
+        }
+      }
       setOut(o)
       if (source.kind === 'script') setInputs(o.inputs)
       setScriptErr(null)
@@ -137,7 +171,7 @@ export default function BacktestApp() {
     } finally {
       setBusy(false)
     }
-  }, [data, settings, source, lang])
+  }, [data, settings, source, lang, shockEdited, shockPreset])
 
   // Relance automatique, avec un court délai pendant la saisie.
   useEffect(() => {
@@ -157,6 +191,22 @@ export default function BacktestApp() {
     setDataError(null)
   }
   const intraday = !!data && data.barMs < 86400000
+  const choosePreset = (id: string) => {
+    const pr = SHOCK_PRESETS.find(x => x.id === id)
+    if (!pr) return
+    const b = pr.build()
+    setShockPreset(id)
+    setShockParams(b.params)
+    setShockAdaptive(b.adaptive)
+    setShockEdited(false)
+    // Exécution déclarée dans strategy() du script : 10 000, 100 % du capital, commission 0,02 %,
+    // glissement d'un tick (négligeable sur le BTC), dans les deux sens.
+    setUiPart({ direction: 'both', capital: 10000, sizing: 'percent', sizeValue: 100, feePct: 0.02, slippagePct: 0 })
+  }
+  const loadTf = (tf: number) => {
+    loadSample(`btc${tf}m`).then(onLoaded).catch(e => setDataError(String(e)))
+  }
+  const dataTf = data ? Math.round(data.barMs / 60000) : null
 
   return (
     <div className="bt-app">
@@ -174,6 +224,7 @@ export default function BacktestApp() {
                 <button key={l} className={lang === l ? 'on' : ''} onClick={() => setLang(l)}>{l.toUpperCase()}</button>
               ))}
             </div>
+            <Link href="/backtest/recherche" className="bt-link">{t.research}</Link>
             <Link href="/" className="bt-link bt-hide-sm">{t.backToSite}</Link>
           </div>
         </div>
@@ -192,14 +243,21 @@ export default function BacktestApp() {
           </Step>
           <Step n={2} title={t.step2} sub={t.step2Sub}>
             <StrategyPanel
-              t={t} lang={lang} mode={mode} setMode={setMode} code={code} setCode={setCode} inputs={inputs}
+              t={t} lang={lang} mode={mode} setMode={m => { if (m === 'shock' && mode !== 'shock') setUiPart({ direction: 'both' }); setMode(m) }} code={code} setCode={setCode} inputs={inputs}
               overrides={overrides} setOverrides={setOverrides} error={source.kind === 'script' ? scriptErr : null}
               signalFile={signalFile} setSignalFile={setSignalFile} signalOpts={signalOpts} setSignalOpts={setSignalOpts}
               onApplySettings={applySettings} onDirection={d => setUiPart({ direction: d })}
+              shockSlot={
+                <ShockPanel
+                  t={t} lang={lang} preset={shockPreset} onPreset={choosePreset} params={shockParams}
+                  onParams={p => { setShockParams(p); setShockAdaptive(null); setShockEdited(true) }} adaptive={shockAdaptive}
+                  dataTf={dataTf} onLoadTf={loadTf}
+                />
+              }
             />
           </Step>
           <Step n={3} title={t.step3} sub={t.step3Sub}>
-            <SettingsPanel t={t} s={ui} set={setUiPart} />
+            <SettingsPanel t={t} s={ui} set={setUiPart} native={mode === 'shock'} />
           </Step>
           <div className="bt-run">
             <button className="bt-btn bt-btn-primary bt-btn-run" onClick={run} disabled={!data || busy}>
@@ -215,7 +273,9 @@ export default function BacktestApp() {
           {out && data && settings ? (
             <Results
               out={out} bars={data.bars} lang={lang} t={t} settings={settings} source={source} intraday={intraday}
-              onApplyParams={v => { setOverrides(o => ({ ...o, ...v })); setMode('script') }}
+              onApplyParams={v => {
+                if (mode === 'shock') { setShockParams(p => ({ ...p, ...v })); setShockAdaptive(null); setShockEdited(true) } else { setOverrides(o => ({ ...o, ...v })); setMode('script') }
+              }}
               onEnableSplit={() => setUiPart({ oosPct: 30 })}
             />
           ) : (

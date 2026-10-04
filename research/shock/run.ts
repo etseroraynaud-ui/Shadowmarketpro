@@ -6,8 +6,8 @@
 import { writeFileSync } from 'node:fs'
 import { loadBtc, dayMs, indexAtOrAfter } from '../lib/data.ts'
 import { metricsOf, pct, num } from '../lib/stats.ts'
-import { makeMarket, runShock } from './engine.ts'
-import { DEFAULT_PARAMS, SCRIPT_COSTS, REALISTIC_COSTS, USER_2026, withParams } from './params.ts'
+import { makeMarket, runShock } from '../../lib/strategies/shock/engine.ts'
+import { DEFAULT_PARAMS, SCRIPT_COSTS, REALISTIC_COSTS, USER_2026, withParams } from '../../lib/strategies/shock/params.ts'
 
 export function parseArgs(argv: string[]) {
   const a: Record<string, string> = {}

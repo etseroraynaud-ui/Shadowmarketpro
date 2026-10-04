@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Bars, InputDef, Settings } from '../../../lib/backtest/types.ts'
-import type { StrategySource } from '../../../lib/backtest/index.ts'
+import type { AppSource } from '../types'
+import { optimizeShock } from '../../../lib/strategies/shock/optimize.ts'
 import { optimize, axisValues, MAX_RUNS } from '../../../lib/backtest/optimize.ts'
 import type { Objective, OptParam, OptResult, OptCell } from '../../../lib/backtest/optimize.ts'
 import { windowIndices } from '../../../lib/backtest/engine.ts'
@@ -36,7 +37,7 @@ export default function Optimizer({
   bars, source, inputs, settings, lang, t, onApply, onEnableSplit,
 }: {
   bars: Bars
-  source: StrategySource
+  source: AppSource
   inputs: InputDef[]
   settings: Settings
   lang: Lang
@@ -44,7 +45,7 @@ export default function Optimizer({
   onApply: (v: Record<string, number>) => void
   onEnableSplit: () => void
 }) {
-  const overrides = source.kind === 'script' ? source.overrides : {}
+  const overrides: Record<string, number> = source.kind === 'script' ? source.overrides : {}
   const numeric = inputs
   const current = (d: InputDef) => (overrides[d.name] ?? d.defval)
   const [p1, setP1] = useState<OptParam | null>(() => (numeric[0] ? defaultRange(numeric[0], current(numeric[0])) : null))
@@ -69,17 +70,22 @@ export default function Optimizer({
   const total = params.reduce((a, p) => a * axisValues(p).length, 1)
   const hasSplit = windowIndices(bars, settings).split > 0
 
-  if (source.kind !== 'script') return <p className="bt-muted">{t.optNoScript}</p>
+  if (source.kind === 'signals') return <p className="bt-muted">{t.optNoScript}</p>
   if (!inputs.length) return <p className="bt-muted">{t.optNoInputs}</p>
 
   const run = () => {
     setError(null)
     setRes(null)
     setProgress({ done: 0, total })
-    const job = { bars, script: source.code, overrides, params, settings, objective, minTrades }
+    const shock = source.kind === 'shock'
+    const job = shock
+      ? { bars, spec: { ...source, adaptive: null }, params, settings, objective, minTrades }
+      : { bars, script: source.kind === 'script' ? source.code : '', overrides, params, settings, objective, minTrades }
     try {
       worker.current?.terminate()
-      const w = new Worker(new URL('../../../lib/backtest/optimizer.worker.ts', import.meta.url), { type: 'module' })
+      const w = shock
+        ? new Worker(new URL('../../../lib/strategies/shock/optimizer.worker.ts', import.meta.url), { type: 'module' })
+        : new Worker(new URL('../../../lib/backtest/optimizer.worker.ts', import.meta.url), { type: 'module' })
       worker.current = w
       w.onmessage = (e: MessageEvent) => {
         const m = e.data
@@ -90,17 +96,18 @@ export default function Optimizer({
       w.onerror = () => {
         // Sans worker (navigateur restrictif), calcul sur la page.
         w.terminate()
-        runInline(job)
+        runInline()
       }
       w.postMessage(job)
     } catch {
-      runInline(job)
+      runInline()
     }
   }
-  const runInline = (job: { params: OptParam[] }) => {
+  const runInline = () => {
     setTimeout(() => {
       try {
-        setRes(optimize(bars, source.code, overrides, job.params, settings, objective, minTrades))
+        if (source.kind === 'shock') setRes(optimizeShock(bars, { ...source, adaptive: null }, params, settings, objective, minTrades))
+        else if (source.kind === 'script') setRes(optimize(bars, source.code, overrides, params, settings, objective, minTrades))
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
       }

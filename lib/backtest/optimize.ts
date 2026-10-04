@@ -53,12 +53,14 @@ export function scoreOf(m: Metrics, o: Objective): number {
   return v
 }
 
-export function optimize(
-  bars: Bars,
-  script: string,
-  baseOverrides: Record<string, number>,
+/**
+ * Grille générique : `evalIn` mesure une combinaison sur l'échantillon, `evalFull` rejoue la
+ * meilleure sur toute la période (mesures échantillon / hors échantillon).
+ */
+export function gridSearch(
   params: OptParam[],
-  settings: Settings,
+  evalIn: (values: number[]) => Metrics | null,
+  evalFull: (values: number[]) => { bestIn: Metrics | null; bestOut: Metrics | null },
   objective: Objective,
   minTrades = 5,
   onProgress?: (done: number, total: number) => void,
@@ -66,20 +68,16 @@ export function optimize(
   const axes = params.map(axisValues)
   const total = axes.reduce((a, x) => a * x.length, 1)
   if (total > MAX_RUNS) throw new Error(`too many combinations (${total} > ${MAX_RUNS})`)
-  const hasSplit = windowIndices(bars, settings).split > 0
-  const inSettings: Settings = hasSplit ? { ...settings, to: settings.splitTime! - 1, splitTime: null } : { ...settings, splitTime: null }
   const cells: OptCell[] = []
   const evalCell = (values: number[]): OptCell => {
-    const ov = { ...baseOverrides }
-    params.forEach((p, k) => { ov[p.name] = values[k] })
+    let m: Metrics | null = null
     try {
-      const comp = compileScript(script, bars, ov)
-      const res = runBacktest(bars, comp.signals, inSettings)
-      const m = res.metrics
-      return { values, score: scoreOf(m, objective), totalReturn: m.totalReturn, sharpe: m.sharpe, maxDrawdown: m.maxDrawdown, trades: m.trades, valid: m.trades >= minTrades }
+      m = evalIn(values)
     } catch {
-      return { values, score: NaN, totalReturn: NaN, sharpe: NaN, maxDrawdown: NaN, trades: 0, valid: false }
+      m = null
     }
+    if (!m) return { values, score: NaN, totalReturn: NaN, sharpe: NaN, maxDrawdown: NaN, trades: 0, valid: false }
+    return { values, score: scoreOf(m, objective), totalReturn: m.totalReturn, sharpe: m.sharpe, maxDrawdown: m.maxDrawdown, trades: m.trades, valid: m.trades >= minTrades }
   }
   let done = 0
   const rec = (k: number, acc: number[]) => {
@@ -98,15 +96,41 @@ export function optimize(
   rec(0, [])
   let best: OptCell | null = null
   for (const c of cells) if (c.valid && (!best || c.score > best.score)) best = c
-  let bestIn: Metrics | null = null
-  let bestOut: Metrics | null = null
-  if (best) {
+  const full = best ? evalFull(best.values) : { bestIn: null, bestOut: null }
+  return { params, axes, cells, best, objective, minTrades, bestIn: full.bestIn, bestOut: full.bestOut }
+}
+
+/** Réglages de la période d'échantillon : tout jusqu'au début de la validation. */
+export function inSampleSettings(bars: Bars, settings: Settings): Settings {
+  const hasSplit = windowIndices(bars, settings).split > 0
+  return hasSplit ? { ...settings, to: settings.splitTime! - 1, splitTime: null } : { ...settings, splitTime: null }
+}
+
+export function optimize(
+  bars: Bars,
+  script: string,
+  baseOverrides: Record<string, number>,
+  params: OptParam[],
+  settings: Settings,
+  objective: Objective,
+  minTrades = 5,
+  onProgress?: (done: number, total: number) => void,
+): OptResult {
+  const inSettings = inSampleSettings(bars, settings)
+  const over = (values: number[]) => {
     const ov = { ...baseOverrides }
-    params.forEach((p, k) => { ov[p.name] = best!.values[k] })
-    const comp = compileScript(script, bars, ov)
-    const res = runBacktest(bars, comp.signals, settings)
-    bestIn = res.inSample ?? res.metrics
-    bestOut = res.outSample
+    params.forEach((p, k) => { ov[p.name] = values[k] })
+    return ov
   }
-  return { params, axes, cells, best, objective, minTrades, bestIn, bestOut }
+  return gridSearch(
+    params,
+    values => runBacktest(bars, compileScript(script, bars, over(values)).signals, inSettings).metrics,
+    values => {
+      const res = runBacktest(bars, compileScript(script, bars, over(values)).signals, settings)
+      return { bestIn: res.inSample ?? res.metrics, bestOut: res.outSample }
+    },
+    objective,
+    minTrades,
+    onProgress,
+  )
 }

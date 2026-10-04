@@ -20,9 +20,9 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadBtc, dayMs, indexAtOrAfter } from '../lib/data.ts'
 import { sharpeOf } from '../lib/stats.ts'
-import { makeMarket, runShock, sliceMarket } from './engine.ts'
-import { DEFAULT_PARAMS, SCRIPT_COSTS, REALISTIC_COSTS, withParams } from './params.ts'
-import type { ShockParams } from './params.ts'
+import { makeMarket, runShock, sliceMarket } from '../../lib/strategies/shock/engine.ts'
+import { DEFAULT_PARAMS, SCRIPT_COSTS, REALISTIC_COSTS, withParams } from '../../lib/strategies/shock/params.ts'
+import type { ShockParams } from '../../lib/strategies/shock/params.ts'
 import { rng } from '../../lib/backtest/robustness.ts'
 
 type Over = Partial<Record<keyof ShockParams, unknown>>

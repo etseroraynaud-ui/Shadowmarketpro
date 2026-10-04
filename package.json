@@ -14,7 +14,8 @@
     "research:diagnose": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/diagnose.ts",
     "research:walkforward": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/walkforward.ts",
     "research:compare-tv": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/compare-tv.ts",
-    "research:regimes": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/regime-wf.ts"
+    "research:regimes": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/regime-wf.ts",
+    "research:publish": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/data/publish-site.ts && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/export-presets.ts && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/publish-reports.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",

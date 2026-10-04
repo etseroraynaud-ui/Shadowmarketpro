@@ -21,9 +21,9 @@
 // Le filtre 60 min (request.security, lookahead_off) prend, pour chaque barre, la dernière
 // barre de 60 min close au plus tard à la clôture de la barre : pas de lecture du futur.
 
-import type { Bars } from '../../lib/backtest/types.ts'
-import { sma, ema, stdev, highest, lowest, atr } from '../../lib/backtest/indicators.ts'
-import { resample } from '../../lib/backtest/data.ts'
+import type { Bars } from '../../backtest/types.ts'
+import { sma, ema, stdev, highest, lowest, atr } from '../../backtest/indicators.ts'
+import { resample } from '../../backtest/data.ts'
 import type { Costs, ShockParams } from './params.ts'
 
 const EPS = 1e-10

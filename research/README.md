@@ -20,7 +20,7 @@ npm run research:data -- /tmp/bs/data/historical/btcusd_bitstamp_1min_2012-2025.
 
 ## Le port du script
 
-`shock/engine.ts` reproduit le script ligne à ligne, et la façon dont TradingView l'exécute :
+`lib/strategies/shock/engine.ts` (partagé avec le site) reproduit le script ligne à ligne, et la façon dont TradingView l'exécute :
 
 - `process_orders_on_close` : entrées, flip et sortie VWAP exécutés à la clôture du signal ;
 - les ordres de sortie (`strategy.exit`) ne sont posés qu'à la clôture de la barre qui suit
@@ -57,6 +57,16 @@ npm run test:research
 ```
 
 Les rapports sont écrits dans `research/reports/`.
+
+Pour mettre à jour le site (onglet Shock Engine de Backtest Lab et page `/backtest/recherche`) :
+
+```
+npm run research:publish
+```
+
+Cette commande copie les données 5, 15 et 30 min dans `public/backtest/data`, régénère les
+préréglages issus de la recherche (`lib/strategies/shock/presets.ts`) et publie les rapports
+dans `public/backtest/reports`.
 
 ## Méthode contre le surajustement
 

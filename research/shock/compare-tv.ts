@@ -9,8 +9,8 @@
 import { readFileSync } from 'node:fs'
 import { parseCsv, parseTime, toNumber } from '../../lib/backtest/data.ts'
 import { loadBtc, indexAtOrAfter } from '../lib/data.ts'
-import { makeMarket, runShock } from './engine.ts'
-import { DEFAULT_PARAMS, SCRIPT_COSTS, withParams } from './params.ts'
+import { makeMarket, runShock } from '../../lib/strategies/shock/engine.ts'
+import { DEFAULT_PARAMS, SCRIPT_COSTS, withParams } from '../../lib/strategies/shock/params.ts'
 import { parseArgs } from './run.ts'
 
 interface TvPos {

@@ -19,13 +19,27 @@ export interface Dataset {
 export const SAMPLES = [
   { id: 'btc1d', file: '/backtest/data/btcusd_1d.csv', name: 'BTC/USD · Bitstamp', label: 'sampleBtc1d' as const },
   { id: 'btc4h', file: '/backtest/data/btcusd_4h.csv', name: 'BTC/USD · Bitstamp', label: 'sampleBtc4h' as const },
+  { id: 'btc30m', file: '/backtest/data/btcusd_30m.csv.gz', name: 'BTC/USD · Bitstamp', label: 'sampleBtc30m' as const },
+  { id: 'btc15m', file: '/backtest/data/btcusd_15m.csv.gz', name: 'BTC/USD · Bitstamp', label: 'sampleBtc15m' as const },
+  { id: 'btc5m', file: '/backtest/data/btcusd_5m.csv.gz', name: 'BTC/USD · Bitstamp', label: 'sampleBtc5m' as const },
 ]
+
+/** Texte d'un fichier, décompressé dans le navigateur s'il est en gzip. */
+async function fetchText(url: string): Promise<string> {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const buf = new Uint8Array(await res.arrayBuffer())
+  // Le serveur peut déjà avoir décompressé : on regarde la signature gzip (1f 8b).
+  if (buf[0] === 0x1f && buf[1] === 0x8b) {
+    const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))
+    return await new Response(stream).text()
+  }
+  return new TextDecoder().decode(buf)
+}
 
 export async function loadSample(id: string): Promise<Dataset> {
   const s = SAMPLES.find(x => x.id === id) ?? SAMPLES[0]
-  const res = await fetch(s.file)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  const d = loadBarsFromCsv(await res.text())
+  const d = loadBarsFromCsv(await fetchText(s.file))
   return { bars: d.bars, name: s.name, timeframe: d.timeframe, barMs: d.barMs, warnings: d.warnings, sample: s.id }
 }
 

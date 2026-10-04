@@ -347,3 +347,42 @@
 .bt-center { text-align: center }
 
 .bt-footer { max-width: 1640px; margin: 0 auto; padding: 10px 20px 40px; color: var(--bt-text3); font-size: 12px; display: flex; flex-direction: column; gap: 2px; text-align: center }
+
+/* ---------- Shock Engine ---------- */
+.bt-shock { display: flex; flex-direction: column; gap: 12px }
+.bt-template.on { border-color: rgba(255, 255, 255, 0.35) !important; background: rgba(255, 255, 255, 0.06) !important }
+.bt-template-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.bt-note { padding: 10px 12px; border-radius: 10px; background: rgba(147, 197, 253, 0.06); border: 1px solid rgba(147, 197, 253, 0.22); color: #c7dcfb; font-size: 12.5px }
+.bt-group { border-top: 1px solid var(--bt-line); padding-top: 8px }
+.bt-group summary { cursor: pointer; font-size: 11.5px; letter-spacing: 0.08em; color: var(--bt-text3); list-style: none; display: flex; align-items: center; gap: 6px; margin-bottom: 8px }
+.bt-group summary::before { content: '▸'; transition: transform .15s }
+.bt-group[open] summary::before { transform: rotate(90deg) }
+.bt-group summary::-webkit-details-marker { display: none }
+.bt-group .bt-field select { padding: 5px 26px 5px 8px }
+
+/* ---------- Page Recherche ---------- */
+.bt-link-plain { color: var(--bt-text); text-decoration: none }
+@media (min-width: 1081px) { .rp-main { grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) } }
+.rp-group h2 { font-family: var(--bt-head); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; color: var(--bt-text2); margin-bottom: 10px }
+.rp-group .bt-list-item { font-size: 13px; padding: 8px 10px }
+.rp-article { padding: 26px 30px; max-width: 1100px }
+@media (max-width: 640px) { .rp-article { padding: 18px 16px } }
+.rp-md { color: var(--bt-text2); font-size: 14.5px; line-height: 1.65 }
+.rp-md h1 { font-family: var(--bt-head); color: var(--bt-text); font-size: 26px; line-height: 1.2; margin-bottom: 14px }
+.rp-md h2 { font-family: var(--bt-head); color: var(--bt-text); font-size: 20px; margin: 30px 0 10px; padding-top: 14px; border-top: 1px solid var(--bt-line) }
+.rp-md h3 { font-family: var(--bt-head); color: var(--bt-text); font-size: 16px; margin: 22px 0 8px }
+.rp-md h4 { color: var(--bt-text); font-size: 14px; margin: 16px 0 6px }
+.rp-md p { margin: 8px 0; max-width: 85ch }
+.rp-md ul, .rp-md ol { margin: 8px 0 8px 20px; max-width: 85ch }
+.rp-md li { margin: 4px 0 }
+.rp-md strong { color: var(--bt-text) }
+.rp-md code { font-family: var(--bt-mono); font-size: 12.5px; padding: 1px 5px; border-radius: 5px; background: rgba(255, 255, 255, 0.07); color: #e4e4e7 }
+.rp-md pre { margin: 10px 0; padding: 12px 14px; border-radius: 10px; background: #0c0c12; border: 1px solid var(--bt-line); overflow-x: auto }
+.rp-md pre code { background: none; padding: 0 }
+.rp-md a { color: #93c5fd }
+.rp-md hr { border: 0; border-top: 1px solid var(--bt-line2); margin: 28px 0 }
+.rp-table-wrap { overflow-x: auto; margin: 12px 0; border: 1px solid var(--bt-line); border-radius: 10px }
+.rp-table { font-size: 12.5px }
+.rp-table td, .rp-table th { white-space: normal; min-width: 60px }
+.rp-table td:first-child { min-width: 140px }
+.rp-table td.num, .rp-table th.num { white-space: nowrap }

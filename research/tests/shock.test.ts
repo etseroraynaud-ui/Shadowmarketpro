@@ -1,8 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { loadBtc, dayMs, indexAtOrAfter } from '../lib/data.ts'
-import { makeMarket, runShock, prepare, percentrank, sliceMarket } from '../shock/engine.ts'
-import { DEFAULT_PARAMS, SCRIPT_COSTS, withParams } from '../shock/params.ts'
+import { makeMarket, runShock, prepare, percentrank, sliceMarket } from '../../lib/strategies/shock/engine.ts'
+import { DEFAULT_PARAMS, SCRIPT_COSTS, withParams } from '../../lib/strategies/shock/params.ts'
 import { sma } from '../../lib/backtest/indicators.ts'
 
 const tf = 15
@@ -81,7 +81,7 @@ test('artefact de pente 60 min : en 5 min, les longs n\'entrent qu\'autour du ch
 })
 
 test('plusieurs jeux identiques en alternance = le script seul ; aucun jeu = aucune position', async () => {
-  const { simulate } = await import('../shock/engine.ts')
+  const { simulate } = await import('../../lib/strategies/shock/engine.ts')
   const ref = runShock(m, DEFAULT_PARAMS, SCRIPT_COSTS, start, end)
   const sel = new Int8Array(m.bars.n)
   for (let i = 0; i < sel.length; i++) sel[i] = i % 2
@@ -92,7 +92,7 @@ test('plusieurs jeux identiques en alternance = le script seul ; aucun jeu = auc
 })
 
 test('régimes : seulement des journées closes', async () => {
-  const { classify } = await import('../shock/regimes.ts')
+  const { classify } = await import('../../lib/strategies/shock/regimes.ts')
   const full = classify(m.bars, tf, hour)
   const cutT = m.bars.t[Math.floor(m.bars.n / 2)]
   const hourCut = sliceHour(cutT)
@@ -105,3 +105,19 @@ function sliceHour(t: number) {
   while (k < hour.n && hour.t[k] < t) k++
   return { n: k, t: hour.t.subarray(0, k), o: hour.o.subarray(0, k), h: hour.h.subarray(0, k), l: hour.l.subarray(0, k), c: hour.c.subarray(0, k), v: hour.v.subarray(0, k) }
 }
+
+test('adaptateur du site : mêmes positions que le moteur de recherche', async () => {
+  const { runShockBacktest } = await import('../../lib/strategies/shock/adapter.ts')
+  const { DEFAULT_SETTINGS } = await import('../../lib/backtest/types.ts')
+  const b30 = loadBtc(30)
+  const a30 = indexAtOrAfter(b30, dayMs('2023-01-01'))
+  const e30 = indexAtOrAfter(b30, dayMs('2024-01-01')) - 1
+  const s = { ...DEFAULT_SETTINGS, feePct: 0.02, slippagePct: 0, direction: 'both' as const, from: b30.t[a30], to: b30.t[e30] }
+  const web = runShockBacktest(b30, { kind: 'shock', params: DEFAULT_PARAMS, adaptive: null }, s)
+  const ref = runShock(makeMarket(b30, 30, hour), DEFAULT_PARAMS, { ...SCRIPT_COSTS, slippageTicks: 0 }, a30, e30)
+  assert.ok(ref.positions.length > 50)
+  const key = (x: { entryIdx: number; exitIdx: number }) => `${x.entryIdx}:${x.exitIdx}`
+  const same = web.result.trades.filter(t => ref.positions.some(p => key(p) === key(t))).length
+  assert.ok(same / ref.positions.length > 0.97, `${same} / ${ref.positions.length}`)
+  assert.ok(Math.abs(web.result.metrics.totalReturn - (ref.equity[e30] / 10000 - 1)) < 0.05)
+})

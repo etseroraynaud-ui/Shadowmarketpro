@@ -7,9 +7,9 @@
 // - volatilité : écart type des rendements journaliers sur 20 jours, comparé à ses valeurs des
 //   365 jours précédents ; calme sous la médiane, agitée au-dessus.
 
-import type { Bars } from '../../lib/backtest/types.ts'
-import { resample } from '../../lib/backtest/data.ts'
-import { sma, stdev } from '../../lib/backtest/indicators.ts'
+import type { Bars } from '../../backtest/types.ts'
+import { resample } from '../../backtest/data.ts'
+import { sma, stdev } from '../../backtest/indicators.ts'
 
 export const REGIME_NAMES = [
   'haussier · calme', 'haussier · agité',
