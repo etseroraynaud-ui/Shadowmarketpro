@@ -233,6 +233,18 @@
 .bt-verdict-time { margin-left: auto; color: var(--bt-text3); font-size: 12px }
 .bt-verdict-text { font-size: 15px; color: var(--bt-text2); max-width: 90ch }
 .bt-verdict-text strong { color: var(--bt-text); font-weight: 600 }
+
+.bt-btn-sm { padding: 5px 10px; font-size: 12.5px; gap: 6px }
+.bt-btn-ghost.on { background: rgba(255, 255, 255, 0.08) !important }
+.bt-export { display: flex; flex-direction: column; gap: 10px }
+.bt-export-head { display: flex; justify-content: space-between; align-items: center }
+.bt-export-head h3 { font-family: var(--bt-head); font-size: 16px; font-weight: 600 }
+.bt-export-close { width: 28px; height: 28px; border-radius: 8px; color: var(--bt-text2); font-size: 18px; line-height: 1 }
+.bt-export-close:hover { background: rgba(255, 255, 255, 0.06); color: var(--bt-text) }
+.bt-export-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap }
+.bt-export-actions { display: flex; gap: 8px; flex-wrap: wrap }
+.bt-export-ask { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding-top: 10px; border-top: 1px solid var(--bt-line) }
+.bt-export-ask blockquote { margin: 0; padding: 8px 12px; border-left: 2px solid var(--bt-line2); color: var(--bt-text2); font-size: 13px; font-style: italic; max-width: 90ch }
 .bt-badge { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid }
 .bt-badge-good { color: var(--bt-pos); border-color: rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.08) }
 .bt-badge-ok { color: var(--bt-amber); border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.07) }

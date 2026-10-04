@@ -191,6 +191,10 @@ export default function BacktestApp() {
     setDataError(null)
   }
   const intraday = !!data && data.barMs < 86400000
+  const reportMeta = useMemo(() => {
+    const pr = mode === 'shock' ? SHOCK_PRESETS.find(x => x.id === shockPreset) : undefined
+    return { market: data?.name ?? '', timeframe: data?.timeframe ?? '', preset: pr ? pr.name[lang] : null, presetEdited: shockEdited }
+  }, [data, mode, shockPreset, shockEdited, lang])
   const choosePreset = (id: string) => {
     const pr = SHOCK_PRESETS.find(x => x.id === id)
     if (!pr) return
@@ -272,7 +276,7 @@ export default function BacktestApp() {
         <section className="bt-content">
           {out && data && settings ? (
             <Results
-              out={out} bars={data.bars} lang={lang} t={t} settings={settings} source={source} intraday={intraday}
+              out={out} bars={data.bars} lang={lang} t={t} settings={settings} source={source} meta={reportMeta} intraday={intraday}
               onApplyParams={v => {
                 if (mode === 'shock') { setShockParams(p => ({ ...p, ...v })); setShockAdaptive(null); setShockEdited(true) } else { setOverrides(o => ({ ...o, ...v })); setMode('script') }
               }}

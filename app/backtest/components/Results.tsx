@@ -11,15 +11,19 @@ import StatsTable from './StatsTable'
 import Monthly from './Monthly'
 import Robustness from './Robustness'
 import Optimizer from './Optimizer'
+import ExportPanel from './ExportPanel'
+import type { ReportMeta } from '../report'
 
 type Tab = 'chart' | 'equity' | 'trades' | 'stats' | 'monthly' | 'robust' | 'optimize'
 type Quality = { label: string; cls: 'good' | 'ok' | 'bad' } | null
 
 export default function Results({
-  out, bars, lang, t, settings, source, intraday, onApplyParams, onEnableSplit,
+  out, bars, lang, t, settings, source, meta, intraday, onApplyParams, onEnableSplit,
 }: {
   out: AppOutput
   bars: Bars
+  /** Marché, timeframe et préréglage, pour le rapport exporté. */
+  meta: Omit<ReportMeta, 'now'>
   lang: Lang
   t: Dict
   settings: Settings
@@ -32,6 +36,7 @@ export default function Results({
   const [log, setLog] = useState<boolean | null>(null)
   const [showTrades, setShowTrades] = useState(true)
   const [showPlots, setShowPlots] = useState(true)
+  const [exporting, setExporting] = useState(false)
   const r = out.result
   const m = r.metrics
   const bh = r.benchMetrics
@@ -83,6 +88,10 @@ export default function Results({
         <div className="bt-verdict-badges">
           {badges.map(b => <span key={b.label} className={`bt-badge bt-badge-${b.cls}`}>{b.label}</span>)}
           <span className="bt-verdict-time">{out.name ? `${out.name} · ` : ''}{t.computedIn(fmtNum(out.ms, lang, 0))}</span>
+          <button className={`bt-btn bt-btn-ghost bt-btn-sm${exporting ? ' on' : ''}`} onClick={() => setExporting(v => !v)} aria-expanded={exporting}>
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden><path d="M8 2v8m0 0L5 7m3 3 3-3M3 12.5h10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            {t.exportBtn}
+          </button>
         </div>
         <p className="bt-verdict-text">
           {m.trades === 0 ? t.verdictNoTrade : (
@@ -94,6 +103,8 @@ export default function Results({
           )}
         </p>
       </section>
+
+      {exporting && <ExportPanel out={out} bars={bars} settings={settings} source={source} meta={meta} lang={lang} t={t} onClose={() => setExporting(false)} />}
 
       {out.warnings.length > 0 && (
         <div className="bt-warn" role="status">

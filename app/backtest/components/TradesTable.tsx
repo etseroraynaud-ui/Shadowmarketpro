@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import type { Trade } from '../../../lib/backtest/types.ts'
 import type { Dict, Lang } from '../i18n'
 import { download, fmtDate, fmtMoney, fmtPct, fmtPrice, tone } from '../format'
+import { tradesCsv } from '../report'
 
 type Key = 'id' | 'entryTime' | 'pnl' | 'pnlPct' | 'bars' | 'mae' | 'mfe'
 
@@ -26,16 +27,7 @@ export default function TradesTable({ trades, lang, t, intraday }: { trades: Tra
       </button>
     </th>
   )
-  const exportCsv = () => {
-    const lines = ['id,side,entry_time,entry_price,exit_time,exit_price,qty,bars,pnl,pnl_pct,fees,mae_pct,mfe_pct,reason']
-    for (const x of trades) {
-      lines.push([
-        x.id, x.dir === 1 ? 'long' : 'short', new Date(x.entryTime).toISOString(), x.entryPrice, new Date(x.exitTime).toISOString(), x.exitPrice,
-        x.qty, x.bars, x.pnl.toFixed(2), (x.pnlPct * 100).toFixed(3), x.fees.toFixed(2), (x.mae * 100).toFixed(3), (x.mfe * 100).toFixed(3), x.reason,
-      ].join(','))
-    }
-    download('trades.csv', lines.join('\n') + '\n', 'text/csv')
-  }
+  const exportCsv = () => download('trades.csv', tradesCsv(trades), 'text/csv')
   return (
     <div>
       <div className="bt-table-tools">
