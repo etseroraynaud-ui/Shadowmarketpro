@@ -56,3 +56,52 @@ export function sharpeOf(equity: Float64Array, a: number, b: number, ppy: number
 
 export const pct = (x: number, d = 1) => (Number.isFinite(x) ? `${(x * 100).toFixed(d)} %` : '—')
 export const num = (x: number, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : x === Infinity ? '∞' : '—')
+
+/**
+ * Positions placées au hasard : même nombre, mêmes durées, même sens, mêmes frais, entrées et
+ * sorties à la clôture, sans chevauchement. Renvoie la part des tirages battus par la stratégie
+ * (rendement composé des positions, taille 100 %).
+ */
+export function randomEntries(bars: Bars, ps: PositionRecord[], a: number, b: number, costPct: number, nSims = 1000, seed = 3) {
+  const k = ps.length
+  if (k < 5) return null
+  const dur = ps.map(p => Math.max(1, p.exitIdx - p.entryIdx))
+  const dirs = ps.map(p => p.dir)
+  const D = dur.reduce((s, x) => s + x, 0)
+  const F = b - a - D
+  if (F < 0) return null
+  const cost = (2 * costPct) / 100
+  let strat = 1
+  for (const p of ps) strat *= 1 + p.pnlPct
+  let st = seed >>> 0
+  const R = () => {
+    st = (st + 0x6d2b79f5) >>> 0
+    let t = st
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+  const sims: number[] = []
+  const cuts = new Float64Array(k)
+  const order = dur.map((_, i) => i)
+  for (let s = 0; s < nSims; s++) {
+    for (let i = k - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); const t = order[i]; order[i] = order[j]; order[j] = t }
+    for (let i = 0; i < k; i++) cuts[i] = Math.floor(R() * (F + 1))
+    cuts.sort()
+    let pos = a
+    let prev = 0
+    let eq = 1
+    for (let i = 0; i < k; i++) {
+      const id = order[i]
+      pos += cuts[i] - prev
+      prev = cuts[i]
+      const x = Math.min(pos + dur[id], b)
+      eq *= Math.max(0, 1 + dirs[id] * (bars.c[x] / bars.c[pos] - 1) - cost)
+      pos = x
+    }
+    sims.push(eq - 1)
+  }
+  sims.sort((x, y) => x - y)
+  const below = sims.filter(x => x < strat - 1).length
+  return { strategy: strat - 1, percentile: below / nSims, median: sims[Math.floor(nSims / 2)], p95: sims[Math.floor(nSims * 0.95)] }
+}

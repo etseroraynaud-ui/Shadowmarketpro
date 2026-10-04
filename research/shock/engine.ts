@@ -318,7 +318,13 @@ interface Pos {
   lo: number
 }
 
-export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end = m.bars.n - 1): ShockResult {
+/** Entrées imposées (tests de timing) : remplacent les signaux du script, sorties inchangées. */
+export interface EntryOverride {
+  long: Uint8Array
+  short: Uint8Array
+}
+
+export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end = m.bars.n - 1, override?: EntryOverride): ShockResult {
   const { bars } = m
   const { o, h, l, c } = bars
   const n = bars.n
@@ -465,8 +471,10 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
       const isFlat = posNow === 0
       const cooldownOK = Number.isNaN(lastTradeBar) || i - lastTradeBar > effCooldown
       const allowLambda = pr.allowLambda[i] === 1
-      const enterLong = allowLambda && cooldownOK && (pr.impulseEntryLong[i] === 1 || pr.fadeEntryLong[i] === 1) && p.allowLong
-      const enterShort = allowLambda && cooldownOK && (pr.impulseEntryShort[i] === 1 || pr.fadeEntryShort[i] === 1) && p.allowShort
+      const sigLong = override ? override.long[i] === 1 : pr.impulseEntryLong[i] === 1 || pr.fadeEntryLong[i] === 1
+      const sigShort = override ? override.short[i] === 1 : pr.impulseEntryShort[i] === 1 || pr.fadeEntryShort[i] === 1
+      const enterLong = allowLambda && cooldownOK && sigLong && p.allowLong
+      const enterShort = allowLambda && cooldownOK && sigShort && p.allowShort
       const last = i === end
       let orderLong = false
       let orderShort = false

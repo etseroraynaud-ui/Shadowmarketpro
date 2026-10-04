@@ -118,33 +118,35 @@ Percentile de lambda (intensité des chocs) :
 
 Mouvement du prix depuis la clôture du signal, en ATR, dans le sens du trade (positif = favorable). Les valeurs négatives de k montrent ce qui s'est passé avant le signal.
 
-| barres k | longs moyenne (n=1111) | longs médiane | longs % > 0 | shorts moyenne (n=3772) | shorts médiane | shorts % > 0 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| -24 | -4.34 | -4.13 | 2 % | -3.40 | -3.25 | 2 % |
-| -20 | -4.22 | -4.04 | 0 % | -3.43 | -3.22 | 0 % |
-| -16 | -4.04 | -3.83 | 0 % | -3.33 | -3.12 | 0 % |
-| -12 | -3.74 | -3.48 | 0 % | -3.15 | -2.97 | 0 % |
-| -8 | -3.38 | -3.15 | 0 % | -2.92 | -2.81 | 0 % |
-| -4 | -2.84 | -2.64 | 0 % | -2.51 | -2.36 | 0 % |
-| 0 | 0.00 | 0.00 | 0 % | 0.00 | 0.00 | 0 % |
-| 1 | 0.07 | -0.12 | 45 % | -0.00 | -0.16 | 43 % |
-| 2 | 0.11 | -0.10 | 47 % | -0.01 | -0.19 | 44 % |
-| 3 | 0.11 | -0.10 | 47 % | -0.01 | -0.21 | 44 % |
-| 4 | 0.17 | -0.11 | 47 % | -0.03 | -0.26 | 42 % |
-| 5 | 0.18 | -0.05 | 48 % | -0.02 | -0.28 | 44 % |
-| 6 | 0.22 | -0.00 | 50 % | -0.02 | -0.28 | 43 % |
-| 7 | 0.25 | -0.06 | 49 % | -0.03 | -0.30 | 42 % |
-| 8 | 0.20 | -0.09 | 48 % | -0.03 | -0.34 | 42 % |
-| 9 | 0.21 | -0.10 | 48 % | -0.05 | -0.38 | 42 % |
-| 10 | 0.27 | -0.04 | 49 % | -0.04 | -0.38 | 43 % |
-| 11 | 0.28 | -0.01 | 50 % | -0.04 | -0.41 | 43 % |
-| 12 | 0.31 | -0.08 | 49 % | -0.03 | -0.41 | 43 % |
-| 18 | 0.38 | -0.04 | 49 % | 0.01 | -0.43 | 44 % |
-| 24 | 0.43 | -0.00 | 50 % | -0.03 | -0.56 | 43 % |
-| 30 | 0.63 | 0.07 | 51 % | -0.05 | -0.53 | 44 % |
-| 36 | 0.66 | 0.10 | 51 % | -0.09 | -0.54 | 43 % |
-| 42 | 0.65 | 0.06 | 51 % | -0.04 | -0.56 | 45 % |
-| 48 | 0.75 | 0.13 | 51 % | -0.00 | -0.59 | 45 % |
+| barres k | longs moyenne (n=1111) | longs médiane | longs % > 0 | shorts moyenne (n=3772) | shorts médiane | shorts % > 0 | toutes barres, hausse moyenne |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| -24 | -4.34 | -4.13 | 2 % | -3.40 | -3.25 | 2 % | -0.17 |
+| -20 | -4.22 | -4.04 | 0 % | -3.43 | -3.22 | 0 % | -0.14 |
+| -16 | -4.04 | -3.83 | 0 % | -3.33 | -3.12 | 0 % | -0.12 |
+| -12 | -3.74 | -3.48 | 0 % | -3.15 | -2.97 | 0 % | -0.08 |
+| -8 | -3.38 | -3.15 | 0 % | -2.92 | -2.81 | 0 % | -0.06 |
+| -4 | -2.84 | -2.64 | 0 % | -2.51 | -2.36 | 0 % | -0.02 |
+| 0 | 0.00 | 0.00 | 0 % | 0.00 | 0.00 | 0 % | 0.00 |
+| 1 | 0.07 | -0.12 | 45 % | -0.00 | -0.16 | 43 % | 0.00 |
+| 2 | 0.11 | -0.10 | 47 % | -0.01 | -0.19 | 44 % | 0.01 |
+| 3 | 0.11 | -0.10 | 47 % | -0.01 | -0.21 | 44 % | 0.01 |
+| 4 | 0.17 | -0.11 | 47 % | -0.03 | -0.26 | 42 % | 0.01 |
+| 5 | 0.18 | -0.05 | 48 % | -0.02 | -0.28 | 44 % | 0.02 |
+| 6 | 0.22 | -0.00 | 50 % | -0.02 | -0.28 | 43 % | 0.02 |
+| 7 | 0.25 | -0.06 | 49 % | -0.03 | -0.30 | 42 % | 0.03 |
+| 8 | 0.20 | -0.09 | 48 % | -0.03 | -0.34 | 42 % | 0.03 |
+| 9 | 0.21 | -0.10 | 48 % | -0.05 | -0.38 | 42 % | 0.04 |
+| 10 | 0.27 | -0.04 | 49 % | -0.04 | -0.38 | 43 % | 0.05 |
+| 11 | 0.28 | -0.01 | 50 % | -0.04 | -0.41 | 43 % | 0.05 |
+| 12 | 0.31 | -0.08 | 49 % | -0.03 | -0.41 | 43 % | 0.05 |
+| 18 | 0.38 | -0.04 | 49 % | 0.01 | -0.43 | 44 % | 0.08 |
+| 24 | 0.43 | -0.00 | 50 % | -0.03 | -0.56 | 43 % | 0.12 |
+| 30 | 0.63 | 0.07 | 51 % | -0.05 | -0.53 | 44 % | 0.15 |
+| 36 | 0.66 | 0.10 | 51 % | -0.09 | -0.54 | 43 % | 0.18 |
+| 42 | 0.65 | 0.06 | 51 % | -0.04 | -0.56 | 45 % | 0.22 |
+| 48 | 0.75 | 0.13 | 51 % | -0.00 | -0.59 | 45 % | 0.25 |
+
+Dernière colonne : mouvement moyen du prix après une barre quelconque (dérive du marché). Un long n'a d'edge que s'il fait mieux que cette colonne ; un short, que s'il fait mieux que son opposé.
 
 ## 7. Sorties
 
@@ -184,7 +186,45 @@ Même période, coûts du script. « Éch. » = jusqu'au 2021-12-31, « hors éc
 | Sans filtre 60 min pour les shorts | -93 % | -0.88 | -94 % | 5938 | -0.040 % | -1.16 | -0.46 |
 | Cooldown 12 barres | -62 % | -0.32 | -74 % | 4420 | -0.017 % | -0.33 | -0.33 |
 | Seuil de choc relevé (micro 2,0 → z > 1,8) | -67 % | -0.37 | -73 % | 3808 | -0.023 % | -0.50 | -0.17 |
+| Longs seuls, sans stop suiveur | 1547 % | 1.23 | -38 % | 383 | 0.941 % | 1.58 | 0.73 |
 | Fade activé (impulse + fade) | -98 % | -1.13 | -98 % | 13516 | -0.024 % | -0.77 | -1.98 |
 | Fade seulement | -94 % | -1.60 | -95 % | 9401 | -0.028 % | -0.82 | -3.18 |
 | Fade seulement, longs | -70 % | -0.86 | -72 % | 5577 | -0.020 % | -0.37 | -1.90 |
+
+## 9. Face au hasard
+
+Pour chaque variante : 1 000 tirages de positions placées au hasard, avec le même nombre de positions, les mêmes durées, le même sens et les mêmes frais (entrée et sortie à la clôture). Sur le BTC, des longs au hasard gagnent déjà grâce à la hausse de fond : une variante n'a un vrai timing que si elle bat largement ces tirages.
+
+| variante | stratégie (positions composées) | hasard médian | hasard 95e centile | tirages battus |
+| --- | ---: | ---: | ---: | ---: |
+| Script tel quel | -83 % | -93 % | -76 % | 86.5 % |
+| Pente 60 min corrigée (3 barres de 60 min) | -83 % | -93 % | -74 % | 85.9 % |
+| Longs seulement | 57 % | -27 % | 33 % | 97.9 % |
+| Shorts seulement | -88 % | -90 % | -72 % | 57.5 % |
+| Sans micro-chocs | -1 % | -81 % | -53 % | 99.7 % |
+| Sans flip exit | -83 % | -93 % | -78 % | 88.8 % |
+| Sans TP1 | -90 % | -92 % | -75 % | 67.6 % |
+| Sans stop suiveur | 151 % | -99 % | -86 % | 100.0 % |
+| Stop 2,5 ATR | -74 % | -94 % | -77 % | 96.5 % |
+| Mode normal (sans High Activity) | -74 % | -91 % | -71 % | 93.6 % |
+| Sans filtre de volume | -84 % | -94 % | -80 % | 90.4 % |
+| Sans filtre 60 min pour les shorts | -93 % | -96 % | -86 % | 74.9 % |
+| Cooldown 12 barres | -62 % | -90 % | -70 % | 98.1 % |
+| Seuil de choc relevé (micro 2,0 → z > 1,8) | -67 % | -87 % | -64 % | 93.3 % |
+| Longs seuls, sans stop suiveur | 1547 % | 973 % | 6014 % | 63.9 % |
+| Fade activé (impulse + fade) | -98 % | -100 % | -99 % | 99.6 % |
+| Fade seulement | -94 % | -98 % | -95 % | 97.0 % |
+| Fade seulement, longs | -70 % | -87 % | -70 % | 95.2 % |
+
+## 10. Timing des entrées, à sorties identiques
+
+Le test le plus juste : on garde exactement les mêmes règles de sortie (stop, TP1, stop suiveur, flip, cooldown) et on remplace seulement les signaux d'entrée par des barres tirées au hasard, en même nombre et du même sens. 100 tirages par variante.
+
+| variante | Sharpe stratégie | Sharpe hasard médian | Sharpe hasard 95e centile | tirages battus | rendement stratégie | rendement hasard médian |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Script tel quel | -0.59 | -0.97 | -0.50 | 92 % | -83 % | -90 % |
+| Longs seulement | 0.49 | -0.57 | -0.02 | 100 % | 57 % | -47 % |
+| Longs seuls, sans stop suiveur | 1.23 | 0.71 | 1.12 | 99 % | 1547 % | 382 % |
+
+Au-dessus de 95 % de tirages battus, le signal d'entrée apporte quelque chose. Autour de 50 %, la performance vient des sorties et de la tendance du marché, pas du moment d'entrée.
 

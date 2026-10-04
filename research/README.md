@@ -63,5 +63,12 @@ Les rapports sont écrits dans `research/reports/`.
   période suivante jamais vue, courbes de test mises bout à bout ; **PBO** (probabilité que le
   jeu choisi finisse sous la médiane en test) ; **Sharpe dégonflé** (corrige le nombre
   d'essais) ; stabilité des réglages choisis d'un pli à l'autre.
+- **Entrées au hasard à sorties identiques** (`diagnose.ts`, section 10) : on garde les mêmes
+  règles de sortie et on remplace seulement les entrées par des barres tirées au hasard. Seul
+  test qui sépare le timing des entrées de la tendance du marché et de la forme des sorties.
 - **Vérification contre TradingView** (`compare-tv.ts`) : retrouve chaque trade de l'export du
   Strategy Tester dans le port.
+
+## Résultats
+
+Synthèse du premier passage : [`reports/SYNTHESE.md`](reports/SYNTHESE.md).

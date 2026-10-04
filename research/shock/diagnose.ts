@@ -10,7 +10,7 @@ import { join } from 'node:path'
 import type { Bars } from '../../lib/backtest/types.ts'
 import { sma } from '../../lib/backtest/indicators.ts'
 import { loadBtc, dayMs, indexAtOrAfter } from '../lib/data.ts'
-import { group, metricsOf, pct, num } from '../lib/stats.ts'
+import { group, metricsOf, pct, num, randomEntries } from '../lib/stats.ts'
 import type { Group } from '../lib/stats.ts'
 import { makeMarket, runShock } from './engine.ts'
 import type { Market, PositionRecord, ShockResult } from './engine.ts'
@@ -101,6 +101,25 @@ interface Variant {
   over: Partial<Record<keyof ShockParams, unknown>>
 }
 
+const RANDOM_RUNS = 100
+
+const TIMING_VARIANTS: Variant[] = [
+  { name: 'Script tel quel', over: {} },
+  { name: 'Longs seulement', over: { allowShort: false } },
+  { name: 'Longs seuls, sans stop suiveur', over: { allowShort: false, atrTrailMult: 50 } },
+]
+
+function rngOf(seed: number) {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0
+    let t = a
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
 const VARIANTS: Variant[] = [
   { name: 'Script tel quel', over: {} },
   { name: 'Pente 60 min corrigée (3 barres de 60 min)', over: { htfSlopeMode: 'htf' } },
@@ -116,6 +135,7 @@ const VARIANTS: Variant[] = [
   { name: 'Sans filtre 60 min pour les shorts', over: { useHTF: false } },
   { name: 'Cooldown 12 barres', over: { cooldownBars: 24 } },
   { name: 'Seuil de choc relevé (micro 2,0 → z > 1,8)', over: { kMicro: 2.0 } },
+  { name: 'Longs seuls, sans stop suiveur', over: { allowShort: false, atrTrailMult: 50 } },
   { name: 'Fade activé (impulse + fade)', over: { directionalOnly: false } },
   { name: 'Fade seulement', over: { directionalOnly: false, useImpulse: false } },
   { name: 'Fade seulement, longs', over: { directionalOnly: false, useImpulse: false, allowShort: false } },
@@ -245,6 +265,7 @@ function main() {
   out()
   const vRows: (string | number)[][] = []
   const vJson: unknown[] = []
+  const rRows: (string | number)[][] = []
   for (const v of VARIANTS) {
     const p = withParams(DEFAULT_PARAMS, v.over)
     const r = runShock(m, p, SCRIPT_COSTS, start, end)
@@ -252,11 +273,61 @@ function main() {
     const ins = metricsOf(bars, r, start, split - 1)
     const oos = metricsOf(bars, r, split, end)
     vRows.push([v.name, pct(all.totalReturn, 0), num(all.sharpe), pct(all.maxDrawdown, 0), all.trades, pct(all.avgTradePct, 3), num(ins.sharpe), num(oos.sharpe)])
-    vJson.push({ name: v.name, over: v.over, all, ins, oos })
+    const rnd = randomEntries(bars, r.positions, start, end, SCRIPT_COSTS.commissionPct)
+    if (rnd) rRows.push([v.name, pct(rnd.strategy, 0), pct(rnd.median, 0), pct(rnd.p95, 0), pct(rnd.percentile, 1)])
+    vJson.push({ name: v.name, over: v.over, all, ins, oos, random: rnd })
   }
   out(table(['variante', 'rendement', 'Sharpe', 'max DD', 'positions', 'moyenne', 'Sharpe éch.', 'Sharpe hors éch.'], vRows))
   out()
+  out('## 9. Face au hasard')
+  out()
+  out('Pour chaque variante : 1 000 tirages de positions placées au hasard, avec le même nombre de positions, les mêmes durées, le même sens et les mêmes frais (entrée et sortie à la clôture). Sur le BTC, des longs au hasard gagnent déjà grâce à la hausse de fond : une variante n\'a un vrai timing que si elle bat largement ces tirages.')
+  out()
+  out(table(['variante', 'stratégie (positions composées)', 'hasard médian', 'hasard 95e centile', 'tirages battus'], rRows))
+  out()
   json.variants = vJson
+
+  // 10. Entrées au hasard, sorties identiques.
+  out('## 10. Timing des entrées, à sorties identiques')
+  out()
+  out(`Le test le plus juste : on garde exactement les mêmes règles de sortie (stop, TP1, stop suiveur, flip, cooldown) et on remplace seulement les signaux d'entrée par des barres tirées au hasard, en même nombre et du même sens. ${RANDOM_RUNS} tirages par variante.`)
+  out()
+  const tRows: (string | number)[][] = []
+  const timing: unknown[] = []
+  for (const v of TIMING_VARIANTS) {
+    const p = withParams(DEFAULT_PARAMS, v.over)
+    const r = runShock(m, p, SCRIPT_COSTS, start, end)
+    const ref = metricsOf(bars, r)
+    let nL = 0, nS = 0
+    for (let i = start; i <= end; i++) {
+      if (r.prep.impulseEntryLong[i] || r.prep.fadeEntryLong[i]) nL++
+      if (r.prep.impulseEntryShort[i] || r.prep.fadeEntryShort[i]) nS++
+    }
+    const R = rngOf(11)
+    const rets: number[] = []
+    const sharpes: number[] = []
+    for (let k = 0; k < RANDOM_RUNS; k++) {
+      const long = new Uint8Array(bars.n)
+      const short = new Uint8Array(bars.n)
+      const span = end - start
+      for (let j = 0; j < nL; j++) long[start + Math.floor(R() * span)] = 1
+      for (let j = 0; j < nS; j++) short[start + Math.floor(R() * span)] = 1
+      const rr = runShock(m, p, SCRIPT_COSTS, start, end, { long, short })
+      const mt = metricsOf(bars, rr)
+      rets.push(mt.totalReturn)
+      sharpes.push(mt.sharpe)
+    }
+    rets.sort((x, y) => x - y)
+    sharpes.sort((x, y) => x - y)
+    const beaten = sharpes.filter(x => x < ref.sharpe).length / RANDOM_RUNS
+    tRows.push([v.name, num(ref.sharpe), num(sharpes[Math.floor(RANDOM_RUNS / 2)]), num(sharpes[Math.floor(RANDOM_RUNS * 0.95)]), pct(beaten, 0), pct(ref.totalReturn, 0), pct(rets[Math.floor(RANDOM_RUNS / 2)], 0)])
+    timing.push({ name: v.name, sharpe: ref.sharpe, randomSharpes: sharpes, beaten })
+  }
+  out(table(['variante', 'Sharpe stratégie', 'Sharpe hasard médian', 'Sharpe hasard 95e centile', 'tirages battus', 'rendement stratégie', 'rendement hasard médian'], tRows))
+  out()
+  out('Au-dessus de 95 % de tirages battus, le signal d\'entrée apporte quelque chose. Autour de 50 %, la performance vient des sorties et de la tendance du marché, pas du moment d\'entrée.')
+  out()
+  json.timing = timing
   mkdirSync(outDir, { recursive: true })
   const base_ = join(outDir, `shock-${tf}m-diagnostic`)
   writeFileSync(base_ + '.md', md.join('\n') + '\n')
