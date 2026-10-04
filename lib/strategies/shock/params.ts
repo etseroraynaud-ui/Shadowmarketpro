@@ -124,6 +124,15 @@ export interface Costs {
   slippagePct: number
   /** Pas de cotation (syminfo.mintick). */
   mintick: number
+  /** Levier : la position vaut capital × qtyPct × levier (1 par défaut). */
+  leverage?: number
+  /**
+   * Marge de maintenance en % de la position (marge croisée) : le compte est liquidé quand son
+   * capital, latent compris, tombe à ce niveau. Absente : pas de liquidation.
+   */
+  maintenancePct?: number
+  /** Financement des perpétuels en % de la position toutes les 8 h (positif : les longs paient). */
+  fundingPct?: number
 }
 
 export const SCRIPT_COSTS: Costs = { capital: 10000, qtyPct: 100, commissionPct: 0.02, slippageTicks: 1, slippagePct: 0, mintick: 0.01 }

@@ -101,6 +101,8 @@
 .bt-grid-3 { grid-template-columns: 1fr 1fr 1fr }
 .bt-span2 { grid-column: 1 / -1 }
 .bt-self-end { align-self: end }
+/* Intitulés en haut, champs alignés en bas même quand un intitulé passe sur deux lignes. */
+.bt-grid-3 > .bt-field > span { flex: 1 }
 @media (max-width: 420px) { .bt-grid-3 { grid-template-columns: 1fr 1fr } }
 
 .bt-field { display: flex; flex-direction: column; gap: 4px; min-width: 0 }
@@ -216,6 +218,8 @@
 .bt-warn-inline { flex-direction: column; align-items: flex-start; gap: 8px }
 .bt-muted { color: var(--bt-text3) }
 .bt-small { font-size: 12px }
+.bt-lev-warn { color: var(--bt-amber) }
+.bt-lev-quick { margin: 8px 0 4px }
 .bt-mb { margin-bottom: 10px }
 .bt-strong { font-weight: 700 }
 .bt-pos { color: var(--bt-pos) }

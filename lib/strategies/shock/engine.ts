@@ -270,7 +270,10 @@ export function prepare(m: Market, p: ShockParams): Prepared {
   }
 }
 
-export type ExitTag = 'TP1' | 'SL' | 'TRAIL' | 'FLIP' | 'VWAP' | 'REV' | 'END'
+/** Échéances de financement des contrats perpétuels : 00 h, 08 h et 16 h UTC. */
+const FUNDING_MS = 8 * 3600000
+
+export type ExitTag = 'TP1' | 'SL' | 'TRAIL' | 'FLIP' | 'VWAP' | 'REV' | 'END' | 'LIQ'
 
 export interface PositionRecord {
   dir: 1 | -1
@@ -285,6 +288,7 @@ export interface PositionRecord {
   /** Prix de sortie moyen pondéré. */
   exitPrice: number
   pnl: number
+  /** Commission et financement. */
   fees: number
   pnlPct: number
   exits: ExitTag[]
@@ -303,6 +307,8 @@ export interface ShockResult {
   fills: number
   start: number
   end: number
+  /** Barre et prix de la liquidation du compte, ou null. */
+  liquidation: { i: number; price: number } | null
   /** Ordres d'entrée passés (signal effectif), pour les diagnostics. */
   entryLong: Uint8Array
   entryShort: Uint8Array
@@ -356,7 +362,7 @@ export function simulate(
   m: Market, sets: ShockParams[], costs: Costs, start = 0, end = m.bars.n - 1, select: Int8Array | null = null, override?: EntryOverride,
 ): ShockResult {
   const { bars } = m
-  const { o, h, l, c } = bars
+  const { o, h, l, c, t } = bars
   const n = bars.n
   const prs = sets.map(p => prepare(m, p))
   const cool = sets.map(p => (p.highActivityMode ? Math.max(Math.trunc(p.cooldownBars / 2), 2) : p.cooldownBars))
@@ -365,6 +371,10 @@ export function simulate(
   const slipPct = costs.slippagePct / 100
   const buy = (x: number) => x + slipFix + x * slipPct
   const sell = (x: number) => x - slipFix - x * slipPct
+  // Levier en marge croisée (voir Costs) ; sans marge de maintenance, pas de liquidation.
+  const lev = costs.leverage != null && costs.leverage > 0 ? costs.leverage : 1
+  const mmr = costs.maintenancePct != null && costs.maintenancePct >= 0 ? costs.maintenancePct / 100 : NaN
+  const funding = (costs.fundingPct ?? 0) / 100
 
   const equity = new Float64Array(n)
   const position = new Int8Array(n)
@@ -374,6 +384,7 @@ export function simulate(
   let realized = 0
   let fills = 0
   let pos: Pos | null = null
+  let liquidation: { i: number; price: number } | null = null
 
   // Variables « var » du script.
   let lastTradeBar = NaN
@@ -422,12 +433,39 @@ export function simulate(
     const t = q.best - q.dir * q.trailDist
     return q.dir === 1 ? Math.max(q.stop, t) : Math.min(q.stop, t)
   }
+  /** Prix auquel le capital, latent compris, tombe à la marge de maintenance ; NaN = jamais. */
+  const liqPx = (q: Pos) => {
+    if (mmr !== mmr) return NaN
+    const base = costs.capital + realized
+    const px = q.dir === 1 ? (q.avg * q.qty - base) / (q.qty * (1 - mmr)) : (base + q.avg * q.qty) / (q.qty * (1 + mmr))
+    return px > 0 ? px : NaN
+  }
+  /** Liquidation : position fermée au prix donné, le reste du capital est perdu. */
+  const liquidate = (i: number, px: number) => {
+    fill(i, pos!.qty, px, 'LIQ')
+    const left = costs.capital + realized
+    const r = positions[positions.length - 1]
+    r.pnl -= left
+    r.pnlPct = r.pnl / r.notional
+    realized = -costs.capital
+    liquidation = { i, price: px }
+  }
+  /** Liquidation seule, avant que les ordres de sortie ne soient posés. */
+  const liqOnly = (i: number) => {
+    const q = pos!
+    const L = liqPx(q)
+    if (!(L > 0)) return
+    if (q.dir === 1 ? o[i] <= L : o[i] >= L) liquidate(i, o[i])
+    else if (q.dir === 1 ? l[i] <= L : h[i] >= L) liquidate(i, L)
+  }
   const tp1Qty = (q: Pos) => q.qty * Math.min(1, Math.max(0, sets[q.set].tp1QtyPct / 100))
   const trailAct = (q: Pos) => q.avg + q.dir * q.trailDist
 
   /** Test d'un niveau à un prix ponctuel (ouverture ou clôture). */
   const checkAt = (i: number, px: number) => {
     const q = pos!
+    const L = liqPx(q)
+    if (q.dir === 1 ? px <= L : px >= L) { liquidate(i, px); return }
     const s = effStop(q)
     if (q.dir === 1 ? px <= s : px >= s) { closeAll(i, px, stopTag(q, s)); return }
     if (sets[q.set].useTP1 && !q.tp1Filled && (q.dir === 1 ? px >= q.tp : px <= q.tp)) {
@@ -461,6 +499,9 @@ export function simulate(
         if (q.trailActive) q.best = q.dir === 1 ? Math.max(q.best, b) : Math.min(q.best, b)
       } else {
         const s = effStop(q)
+        // Un stop placé au-delà du prix de liquidation ne sera jamais atteint.
+        const L = liqPx(q)
+        if ((q.dir === 1 ? b <= L : b >= L) && !(q.dir === 1 ? s >= L : s <= L)) { liquidate(i, L); return }
         if (q.dir === 1 ? b <= s : b >= s) {
           const tag = stopTag(q, s)
           fill(i, q.qty, q.dir === 1 ? sell(s) : buy(s), tag)
@@ -473,8 +514,8 @@ export function simulate(
   const capitalNow = (i: number) => costs.capital + realized + (pos ? pos.dir * (c[i] - pos.avg) * pos.qty : 0)
   const open = (i: number, dir: 1 | -1, tag: PositionRecord['tag'], set: number) => {
     const eq = capitalNow(i)
-    if (eq <= 0) return
-    const qty = (eq * costs.qtyPct) / 100 / c[i]
+    if (eq <= 0 || liquidation) return
+    const qty = ((eq * costs.qtyPct) / 100) * lev / c[i]
     const px = dir === 1 ? buy(c[i]) : sell(c[i])
     const fee = px * qty * comm
     realized -= fee
@@ -488,8 +529,20 @@ export function simulate(
 
   for (let i = 0; i < start; i++) equity[i] = costs.capital
   for (let i = start; i <= end; i++) {
-    // 1. Ordres de sortie actifs, dans la barre.
-    if (pos && pos.exitsActive) intrabar(i)
+    // 0. Financement des contrats perpétuels, à chaque échéance de 8 h passée en position.
+    if (pos && funding !== 0 && pos.entryIdx < i) {
+      const k = Math.floor(t[i] / FUNDING_MS) - Math.floor(t[i - 1] / FUNDING_MS)
+      if (k > 0) {
+        const f = k * funding * pos.dir * pos.qty * o[i]
+        realized -= f
+        pos.fees += f
+      }
+    }
+    // 1. Ordres de sortie actifs, dans la barre ; avant eux, seule la liquidation peut fermer.
+    if (pos) {
+      if (pos.exitsActive) intrabar(i)
+      else liqOnly(i)
+    }
     if (pos && pos.entryIdx < i) { pos.hi = Math.max(pos.hi, h[i]); pos.lo = Math.min(pos.lo, l[i]) }
 
     // 2. Calcul du script à la clôture.
@@ -597,5 +650,5 @@ export function simulate(
     equity[i] = capitalNow(i)
   }
   for (let i = end + 1; i < n; i++) equity[i] = equity[end]
-  return { equity, position, positions, fills, start, end, entryLong, entryShort, prep: prs[0] }
+  return { equity, position, positions, fills, start, end, liquidation, entryLong, entryShort, prep: prs[0] }
 }

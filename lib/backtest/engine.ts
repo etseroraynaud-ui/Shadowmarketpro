@@ -2,16 +2,21 @@
 //
 // Ordre des événements dans une barre i :
 //   1. ordres en attente (signal de la clôture i-1) exécutés à l'ouverture de i ;
-//   2. sortie forcée après N barres, exécutée à l'ouverture ;
-//   3. stop, objectif et stop suiveur testés sur le haut et le bas de la barre. Si l'ouverture
-//      a déjà franchi un niveau, l'ordre est rempli à l'ouverture (gap). Si le stop et
-//      l'objectif sont tous deux touchés dans la barre, le stop passe en premier (hypothèse
-//      prudente : l'ordre réel des prix dans la barre est inconnu) ;
-//   4. capital évalué à la clôture ;
-//   5. signaux de la clôture i lus : ordre pour l'ouverture i+1 (ou exécuté à la clôture
+//   2. financement des contrats perpétuels, si une échéance de 8 h tombe à l'ouverture ;
+//   3. sortie forcée après N barres, exécutée à l'ouverture ;
+//   4. liquidation, stop, objectif et stop suiveur testés sur le haut et le bas de la barre. Si
+//      l'ouverture a déjà franchi un niveau, l'ordre est rempli à l'ouverture (gap). Si plusieurs
+//      niveaux sont touchés dans la barre, le pire passe en premier (hypothèse prudente : l'ordre
+//      réel des prix dans la barre est inconnu) ;
+//   5. capital évalué à la clôture ;
+//   6. signaux de la clôture i lus : ordre pour l'ouverture i+1 (ou exécuté à la clôture
 //      en mode « close »).
 // Une seule position à la fois, pas de pyramidage. Un signal d'entrée opposé ferme la
 // position en cours (et la retourne si les deux sens sont autorisés).
+//
+// Levier en marge croisée, comme sur un exchange de contrats perpétuels : tout le capital sert
+// de garantie, et le compte est liquidé quand son capital, latent compris, tombe à la marge de
+// maintenance. La position est alors fermée au prix de liquidation et le reste est perdu.
 
 import type { BacktestResult, Bars, ExitReason, Msg, Settings, Signals, Trade } from './types.ts'
 import { computeMetrics } from './metrics.ts'
@@ -23,6 +28,7 @@ interface Position {
   entryIdx: number
   entryTime: number
   entryFee: number
+  funding: number
   notional: number
   equityAtEntry: number
   stop: number
@@ -70,7 +76,11 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
   let pos: Position | null = null
   let pending: Pending | null = null
   let ruined = false
+  let liquidation: { i: number; price: number } | null = null
   let noStopForRisk = false
+  const leverage = s.leverage > 0 ? s.leverage : 1
+  const mmr = Math.max(0, s.maintenancePct) / 100
+  const funding = s.fundingPct / 100
 
   const buyPx = (p: number) => p * (1 + slip)
   const sellPx = (p: number) => p * (1 - slip)
@@ -96,23 +106,23 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
     const sd = stopDistAt(sigIdx, px)
     const td = targetDistAt(sigIdx, px)
     let notional: number
-    if (s.sizing === 'fixed') notional = Math.min(s.sizeValue, eq * Math.max(1, s.maxLeverage))
+    if (s.sizing === 'fixed') notional = Math.min(s.sizeValue, eq) * leverage
     else if (s.sizing === 'risk') {
       if (sd === sd && sd > 0) {
         const qtyRisk = (eq * s.sizeValue) / 100 / sd
-        notional = Math.min(qtyRisk * px, eq * Math.max(0.01, s.maxLeverage))
+        notional = Math.min(qtyRisk * px, eq * leverage)
       } else {
         noStopForRisk = true
         notional = eq
       }
-    } else notional = (eq * s.sizeValue) / 100
+    } else notional = ((eq * s.sizeValue) / 100) * leverage
     if (!(notional > 0)) return
     const qty = notional / px
     const entryFee = orderFee(notional)
     realized -= entryFee
     const trailDist = s.trailingPct != null && s.trailingPct > 0 ? (px * s.trailingPct) / 100 : NaN
     pos = {
-      dir, qty, entryPrice: px, entryIdx: i, entryTime: t[i], entryFee, notional, equityAtEntry: eq,
+      dir, qty, entryPrice: px, entryIdx: i, entryTime: t[i], entryFee, funding: 0, notional, equityAtEntry: eq,
       stop: sd === sd ? px - dir * sd : NaN,
       target: td === td ? px + dir * td : NaN,
       trailDist,
@@ -127,7 +137,7 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
     const exitFee = orderFee(p.qty * px)
     const gross = p.dir * (px - p.entryPrice) * p.qty
     realized += gross - exitFee
-    const pnl = gross - exitFee - p.entryFee
+    const pnl = gross - exitFee - p.entryFee - p.funding
     const best = Math.max(p.best, px)
     const worst = Math.min(p.worst, px)
     trades.push({
@@ -142,7 +152,7 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
       qty: p.qty,
       notional: p.notional,
       equityAtEntry: p.equityAtEntry,
-      fees: p.entryFee + exitFee,
+      fees: p.entryFee + exitFee + p.funding,
       pnl,
       pnlPct: pnl / p.notional,
       bars: i - p.entryIdx,
@@ -151,6 +161,28 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
       mfe: p.dir === 1 ? best / p.entryPrice - 1 : -(worst / p.entryPrice - 1),
     })
     pos = null
+  }
+
+  /**
+   * Prix auquel le capital du compte, latent compris, tombe à la marge de maintenance ; NaN si la
+   * position ne peut pas être liquidée (garantie plus grande que la position).
+   */
+  const liqPrice = (p: Position): number => {
+    const base = capital + realized
+    const px = p.dir === 1 ? (p.entryPrice * p.qty - base) / (p.qty * (1 - mmr)) : (base + p.entryPrice * p.qty) / (p.qty * (1 + mmr))
+    return px > 0 ? px : NaN
+  }
+
+  /** Liquidation : position fermée au prix donné, le reste du capital est perdu. */
+  const liquidate = (i: number, price: number) => {
+    close(i, price, 'liquidation', true)
+    const left = capital + realized
+    const tr = trades[trades.length - 1]
+    tr.pnl -= left
+    tr.pnlPct = tr.pnl / tr.notional
+    realized = -capital
+    ruined = true
+    liquidation = { i, price }
   }
 
   const execPending = (i: number, price: number) => {
@@ -170,14 +202,20 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
     const p = pos!
     const stopLevel = p.dir === 1 ? maxNum(p.stop, p.trailStop) : minNum(p.stop, p.trailStop)
     const stopReason: ExitReason = stopLevel === p.trailStop && stopLevel !== p.stop ? 'trailing' : 'stop'
+    const liq = liqPrice(p)
     if (p.dir === 1) {
+      if (liq === liq && o[i] <= liq) { liquidate(i, o[i]); return true }
       if (stopLevel === stopLevel && o[i] <= stopLevel && i > p.entryIdx) { close(i, o[i], stopReason); return true }
       if (p.target === p.target && o[i] >= p.target && i > p.entryIdx) { close(i, o[i], 'target', true); return true }
+      // Un stop placé sous le prix de liquidation ne sera jamais atteint.
+      if (liq === liq && l[i] <= liq && !(stopLevel >= liq)) { liquidate(i, liq); return true }
       if (stopLevel === stopLevel && l[i] <= stopLevel) { close(i, stopLevel, stopReason); return true }
       if (p.target === p.target && h[i] >= p.target) { close(i, p.target, 'target', true); return true }
     } else {
+      if (liq === liq && o[i] >= liq) { liquidate(i, o[i]); return true }
       if (stopLevel === stopLevel && o[i] >= stopLevel && i > p.entryIdx) { close(i, o[i], stopReason); return true }
       if (p.target === p.target && o[i] <= p.target && i > p.entryIdx) { close(i, o[i], 'target', true); return true }
+      if (liq === liq && h[i] >= liq && !(stopLevel <= liq)) { liquidate(i, liq); return true }
       if (stopLevel === stopLevel && h[i] >= stopLevel) { close(i, stopLevel, stopReason); return true }
       if (p.target === p.target && l[i] <= p.target) { close(i, p.target, 'target', true); return true }
     }
@@ -188,6 +226,14 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
     const inWindow = i >= start && i <= end
     if (inWindow) {
       if (pending && s.fill === 'next_open') execPending(i, o[i])
+      if (pos && funding !== 0 && pos.entryIdx < i && i > 0) {
+        const k = Math.floor(t[i] / FUNDING_MS) - Math.floor(t[i - 1] / FUNDING_MS)
+        if (k > 0) {
+          const f = k * funding * pos.dir * pos.qty * o[i]
+          realized -= f
+          pos.funding += f
+        }
+      }
       if (pos && s.maxBars != null && s.maxBars > 0 && i - pos.entryIdx >= s.maxBars) close(i, o[i], 'time')
       if (pos) {
         // Avant les tests intrabarre, l'extrême favorable de la barre n'est pas encore connu.
@@ -235,7 +281,10 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
       equity[i] = capital + realized
     }
   }
-  if (ruined) warnings.push({ fr: 'Le capital est tombé à zéro : la simulation s\'est arrêtée là (compte ruiné).', en: 'Equity fell to zero: the simulation stopped there (account ruined).' })
+  // Assigné dans liquidate() : l'analyse de flux de TypeScript ne le voit pas.
+  const liq = liquidation as { i: number; price: number } | null
+  if (liq) warnings.push(liquidationMsg(t[liq.i], liq.price, leverage))
+  else if (ruined) warnings.push({ fr: 'Le capital est tombé à zéro : la simulation s\'est arrêtée là (compte ruiné).', en: 'Equity fell to zero: the simulation stopped there (account ruined).' })
   if (noStopForRisk) warnings.push({ fr: 'Taille « % risqué » sans stop : 100 % du capital engagé faute de distance de stop. Définissez un stop.', en: '"% risked" sizing without a stop: 100% of equity used for lack of a stop distance. Set a stop.' })
 
   // Achat conservé : tout le capital acheté à l'ouverture de la première barre de la fenêtre.
@@ -266,6 +315,18 @@ export function runBacktest(bars: Bars, sig: Signals, s: Settings): BacktestResu
     outSample = computeMetrics(bars, equity, position, trades.filter(x => x.entryIdx >= split), split, end, equity[split - 1])
   }
   return { equity, benchmark, drawdown, position, trades, start, end, split, metrics, benchMetrics, inSample, outSample, warnings }
+}
+
+/** Échéances de financement des contrats perpétuels : 00 h, 08 h et 16 h UTC. */
+export const FUNDING_MS = 8 * 3600000
+
+export function liquidationMsg(time: number, price: number, leverage: number): Msg {
+  const d = new Date(time).toISOString().slice(0, 16).replace('T', ' ')
+  const f = (loc: string, x: number) => new Intl.NumberFormat(loc, { maximumFractionDigits: 2 }).format(x)
+  return {
+    fr: `Compte liquidé le ${d} UTC au prix de ${f('fr-FR', price)} (levier ×${f('fr-FR', leverage)}) : le capital est tombé à la marge de maintenance et tout est perdu. La simulation s'arrête là.`,
+    en: `Account liquidated on ${d} UTC at ${f('en-US', price)} (×${f('en-US', leverage)} leverage): equity fell to the maintenance margin and everything is lost. The simulation stops there.`,
+  }
 }
 
 function maxNum(a: number, b: number): number {

@@ -257,7 +257,7 @@ export default function BacktestApp() {
             />
           </Step>
           <Step n={3} title={t.step3} sub={t.step3Sub}>
-            <SettingsPanel t={t} s={ui} set={setUiPart} native={mode === 'shock'} />
+            <SettingsPanel t={t} lang={lang} s={ui} set={setUiPart} native={mode === 'shock'} />
           </Step>
           <div className="bt-run">
             <button className="bt-btn bt-btn-primary bt-btn-run" onClick={run} disabled={!data || busy}>

@@ -121,3 +121,35 @@ test('adaptateur du site : mêmes positions que le moteur de recherche', async (
   assert.ok(same / ref.positions.length > 0.97, `${same} / ${ref.positions.length}`)
   assert.ok(Math.abs(web.result.metrics.totalReturn - (ref.equity[e30] / 10000 - 1)) < 0.05)
 })
+
+test('levier : sans levier, la marge de maintenance ne change rien ; à ×2, positions deux fois plus grosses', () => {
+  const ref = runShock(m, DEFAULT_PARAMS, SCRIPT_COSTS, start, end)
+  const mm = runShock(m, DEFAULT_PARAMS, { ...SCRIPT_COSTS, maintenancePct: 0.5 }, start, end)
+  assert.deepEqual(Array.from(mm.equity), Array.from(ref.equity))
+  assert.equal(mm.liquidation, null)
+  const x2 = runShock(m, DEFAULT_PARAMS, { ...SCRIPT_COSTS, leverage: 2, maintenancePct: 0.5 }, start, end)
+  assert.deepEqual(x2.positions.map(p => [p.entryIdx, p.exitIdx]), ref.positions.map(p => [p.entryIdx, p.exitIdx]))
+  for (const p of x2.positions.slice(0, 20)) assert.ok(Math.abs(p.notional / p.equityAtEntry - 2) < 0.01)
+})
+
+test('levier extrême : liquidation, capital à zéro, plus aucune position ensuite', () => {
+  const r = runShock(m, DEFAULT_PARAMS, { ...SCRIPT_COSTS, leverage: 100, maintenancePct: 0.5 }, start, end)
+  assert.ok(r.liquidation)
+  const last = r.positions[r.positions.length - 1]
+  assert.equal(last.exits[last.exits.length - 1], 'LIQ')
+  assert.equal(last.exitIdx, r.liquidation.i)
+  for (let i = r.liquidation.i; i <= end; i++) assert.equal(r.equity[i], 0)
+  // Long : liquidé sous l'entrée ; short : au-dessus.
+  assert.ok(last.dir === 1 ? r.liquidation.price < last.entryPrice : r.liquidation.price > last.entryPrice)
+})
+
+test('financement positif : coûte aux longs, rapporte aux shorts', () => {
+  const longs = withParams(DEFAULT_PARAMS, { allowShort: false })
+  const a = runShock(m, longs, SCRIPT_COSTS, start, end)
+  const f = runShock(m, longs, { ...SCRIPT_COSTS, fundingPct: 0.01 }, start, end)
+  assert.ok(f.equity[end] < a.equity[end])
+  const shorts = withParams(DEFAULT_PARAMS, { allowLong: false })
+  const b = runShock(m, shorts, SCRIPT_COSTS, start, end)
+  const g = runShock(m, shorts, { ...SCRIPT_COSTS, fundingPct: 0.01 }, start, end)
+  assert.ok(g.equity[end] > b.equity[end])
+})

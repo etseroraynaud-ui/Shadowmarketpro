@@ -4,7 +4,7 @@
 
 import type { BacktestResult, Bars, ExitReason, InputDef, Msg, Plot, Settings, Signals, Trade } from '../../backtest/types.ts'
 import { computeMetrics } from '../../backtest/metrics.ts'
-import { windowIndices } from '../../backtest/engine.ts'
+import { liquidationMsg, windowIndices } from '../../backtest/engine.ts'
 import { medianStep, resample } from '../../backtest/data.ts'
 import { makeMarket, simulate } from './engine.ts'
 import type { Market, PositionRecord, ShockResult } from './engine.ts'
@@ -177,7 +177,10 @@ function marketOf(bars: Bars): { m: Market; tfMin: number; warnings: Msg[] } {
 }
 
 export function shockCosts(s: Settings): Costs {
-  return { capital: s.capital, qtyPct: s.sizing === 'percent' ? s.sizeValue : 100, commissionPct: s.feePct, slippageTicks: 0, slippagePct: s.slippagePct, mintick: 0.01 }
+  return {
+    capital: s.capital, qtyPct: s.sizing === 'percent' ? s.sizeValue : 100, commissionPct: s.feePct, slippageTicks: 0, slippagePct: s.slippagePct, mintick: 0.01,
+    leverage: s.leverage > 0 ? s.leverage : 1, maintenancePct: s.maintenancePct, fundingPct: s.fundingPct,
+  }
 }
 
 function withDirection(p: ShockParams, s: Settings): ShockParams {
@@ -214,6 +217,7 @@ export function runShockRaw(bars: Bars, spec: ShockSpec, s: Settings) {
 
 function reasonOf(p: PositionRecord): ExitReason {
   const last = p.exits[p.exits.length - 1]
+  if (last === 'LIQ') return 'liquidation'
   if (p.exits.includes('TRAIL')) return 'trailing'
   if (last === 'SL') return 'stop'
   if (last === 'TP1') return 'target'
@@ -274,6 +278,7 @@ export function runShockBacktest(bars: Bars, spec: ShockSpec, s: Settings): Shoc
     outSample = computeMetrics(bars, r.equity, r.position, trades.filter(x => x.entryIdx >= split), split, end, r.equity[split - 1])
   }
   if (s.sizing !== 'percent') warnings.push({ fr: 'Shock Engine : taille en % du capital seulement (100 % utilisé).', en: 'Shock Engine: size as % of equity only (100% used).' })
+  if (r.liquidation) warnings.push(liquidationMsg(bars.t[r.liquidation.i], r.liquidation.price, s.leverage))
   if (s.feeFixed > 0) warnings.push({ fr: 'Shock Engine : les frais fixes par ordre ne sont pas pris en compte.', en: 'Shock Engine: fixed fees per order are not applied.' })
   if (spec.adaptive) warnings.push({ fr: 'Mode adaptatif expérimental : les réglages changent selon la volatilité journalière. Résultat hors échantillon instable dans la recherche, à valider avant tout usage réel.', en: 'Experimental adaptive mode: settings switch with daily volatility. Out-of-sample result unstable in research, to be validated before any real use.' })
   const result: BacktestResult = {

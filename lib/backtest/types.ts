@@ -27,8 +27,18 @@ export interface Settings {
   /** percent : % du capital courant ; fixed : montant fixe ; risk : % du capital risqué jusqu'au stop. */
   sizing: SizingMode
   sizeValue: number
-  /** Levier maximal accepté par le mode « risk ». */
-  maxLeverage: number
+  /**
+   * Levier. En « percent » et « fixed », la taille sert de marge et la position vaut marge × levier.
+   * En « risk », plafond de la position : capital × levier.
+   */
+  leverage: number
+  /**
+   * Marge de maintenance, en % de la valeur de la position. Marge croisée : le compte est liquidé
+   * quand son capital (latent compris) tombe à ce niveau ; il perd alors tout.
+   */
+  maintenancePct: number
+  /** Financement des contrats perpétuels, en % de la position toutes les 8 h (positif : les longs paient). */
+  fundingPct: number
   direction: Direction
   /** Commission en % de la valeur échangée, à l'entrée et à la sortie. */
   feePct: number
@@ -55,7 +65,9 @@ export const DEFAULT_SETTINGS: Settings = {
   capital: 10000,
   sizing: 'percent',
   sizeValue: 100,
-  maxLeverage: 1,
+  leverage: 1,
+  maintenancePct: 0.5,
+  fundingPct: 0,
   direction: 'long',
   feePct: 0.1,
   feeFixed: 0,
@@ -90,7 +102,7 @@ export interface Signals {
   plots: Plot[]
 }
 
-export type ExitReason = 'signal' | 'reverse' | 'stop' | 'target' | 'trailing' | 'time' | 'end'
+export type ExitReason = 'signal' | 'reverse' | 'stop' | 'target' | 'trailing' | 'time' | 'end' | 'liquidation'
 
 export interface Trade {
   id: number
@@ -106,6 +118,7 @@ export interface Trade {
   notional: number
   /** Capital juste avant l'entrée. */
   equityAtEntry: number
+  /** Commission et financement. */
   fees: number
   /** Résultat net, frais compris. */
   pnl: number

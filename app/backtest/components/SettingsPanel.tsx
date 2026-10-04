@@ -1,19 +1,21 @@
 'use client'
 
 import type { Settings } from '../../../lib/backtest/types.ts'
-import type { Dict } from '../i18n'
+import type { Dict, Lang } from '../i18n'
+import { fmtNum, fmtPct } from '../format'
 
 export interface UiSettings extends Omit<Settings, 'from' | 'to' | 'splitTime'> {
   /** Part finale de la fenêtre mise de côté pour la validation (0 = aucune). */
   oosPct: number
 }
 
-function NumField({ label, value, onChange, step = 'any', min, suffix, placeholder }: {
+function NumField({ label, value, onChange, step = 'any', min, max, suffix, placeholder }: {
   label: string
   value: number | null
   onChange: (v: number | null) => void
   step?: number | string
   min?: number
+  max?: number
   suffix?: string
   placeholder?: string
 }) {
@@ -25,6 +27,7 @@ function NumField({ label, value, onChange, step = 'any', min, suffix, placehold
           type="number"
           step={step}
           min={min}
+          max={max}
           value={value ?? ''}
           placeholder={placeholder}
           onChange={e => {
@@ -39,7 +42,23 @@ function NumField({ label, value, onChange, step = 'any', min, suffix, placehold
   )
 }
 
-export default function SettingsPanel({ t, s, set, native = false }: { t: Dict; s: UiSettings; set: (p: Partial<UiSettings>) => void; native?: boolean }) {
+/** Mouvement de prix contre un long qui amène le capital à la marge de maintenance. */
+function liquidationMove(exposure: number, maintenancePct: number): number {
+  const mmr = maintenancePct / 100
+  return (1 / exposure - mmr) / (1 - mmr)
+}
+
+function LeverageHint({ t, lang, s }: { t: Dict; lang: Lang; s: UiSettings }) {
+  const x = (v: number) => `${fmtNum(v, lang, 2)} ×`
+  if (s.sizing === 'risk') return <p className="bt-muted bt-small">{t.leverageRiskHint(x(s.leverage))}</p>
+  // En « fixed », la position dépend du capital à chaque trade : l'exposition n'est connue qu'au départ.
+  const exposure = s.sizing === 'percent' ? (s.sizeValue / 100) * s.leverage : (Math.min(s.sizeValue, s.capital) / s.capital) * s.leverage
+  if (!(exposure > 1)) return <p className="bt-muted bt-small">{t.leverageNone}</p>
+  const move = liquidationMove(exposure, s.maintenancePct)
+  return <p className={`bt-small ${exposure >= 5 ? 'bt-lev-warn' : 'bt-muted'}`}>{t.leverageHint(x(exposure), fmtPct(Math.max(0, move), lang, 1, false))}</p>
+}
+
+export default function SettingsPanel({ t, lang, s, set, native = false }: { t: Dict; lang: Lang; s: UiSettings; set: (p: Partial<UiSettings>) => void; native?: boolean }) {
   const pos = (v: number | null) => (v != null && v > 0 ? v : null)
   return (
     <div className="bt-step-body">
@@ -67,7 +86,7 @@ export default function SettingsPanel({ t, s, set, native = false }: { t: Dict; 
           <span>{t.sizing}</span>
           <select value={s.sizing} onChange={e => {
             const sizing = e.target.value as Settings['sizing']
-            set({ sizing, sizeValue: sizing === 'percent' ? 100 : sizing === 'risk' ? 1 : 1000, maxLeverage: sizing === 'risk' ? 3 : s.maxLeverage })
+            set({ sizing, sizeValue: sizing === 'percent' ? 100 : sizing === 'risk' ? 1 : 1000 })
           }}>
             <option value="percent">{t.sizing_percent}</option>
             <option value="fixed">{t.sizing_fixed}</option>
@@ -76,9 +95,22 @@ export default function SettingsPanel({ t, s, set, native = false }: { t: Dict; 
         </label>
         <NumField label={s.sizing === 'fixed' ? t.sizing_fixed : '%'} value={s.sizeValue} min={0} suffix={s.sizing === 'fixed' ? undefined : '%'} onChange={v => set({ sizeValue: v ?? 0 })} />
         <p className="bt-muted bt-small bt-span2">{t[`sizingHint_${s.sizing}` as const]}</p>
-        {s.sizing === 'risk' && <NumField label={t.maxLeverage} value={s.maxLeverage} min={0.1} step={0.5} suffix="×" onChange={v => set({ maxLeverage: v ?? 1 })} />}
       </div>
       )}
+
+      <div className="bt-sub">{t.leverageSection}</div>
+      <div className="bt-form-grid bt-grid-3">
+        <NumField label={s.sizing === 'risk' && !native ? t.maxLeverage : t.leverage} value={s.leverage} min={1} max={125} step={0.5} suffix="×" onChange={v => set({ leverage: v != null && v >= 1 ? Math.min(v, 125) : 1 })} />
+        <NumField label={t.maintenancePct} value={s.maintenancePct} min={0} step={0.1} suffix="%" onChange={v => set({ maintenancePct: v != null && v >= 0 ? v : 0.5 })} />
+        <NumField label={t.fundingPct} value={s.fundingPct} step={0.005} suffix="%" onChange={v => set({ fundingPct: v ?? 0 })} />
+      </div>
+      <div className="bt-seg bt-seg-sm bt-lev-quick">
+        {[1, 2, 3, 5, 10].map(v => (
+          <button key={v} className={s.leverage === v ? 'on' : ''} onClick={() => set({ leverage: v })}>×{v}</button>
+        ))}
+      </div>
+      <LeverageHint t={t} lang={lang} s={native ? { ...s, sizing: 'percent' } : s} />
+      <p className="bt-muted bt-small">{t.fundingHint}</p>
 
       <div className="bt-sub">{t.costs}</div>
       <div className="bt-form-grid bt-grid-3">
