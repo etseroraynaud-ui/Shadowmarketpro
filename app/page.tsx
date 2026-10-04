@@ -21,6 +21,7 @@ export default function HomePage() {
               <a href="#indicators">Indicators</a>
               <a href="#pricing">Pricing</a>
               <a href="#faq">FAQ</a>
+              <Link href="/backtest">Backtest</Link>
               <Link href="/payment">Payment</Link>
             </div>
           </div>
@@ -336,6 +337,7 @@ export default function HomePage() {
                   <li><a href="#indicators">Indicators</a></li>
                   <li><a href="#pricing">Pricing</a></li>
                   <li><a href="#faq">FAQ</a></li>
+                  <li><Link href="/backtest">Backtest Lab</Link></li>
                 </ul>
               </div>
               <div>
