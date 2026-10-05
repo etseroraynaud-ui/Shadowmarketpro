@@ -19,3 +19,8 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 .vscode/
+
+# bot : données, état et journaux locaux
+bot/data/
+bot/state/
+bot/logs/
