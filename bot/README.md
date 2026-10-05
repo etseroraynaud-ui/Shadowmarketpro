@@ -6,7 +6,7 @@ deuxième implémentation de la stratégie.
 
 ```
 Hyperliquid (REST + WebSocket)
-        ↓  bougies 15 min closes, journalier
+        ↓  bougies 15 min closes, journalier, BBO, événements du compte
 ShockRunner        lib/strategies/shock/live.ts      historique + recalcul à chaque clôture
         ↓
 ShockStrategy      lib/strategies/shock/strategy.ts  décision du script (la même que le backtest)
@@ -24,7 +24,7 @@ Le backtest et le bot partagent la même stratégie :
                     ShockStrategy (strategy.ts)
                    /                           \
    SimBroker (broker.ts)                 ExecutionEngine (bot/src/engine/live.ts)
-   backtest, shadow mode                 testnet, mainnet
+   backtest, shadow mode                 shadow mode (exchange papier), testnet, mainnet
 ```
 
 ## Ce qui est garanti, et comment c'est vérifié
@@ -35,15 +35,25 @@ Le backtest et le bot partagent la même stratégie :
 | Rejouer un historique bougie par bougie = backtest d'un bloc | `research/tests/live.test.ts`, `bot/tests/parity.test.ts` : même décision à chaque barre (entrées, sorties, niveaux de stop, TP1, trailing), même régime, mêmes positions, même capital |
 | Le moteur live, face à un exchange qui exécute comme le backtest, fait les mêmes trades | `bot/tests/live.test.ts` : mêmes entrées, sens, motifs de sortie (stop, flip, TP1, stop suiveur) et prix |
 | Sur l'historique Hyperliquid | `npm run parity` (demande l'accès réseau à Hyperliquid) |
+| Seules les bougies closes entrent dans le moteur | `tests/candles.test.ts` : une bougie n'entre que si l'exchange a déjà ouvert la suivante (pas seulement d'après l'horloge locale) ; toute bougie relue différente est signalée (`candle_revised`) |
+| Reconnexions | `tests/stream.test.ts` : signal de clôture en double, reconnexion, coupure de 45 min rattrapée par REST, chaque bougie une seule fois ; `npm run ws-check` : coupures forcées sur le vrai WebSocket |
+| Pas d'ordre en double | `tests/orders.test.ts` : réponse perdue, requête perdue, arrêt brutal en plein envoi (entrée, déplacement du stop), ordre du bot en trop, stop disparu, deux instances |
+| Exchange papier du shadow mode | `tests/paper.test.ts` : exécution au BBO, stops, limites, réduction seule |
 
 ## Modes
 
-1. **Shadow** (`BOT_MODE=shadow`, défaut) : aucun ordre. Les décisions sont exécutées par le
-   broker simulé du backtest, sur les bougies Hyperliquid en temps réel. Le journal est ce que
-   le backtest aurait fait.
+1. **Shadow** (`BOT_MODE=shadow`, défaut) : aucun ordre, aucune clé. Deux moteurs tournent sur
+   les bougies et le BBO réels de Hyperliquid :
+   - le broker simulé du backtest : le journal est ce que le backtest aurait fait ;
+   - le moteur live complet (ordres, stops, TP1, stop suiveur, anti-doublons) sur un **exchange
+     papier** (`exec/paper.ts`) qui exécute au BBO réel sans rien envoyer.
+
+   À chaque clôture, leurs positions sont comparées (événement `parity`). L'exchange papier
+   repart à plat à chaque lancement.
 2. **Testnet** (`BOT_MODE=testnet`) : ordres réels sur le testnet, avec les données du
    testnet (marché cohérent avec les ordres ; ses signaux n'ont pas de valeur de trading).
-3. **Mainnet** (`BOT_MODE=mainnet`) : seulement après plusieurs semaines de shadow et de testnet.
+3. **Mainnet** (`BOT_MODE=mainnet`) : seulement après plusieurs semaines de shadow et de testnet,
+   et seulement avec `BOT_ALLOW_MAINNET=1` (sans lui, le bot refuse de démarrer et ne lit aucune clé).
 
 ## Installation
 
@@ -52,6 +62,19 @@ cd bot
 npm install
 npm test          # tests du bot
 npm run check     # typage
+```
+
+Derrière un proxy HTTPS (`HTTPS_PROXY`), lancer Node avec `NODE_USE_ENV_PROXY=1` (Node ≥ 22.21).
+
+## Contrôles sur le vrai Hyperliquid
+
+```
+npm run parity -- --steps 4900          # backtest d'un bloc = moteur bougie par bougie, historique mainnet
+npm run ws-check -- --network mainnet   # coupures WebSocket forcées : reconnexion, réabonnement
+npm run testnet-check                   # testnet : métadonnées, lecture de compte, signature
+npm run testnet-check -- --trade        # + aller-retour minimal avec le wallet agent du testnet
+npm run source-compare                  # même stratégie sur Bitstamp (recherche) et Hyperliquid
+npm run shadow-report                   # bilan de la dernière session (bougies, WS, parité, ordres)
 ```
 
 ## Wallet agent (testnet et mainnet)
@@ -76,9 +99,16 @@ export HL_AGENT_PRIVATE_KEY=0x...    # clé privée de l'agent, jamais dans le c
 | `BOT_STOP_SLIPPAGE_PCT` | 5 | écart maximal d'un stop déclenché |
 | `BOT_EMERGENCY_STOP_PCT` | désactivé | stop de sécurité entre l'entrée et la pose du stop du script |
 | `BOT_KILL_FILE` | `bot/state/KILL` | s'il existe : plus aucune entrée |
+| `BOT_MAX_SPREAD_BPS` | 10 | spread maximal pour une entrée (attente de 10 s, puis abandon) ; jamais pour une sortie |
+| `BOT_TRAIL_STEP_PCT` | 5 | pas minimal du stop suiveur entre deux clôtures, en % de la distance de suivi |
+| `BOT_TRAIL_MIN_INTERVAL_MS` | 2000 | intervalle minimal entre deux déplacements du stop |
+| `BOT_WS_STALE_MS` | 60000 (testnet 900000) | aucune donnée du WebSocket depuis ce délai : reconnexion forcée |
 | `BOT_RESET_STATE` | | `1` : repart de zéro (le compte doit être à plat) |
-| `BOT_DATA_NETWORK` | réseau du mode | données mainnet ou testnet |
-| `BOT_SHADOW_CAPITAL`, `BOT_SHADOW_FEE_PCT` | 10000, 0.045 | broker simulé du shadow mode |
+| `BOT_DATA_NETWORK` | réseau du mode (shadow : mainnet) | données mainnet ou testnet |
+| `BOT_ALLOW_MAINNET` | | `1` obligatoire pour `BOT_MODE=mainnet` |
+| `BOT_SHADOW_CAPITAL`, `BOT_SHADOW_FEE_PCT` | 10000, 0.045 | broker simulé et exchange papier du shadow mode |
+| `BOT_SHADOW_PAPER` | 1 | `0` : pas de moteur live sur exchange papier en shadow |
+| `BOT_PAPER_MAKER_FEE_PCT` | 0.015 | frais des limites exécutées sur l'exchange papier |
 
 ## Lancement
 
@@ -90,10 +120,15 @@ Le bot écrit :
 
 - `bot/data/<réseau>/BTC-15m.csv`, `BTC-1d.csv` : cache des bougies closes (ajout seul) ;
 - `bot/state/live-<mode>-BTC.json` : état (variables du script, position, ordres) ;
-- `bot/logs/events-AAAA-MM.jsonl` : chaque bougie, signal, ordre, fill, erreur ;
+- `bot/logs/events-AAAA-MM.jsonl` : chaque bougie (`market_bar` : signal qui l'a fait lire,
+  comparaison WebSocket / REST, spread pendant la bougie), signal, ordre, fill, reconnexion,
+  erreur ; en shadow, `engine: "paper"` marque le moteur live sur l'exchange papier ;
 - `bot/logs/trades-<mode>.csv` : un trade par ligne (heure, sens, entrée, sortie, quantité, ATR,
   régime, z-score du choc, z-score du volume, lambda, MAE, MFE, frais, financement, écart
-  d'exécution, PnL).
+  d'exécution, PnL, spread à l'entrée et à la sortie) ; en shadow, `trades-shadow.csv` (backtest) et
+  `trades-shadow-paper.csv` (moteur live sur l'exchange papier).
+
+Signal `SIGUSR2` : coupe et rétablit le WebSocket (test des reconnexions en conditions réelles).
 
 ## Sécurité
 
@@ -109,6 +144,25 @@ Le bot écrit :
 - Bougie manquée pendant un arrêt : rattrapée seulement si elle ne demandait aucun ordre, sinon
   arrêt.
 - Stop refusé par l'exchange : position fermée au marché, puis arrêt.
+- Un seul processus par mode et par actif (verrou `bot/state/live-<mode>-BTC.json.lock`).
+
+## Pas d'ordre en double
+
+- Chaque ordre porte un identifiant client (cloid : préfixe du bot, nature de l'ordre, partie
+  aléatoire), écrit dans l'état **avant** l'envoi.
+- Réponse incertaine (délai dépassé, connexion coupée) : le bot demande à Hyperliquid le statut de
+  ce cloid et ses fills, et continue avec l'issue réelle. Il ne renvoie jamais un ordre. Un refus
+  explicite de l'exchange n'est pas incertain.
+- Redémarrage avec un ordre en suspens : retrouvé par son cloid. Jamais exécuté : oublié. Stop,
+  TP1 ou stop de sécurité posés : adoptés par la position. Entrée ou fermeture exécutée : arrêt
+  pour vérification.
+- Stop déplacé (stop suiveur, retaille après TP1) : le nouveau est posé, puis l'ancien annulé ; la
+  position n'est jamais sans stop, et deux stops en réduction seule ne peuvent pas fermer plus
+  qu'elle. (Pas de `modify` : chez Hyperliquid, une modification annule puis repose l'ordre, et la documentation du SDK la réserve par défaut aux ordres non déclencheurs ; poser puis annuler ne dépend pas de ces règles.)
+- Fills reconnus par numéro d'ordre ou par cloid.
+- À chaque clôture : ordres du bot que l'état ne connaît pas annulés (`orphan_orders_canceled`),
+  stop ou TP1 disparus sans exécution reposés (`stop_missing`), ordre étranger : arrêt.
+- Bougies : une seule lecture à la fois, chaque bougie passée une seule fois au moteur.
 
 ## Écarts connus avec le backtest (inévitables en réel)
 
@@ -118,8 +172,14 @@ Le bot écrit :
 - **Pas de stop pendant la bougie qui suit l'entrée** : c'est le comportement du script
   (`strategy.exit` posé à la clôture suivante). `BOT_EMERGENCY_STOP_PCT` ajoute un stop de
   sécurité, désactivé par défaut.
-- **Stop suiveur** : Hyperliquid n'en a pas ; le bot déplace son stop au fil des prix (au plus
-  une fois par seconde).
+- **Stop suiveur** : Hyperliquid n'en a pas ; le bot déplace son stop au fil du BBO, par pas d'au
+  moins 5 % de la distance de suivi et au plus toutes les 2 s (limite d'ordres de Hyperliquid) ;
+  à chaque clôture, au tick près.
+- **Prix de référence** : les ordres au marché partent du meilleur prix d'en face (BBO), limités à
+  `BOT_MAX_SLIPPAGE_PCT` ; le spread est journalisé à chaque entrée et sortie.
+- **Données** : le backtest de recherche utilise Bitstamp (spot), le bot Hyperliquid (perp). Sur la
+  période commune (`npm run source-compare`), les prix diffèrent de quelques points de base et la
+  grande majorité des signaux tombent sur la même bougie, mais pas tous.
 - **Historique** : l'API ne donne que les 5000 dernières bougies 15 min (environ 52 jours) ; le
   cache local les garde ensuite. Le régime de volatilité vient des bougies journalières
   Hyperliquid (au moins un an nécessaire).

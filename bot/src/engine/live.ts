@@ -14,6 +14,17 @@
 //   L'état du script est alors exactement celui du backtest ;
 // - redémarrage : état relu, comparé à Hyperliquid (position, ordres, fills). Au moindre écart,
 //   le bot n'envoie plus aucun ordre (halted) jusqu'à intervention manuelle.
+//
+// Pas d'ordre en double :
+// - chaque ordre porte un identifiant client (cloid) écrit dans l'état avant l'envoi ; une réponse
+//   incertaine (délai dépassé, connexion coupée) est résolue en demandant à l'exchange le statut
+//   de ce cloid, jamais en renvoyant l'ordre ; au redémarrage, un ordre en suspens est retrouvé de
+//   la même façon ;
+// - le stop est déplacé en posant le nouveau avant d'annuler l'ancien (réduction seule : deux
+//   stops ne peuvent pas fermer plus que la position, et la position n'est jamais sans stop) ;
+// - à chaque clôture, les ordres du bot que l'état ne connaît pas sont annulés, un stop disparu
+//   est reposé ; un ordre qui ne vient pas du bot arrête tout ;
+// - une seule opération à la fois (bougie, prix, fills), un seul processus par compte (verrou).
 
 import type { Bars } from '../../../lib/backtest/types.ts'
 import { ShockRunner, ShockSession } from '../../../lib/strategies/shock/live.ts'
@@ -21,8 +32,9 @@ import type { Bar, ShockConfig } from '../../../lib/strategies/shock/live.ts'
 import type { Decision, EntryOrder } from '../../../lib/strategies/shock/strategy.ts'
 import type { Costs } from '../../../lib/strategies/shock/params.ts'
 import type { BotConfig } from '../config.ts'
-import type { Exchange, Side } from '../exec/exchange.ts'
+import type { Exchange, OrderKind, OrderResult, Side } from '../exec/exchange.ts'
 import { cloidKind, newCloid } from '../exec/exchange.ts'
+import { midOf, spreadBps } from '../data/quotes.ts'
 import type { Journal } from '../journal.ts'
 import { RiskEngine } from './risk.ts'
 import { SET_NAMES, iso, regimeName } from './shadow.ts'
@@ -37,6 +49,8 @@ export interface LiveOptions {
   store: StateStore
   network: 'testnet' | 'mainnet'
   now?: () => number
+  /** Attente (remplaçable dans les tests). */
+  sleep?: (ms: number) => Promise<void>
   /** Ignore l'état sauvegardé (le compte doit être à plat) : reprise après intervention manuelle. */
   resetState?: boolean
 }
@@ -59,7 +73,7 @@ export class LiveEngine {
   session: ShockSession | null
   state: BotState
   private queue: Promise<unknown> = Promise.resolve()
-  private lastModify = 0
+  private lastMove = 0
 
   private constructor(o: LiveOptions, runner: ShockRunner, session: ShockSession | null, state: BotState) {
     this.o = o
@@ -74,6 +88,10 @@ export class LiveEngine {
 
   private now(): number {
     return this.o.now ? this.o.now() : Date.now()
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return this.o.sleep ? this.o.sleep(ms) : new Promise(r => setTimeout(r, ms))
   }
 
   get halted(): string | null {
@@ -103,7 +121,7 @@ export class LiveEngine {
       const session = new ShockSession(o.shock, handoffCosts(o.cfg, o.shock), chart, 0, { regimeBars: daily })
       const state: BotState = {
         version: 1, network: o.network, coin: o.cfg.coin, account: o.cfg.account ?? '', anchor: chart.t[0], lastBarTime: chart.t[chart.n - 1],
-        strategy: saveStrategy(session.runner.strategy.state, chart.t), position: null, seenFills: [], lastFillTime: now, lastFundingTime: now, halted: null,
+        strategy: saveStrategy(session.runner.strategy.state, chart.t), position: null, seenFills: [], lastFillTime: now, lastFundingTime: now, halted: null, pending: null,
       }
       eng = new LiveEngine(o, session.runner, session, state)
       o.journal.event('live_first_start', { bars: chart.n, simPosition: session.broker.pos ? (session.broker.pos.dir === 1 ? 'long' : 'short') : 'flat' })
@@ -122,7 +140,8 @@ export class LiveEngine {
       eng = new LiveEngine(o, runner, null, saved)
       o.journal.event('live_restart', { lastBar: iso(saved.lastBarTime), missed: chart.n - 1 - idx, position: saved.position ? (saved.position.dir === 1 ? 'long' : 'short') : 'flat', halted: saved.halted })
       if (!saved.halted) {
-        await eng.reconcile()
+        await eng.recoverPending()
+        if (!eng.halted) await eng.reconcile()
         for (let i = idx + 1; i < chart.n && !eng.halted; i++) await eng.catchUp({ t: chart.t[i], o: chart.o[i], h: chart.h[i], l: chart.l[i], c: chart.c[i], v: chart.v[i] })
       }
     }
@@ -166,11 +185,6 @@ export class LiveEngine {
     const size = acct.position.size
     if (!pos) {
       if (Math.abs(size) > this.lotEps()) return this.halt(`position de ${size} ${this.o.cfg.coin} chez Hyperliquid, aucune position connue du bot`)
-      const mine = orders.filter(o => cloidKind(o.cloid) != null)
-      if (mine.length) {
-        await this.ex.cancel(mine.map(o => o.oid))
-        this.journal.event('orphan_orders_canceled', { oids: mine.map(o => o.oid) })
-      }
     } else {
       if (Math.sign(size) !== pos.dir || Math.abs(Math.abs(size) - pos.size) > this.lotEps()) {
         return this.halt(`position chez Hyperliquid ${size}, attendue ${pos.dir * pos.size}`)
@@ -178,7 +192,49 @@ export class LiveEngine {
       if (pos.exitsActive && (pos.stopOid == null || !orders.some(o => o.oid === pos.stopOid))) return this.halt('stop du bot absent chez Hyperliquid')
       if (pos.tp1Oid != null && !pos.tp1Filled && !orders.some(o => o.oid === pos.tp1Oid)) return this.halt('ordre TP1 du bot absent chez Hyperliquid')
     }
+    // Ordres du bot que l'état ne suit pas (doublon, reste d'une position fermée) : annulés.
+    await this.cancelOrphans(orders)
     this.journal.event('reconciled', { position: size, equity: acct.equity, orders: orders.length })
+  }
+
+  /** Ordres ouverts du bot qui ne sont ni le stop, ni le TP1, ni le stop de sécurité de la position. */
+  private async cancelOrphans(orders: { oid: number; cloid: string | null; triggerPx: number | null; limitPx: number; sz: number }[]): Promise<void> {
+    const p = this.state.position
+    const known = new Set([p?.stopOid, p?.tp1Oid, p?.emergencyOid].filter((x): x is number => x != null))
+    const orphans = orders.filter(o => cloidKind(o.cloid) != null && !known.has(o.oid))
+    if (!orphans.length) return
+    const res = await this.ex.cancel(orphans.map(o => o.oid))
+    this.journal.event('orphan_orders_canceled', {
+      orders: orphans.map((o, k) => ({ oid: o.oid, cloid: o.cloid, kind: cloidKind(o.cloid), trigger: o.triggerPx, px: o.limitPx, sz: o.sz, ok: res[k]?.ok ?? false })),
+    })
+  }
+
+  /**
+   * Ordre envoyé juste avant un arrêt, sans issue connue : retrouvé chez l'exchange par son cloid,
+   * jamais renvoyé. Jamais exécuté : oublié. Stop, TP1 ou stop de sécurité posés : adoptés par la
+   * position (l'ancien ordre, s'il reste, est annulé comme orphelin). Tout le reste : arrêt.
+   */
+  async recoverPending(): Promise<void> {
+    const p = this.state.pending
+    if (!p) return
+    const st = await this.ex.orderStatus(p.cloid)
+    const fills = (await this.ex.fills(p.at - 60000)).filter(f => f.cloid === p.cloid)
+    this.journal.event('pending_order_found', { cloid: p.cloid, kind: p.kind, side: p.side, sz: p.sz, at: iso(p.at), status: st.detail, fills: fills.length })
+    const pos = this.state.position
+    if (st.status === 'unknown' || ((st.status === 'canceled' || st.status === 'rejected') && !fills.length)) {
+      this.state.pending = null
+    } else if (pos && st.status === 'open' && st.oid != null && (p.kind === 'stop' || p.kind === 'tp1' || p.kind === 'emergency')) {
+      if (p.kind === 'stop') { pos.stopOid = st.oid; pos.stopCloid = p.cloid; pos.stopTrigger = st.triggerPx; pos.stopSz = st.sz ?? pos.size }
+      if (p.kind === 'tp1') { pos.tp1Oid = st.oid; pos.tp1Cloid = p.cloid }
+      if (p.kind === 'emergency') pos.emergencyOid = st.oid
+      pos.oids.push(st.oid)
+      pos.cloids.push(p.cloid)
+      this.state.pending = null
+      this.journal.event('pending_order_adopted', { cloid: p.cloid, kind: p.kind, oid: st.oid })
+    } else {
+      return this.halt(`ordre ${p.kind} ${p.cloid} envoyé juste avant l'arrêt, état chez l'exchange : ${st.detail}, ${fills.length} fill(s) : vérifier le compte`)
+    }
+    this.save()
   }
 
   // ---------------------------------------------------------------- fills et financement
@@ -194,8 +250,9 @@ export class LiveEngine {
       this.state.lastFillTime = Math.max(this.state.lastFillTime, f.time)
       const pos = this.state.position
       const kind = cloidKind(f.cloid)
-      if (!pos || (!pos.oids.includes(f.oid) && !f.liquidation)) {
-        this.journal.event('fill_unmatched', { oid: f.oid, kind, side: f.side, px: f.px, sz: f.sz })
+      const mine = pos != null && (pos.oids.includes(f.oid) || (f.cloid != null && pos.cloids.includes(f.cloid)))
+      if (!pos || (!mine && !f.liquidation)) {
+        this.journal.event('fill_unmatched', { oid: f.oid, cloid: f.cloid, kind, side: f.side, px: f.px, sz: f.sz })
         continue
       }
       pos.fees += f.fee
@@ -208,12 +265,16 @@ export class LiveEngine {
         pos.slippage += pos.dir * (f.px - ref) * f.sz * -1
         this.exitFill(pos, f.px, f.sz, tag)
         if (kind === 'tp1') pos.tp1Filled = true
+        this.journal.event('exit_fill', { tag, px: f.px, sz: f.sz, ref, left: pos.size, oid: f.oid })
       }
     }
     if (this.state.seenFills.length > 2000) this.state.seenFills = this.state.seenFills.slice(-1000)
     const pos = this.state.position
     if (pos && pos.size <= this.lotEps()) await this.finalize()
-    else if (pos && pos.tp1Filled && pos.stopOid != null) await this.resizeStop()
+    else if (pos && pos.stopOid != null && pos.stopTrigger != null && (pos.stopSz ?? pos.size) > pos.size + this.lotEps()) {
+      // Après un TP1, le stop est reposé sur le reste de la position.
+      await this.setStop(pos, pos.stopTrigger)
+    }
   }
 
   private async applyFunding(): Promise<void> {
@@ -247,8 +308,48 @@ export class LiveEngine {
       shockZ: p.context.z, volumeZ: p.context.volZ, lambdaPct: p.context.lamPct,
       mae: p.dir === 1 ? p.lo - p.avg : p.avg - p.hi, mfe: p.dir === 1 ? p.hi - p.avg : p.avg - p.lo,
       fees: p.fees, funding: p.funding, slippage: p.slippage, pnl, pnlPct: pnl / (p.avg * p.exitQty), exits: p.exits.join('+'),
+      spreadEntryBps: p.spreadEntryBps, spreadExitBps: p.spreadExitBps,
     })
     this.state.position = null
+  }
+
+  // ---------------------------------------------------------------- envoi des ordres
+
+  /**
+   * Envoi d'un ordre sans risque de doublon : l'intention (cloid) est écrite dans l'état avant
+   * l'envoi ; une réponse incertaine est résolue en interrogeant l'exchange par ce cloid. L'intention
+   * est effacée en mémoire et disparaît du disque avec l'état qui suit (position mise à jour).
+   */
+  private async place(kind: OrderKind, side: Side, sz: number, send: (cloid: string) => Promise<OrderResult>): Promise<OrderResult & { cloid: string }> {
+    const cloid = newCloid(kind)
+    this.state.pending = { cloid, kind, side, sz, at: this.now() }
+    this.save()
+    let r = await send(cloid)
+    if (r.uncertain || (r.status === 'resting' && r.oid == null)) r = await this.resolve(cloid, r)
+    this.state.pending = null
+    return { ...r, cloid }
+  }
+
+  /** Issue réelle d'un ordre sans réponse claire, d'après son statut et ses fills chez l'exchange. */
+  private async resolve(cloid: string, first: OrderResult): Promise<OrderResult> {
+    for (let k = 1; k <= 4; k++) {
+      await this.sleep(500 * k)
+      const st = await this.ex.orderStatus(cloid).catch(e => {
+        this.journal.event('order_status_failed', { cloid, error: e instanceof Error ? e.message : String(e) })
+        return null
+      })
+      if (!st || st.status === 'unknown') continue
+      const fills = (await this.ex.fills(this.now() - 3600000)).filter(f => f.cloid === cloid)
+      let filledSz = fills.reduce((a, f) => a + f.sz, 0)
+      const avgPx = filledSz > 0 ? fills.reduce((a, f) => a + f.px * f.sz, 0) / filledSz : null
+      if (st.status === 'filled' && filledSz === 0) filledSz = st.sz ?? 0
+      this.journal.event('order_resolved', { cloid, first: first.status, error: first.error ?? null, status: st.detail, oid: st.oid, filledSz })
+      if (st.status === 'open' || st.status === 'triggered') return { status: 'resting', oid: st.oid, filledSz, avgPx }
+      if (filledSz > 0) return { status: 'filled', oid: st.oid, filledSz, avgPx }
+      return { status: 'error', oid: st.oid, filledSz: 0, avgPx: null, error: `${st.detail} (${first.error ?? 'sans réponse'})` }
+    }
+    this.journal.event('order_resolved', { cloid, first: first.status, error: first.error ?? null, status: 'unknown' })
+    return { status: 'error', oid: null, filledSz: 0, avgPx: null, error: `ordre inconnu de l'exchange après vérification (${first.error ?? 'sans réponse'})` }
   }
 
   // ---------------------------------------------------------------- appels du programme principal
@@ -282,7 +383,9 @@ export class LiveEngine {
       pos.lo = Math.min(pos.lo, mid)
       if (!pos.exitsActive) return
       this.trail(pos, mid)
+      const before = pos.stopOid
       await this.refreshStop(false)
+      if (this.state.position !== pos || pos.stopOid !== before) this.save()
     })
   }
 
@@ -312,6 +415,7 @@ export class LiveEngine {
     if (pos ? Math.sign(size) !== pos.dir || Math.abs(Math.abs(size) - pos.size) > this.lotEps() : Math.abs(size) > this.lotEps()) {
       return this.halt(`position chez Hyperliquid ${size}, attendue ${pos ? pos.dir * pos.size : 0}`)
     }
+    if (execute && !(await this.checkOrders())) return
     if (pos && bar.t > pos.entryBar) {
       pos.hi = Math.max(pos.hi, bar.h)
       pos.lo = Math.min(pos.lo, bar.l)
@@ -342,6 +446,41 @@ export class LiveEngine {
       bar: iso(bar.t + this.tfMs), close: bar.c, regime: regimeName(ctx.regime), position: pos ? (pos.dir === 1 ? 'long' : 'short') : 'flat',
       size: pos?.size ?? 0, stop: pos?.stopTrigger ?? null, tp1: pos && pos.tp1Oid != null && !pos.tp1Filled ? pos.tp : null,
     })
+  }
+
+  /**
+   * Ordres ouverts à la clôture : un ordre étranger arrête tout ; les ordres du bot que l'état ne
+   * suit pas sont annulés ; un stop ou un TP1 disparu sans avoir été exécuté sera reposé.
+   */
+  private async checkOrders(): Promise<boolean> {
+    const orders = await this.ex.openOrders()
+    const foreign = orders.filter(o => cloidKind(o.cloid) == null)
+    if (foreign.length) {
+      this.halt(`${foreign.length} ordre(s) ouvert(s) sur ${this.o.cfg.coin} qui ne viennent pas du bot`)
+      return false
+    }
+    await this.cancelOrphans(orders)
+    const pos = this.state.position
+    if (!pos) return true
+    const open = new Set(orders.map(o => o.oid))
+    const gone = async (oid: number | null, cloid: string | null | undefined): Promise<boolean> => {
+      if (oid == null || open.has(oid)) return false
+      // Exécuté mais pas encore dans les fills : on attend la prochaine lecture, rien n'est reposé.
+      const st = cloid ? await this.ex.orderStatus(cloid).catch(() => null) : null
+      return !(st && (st.status === 'filled' || st.status === 'triggered'))
+    }
+    if (await gone(pos.stopOid, pos.stopCloid)) {
+      this.journal.event('stop_missing', { oid: pos.stopOid, trigger: pos.stopTrigger })
+      pos.stopOid = null
+      pos.stopCloid = null
+    }
+    if (!pos.tp1Filled && (await gone(pos.tp1Oid, pos.tp1Cloid))) {
+      this.journal.event('tp1_missing', { oid: pos.tp1Oid, px: pos.tp })
+      pos.tp1Oid = null
+      pos.tp1Cloid = null
+    }
+    if (pos.emergencyOid != null && !open.has(pos.emergencyOid)) pos.emergencyOid = null
+    return true
   }
 
   /** Exécution de la décision, dans l'ordre du broker simulé. */
@@ -390,79 +529,107 @@ export class LiveEngine {
       }
       this.trail(pos, close)
     }
-    if (pos.emergencyOid != null) {
-      await this.ex.cancel([pos.emergencyOid]).catch(() => undefined)
-      pos.emergencyOid = null
-    }
     await this.refreshStop(true)
     if (!this.state.position || this.state.halted) return
+    if (pos.emergencyOid != null && pos.stopOid != null) {
+      // Le stop du script est posé : le stop de sécurité n'a plus lieu d'être.
+      await this.ex.cancel([pos.emergencyOid])
+      pos.emergencyOid = null
+    }
     if (pos.useTP1 && !pos.tp1Filled && pos.tp1Oid == null) {
       const sz = this.risk.tp1Size(pos.size, pos.tp1QtyPct, pos.tp)
       if (sz > 0) {
-        const r = await this.ex.limit(this.sideOut(pos), sz, pos.tp, true, newCloid('tp1'))
+        const side = this.sideOut(pos)
+        const r = await this.place('tp1', side, sz, c => this.ex.limit(side, sz, pos.tp, true, c))
         if (r.status === 'error' || r.oid == null) return this.halt(`TP1 refusé : ${r.error}`)
         pos.tp1Oid = r.oid
+        pos.tp1Cloid = r.cloid
         pos.oids.push(r.oid)
+        pos.cloids.push(r.cloid)
         // Exécuté tout de suite (prix déjà au-delà) : la taille est mise à jour par son fill.
         if (r.status === 'filled') await this.applyFills()
       }
     }
   }
 
-  /** Pose ou déplace le stop au niveau effectif (le stop suiveur ne recule jamais). */
+  /**
+   * Pose ou déplace le stop au niveau effectif (le stop suiveur ne recule jamais). Entre deux
+   * clôtures, le déplacement attend un pas minimal et un intervalle minimal (nombre d'ordres).
+   */
   private async refreshStop(force: boolean): Promise<void> {
     const pos = this.state.position
     if (!pos || !pos.exitsActive) return
     const want = this.effStop(pos)
-    const tick = this.ex.asset.tick
     if (pos.stopOid == null) {
-      const r = await this.ex.stop(this.sideOut(pos), pos.size, want, this.o.cfg.stopSlippagePct, newCloid('stop'))
-      if (r.status === 'error' || r.oid == null) {
-        this.journal.event('stop_rejected', { error: r.error, trigger: want })
-        await this.closePosition('SL', want)
-        return this.halt(`stop refusé par l'exchange (${r.error}) : position fermée au marché`)
-      }
-      pos.stopOid = r.oid
-      pos.stopTrigger = want
-      pos.oids.push(r.oid)
-      if (r.status === 'filled') await this.applyFills()
-      return
+      if (await this.setStop(pos, want)) return
+      await this.closePosition('SL', want)
+      return this.halt(`stop refusé par l'exchange : position fermée au marché`)
     }
-    const better = pos.stopTrigger == null || (pos.dir === 1 ? want - pos.stopTrigger : pos.stopTrigger - want) >= tick
-    if (!better || (!force && this.now() - this.lastModify < 1000)) return
-    this.lastModify = this.now()
-    const r = await this.ex.modifyStop(pos.stopOid, this.sideOut(pos), pos.size, want, this.o.cfg.stopSlippagePct, newCloid('stop'))
-    if (r.status === 'error') {
-      // Le stop a pu être exécuté entre-temps : les fills le diront.
-      this.journal.event('stop_modify_failed', { error: r.error, trigger: want })
-      await this.applyFills()
-      return
-    }
-    pos.stopTrigger = want
+    const gain = pos.stopTrigger == null ? Infinity : pos.dir === 1 ? want - pos.stopTrigger : pos.stopTrigger - want
+    const tick = this.ex.asset.tick
+    const minStep = force ? tick : Math.max(tick, (this.o.cfg.trailStepPct / 100) * pos.trailDist)
+    if (!(gain >= minStep - 1e-9)) return
+    if (!force && this.now() - this.lastMove < this.o.cfg.trailMinIntervalMs) return
+    this.lastMove = this.now()
+    await this.setStop(pos, want)
   }
 
-  /** Après un TP1, le stop couvre le reste de la position. */
-  private async resizeStop(): Promise<void> {
-    const pos = this.state.position
-    if (!pos || pos.stopOid == null || pos.stopTrigger == null) return
-    const r = await this.ex.modifyStop(pos.stopOid, this.sideOut(pos), pos.size, pos.stopTrigger, this.o.cfg.stopSlippagePct, newCloid('stop'))
-    if (r.status === 'error') this.journal.event('stop_resize_failed', { error: r.error })
+  /**
+   * Stop posé, déplacé ou retaillé : le nouveau est posé avant que l'ancien soit annulé, la position
+   * n'est jamais sans stop ; en réduction seule, deux stops ne peuvent pas fermer plus qu'elle.
+   * Renvoie false si l'exchange refuse le nouveau stop (l'ancien reste en place).
+   */
+  private async setStop(pos: LivePosition, trigger: number): Promise<boolean> {
+    const side = this.sideOut(pos)
+    const old = pos.stopOid
+    const sz = pos.size
+    const r = await this.place('stop', side, sz, c => this.ex.stop(side, sz, trigger, this.o.cfg.stopSlippagePct, c))
+    if (r.status === 'error' || r.oid == null) {
+      this.journal.event(old == null ? 'stop_rejected' : 'stop_move_failed', { error: r.error, trigger })
+      return false
+    }
+    pos.stopOid = r.oid
+    pos.stopCloid = r.cloid
+    pos.stopTrigger = trigger
+    pos.stopSz = sz
+    pos.oids.push(r.oid)
+    pos.cloids.push(r.cloid)
+    this.journal.event(old == null ? 'stop_placed' : 'stop_moved', { trigger, size: sz, oid: r.oid })
+    let oldFilled = false
+    if (old != null) {
+      const [c] = await this.ex.cancel([old])
+      // Annulation refusée : l'ancien stop vient sans doute d'être exécuté ; les fills le diront.
+      if (!c?.ok) { oldFilled = true; this.journal.event('stop_cancel_failed', { oid: old, error: c?.error }) }
+    }
+    if (r.status === 'filled' || oldFilled) await this.applyFills()
+    return true
   }
 
   /** Fermeture au marché à la clôture (VWAP, flip, retournement, stop déjà franchi). */
   private async closePosition(tag: string, ref: number): Promise<void> {
     const pos = this.state.position!
     const resting = [pos.stopOid, pos.tp1Oid, pos.emergencyOid].filter((x): x is number => x != null)
-    if (resting.length) await this.ex.cancel(resting).catch(e => this.journal.event('cancel_failed', { error: String(e) }))
+    const canceled = resting.length ? await this.ex.cancel(resting) : []
     pos.stopOid = pos.tp1Oid = pos.emergencyOid = null
-    const mid = await this.ex.mid()
-    const r = await this.ex.market(this.sideOut(pos), pos.size, true, mid, this.o.cfg.maxSlippagePct, newCloid('close'))
+    if (canceled.some(c => !c.ok)) {
+      // Un ordre de sortie a pu s'exécuter entre-temps : la position est relue avant de fermer.
+      this.journal.event('cancel_failed', { results: canceled })
+      await this.applyFills()
+      if (this.state.position !== pos) return
+    }
+    const side = this.sideOut(pos)
+    const q = await this.ex.quote()
+    pos.spreadExitBps = spreadBps(q)
+    const sz = pos.size
+    const r = await this.place('close', side, sz, c => this.ex.market(side, sz, true, side === 'buy' ? q.ask : q.bid, this.o.cfg.maxSlippagePct, c))
     if (r.oid != null) pos.oids.push(r.oid)
-    if (r.status !== 'filled' || r.filledSz + this.lotEps() < pos.size) {
-      return this.halt(`fermeture ${tag} incomplète : ${r.status} ${r.filledSz}/${pos.size} ${r.error ?? ''}`)
+    pos.cloids.push(r.cloid)
+    if (r.status !== 'filled' || r.filledSz + this.lotEps() < sz) {
+      return this.halt(`fermeture ${tag} incomplète : ${r.status} ${r.filledSz}/${sz} ${r.error ?? ''}`)
     }
     pos.slippage += pos.dir * (ref - (r.avgPx ?? ref)) * r.filledSz
     this.exitFill(pos, r.avgPx ?? ref, r.filledSz, tag)
+    this.journal.event('exit', { tag, side, size: r.filledSz, avg: r.avgPx, ref, spreadBps: pos.spreadExitBps })
     await this.applyFills()
     if (this.state.position === pos) await this.finalize()
   }
@@ -473,14 +640,22 @@ export class LiveEngine {
     if (pos && pos.dir !== order.dir) await this.closePosition('REV', bar.c)
     if (this.state.position || this.state.halted) return
     const blocked = this.risk.entryBlocked(this.state.halted)
-    if (blocked) return this.journal.event('entry_blocked', { reason: blocked, side: order.dir === 1 ? 'long' : 'short' })
+    const sideName = order.dir === 1 ? 'long' : 'short'
+    if (blocked) return this.journal.event('entry_blocked', { reason: blocked, side: sideName })
+    // Spread trop large : quelques secondes d'attente, puis l'entrée est abandonnée.
+    let q = await this.ex.quote()
+    for (let k = 0; spreadBps(q) > this.o.cfg.maxSpreadBps && k < 5; k++) {
+      await this.sleep(2000)
+      q = await this.ex.quote()
+    }
+    const spread = spreadBps(q)
+    if (spread > this.o.cfg.maxSpreadBps) return this.journal.event('entry_skipped', { reason: `spread ${spread.toFixed(2)} pb > ${this.o.cfg.maxSpreadBps} pb`, side: sideName, bid: q.bid, ask: q.ask })
     const acct = await this.ex.account()
-    const mid = await this.ex.mid()
-    const size = this.risk.entrySize(acct.equity, mid)
-    if (!size.ok) return this.journal.event('entry_skipped', { reason: size.reason })
+    const size = this.risk.entrySize(acct.equity, midOf(q))
+    if (!size.ok) return this.journal.event('entry_skipped', { reason: size.reason, side: sideName })
     const side: Side = order.dir === 1 ? 'buy' : 'sell'
-    const r = await this.ex.market(side, size.size, false, mid, this.o.cfg.maxSlippagePct, newCloid('entry'))
-    if (r.status !== 'filled' || r.filledSz <= 0 || r.oid == null) return this.journal.event('entry_failed', { status: r.status, error: r.error })
+    const r = await this.place('entry', side, size.size, c => this.ex.market(side, size.size, false, side === 'buy' ? q.ask : q.bid, this.o.cfg.maxSlippagePct, c))
+    if (r.status !== 'filled' || r.filledSz <= 0 || r.oid == null) return this.journal.event('entry_failed', { status: r.status, error: r.error, side: sideName })
     const after = await this.ex.account()
     if (Math.sign(after.position.size) !== order.dir) return this.halt(`entrée exécutée mais position ${after.position.size}`)
     const ctx = this.runner.context(i)
@@ -491,16 +666,18 @@ export class LiveEngine {
       dir: order.dir, size: filled, avg, set: order.set, tag: order.tag, entryBar: bar.t, refEntry: bar.c,
       atrAtEntry: this.runner.strategy.prs[order.set].atr[i], context: { regime: ctx.regime, z: s.z, volZ: s.volZ, lamPct: s.lamPct },
       exitsActive: false, stop: NaN, tp: NaN, trailDist: NaN, useTP1: false, tp1QtyPct: 0, tp1Filled: false, trailActive: false, best: NaN,
-      stopTrigger: null, stopOid: null, tp1Oid: null, emergencyOid: null, oids: [r.oid],
+      stopTrigger: null, stopSz: 0, stopOid: null, stopCloid: null, tp1Oid: null, tp1Cloid: null, emergencyOid: null, oids: [r.oid], cloids: [r.cloid],
       hi: avg, lo: avg, fees: 0, funding: 0, closedPnl: 0, slippage: order.dir * (avg - bar.c) * filled, exitValue: 0, exitQty: 0, exits: [],
+      spreadEntryBps: spread,
     }
-    this.journal.event('entry', { side, size: filled, avg, ref: bar.c, set: SET_NAMES[order.set], tag: order.tag, notional: filled * avg })
+    this.journal.event('entry', { side, size: filled, avg, ref: bar.c, bid: q.bid, ask: q.ask, spreadBps: spread, set: SET_NAMES[order.set], tag: order.tag, notional: filled * avg })
     const em = this.o.cfg.emergencyStopPct
     if (em != null) {
       const p = this.state.position
       const trig = avg * (1 - order.dir * em / 100)
-      const er = await this.ex.stop(this.sideOut(p), filled, trig, this.o.cfg.stopSlippagePct, newCloid('emergency'))
-      if (er.oid != null) { p.emergencyOid = er.oid; p.oids.push(er.oid) } else this.journal.event('emergency_stop_rejected', { error: er.error })
+      const out = this.sideOut(p)
+      const er = await this.place('emergency', out, filled, c => this.ex.stop(out, filled, trig, this.o.cfg.stopSlippagePct, c))
+      if (er.oid != null) { p.emergencyOid = er.oid; p.oids.push(er.oid); p.cloids.push(er.cloid) } else this.journal.event('emergency_stop_rejected', { error: er.error })
     }
     await this.applyFills()
   }
