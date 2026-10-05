@@ -12,7 +12,7 @@
 import type { Costs, ShockParams } from './params.ts'
 import type { Market, Prepared } from './market.ts'
 import { ShockStrategy } from './strategy.ts'
-import type { EntryOverride } from './strategy.ts'
+import type { Decision, EntryOverride } from './strategy.ts'
 import { SimBroker } from './broker.ts'
 import type { PositionRecord } from './broker.ts'
 
@@ -43,10 +43,11 @@ export function runShock(m: Market, p: ShockParams, costs: Costs, start = 0, end
  * Exécution avec plusieurs jeux de paramètres : `select[i]` donne le jeu qui décide des entrées à
  * la barre i (-1 = pas de nouvelle entrée). Une position garde jusqu'à sa sortie les réglages du
  * jeu qui l'a ouverte (stop, TP1, trailing, VWAP, flip). Avec un seul jeu et `select` nul, c'est
- * exactement le script.
+ * exactement le script. `trace` reçoit la décision de chaque barre (contrôle de parité avec le live).
  */
 export function simulate(
   m: Market, sets: ShockParams[], costs: Costs, start = 0, end = m.bars.n - 1, select: Int8Array | null = null, override?: EntryOverride,
+  trace?: (i: number, d: Decision) => void,
 ): ShockResult {
   const n = m.bars.n
   const strategy = new ShockStrategy(m, sets, costs.mintick, select, override)
@@ -60,6 +61,7 @@ export function simulate(
     broker.beforeClose(i)
     const last = i === end
     const d = strategy.onClose(i, broker.view(), last)
+    if (trace) trace(i, d)
     const sent = broker.afterClose(i, d, last)
     if (sent.long) entryLong[i] = 1
     if (sent.short) entryShort[i] = 1
