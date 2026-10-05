@@ -10,6 +10,10 @@ export interface AssetInfo {
   maxLeverage: number
   /** Pas de cotation effectif (1 $ pour BTC : prix entiers). */
   tick: number
+  /** Dex HIP-3 de l'actif ('' : marché principal). */
+  dex: string
+  /** Marge croisée permise (sinon isolée seulement). */
+  isCross: boolean
 }
 
 export interface AccountState {

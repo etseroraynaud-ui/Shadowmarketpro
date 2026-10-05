@@ -138,8 +138,10 @@ export class CandleFeed {
   constructor(api: CandleApi, coin: string, dataDir: string) {
     this.api = api
     this.coin = coin
-    this.chart = new CandleStore(`${dataDir}/${coin}-15m.csv`)
-    this.daily = new CandleStore(`${dataDir}/${coin}-1d.csv`)
+    // « xyz:NVDA » → « xyz_NVDA » : nom de fichier valable partout.
+    const file = coin.replace(/[^A-Za-z0-9._-]/g, '_')
+    this.chart = new CandleStore(`${dataDir}/${file}-15m.csv`)
+    this.daily = new CandleStore(`${dataDir}/${file}-1d.csv`)
   }
 
   /** Complète le cache jusqu'à maintenant. Renvoie les bougies 15 min ajoutées. */

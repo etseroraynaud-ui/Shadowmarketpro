@@ -7,7 +7,7 @@
 // le compte HL_ACCOUNT_ADDRESS. L'agent ne peut pas retirer de fonds.
 
 import { ExchangeClient, HttpTransport, InfoClient, SubscriptionClient, WebSocketTransport } from '@nktkas/hyperliquid'
-import { formatPrice, formatSize } from '@nktkas/hyperliquid/utils'
+import { formatPrice, formatSize, SymbolConverter } from '@nktkas/hyperliquid/utils'
 import { privateKeyToAccount } from 'viem/accounts'
 import type { Bar } from '../../../lib/strategies/shock/live.ts'
 import type { CandleApi, Interval } from '../data/candles.ts'
@@ -18,14 +18,26 @@ export interface HlOptions {
   coin: string
 }
 
+/**
+ * Marché HIP-3 (perp déployé par un tiers, ex. actions) : « dex:SYMBOLE » (xyz:NVDA). Les
+ * positions, ordres et prix de ces marchés se demandent avec le nom du dex ; le marché principal
+ * (BTC, ETH…) a un nom de dex vide.
+ */
+export function dexOf(coin: string): string {
+  const k = coin.indexOf(':')
+  return k > 0 ? coin.slice(0, k) : ''
+}
+
 /** Données publiques : bougies, prix, métadonnées de l'actif. */
 export class HyperliquidData implements CandleApi {
   readonly info: InfoClient
+  readonly transport: HttpTransport
   readonly testnet: boolean
 
   constructor(testnet: boolean) {
     this.testnet = testnet
-    this.info = new InfoClient({ transport: new HttpTransport({ isTestnet: testnet, timeout: 15000 }) })
+    this.transport = new HttpTransport({ isTestnet: testnet, timeout: 15000 })
+    this.info = new InfoClient({ transport: this.transport })
   }
 
   async candles(coin: string, interval: Interval, startTime: number, endTime: number): Promise<Bar[]> {
@@ -34,20 +46,21 @@ export class HyperliquidData implements CandleApi {
   }
 
   async assetInfo(coin: string): Promise<AssetInfo> {
-    const meta = await this.info.meta()
-    const index = meta.universe.findIndex(u => u.name === coin)
-    if (index < 0) throw new Error(`${coin} absent de l'univers perp`)
-    const u = meta.universe[index]
+    const dex = dexOf(coin)
+    const meta = await this.info.meta({ dex })
+    const u = meta.universe.find(x => x.name === coin)
+    if (!u) throw new Error(`${coin} absent de l'univers perp${dex ? ` du dex ${dex}` : ''}`)
     if (u.isDelisted) throw new Error(`${coin} est délisté`)
-    // Prix : 5 chiffres significatifs, 6 - szDecimals décimales, entiers toujours permis.
-    const mid = Number((await this.info.allMids())[coin])
-    const digits = Math.floor(Math.log10(mid)) + 1
-    const tick = Math.max(10 ** (digits - 5), 10 ** -(6 - u.szDecimals), digits >= 5 ? 1 : 0)
-    return { index, szDecimals: u.szDecimals, maxLeverage: u.maxLeverage, tick }
+    // Identifiant d'ordre : indice dans l'univers, ou 100000 + 10000 × rang du dex + indice (HIP-3).
+    const conv = await SymbolConverter.create({ transport: this.transport, dexs: dex ? [dex] : false })
+    const index = conv.getAssetId(coin)
+    if (index == null) throw new Error(`identifiant d'actif de ${coin} introuvable`)
+    const mid = await this.mid(coin)
+    return { index, szDecimals: u.szDecimals, maxLeverage: u.maxLeverage, tick: tickOf(mid, u.szDecimals), dex, isCross: !u.onlyIsolated && !u.marginMode }
   }
 
   async mid(coin: string): Promise<number> {
-    const m = Number((await this.info.allMids())[coin])
+    const m = Number((await this.info.allMids({ dex: dexOf(coin) }))[coin])
     if (!(m > 0)) throw new Error(`prix moyen de ${coin} indisponible`)
     return m
   }
@@ -69,7 +82,7 @@ export class HyperliquidStream {
   }
 
   async onMid(coin: string, listener: (mid: number) => void) {
-    return this.subs.allMids(e => {
+    return this.subs.allMids({ dex: dexOf(coin) }, e => {
       const m = Number(e.mids[coin])
       if (m > 0) listener(m)
     })
@@ -113,7 +126,7 @@ export class HyperliquidExchange implements Exchange {
   }
 
   async account(): Promise<AccountState> {
-    const s = await this.data.info.clearinghouseState({ user: this.user })
+    const s = await this.data.info.clearinghouseState({ user: this.user, dex: this.asset.dex })
     const p = s.assetPositions.find(a => a.position.coin === this.coin)?.position
     return {
       equity: Number(s.crossMarginSummary.accountValue),
@@ -123,7 +136,7 @@ export class HyperliquidExchange implements Exchange {
   }
 
   async openOrders(): Promise<OpenOrder[]> {
-    const rows = await this.data.info.frontendOpenOrders({ user: this.user })
+    const rows = await this.data.info.frontendOpenOrders({ user: this.user, dex: this.asset.dex })
     return rows.filter(o => o.coin === this.coin).map(o => ({
       oid: o.oid, cloid: o.cloid, side: o.side === 'B' ? 'buy' : 'sell', sz: Number(o.sz), limitPx: Number(o.limitPx),
       triggerPx: o.isTrigger ? Number(o.triggerPx) : null, isTrigger: o.isTrigger, reduceOnly: o.reduceOnly,
@@ -148,7 +161,7 @@ export class HyperliquidExchange implements Exchange {
   }
 
   async setLeverage(leverage: number): Promise<void> {
-    await this.exchange.updateLeverage({ asset: this.asset.index, isCross: true, leverage: Math.min(Math.ceil(leverage), this.asset.maxLeverage) })
+    await this.exchange.updateLeverage({ asset: this.asset.index, isCross: this.asset.isCross, leverage: Math.min(Math.ceil(leverage), this.asset.maxLeverage) })
   }
 
   private async send(order: Parameters<ExchangeClient['order']>[0]['orders'][number]): Promise<OrderResult> {
@@ -199,4 +212,14 @@ export class HyperliquidExchange implements Exchange {
     if (!oids.length) return
     await this.exchange.cancel({ cancels: oids.map(o => ({ a: this.asset.index, o })) })
   }
+}
+
+/**
+ * Pas de cotation effectif : 5 chiffres significatifs au plus, 6 - szDecimals décimales au plus,
+ * prix entiers toujours permis.
+ */
+export function tickOf(price: number, szDecimals: number): number {
+  const digits = Math.floor(Math.log10(price)) + 1
+  if (digits >= 5) return 1
+  return Math.max(10 ** (digits - 5), 10 ** -(6 - szDecimals))
 }

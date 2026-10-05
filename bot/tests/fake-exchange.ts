@@ -15,7 +15,7 @@ interface Resting {
 }
 
 export class FakeExchange implements Exchange {
-  readonly asset: AssetInfo = { index: 0, szDecimals: 5, maxLeverage: 40, tick: 1 }
+  readonly asset: AssetInfo = { index: 0, szDecimals: 5, maxLeverage: 40, tick: 1, dex: '', isCross: true }
   price = NaN
   time = 0
   cash: number
