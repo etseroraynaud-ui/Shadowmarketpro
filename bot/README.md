@@ -177,6 +177,10 @@ Signal `SIGUSR2` : coupe et rétablit le WebSocket (test des reconnexions en con
 - **Stop suiveur** : Hyperliquid n'en a pas ; le bot déplace son stop au fil du BBO, par pas d'au
   moins 5 % de la distance de suivi et au plus toutes les 2 s (limite d'ordres de Hyperliquid) ;
   à chaque clôture, au tick près.
+- **Déclenchement des stops** : Hyperliquid déclenche ses stops sur son prix « mark » ; le backtest,
+  sur les prix des bougies ; l'exchange papier, sur le milieu du BBO.
+- **Lecture des bougies** : sur le mainnet, la bougie close est lue environ 3 s après la clôture ; sur
+  le testnet, peu actif, elle attend la première transaction de la bougie suivante (au plus 60 s).
 - **Prix de référence** : les ordres au marché partent du meilleur prix d'en face (BBO), limités à
   `BOT_MAX_SLIPPAGE_PCT` ; le spread est journalisé à chaque entrée et sortie.
 - **Données** : le backtest de recherche utilise Bitstamp (spot), le bot Hyperliquid (perp). Sur la
