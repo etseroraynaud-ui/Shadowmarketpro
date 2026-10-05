@@ -39,7 +39,7 @@ test('shadow mode : mêmes trades que le backtest, journal écrit', () => {
   const closedLive = ref.positions.filter(p => p.exitIdx >= k0 && p.exitIdx < chart.n - 1)
   const csv = readFileSync(join(dir, 'trades-shadow.csv'), 'utf8').trim().split('\n')
   assert.equal(csv.length - 1, closedLive.length)
-  assert.match(csv[0], /^mode,side,entryTime,exitTime,entry,exit,qty,atr,regime,set,tag,shockZ,volumeZ,lambdaPct,mae,mfe,fees,funding,slippage,pnl,pnlPct,exits$/)
+  assert.match(csv[0], /^mode,side,entryTime,exitTime,entry,exit,qty,atr,regime,set,tag,shockZ,volumeZ,lambdaPct,mae,mfe,fees,funding,slippage,pnl,pnlPct,exits,spreadEntryBps,spreadExitBps$/)
   const events = readFileSync(join(dir, readdirSync(dir).find(f => f.startsWith('events-'))!), 'utf8').trim().split('\n').map(l => JSON.parse(l))
   assert.equal(events.filter(e => e.type === 'bar').length, 2500)
   assert.ok(events.some(e => e.type === 'signal'))

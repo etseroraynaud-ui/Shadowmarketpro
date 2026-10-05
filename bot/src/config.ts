@@ -1,11 +1,14 @@
 // Configuration du bot, lue uniquement dans les variables d'environnement. Aucune clé dans le code.
 //
 //   BOT_MODE              shadow (défaut) | testnet | mainnet
+//   BOT_ALLOW_MAINNET     doit valoir 1 pour BOT_MODE=mainnet ; sinon le bot refuse de démarrer
+//                         et ne lit aucune clé
 //   HL_ACCOUNT_ADDRESS    adresse du compte Hyperliquid (le compte principal, pas l'agent)
 //   HL_SUBACCOUNT_ADDRESS sous-compte (ou vault) du compte principal que le bot trade ; vide : le
 //                         compte principal. Un sous-compte dédié isole le track record du bot.
 //   HL_AGENT_PRIVATE_KEY  clé privée du wallet agent dédié au bot (approuvé sur le compte) ;
 //                         obligatoire en testnet et mainnet, jamais lue en shadow
+//   BOT_DATA_NETWORK      réseau des bougies et du BBO : celui du mode par défaut (shadow : mainnet)
 //   BOT_COIN              BTC (défaut)
 //   BOT_DATA_DIR          bot/data (cache des bougies)
 //   BOT_STATE_DIR         bot/state (état persistant)
@@ -20,10 +23,19 @@
 //   BOT_EMERGENCY_STOP_PCT stop de sécurité entre l'entrée et la pose du stop du script, en % du
 //                         prix (défaut : désactivé, comme le script)
 //   BOT_KILL_FILE         si ce fichier existe : plus aucune nouvelle entrée (défaut bot/state/KILL)
+//   BOT_MAX_SPREAD_BPS    spread maximal pour une entrée, en points de base (défaut 10) ; au-delà,
+//                         le bot attend jusqu'à 10 s puis renonce à l'entrée (jamais aux sorties)
+//   BOT_TRAIL_STEP_PCT    pas minimal de déplacement du stop suiveur entre deux clôtures, en % de la
+//                         distance de suivi (défaut 5) : limite le nombre d'ordres
+//   BOT_TRAIL_MIN_INTERVAL_MS  intervalle minimal entre deux déplacements (défaut 2000)
+//   BOT_WS_STALE_MS       aucune donnée du WebSocket depuis ce délai : reconnexion forcée
+//                         (défaut 60000 sur les données mainnet, 900000 sur le testnet, plus calme)
 //
 // Shadow mode (broker simulé, mêmes coûts que le backtest du site par défaut) :
 //   BOT_SHADOW_CAPITAL    10000
 //   BOT_SHADOW_FEE_PCT    0.045 (taker Hyperliquid, palier de base)
+//   BOT_SHADOW_PAPER      1 (défaut) : le moteur live tourne aussi, sur l'exchange papier (BBO réel)
+//   BOT_PAPER_MAKER_FEE_PCT 0.015 (maker Hyperliquid, palier de base)
 
 import { join, resolve } from 'node:path'
 
@@ -31,6 +43,8 @@ export type Mode = 'shadow' | 'testnet' | 'mainnet'
 
 export interface BotConfig {
   mode: Mode
+  /** Réseau des données (bougies, BBO). */
+  dataNetwork: 'mainnet' | 'testnet'
   coin: string
   tfMin: 15
   account: `0x${string}` | null
@@ -46,8 +60,14 @@ export interface BotConfig {
   stopSlippagePct: number
   emergencyStopPct: number | null
   killFile: string
+  maxSpreadBps: number
+  trailStepPct: number
+  trailMinIntervalMs: number
+  wsStaleMs: number
   shadowCapital: number
   shadowFeePct: number
+  shadowPaper: boolean
+  paperMakerFeePct: number
 }
 
 const ROOT = resolve(import.meta.dirname, '..')
@@ -70,6 +90,9 @@ function hex(env: NodeJS.ProcessEnv, key: string, len: number): `0x${string}` | 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
   const mode = (env.BOT_MODE ?? 'shadow') as Mode
   if (!['shadow', 'testnet', 'mainnet'].includes(mode)) throw new Error(`BOT_MODE=${mode} : shadow, testnet ou mainnet`)
+  if (mode === 'mainnet' && env.BOT_ALLOW_MAINNET !== '1') throw new Error('BOT_MODE=mainnet refusé : BOT_ALLOW_MAINNET=1 est obligatoire (aucune clé lue)')
+  const dataNetwork = (env.BOT_DATA_NETWORK ?? (mode === 'testnet' ? 'testnet' : 'mainnet')) as BotConfig['dataNetwork']
+  if (dataNetwork !== 'mainnet' && dataNetwork !== 'testnet') throw new Error(`BOT_DATA_NETWORK=${dataNetwork} : mainnet ou testnet`)
   const account = hex(env, 'HL_ACCOUNT_ADDRESS', 40)
   const subAccount = hex(env, 'HL_SUBACCOUNT_ADDRESS', 40)
   if (subAccount && !account) throw new Error('HL_SUBACCOUNT_ADDRESS demande HL_ACCOUNT_ADDRESS (le compte principal qui a approuvé l\'agent)')
@@ -81,6 +104,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
   const emergency = env.BOT_EMERGENCY_STOP_PCT
   return {
     mode,
+    dataNetwork,
     coin: env.BOT_COIN ?? 'BTC',
     tfMin: 15,
     account,
@@ -96,8 +120,14 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
     stopSlippagePct: num(env, 'BOT_STOP_SLIPPAGE_PCT', 5, 0.1, 20),
     emergencyStopPct: emergency == null || emergency === '' ? null : num(env, 'BOT_EMERGENCY_STOP_PCT', 0, 0.1, 50),
     killFile: resolve(env.BOT_KILL_FILE ?? join(stateDir, 'KILL')),
+    maxSpreadBps: num(env, 'BOT_MAX_SPREAD_BPS', 10, 0.1, 500),
+    trailStepPct: num(env, 'BOT_TRAIL_STEP_PCT', 5, 0, 50),
+    trailMinIntervalMs: num(env, 'BOT_TRAIL_MIN_INTERVAL_MS', 2000, 0, 60000),
+    wsStaleMs: num(env, 'BOT_WS_STALE_MS', dataNetwork === 'testnet' ? 900000 : 60000, 10000, 3600000),
     shadowCapital: num(env, 'BOT_SHADOW_CAPITAL', 10000, 10, 1e9),
     shadowFeePct: num(env, 'BOT_SHADOW_FEE_PCT', 0.045, 0, 1),
+    shadowPaper: (env.BOT_SHADOW_PAPER ?? '1') !== '0',
+    paperMakerFeePct: num(env, 'BOT_PAPER_MAKER_FEE_PCT', 0.015, -0.1, 1),
   }
 }
 

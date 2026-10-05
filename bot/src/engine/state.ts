@@ -1,9 +1,11 @@
-// État persistant du bot live : variables du script, position et ordres, dernière bougie traitée.
-// Écrit de façon atomique après chaque changement ; relu et comparé à Hyperliquid au démarrage.
+// État persistant du bot live : variables du script, position et ordres, dernière bougie traitée,
+// ordre en cours d'envoi. Écrit de façon atomique après chaque changement ; relu et comparé à
+// Hyperliquid au démarrage. Un verrou empêche deux instances de piloter le même compte.
 
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import type { StrategyState, EntryTag } from '../../../lib/strategies/shock/strategy.ts'
+import type { OrderKind, Side } from '../exec/exchange.ts'
 
 /** Position ouverte par le bot, telle qu'il la suit. */
 export interface LivePosition {
@@ -30,13 +32,18 @@ export interface LivePosition {
   tp1Filled: boolean
   trailActive: boolean
   best: number
-  /** Niveau du stop actuellement posé chez l'exchange. */
+  /** Niveau et taille du stop actuellement posé chez l'exchange. */
   stopTrigger: number | null
+  stopSz?: number
   stopOid: number | null
+  stopCloid?: string | null
   tp1Oid: number | null
+  tp1Cloid?: string | null
   emergencyOid: number | null
   /** Ordres de la position (entrée, sorties) : leurs fills sont comptés dans ce trade. */
   oids: number[]
+  /** Identifiants client de ces ordres (un fill est reconnu par l'un ou l'autre). */
+  cloids: string[]
   // Suivi
   hi: number
   lo: number
@@ -47,6 +54,9 @@ export interface LivePosition {
   exitValue: number
   exitQty: number
   exits: string[]
+  /** Spread à l'envoi de l'ordre d'entrée et de la fermeture au marché, en points de base. */
+  spreadEntryBps?: number
+  spreadExitBps?: number
 }
 
 export interface BotState {
@@ -67,6 +77,21 @@ export interface BotState {
   lastFundingTime: number
   /** Raison de l'arrêt des ordres, ou null. Effacé seulement à la main : compte remis à plat, puis BOT_RESET_STATE=1. */
   halted: string | null
+  /**
+   * Ordre en cours d'envoi, écrit avant l'envoi et effacé avec l'état qui suit sa réponse : au
+   * redémarrage, un ordre encore là a pu partir sans que le bot connaisse son issue ; il est
+   * retrouvé chez l'exchange par son cloid, jamais renvoyé.
+   */
+  pending: PendingOrder | null
+}
+
+export interface PendingOrder {
+  cloid: string
+  kind: OrderKind
+  side: Side
+  sz: number
+  /** Heure locale de l'envoi. */
+  at: number
 }
 
 /** JSON ne connaît pas NaN : les variables du script en contiennent. */
@@ -84,7 +109,36 @@ export class StateStore {
     if (!existsSync(this.file)) return null
     const s = JSON.parse(readFileSync(this.file, 'utf8'), decode) as BotState
     if (s.version !== 1) throw new Error(`${this.file} : version d'état inconnue`)
+    // Champs ajoutés depuis la première version de l'état.
+    s.pending ??= null
+    if (s.position) s.position.cloids ??= []
     return s
+  }
+
+  /**
+   * Verrou d'instance : un seul processus par fichier d'état. Un verrou laissé par un processus
+   * qui n'existe plus est repris. Renvoie la fonction qui le libère.
+   */
+  lock(): () => void {
+    const file = `${this.file}.lock`
+    mkdirSync(dirname(file), { recursive: true })
+    for (let k = 0; k < 2; k++) {
+      try {
+        writeFileSync(file, String(process.pid), { flag: 'wx' })
+        let held = true
+        return () => {
+          if (held) { held = false; try { unlinkSync(file) } catch { /* déjà libéré */ } }
+        }
+      } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== 'EEXIST') throw e
+        const pid = Number(readFileSync(file, 'utf8'))
+        if (Number.isSafeInteger(pid) && pid > 0 && pid !== process.pid && alive(pid)) {
+          throw new Error(`une autre instance du bot (pid ${pid}) utilise ${this.file} : arrêt pour éviter les ordres en double`)
+        }
+        unlinkSync(file)
+      }
+    }
+    throw new Error(`verrou ${file} impossible à prendre`)
   }
 
   save(s: BotState): void {
@@ -92,6 +146,15 @@ export class StateStore {
     const tmp = `${this.file}.tmp`
     writeFileSync(tmp, JSON.stringify(s, encode, 1))
     renameSync(tmp, this.file)
+  }
+}
+
+function alive(pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (e) {
+    return (e as NodeJS.ErrnoException).code === 'EPERM'
   }
 }
 

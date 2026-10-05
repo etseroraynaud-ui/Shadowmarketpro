@@ -1,5 +1,8 @@
 // Interface d'exécution du bot : ce dont l'ExecutionEngine a besoin d'un exchange. Implémentée
-// par Hyperliquid (hl/client.ts) et par un faux exchange en mémoire pour les tests.
+// par Hyperliquid (hl/client.ts), par l'exchange papier du shadow mode (exec/paper.ts, prix réels,
+// aucun ordre envoyé) et par un faux exchange en mémoire pour les tests.
+
+import type { Quote } from '../data/quotes.ts'
 
 export type Side = 'buy' | 'sell'
 
@@ -65,6 +68,25 @@ export interface OrderResult {
   filledSz: number
   avgPx: number | null
   error?: string
+  /** Issue inconnue (délai dépassé, connexion coupée) : l'ordre a pu être reçu ; à vérifier par le cloid. */
+  uncertain?: boolean
+}
+
+/** Statut d'un ordre retrouvé par son identifiant client (cloid). */
+export interface OrderStatus {
+  /** unknown : l'exchange ne connaît pas cet ordre (jamais reçu). */
+  status: 'unknown' | 'open' | 'filled' | 'triggered' | 'canceled' | 'rejected'
+  oid: number | null
+  triggerPx: number | null
+  sz: number | null
+  /** Statut brut de l'exchange. */
+  detail: string
+}
+
+export interface CancelResult {
+  oid: number
+  ok: boolean
+  error?: string
 }
 
 export interface Exchange {
@@ -74,7 +96,8 @@ export interface Exchange {
   openOrders(): Promise<OpenOrder[]>
   fills(since: number): Promise<Fill[]>
   funding(since: number): Promise<FundingEvent[]>
-  mid(): Promise<number>
+  /** Meilleurs prix acheteur et vendeur actuels. */
+  quote(): Promise<Quote>
   setLeverage(leverage: number): Promise<void>
   /** Ordre au marché : limite IOC à refPx ± maxSlippagePct. */
   market(side: Side, sz: number, reduceOnly: boolean, refPx: number, maxSlippagePct: number, cloid: string): Promise<OrderResult>
@@ -82,8 +105,10 @@ export interface Exchange {
   stop(side: Side, sz: number, triggerPx: number, slippagePct: number, cloid: string): Promise<OrderResult>
   /** Ordre limite GTC. */
   limit(side: Side, sz: number, px: number, reduceOnly: boolean, cloid: string): Promise<OrderResult>
-  modifyStop(oid: number, side: Side, sz: number, triggerPx: number, slippagePct: number, cloid: string): Promise<OrderResult>
-  cancel(oids: number[]): Promise<void>
+  /** Annulation, ordre par ordre ; un ordre déjà exécuté ou annulé donne ok = false, sans exception. */
+  cancel(oids: number[]): Promise<CancelResult[]>
+  /** Statut d'un ordre par son identifiant client : sert à savoir si un ordre sans réponse est passé. */
+  orderStatus(cloid: string): Promise<OrderStatus>
 }
 
 // Identifiants client des ordres du bot : partagés avec la page Performance live du site.
