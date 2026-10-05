@@ -8,7 +8,7 @@ import { liquidationMsg, windowIndices } from '../../backtest/engine.ts'
 import { medianStep, resample } from '../../backtest/data.ts'
 import { makeMarket, simulate } from './engine.ts'
 import type { Market, PositionRecord, ShockResult } from './engine.ts'
-import { classify } from './regimes.ts'
+import { classify, volatilitySelect } from './regimes.ts'
 import { DEFAULT_PARAMS, USER_2026 } from './params.ts'
 import type { Costs, ShockParams } from './params.ts'
 import { WF15, WF30, ADAPTIVE15, ADAPTIVE30 } from './presets.ts'
@@ -200,16 +200,8 @@ export function runShockRaw(bars: Bars, spec: ShockSpec, s: Settings) {
     const sets: ShockParams[] = []
     const calmIdx = spec.adaptive.calm ? sets.push(withDirection(spec.adaptive.calm, s)) - 1 : -1
     const agiIdx = spec.adaptive.agitated ? sets.push(withDirection(spec.adaptive.agitated, s)) - 1 : -1
-    const reg = classify(bars, tfMin, m.htf)
-    const sel = new Int8Array(bars.n).fill(-1)
-    regimeVol = new Float64Array(bars.n).fill(NaN)
-    for (let i = 0; i < bars.n; i++) {
-      const id = reg.id[i]
-      if (id < 0) continue
-      const agitated = id % 2 === 1
-      regimeVol[i] = agitated ? 1 : 0
-      sel[i] = agitated ? agiIdx : calmIdx
-    }
+    const { select: sel, agitated } = volatilitySelect(classify(bars, tfMin, m.htf), bars.n, calmIdx, agiIdx)
+    regimeVol = agitated
     r = sets.length ? simulate(m, sets, costs, start, end, sel) : simulate(m, [withDirection(spec.params, s)], costs, start, end, new Int8Array(bars.n).fill(-1))
   } else {
     r = simulate(m, [withDirection(spec.params, s)], costs, start, end)

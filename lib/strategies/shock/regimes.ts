@@ -63,3 +63,21 @@ export function classify(bars: Bars, tfMin: number, hourly: Bars, opt = { smaLen
   for (let i = 1; i < n; i++) ret[i] = d.c[i] / d.c[i - 1] - 1
   return { id, daily: { t: d.t, id: dayId, ret } }
 }
+
+/**
+ * Mode adaptatif : jeu de réglages qui décide des entrées à chaque barre, selon la volatilité du
+ * régime (calme ou agitée) ; -1 = pas de nouvelle entrée (régime inconnu, ou pas de jeu pour ce
+ * régime). `agitated` : 1 agité, 0 calme, NaN inconnu.
+ */
+export function volatilitySelect(reg: RegimeSeries, n: number, calmIdx: number, agiIdx: number): { select: Int8Array; agitated: Float64Array } {
+  const select = new Int8Array(n).fill(-1)
+  const agitated = new Float64Array(n).fill(NaN)
+  for (let i = 0; i < n; i++) {
+    const id = reg.id[i]
+    if (id < 0) continue
+    const agi = id % 2 === 1
+    agitated[i] = agi ? 1 : 0
+    select[i] = agi ? agiIdx : calmIdx
+  }
+  return { select, agitated }
+}
