@@ -14,7 +14,8 @@
     "ws-check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/ws-check.ts",
     "source-compare": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/source-compare.ts",
     "testnet-check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/testnet-check.ts",
-    "shadow-report": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/shadow-report.ts"
+    "shadow-report": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/shadow-report.ts",
+    "paper-replay": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/paper-replay.ts"
   },
   "dependencies": {
     "@nktkas/hyperliquid": "^0.33.3",

@@ -39,6 +39,7 @@ Le backtest et le bot partagent la même stratégie :
 | Reconnexions | `tests/stream.test.ts` : signal de clôture en double, reconnexion, coupure de 45 min rattrapée par REST, chaque bougie une seule fois ; `npm run ws-check` : coupures forcées sur le vrai WebSocket |
 | Pas d'ordre en double | `tests/orders.test.ts` : réponse perdue, requête perdue, arrêt brutal en plein envoi (entrée, déplacement du stop), ordre du bot en trop, stop disparu, deux instances |
 | Exchange papier du shadow mode | `tests/paper.test.ts` : exécution au BBO, stops, limites, réduction seule |
+| Moteur live complet sur l'historique Hyperliquid | `npm run paper-replay` : BBO reconstitué le long de chaque bougie, réglages de production du stop suiveur, trades comparés au backtest |
 
 ## Modes
 
@@ -74,6 +75,7 @@ npm run ws-check -- --network mainnet   # coupures WebSocket forcées : reconnex
 npm run testnet-check                   # testnet : métadonnées, lecture de compte, signature
 npm run testnet-check -- --trade        # + aller-retour minimal avec le wallet agent du testnet
 npm run source-compare                  # même stratégie sur Bitstamp (recherche) et Hyperliquid
+npm run paper-replay                    # historique Hyperliquid → moteur live + exchange papier, trade par trade contre le backtest
 npm run shadow-report                   # bilan de la dernière session (bougies, WS, parité, ordres)
 ```
 
