@@ -1,0 +1,110 @@
+{
+  "15m script": {
+    "positions": 4883,
+    "fills": 12378,
+    "finalEquity": 1693.2716134768707,
+    "liquidation": null,
+    "positionsHash": "893a5c22fd79e2280a6d2e24",
+    "equityHash": "b80419a2fae02498af48e779",
+    "positionHash": "1b8f4a929a3f4e776c170dba",
+    "entriesHash": "d30b9d78eb1d60c0a1bb933c"
+  },
+  "30m user2026": {
+    "positions": 334,
+    "fills": 790,
+    "finalEquity": 4763.853980174216,
+    "liquidation": null,
+    "positionsHash": "51cda4d148eb0b18a286204d",
+    "equityHash": "f5bab14bd0c45f5cef79519b",
+    "positionHash": "21da75b6b8e04d936bb807a4",
+    "entriesHash": "34eab5d45651013faf0a9461"
+  },
+  "30m wf30 realistic": {
+    "positions": 382,
+    "fills": 764,
+    "finalEquity": 88538.44387970863,
+    "liquidation": null,
+    "positionsHash": "d8adb671e536af4e7a8fc6cd",
+    "equityHash": "62a4a46cfe7b8a409bf7f877",
+    "positionHash": "1068c4d701c763ea1e769066",
+    "entriesHash": "fd0329d744ddafd4455856b7"
+  },
+  "5m script x100 (liquidation)": {
+    "positions": 1,
+    "fills": 2,
+    "finalEquity": 0,
+    "liquidation": {
+      "i": 3120,
+      "price": 6.15
+    },
+    "positionsHash": "deca6ec4e278cb313f3a18d0",
+    "equityHash": "5b2da36dc49993eb952368be",
+    "positionHash": "552ee2b4c51a8ea5b2288d51",
+    "entriesHash": "e91e25eaf88c6370ba2f0172"
+  },
+  "15m script x3 funding": {
+    "positions": 4883,
+    "fills": 12378,
+    "finalEquity": 10.14958578371261,
+    "liquidation": null,
+    "positionsHash": "4e5853a17d6aecc8b1a6dd0a",
+    "equityHash": "e12ca10dd8c29bb35a066287",
+    "positionHash": "1b8f4a929a3f4e776c170dba",
+    "entriesHash": "d30b9d78eb1d60c0a1bb933c"
+  },
+  "30m two sets alternating": {
+    "positions": 1113,
+    "fills": 2810,
+    "finalEquity": 4295.666110163928,
+    "liquidation": null,
+    "positionsHash": "cc1af3a5948c3ba3e8187f7f",
+    "equityHash": "555f2d31ca135cbb0b5c554e",
+    "positionHash": "6d3a49dba39525b524d764aa",
+    "entriesHash": "abce2cbcff041c0462d8a131"
+  },
+  "15m override entries": {
+    "positions": 5971,
+    "fills": 14926,
+    "finalEquity": 461.7814277666075,
+    "liquidation": null,
+    "positionsHash": "8f07493379d856508e4b60fb",
+    "equityHash": "b2e68c8601d5a10ed27c5daa",
+    "positionHash": "b47a45a802cacdd7065870b7",
+    "entriesHash": "eab6e34b80b5e5952c2a2c74"
+  },
+  "site adaptive15": {
+    "trades": 1418,
+    "finalEquity": 1100407.6828849346,
+    "tradesHash": "363781ba5484e11859a7184e",
+    "equityHash": "b70d80308259cef05b0a664d",
+    "metricsHash": "782be6c9b6e4157954cbc726"
+  },
+  "site adaptive15 x3 funding split": {
+    "trades": 1418,
+    "finalEquity": 376756209.904608,
+    "tradesHash": "da00cf6ee26f33796a965b25",
+    "equityHash": "a67ac10c669503efdbfc7517",
+    "metricsHash": "b9256a8568aec2718c34d2ce"
+  },
+  "site adaptive30 2022+": {
+    "trades": 292,
+    "finalEquity": 130467.45059449604,
+    "tradesHash": "f0482b48b67f25b40fec677c",
+    "equityHash": "f66017a93d4997b6950f565a",
+    "metricsHash": "82abdf120f51eed082e4fc9c"
+  },
+  "site user2026 longs only": {
+    "trades": 3,
+    "finalEquity": 10016.456504079668,
+    "tradesHash": "35c5ff27f465f6def49a9a76",
+    "equityHash": "94ba0219eb13a47a090db344",
+    "metricsHash": "9cdabf58da54793b69b8c8d7"
+  },
+  "site script 5m": {
+    "trades": 15372,
+    "finalEquity": 3.092281986027956e-11,
+    "tradesHash": "e3f46b620fc849974c5e5dda",
+    "equityHash": "efab2bec2a52a5a571598da7",
+    "metricsHash": "cfffcd6f95334f14914075cf"
+  }
+}
