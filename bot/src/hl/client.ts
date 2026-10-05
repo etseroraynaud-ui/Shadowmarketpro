@@ -3,29 +3,24 @@
 //   automatiques du SDK) ;
 // - exécution : ordres, stops, annulations, positions, ordres ouverts, fills, financement.
 //
-// Les ordres sont signés par un wallet agent dédié au bot (clé en variable d'environnement), pour
-// le compte HL_ACCOUNT_ADDRESS. L'agent ne peut pas retirer de fonds.
+// Les ordres sont signés par un wallet agent dédié au bot (clé en variable d'environnement),
+// approuvé sur le compte HL_ACCOUNT_ADDRESS. L'agent ne peut pas retirer de fonds. Avec un
+// sous-compte (HL_SUBACCOUNT_ADDRESS), chaque ordre porte son adresse (« vaultAddress ») : le même
+// agent trade alors le sous-compte, et positions, ordres et fills sont lus sur le sous-compte.
 
 import { ExchangeClient, HttpTransport, InfoClient, SubscriptionClient, WebSocketTransport } from '@nktkas/hyperliquid'
 import { formatPrice, formatSize, SymbolConverter } from '@nktkas/hyperliquid/utils'
 import { privateKeyToAccount } from 'viem/accounts'
 import type { Bar } from '../../../lib/strategies/shock/live.ts'
+import { dexOf, tickOf } from '../../../lib/hyperliquid/market.ts'
 import type { CandleApi, Interval } from '../data/candles.ts'
 import type { AccountState, AssetInfo, Exchange, Fill, FundingEvent, OpenOrder, OrderResult, Side } from '../exec/exchange.ts'
+
+export { dexOf, tickOf }
 
 export interface HlOptions {
   testnet: boolean
   coin: string
-}
-
-/**
- * Marché HIP-3 (perp déployé par un tiers, ex. actions) : « dex:SYMBOLE » (xyz:NVDA). Les
- * positions, ordres et prix de ces marchés se demandent avec le nom du dex ; le marché principal
- * (BTC, ETH…) a un nom de dex vide.
- */
-export function dexOf(coin: string): string {
-  const k = coin.indexOf(':')
-  return k > 0 ? coin.slice(0, k) : ''
 }
 
 /** Données publiques : bougies, prix, métadonnées de l'actif. */
@@ -93,6 +88,16 @@ export class HyperliquidStream {
   }
 }
 
+/** Ce que le compte principal autorise : l'agent, et le sous-compte ou vault tradé. */
+export interface AccessCheck {
+  agent: `0x${string}`
+  /** L'agent figure parmi les wallets API du compte principal. */
+  agentListed: boolean
+  traded: `0x${string}`
+  kind: 'compte principal' | 'sous-compte' | 'vault'
+  name: string | null
+}
+
 /** Exécution réelle sur Hyperliquid (testnet ou mainnet). */
 export class HyperliquidExchange implements Exchange {
   readonly asset: AssetInfo
@@ -109,12 +114,16 @@ export class HyperliquidExchange implements Exchange {
     this.asset = asset
   }
 
-  static async connect(opts: HlOptions & { account: `0x${string}`; agentKey: `0x${string}` }): Promise<HyperliquidExchange> {
+  static async connect(opts: HlOptions & { account: `0x${string}`; subAccount: `0x${string}` | null; agentKey: `0x${string}` }): Promise<{ exchange: HyperliquidExchange; access: AccessCheck }> {
     const data = new HyperliquidData(opts.testnet)
     const wallet = privateKeyToAccount(opts.agentKey)
-    const exchange = new ExchangeClient({ transport: new HttpTransport({ isTestnet: opts.testnet, timeout: 15000 }), wallet })
+    const access = await checkAccess(data.info, opts.account, opts.subAccount, wallet.address)
+    const exchange = new ExchangeClient({
+      transport: new HttpTransport({ isTestnet: opts.testnet, timeout: 15000 }), wallet,
+      ...(opts.subAccount ? { defaultVaultAddress: opts.subAccount } : {}),
+    })
     const asset = await data.assetInfo(opts.coin)
-    return new HyperliquidExchange(data, exchange, opts.account, opts.coin, asset)
+    return { exchange: new HyperliquidExchange(data, exchange, access.traded, opts.coin, asset), access }
   }
 
   private px(x: number): string {
@@ -215,11 +224,19 @@ export class HyperliquidExchange implements Exchange {
 }
 
 /**
- * Pas de cotation effectif : 5 chiffres significatifs au plus, 6 - szDecimals décimales au plus,
- * prix entiers toujours permis.
+ * Vérifie, avant tout ordre, que le sous-compte (ou vault) appartient bien au compte principal :
+ * sinon l'agent signerait pour une adresse qu'il ne contrôle pas. L'absence de l'agent dans la
+ * liste des wallets API est seulement signalée (les ordres échoueraient de toute façon).
  */
-export function tickOf(price: number, szDecimals: number): number {
-  const digits = Math.floor(Math.log10(price)) + 1
-  if (digits >= 5) return 1
-  return Math.max(10 ** (digits - 5), 10 ** -(6 - szDecimals))
+export async function checkAccess(info: InfoClient, account: `0x${string}`, sub: `0x${string}` | null, agent: `0x${string}`): Promise<AccessCheck> {
+  const agents = await info.extraAgents({ user: account })
+  const agentListed = agents.some(a => a.address.toLowerCase() === agent.toLowerCase())
+  if (!sub) return { agent, agentListed, traded: account, kind: 'compte principal', name: null }
+  const same = (x: string) => x.toLowerCase() === sub.toLowerCase()
+  const subs = (await info.subAccounts({ user: account })) ?? []
+  const s = subs.find(x => same(x.subAccountUser))
+  if (s) return { agent, agentListed, traded: sub, kind: 'sous-compte', name: s.name }
+  const vault = (await info.leadingVaults({ user: account })).find(v => same(v.address))
+  if (vault) return { agent, agentListed, traded: sub, kind: 'vault', name: vault.name }
+  throw new Error(`HL_SUBACCOUNT_ADDRESS ${sub} n'est ni un sous-compte ni un vault de ${account}`)
 }

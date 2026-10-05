@@ -1,0 +1,7 @@
+# Image du bot (bot/Dockerfile) : seulement le moteur partagé et le bot.
+*
+!lib/
+!bot/package.json
+!bot/package-lock.json
+!bot/src/
+lib/**/tests/

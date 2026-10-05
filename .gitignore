@@ -24,3 +24,5 @@ Thumbs.db
 bot/data/
 bot/state/
 bot/logs/
+# bot : secrets du serveur (clé de l'agent)
+bot/deploy/*.env

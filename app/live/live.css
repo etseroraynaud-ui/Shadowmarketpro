@@ -1,0 +1,36 @@
+/* Page Performance live : complète backtest.css (mêmes variables, mêmes cartes). */
+.lv-main { max-width: 1640px; margin: 0 auto; padding: 14px 20px 40px; display: flex; flex-direction: column; gap: 12px }
+@media (max-width: 640px) { .lv-main { padding-left: 16px; padding-right: 16px } }
+.lv-h2 { font-family: var(--bt-head); font-size: 16px; font-weight: 600; line-height: 1.25 }
+.lv-h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--bt-text3); margin: 14px 0 8px; padding-top: 12px; border-top: 1px solid var(--bt-line) }
+.lv-sub { font-size: 12.5px; margin: 4px 0 12px; max-width: 110ch }
+.lv-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap }
+.lv-empty { padding: 24px 0; text-align: center }
+.lv-note { padding: 10px 12px; border-radius: 10px; font-size: 13px }
+.lv-note-warn { color: var(--bt-amber); background: rgba(251, 191, 36, 0.07); border: 1px solid rgba(251, 191, 36, 0.3) }
+.lv-note-small { font-size: 12px; margin-top: 10px; max-width: 120ch }
+.lv-disclaimer { color: var(--bt-text3); font-size: 12px; text-align: center; margin-top: 10px }
+
+.lv-form { display: flex; flex-direction: column; gap: 10px }
+.lv-form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap }
+.lv-grow { flex: 1 1 320px }
+.lv-form-row input { font-family: var(--bt-mono); font-size: 13px }
+
+.lv-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; padding: 12px 16px }
+.lv-bar-id { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0 }
+.lv-bar-id strong { font-family: var(--bt-head); font-size: 15px }
+.lv-bar-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px }
+.lv-addr { font-family: var(--bt-mono); font-size: 12px; color: var(--bt-text2); text-decoration: underline; text-decoration-color: rgba(255, 255, 255, 0.25); text-underline-offset: 3px; overflow-wrap: anywhere }
+.lv-addr:hover { color: var(--bt-text) }
+
+.lv-grid { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(0, 2.2fr); gap: 12px }
+@media (max-width: 980px) { .lv-grid { grid-template-columns: 1fr } }
+.lv-flat { font-family: var(--bt-head); font-size: 20px; font-weight: 600; color: var(--bt-text2); padding: 6px 0 }
+.lv-dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin-top: 10px }
+.lv-dl div { display: flex; flex-direction: column; gap: 1px; min-width: 0 }
+.lv-dl dt { font-size: 11.5px; color: var(--bt-text3) }
+.lv-dl dd { font-variant-numeric: tabular-nums; font-size: 14px }
+.lv-orders { list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-variant-numeric: tabular-nums }
+.lv-orders li { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.lv-chart { width: 100%; height: 300px }
+.lv-chip { margin-left: 6px }

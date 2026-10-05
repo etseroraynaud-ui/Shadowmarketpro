@@ -13,6 +13,7 @@ import { Journal } from '../src/journal.ts'
 import { LiveEngine, handoffCosts } from '../src/engine/live.ts'
 import { StateStore } from '../src/engine/state.ts'
 import { FakeExchange } from './fake-exchange.ts'
+import { backtestTrips, compareTrips, roundTrips } from '../../lib/hyperliquid/track.ts'
 
 const all15 = loadBtc(15)
 const allDaily = resample(loadBtc(60), 86400000)
@@ -93,6 +94,19 @@ for (const [name, W] of [['stops et flips', W1], ['TP1 et stop suiveur', W2]] as
     assert.equal(t.set, String(p.set))
   })
   if (W === W2) assert.ok(bt.some(p => p.exits.includes('TP1')) && bt.some(p => p.exits.includes('TRAIL')), 'TP1 et stop suiveur couverts')
+  // Page Performance live : les trades reconstitués à partir des seuls fills publics
+  // correspondent un à un au backtest, avec le même rendement par trade.
+  const { trips, skipped } = roundTrips(ex.log.map(f => ({ ...f, coin: 'BTC' })))
+  assert.equal(skipped, 0)
+  const closed = trips.filter(t => t.exitTime != null)
+  assert.equal(closed.length, bt.length)
+  assert.ok(closed.every(t => t.bot), 'entrées reconnues comme ordres du bot')
+  const rows = compareTrips(closed, backtestTrips(chart, bt, null, M15), M15, firstLive)
+  assert.deepEqual(rows.map(r => r.status), bt.map(() => 'match'))
+  rows.forEach((r, k) => {
+    assert.equal(r.live!.exits.includes('tp1'), bt[k].exits.includes('TP1'), `TP1 ${k}`)
+    assert.ok(Math.abs(r.live!.pnlPct - bt[k].pnlPct) < 2e-4, `rendement ${k} : ${r.live!.pnlPct} / ${bt[k].pnlPct}`)
+  })
 })
 
 test('compte pas à plat au premier lancement : aucun ordre', async () => {

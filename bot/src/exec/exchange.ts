@@ -86,18 +86,6 @@ export interface Exchange {
   cancel(oids: number[]): Promise<void>
 }
 
-/** Identifiants client des ordres du bot : préfixe fixe, nature de l'ordre, partie aléatoire. */
-export const CLOID_PREFIX = '0x5b0c'
-export type OrderKind = 'entry' | 'close' | 'stop' | 'tp1' | 'emergency'
-const KIND_CODE: Record<OrderKind, string> = { entry: '01', close: '02', stop: '03', tp1: '04', emergency: '05' }
-
-export function newCloid(kind: OrderKind): string {
-  const rand = Array.from(crypto.getRandomValues(new Uint8Array(13)), b => b.toString(16).padStart(2, '0')).join('')
-  return `${CLOID_PREFIX}${KIND_CODE[kind]}${rand}`
-}
-
-export function cloidKind(cloid: string | null): OrderKind | null {
-  if (!cloid || !cloid.startsWith(CLOID_PREFIX)) return null
-  const code = cloid.slice(CLOID_PREFIX.length, CLOID_PREFIX.length + 2)
-  return (Object.keys(KIND_CODE) as OrderKind[]).find(k => KIND_CODE[k] === code) ?? null
-}
+// Identifiants client des ordres du bot : partagés avec la page Performance live du site.
+export { CLOID_PREFIX, cloidKind, newCloid } from '../../../lib/hyperliquid/cloid.ts'
+export type { OrderKind } from '../../../lib/hyperliquid/cloid.ts'

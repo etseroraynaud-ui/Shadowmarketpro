@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Commandes du bot Shock Engine sur le serveur (installé par install.sh comme « smp-bot »).
+#
+#   smp-bot status                 état des services
+#   smp-bot logs [shadow|live]     journal en direct (Ctrl+C pour quitter)
+#   smp-bot trades [shadow|live]   trades fermés (CSV)
+#   smp-bot pause                  bot réel : plus aucune nouvelle entrée (la position en cours reste gérée)
+#   smp-bot resume                 bot réel : entrées de nouveau permises
+#   smp-bot live-start             démarre le bot réel (bot/deploy/live.env)
+#   smp-bot live-stop              arrête le bot réel
+#   smp-bot live-reset             après un HALT, compte remis à plat : repart de zéro
+#   smp-bot update                 récupère la dernière version et redémarre
+set -euo pipefail
+
+DIR=${SMP_DIR:-/opt/shadowmarketpro}
+ENV_FILE=$DIR/bot/deploy/live.env
+# Le service live n'existe que si live.env existe (il contient le mode et la clé).
+compose() {
+  if [ -f "$ENV_FILE" ]; then docker compose -f "$DIR/bot/deploy/compose.yml" --profile live "$@"
+  else docker compose -f "$DIR/bot/deploy/compose.yml" "$@"; fi
+}
+service() { case "${1:-shadow}" in shadow|live) echo "${1:-shadow}" ;; *) echo "service inconnu : $1 (shadow ou live)" >&2; exit 1 ;; esac; }
+running() { [ -n "$(compose ps -q --status running "$1" 2>/dev/null)" ]; }
+
+check_env() {
+  [ -f "$ENV_FILE" ] || { echo "Il manque $ENV_FILE : copier live.env.example, le remplir, puis chmod 600." >&2; exit 1; }
+  local perm; perm=$(stat -c %a "$ENV_FILE")
+  [ "$perm" = 600 ] || { echo "$ENV_FILE contient la clé de l'agent : chmod 600 $ENV_FILE (actuellement $perm)." >&2; exit 1; }
+  grep -Eq '^BOT_MODE=(testnet|mainnet)$' "$ENV_FILE" || { echo "BOT_MODE doit valoir testnet ou mainnet dans $ENV_FILE." >&2; exit 1; }
+}
+
+case "${1:-help}" in
+  status) compose ps ;;
+  logs) compose logs -f --tail 100 "$(service "${2:-}")" ;;
+  trades) compose exec "$(service "${2:-}")" sh -c 'cat /data/logs/trades-*.csv 2>/dev/null || echo "Aucun trade fermé pour l’instant."' ;;
+  pause) check_env; compose exec live sh -c 'mkdir -p /data/state && touch /data/state/KILL' && echo "Nouvelles entrées bloquées." ;;
+  resume) check_env; compose exec live rm -f /data/state/KILL && echo "Entrées de nouveau permises." ;;
+  live-start)
+    check_env
+    echo "Démarrage du bot réel : $(grep -E '^BOT_MODE=' "$ENV_FILE" | cut -d= -f2), $(grep -E '^BOT_COIN=' "$ENV_FILE" | cut -d= -f2 || echo BTC)."
+    compose up -d --build live
+    echo "Suivre : smp-bot logs live"
+    ;;
+  live-stop)
+    compose stop live
+    echo "Bot réel arrêté. Une position ouverte reste chez Hyperliquid avec son stop, mais le stop suiveur ne bouge plus."
+    ;;
+  live-reset)
+    check_env
+    compose stop live
+    # L'état est mis de côté (pas effacé) : au démarrage, le bot vérifie que le compte est à plat,
+    # rejoue l'historique et reprend la main dès que le backtest est à plat.
+    compose run --rm --no-deps --entrypoint sh live -c 'for f in /data/state/live-*.json; do [ -e "$f" ] && mv "$f" "$f.$(date +%s).bak"; done; true'
+    compose up -d live
+    echo "Bot réel relancé sans état. Suivre : smp-bot logs live"
+    ;;
+  update)
+    git -C "$DIR" pull --ff-only
+    services=shadow
+    if running live; then check_env; services="shadow live"; fi
+    # shellcheck disable=SC2086
+    compose up -d --build $services
+    ;;
+  *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+esac

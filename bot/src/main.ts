@@ -68,7 +68,9 @@ async function main() {
     const costs = { capital: cfg.shadowCapital, qtyPct: cfg.equityPct, commissionPct: cfg.shadowFeePct, slippageTicks: 0, slippagePct: 0, mintick: asset.tick, leverage: cfg.leverage, maintenancePct: 0.5, fundingPct: 0 }
     engine = new ShadowEngine(shock, costs, feed.chartBars(), feed.dailyBars(), journal)
   } else {
-    const exchange = await retry('exchange', () => HyperliquidExchange.connect({ testnet: cfg.mode === 'testnet', coin: cfg.coin, account: cfg.account!, agentKey: cfg.agentKey! }), journal)
+    const { exchange, access } = await retry('exchange', () => HyperliquidExchange.connect({ testnet: cfg.mode === 'testnet', coin: cfg.coin, account: cfg.account!, subAccount: cfg.subAccount, agentKey: cfg.agentKey! }), journal)
+    journal.event('access', { ...access })
+    if (!access.agentListed) journal.event('warning', { what: `l'agent ${access.agent} n'est pas dans les wallets API de ${cfg.account} : les ordres seront refusés` })
     const live = await LiveEngine.start({
       cfg, shock, exchange, journal, network: cfg.mode === 'testnet' ? 'testnet' : 'mainnet',
       store: new StateStore(join(cfg.stateDir, `live-${cfg.mode}-${cfg.coin}.json`)), resetState: process.env.BOT_RESET_STATE === '1',

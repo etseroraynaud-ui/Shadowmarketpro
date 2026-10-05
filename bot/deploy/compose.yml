@@ -1,0 +1,49 @@
+# Bot Shock Engine sur un serveur, avec Docker. Depuis la racine du dépôt :
+#
+#   docker compose -f bot/deploy/compose.yml up -d --build                  shadow mode seul
+#   docker compose -f bot/deploy/compose.yml --profile live up -d --build   + testnet ou mainnet
+#
+# Les deux tournent en parallèle : le shadow mode (données mainnet, aucun ordre) reste la
+# référence à laquelle comparer le bot réel. Redémarrage automatique en cas d'arrêt ou de reboot.
+
+name: shock-engine
+
+x-bot: &bot
+  build:
+    context: ../..
+    dockerfile: bot/Dockerfile
+  image: shock-engine-bot
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 30s
+  logging:
+    driver: local
+    options:
+      max-size: 10m
+      max-file: "5"
+
+services:
+  shadow:
+    <<: *bot
+    env_file:
+      - path: shadow.env
+        required: false
+    environment:
+      # Toujours shadow, quoi que contienne shadow.env : ce service n'envoie jamais d'ordre.
+      BOT_MODE: shadow
+    volumes:
+      - shadow-data:/data
+
+  live:
+    <<: *bot
+    profiles: [live]
+    # BOT_MODE (testnet puis mainnet), adresses et clé de l'agent : fichier lisible par root seul.
+    env_file:
+      - path: live.env
+        required: true
+    volumes:
+      - live-data:/data
+
+volumes:
+  shadow-data:
+  live-data:

@@ -2,6 +2,8 @@
 //
 //   BOT_MODE              shadow (défaut) | testnet | mainnet
 //   HL_ACCOUNT_ADDRESS    adresse du compte Hyperliquid (le compte principal, pas l'agent)
+//   HL_SUBACCOUNT_ADDRESS sous-compte (ou vault) du compte principal que le bot trade ; vide : le
+//                         compte principal. Un sous-compte dédié isole le track record du bot.
 //   HL_AGENT_PRIVATE_KEY  clé privée du wallet agent dédié au bot (approuvé sur le compte) ;
 //                         obligatoire en testnet et mainnet, jamais lue en shadow
 //   BOT_COIN              BTC (défaut)
@@ -32,6 +34,7 @@ export interface BotConfig {
   coin: string
   tfMin: 15
   account: `0x${string}` | null
+  subAccount: `0x${string}` | null
   agentKey: `0x${string}` | null
   dataDir: string
   stateDir: string
@@ -68,6 +71,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
   const mode = (env.BOT_MODE ?? 'shadow') as Mode
   if (!['shadow', 'testnet', 'mainnet'].includes(mode)) throw new Error(`BOT_MODE=${mode} : shadow, testnet ou mainnet`)
   const account = hex(env, 'HL_ACCOUNT_ADDRESS', 40)
+  const subAccount = hex(env, 'HL_SUBACCOUNT_ADDRESS', 40)
+  if (subAccount && !account) throw new Error('HL_SUBACCOUNT_ADDRESS demande HL_ACCOUNT_ADDRESS (le compte principal qui a approuvé l\'agent)')
+  if (subAccount && account && subAccount.toLowerCase() === account.toLowerCase()) throw new Error('HL_SUBACCOUNT_ADDRESS est le compte principal : laisser vide')
   // La clé n'est lue que lorsqu'on va s'en servir.
   const agentKey = mode === 'shadow' ? null : hex(env, 'HL_AGENT_PRIVATE_KEY', 64)
   if (mode !== 'shadow' && (!account || !agentKey)) throw new Error(`mode ${mode} : HL_ACCOUNT_ADDRESS et HL_AGENT_PRIVATE_KEY sont obligatoires`)
@@ -78,6 +84,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
     coin: env.BOT_COIN ?? 'BTC',
     tfMin: 15,
     account,
+    subAccount,
     agentKey,
     dataDir: resolve(env.BOT_DATA_DIR ?? join(ROOT, 'data')),
     stateDir,
@@ -92,6 +99,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
     shadowCapital: num(env, 'BOT_SHADOW_CAPITAL', 10000, 10, 1e9),
     shadowFeePct: num(env, 'BOT_SHADOW_FEE_PCT', 0.045, 0, 1),
   }
+}
+
+/** Adresse dont le bot trade la position : le sous-compte s'il y en a un, sinon le compte. */
+export function tradedAccount(c: Pick<BotConfig, 'account' | 'subAccount'>): `0x${string}` | null {
+  return c.subAccount ?? c.account
 }
 
 /** Configuration sans secret, pour le journal. */

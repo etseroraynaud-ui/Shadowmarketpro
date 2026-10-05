@@ -64,11 +64,29 @@ export HL_ACCOUNT_ADDRESS=0x...      # ton compte (adresse publique)
 export HL_AGENT_PRIVATE_KEY=0x...    # clé privée de l'agent, jamais dans le code ni dans git
 ```
 
+## Sous-compte dédié (recommandé)
+
+Le bot peut trader un **sous-compte** du compte principal plutôt que le compte lui-même : son
+historique ne contient alors que les trades du bot (un track record propre, vérifiable on-chain),
+et une erreur du bot ne touche pas le reste du compte.
+
+1. Sur Hyperliquid : Portfolio → Sub-Accounts → créer un sous-compte, puis y transférer le
+   capital du bot (USDC).
+2. Le wallet agent reste celui du compte principal ; aucune autre clé.
+3. ```
+   export HL_SUBACCOUNT_ADDRESS=0x...   # adresse du sous-compte
+   ```
+
+Chaque ordre porte alors l'adresse du sous-compte, et le bot lit position, ordres et fills du
+sous-compte. Au démarrage, il vérifie que cette adresse est bien un sous-compte (ou un vault) du
+compte principal, sinon il s'arrête. Plus tard, la même variable accepte l'adresse d'un vault.
+
 ## Variables
 
 | Variable | Défaut | Rôle |
 | --- | --- | --- |
 | `BOT_MODE` | `shadow` | `shadow`, `testnet`, `mainnet` |
+| `HL_SUBACCOUNT_ADDRESS` | | sous-compte (ou vault) tradé ; vide : le compte principal |
 | `BOT_EQUITY_PCT` | 100 | part du capital par position (comme le backtest) |
 | `BOT_LEVERAGE` | 1 | levier de la position |
 | `BOT_MAX_NOTIONAL_USD` | 1000 | plafond de la valeur d'une position |
@@ -85,6 +103,10 @@ export HL_AGENT_PRIVATE_KEY=0x...    # clé privée de l'agent, jamais dans le c
 ```
 BOT_MODE=shadow npm start
 ```
+
+Sur un serveur, 24 h/24 (Docker, redémarrage automatique, shadow mode et bot réel en parallèle) :
+voir **[DEPLOY.md](DEPLOY.md)**. Les trades réels se suivent sur la page Performance live du
+site (`/live`), qui lit le compte directement sur Hyperliquid et compare chaque trade au backtest.
 
 Le bot écrit :
 

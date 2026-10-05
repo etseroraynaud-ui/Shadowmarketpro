@@ -21,6 +21,7 @@ import type { Bar, ShockConfig } from '../../../lib/strategies/shock/live.ts'
 import type { Decision, EntryOrder } from '../../../lib/strategies/shock/strategy.ts'
 import type { Costs } from '../../../lib/strategies/shock/params.ts'
 import type { BotConfig } from '../config.ts'
+import { tradedAccount } from '../config.ts'
 import type { Exchange, Side } from '../exec/exchange.ts'
 import { cloidKind, newCloid } from '../exec/exchange.ts'
 import type { Journal } from '../journal.ts'
@@ -102,7 +103,7 @@ export class LiveEngine {
     if (!saved) {
       const session = new ShockSession(o.shock, handoffCosts(o.cfg, o.shock), chart, 0, { regimeBars: daily })
       const state: BotState = {
-        version: 1, network: o.network, coin: o.cfg.coin, account: o.cfg.account ?? '', anchor: chart.t[0], lastBarTime: chart.t[chart.n - 1],
+        version: 1, network: o.network, coin: o.cfg.coin, account: tradedAccount(o.cfg) ?? '', anchor: chart.t[0], lastBarTime: chart.t[chart.n - 1],
         strategy: saveStrategy(session.runner.strategy.state, chart.t), position: null, seenFills: [], lastFillTime: now, lastFundingTime: now, halted: null,
       }
       eng = new LiveEngine(o, session.runner, session, state)
@@ -110,7 +111,7 @@ export class LiveEngine {
       if (!session.broker.pos) eng.handoff()
       await eng.reconcile()
     } else {
-      const bad = saved.anchor !== chart.t[0] ? 'première bougie de l\'historique différente' : saved.network !== o.network || saved.coin !== o.cfg.coin || saved.account !== (o.cfg.account ?? '') ? 'réseau, actif ou compte différent' : null
+      const bad = saved.anchor !== chart.t[0] ? 'première bougie de l\'historique différente' : saved.network !== o.network || saved.coin !== o.cfg.coin || saved.account !== (tradedAccount(o.cfg) ?? '') ? 'réseau, actif ou compte différent' : null
       const idx = indexOfTime(chart.t, saved.lastBarTime)
       if (bad || idx < 0) {
         const runner = new ShockRunner(o.shock, chart, { regimeBars: daily })

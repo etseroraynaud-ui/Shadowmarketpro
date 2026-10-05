@@ -65,7 +65,7 @@ export interface BotState {
   seenFills: number[]
   lastFillTime: number
   lastFundingTime: number
-  /** Raison de l'arrêt des ordres, ou null. Effacé seulement à la main (BOT_CLEAR_HALT=1). */
+  /** Raison de l'arrêt des ordres, ou null. Effacé seulement à la main : compte remis à plat, puis BOT_RESET_STATE=1. */
   halted: string | null
 }
 

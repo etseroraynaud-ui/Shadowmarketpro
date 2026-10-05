@@ -107,6 +107,7 @@ export const HL_MARKETS: Record<MarketGroup, Market[]> = {
 
 export const HL_INTERVALS = ['5m', '15m', '30m', '1h', '4h', '1d'] as const
 const HL_INFO = 'https://api.hyperliquid.xyz/info'
+const HL_INFO_TESTNET = 'https://api.hyperliquid-testnet.xyz/info'
 /** L'API ne renvoie que les 5000 bougies les plus récentes d'un intervalle. */
 const HL_MAX = 5000
 
@@ -129,9 +130,9 @@ function closedRecords(rows: { t: number; o: string; h: string; l: string; c: st
   return recs
 }
 
-async function hlCandles(coin: string, interval: string, now: number): Promise<Rec[]> {
+async function hlCandles(coin: string, interval: string, now: number, testnet = false): Promise<Rec[]> {
   const step = INTERVAL_MS[interval]
-  const res = await fetch(HL_INFO, {
+  const res = await fetch(testnet ? HL_INFO_TESTNET : HL_INFO, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ type: 'candleSnapshot', req: { coin, interval, startTime: now - HL_MAX * step, endTime: now } }),
@@ -142,10 +143,10 @@ async function hlCandles(coin: string, interval: string, now: number): Promise<R
   return closedRecords(rows, step, now)
 }
 
-export async function loadHyperliquid(coin: string, interval: string): Promise<Dataset> {
+export async function loadHyperliquid(coin: string, interval: string, testnet = false): Promise<Dataset> {
   if (!INTERVAL_MS[interval]) throw new Error(`intervalle ${interval}`)
   const now = Date.now()
-  const [recs, days] = await Promise.all([hlCandles(coin, interval, now), interval === '1d' ? null : hlCandles(coin, '1d', now)])
+  const [recs, days] = await Promise.all([hlCandles(coin, interval, now, testnet), interval === '1d' ? null : hlCandles(coin, '1d', now, testnet)])
   if (recs.length < 2) throw new Error('no data')
   const d = barsFromRecords(recs)
   const daily = interval === '1d' ? d.bars : days && days.length ? barsFromRecords(days).bars : undefined

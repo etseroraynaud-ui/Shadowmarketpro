@@ -237,6 +237,7 @@ export default function BacktestApp() {
               ))}
             </div>
             <Link href="/backtest/recherche" className="bt-link">{t.research}</Link>
+            <Link href="/live" className="bt-link">{t.live}</Link>
             <Link href="/" className="bt-link bt-hide-sm">{t.backToSite}</Link>
           </div>
         </div>
