@@ -20,8 +20,9 @@ import { LogoSVGSmall } from '../components/Logo'
 import { DICTS } from './i18n'
 import type { Lang } from './i18n'
 import { fmtNum, parseDay } from './format'
-import DataPanel, { loadSample } from './components/DataPanel'
-import type { Dataset } from './components/DataPanel'
+import DataPanel from './components/DataPanel'
+import { loadDataset, withTimeframe } from './datasets'
+import type { Dataset } from './datasets'
 import StrategyPanel from './components/StrategyPanel'
 import type { ScriptErr, StrategyMode } from './components/StrategyPanel'
 import SettingsPanel from './components/SettingsPanel'
@@ -118,7 +119,8 @@ export default function BacktestApp() {
     if (s.shockParams) setShockParams({ ...DEFAULT_PARAMS, ...s.shockParams })
     if (s.shockEdited) { setShockEdited(true); setShockAdaptive(null) }
     setReady(true)
-    loadSample(s.sample ?? 'btc1d').then(setData).catch(e => setDataError(String(e)))
+    // Dernier jeu de données ; si sa source ne répond plus, l'exemple par défaut.
+    loadDataset(s.sample ?? 'btc1d').catch(() => loadDataset('btc1d')).then(setData).catch(e => setDataError(String(e)))
   }, [])
 
   useEffect(() => {
@@ -148,14 +150,19 @@ export default function BacktestApp() {
     if (!data || !settings) return
     setBusy(true)
     try {
-      const o = source.kind === 'shock' ? runShockBacktest(data.bars, source, settings) : runStrategy(data.bars, source as StrategySource, settings)
+      const o = source.kind === 'shock' ? runShockBacktest(data.bars, source, settings, data.daily) : runStrategy(data.bars, source as StrategySource, settings)
       // Préréglage choisi par la recherche, testé sur la période où il a été choisi : résultat flatteur.
       const pr = source.kind === 'shock' && !shockEdited ? SHOCK_PRESETS.find(x => x.id === shockPreset) : undefined
       if (pr?.selectedOn) {
         const r0 = o.result
         const a = data.bars.t[r0.start]
         const b = data.bars.t[r0.end]
-        if (a < pr.selectedOn.to && b > pr.selectedOn.from) {
+        if (!/BTC/i.test(data.name)) {
+          o.warnings = [{
+            fr: 'Préréglage réglé sur BTC et appliqué tel quel à cet actif : le résultat est un test hors échantillon de la stratégie, pas un réglage pour cet actif.',
+            en: 'Preset tuned on BTC and applied unchanged to this asset: the result is an out-of-sample test of the strategy, not a tuning for this asset.',
+          }, ...o.warnings]
+        } else if (a < pr.selectedOn.to && b > pr.selectedOn.from) {
           o.warnings = [{
             fr: `Ce préréglage a été choisi par la recherche sur 2017-2026 : sur cette période, le résultat affiché est en échantillon et donc flatteur. ${pr.selectedOn.oos.fr}`,
             en: `This preset was chosen by the research on 2017-2026: on this period, the result shown is in sample and therefore flattering. ${pr.selectedOn.oos.en}`,
@@ -207,8 +214,9 @@ export default function BacktestApp() {
     // glissement d'un tick (négligeable sur le BTC), dans les deux sens.
     setUiPart({ direction: 'both', capital: 10000, sizing: 'percent', sizeValue: 100, feePct: 0.02, slippagePct: 0 })
   }
+  /** Même marché dans le timeframe conseillé par le préréglage (BTC/USD Bitstamp pour un CSV). */
   const loadTf = (tf: number) => {
-    loadSample(`btc${tf}m`).then(onLoaded).catch(e => setDataError(String(e)))
+    loadDataset(withTimeframe(data?.sample, tf) ?? `btc${tf}m`).then(onLoaded).catch(e => setDataError(String(e)))
   }
   const dataTf = data ? Math.round(data.barMs / 60000) : null
 

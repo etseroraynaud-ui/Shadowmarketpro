@@ -189,8 +189,12 @@ function withDirection(p: ShockParams, s: Settings): ShockParams {
   return { ...p, allowLong: p.allowLong && s.direction !== 'short', allowShort: p.allowShort && s.direction !== 'long' }
 }
 
-/** Exécution brute : renvoie le résultat du moteur et la fenêtre. */
-export function runShockRaw(bars: Bars, spec: ShockSpec, s: Settings) {
+/**
+ * Exécution brute : renvoie le résultat du moteur et la fenêtre. `regimeBars` : bougies
+ * journalières de la même source (régime de volatilité du mode adaptatif) ; par défaut, les
+ * barres 60 min regroupées depuis les données chargées, ce qui demande plusieurs mois d'historique.
+ */
+export function runShockRaw(bars: Bars, spec: ShockSpec, s: Settings, regimeBars?: Bars) {
   const { m, tfMin, warnings } = marketOf(bars)
   const { start, end, split } = windowIndices(bars, s)
   const costs = shockCosts(s)
@@ -200,7 +204,7 @@ export function runShockRaw(bars: Bars, spec: ShockSpec, s: Settings) {
     const sets: ShockParams[] = []
     const calmIdx = spec.adaptive.calm ? sets.push(withDirection(spec.adaptive.calm, s)) - 1 : -1
     const agiIdx = spec.adaptive.agitated ? sets.push(withDirection(spec.adaptive.agitated, s)) - 1 : -1
-    const { select: sel, agitated } = volatilitySelect(classify(bars, tfMin, m.htf), bars.n, calmIdx, agiIdx)
+    const { select: sel, agitated } = volatilitySelect(classify(bars, tfMin, regimeBars ?? m.htf), bars.n, calmIdx, agiIdx)
     regimeVol = agitated
     r = sets.length ? simulate(m, sets, costs, start, end, sel) : simulate(m, [withDirection(spec.params, s)], costs, start, end, new Int8Array(bars.n).fill(-1))
   } else {
@@ -241,9 +245,9 @@ export interface ShockRunOutput {
   ms: number
 }
 
-export function runShockBacktest(bars: Bars, spec: ShockSpec, s: Settings): ShockRunOutput {
+export function runShockBacktest(bars: Bars, spec: ShockSpec, s: Settings, regimeBars?: Bars): ShockRunOutput {
   const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now()
-  const { r, start, end, split, warnings, regimeVol } = runShockRaw(bars, spec, s)
+  const { r, start, end, split, warnings, regimeVol } = runShockRaw(bars, spec, s, regimeBars)
   const n = bars.n
   const capital = s.capital > 0 ? s.capital : 10000
   const trades = toTrades(bars, r.positions)

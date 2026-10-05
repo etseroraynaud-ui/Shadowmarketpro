@@ -1,70 +1,15 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { loadBarsFromCsv, barsFromRecords, DataError } from '../../../lib/backtest/data.ts'
-import type { Bars, Msg } from '../../../lib/backtest/types.ts'
+import { loadBarsFromCsv, DataError } from '../../../lib/backtest/data.ts'
 import type { Dict, Lang } from '../i18n'
 import { fmtDate, fmtPrice } from '../format'
+import { BINANCE_INTERVALS, BINANCE_QUICK, HL_INTERVALS, HL_MARKETS, SAMPLES, loadBinance, loadDataset, loadHyperliquid } from '../datasets'
+import type { Dataset, MarketGroup } from '../datasets'
 
-export interface Dataset {
-  bars: Bars
-  name: string
-  timeframe: string
-  barMs: number
-  warnings: Msg[]
-  /** Identifiant de l'exemple chargé, pour le recharger à la prochaine visite. */
-  sample?: string
-}
+export type { Dataset } from '../datasets'
 
-export const SAMPLES = [
-  { id: 'btc1d', file: '/backtest/data/btcusd_1d.csv', name: 'BTC/USD · Bitstamp', label: 'sampleBtc1d' as const },
-  { id: 'btc4h', file: '/backtest/data/btcusd_4h.csv', name: 'BTC/USD · Bitstamp', label: 'sampleBtc4h' as const },
-  { id: 'btc30m', file: '/backtest/data/btcusd_30m.csv.gz', name: 'BTC/USD · Bitstamp', label: 'sampleBtc30m' as const },
-  { id: 'btc15m', file: '/backtest/data/btcusd_15m.csv.gz', name: 'BTC/USD · Bitstamp', label: 'sampleBtc15m' as const },
-  { id: 'btc5m', file: '/backtest/data/btcusd_5m.csv.gz', name: 'BTC/USD · Bitstamp', label: 'sampleBtc5m' as const },
-]
-
-/** Texte d'un fichier, décompressé dans le navigateur s'il est en gzip. */
-async function fetchText(url: string): Promise<string> {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  const buf = new Uint8Array(await res.arrayBuffer())
-  // Le serveur peut déjà avoir décompressé : on regarde la signature gzip (1f 8b).
-  if (buf[0] === 0x1f && buf[1] === 0x8b) {
-    const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))
-    return await new Response(stream).text()
-  }
-  return new TextDecoder().decode(buf)
-}
-
-export async function loadSample(id: string): Promise<Dataset> {
-  const s = SAMPLES.find(x => x.id === id) ?? SAMPLES[0]
-  const d = loadBarsFromCsv(await fetchText(s.file))
-  return { bars: d.bars, name: s.name, timeframe: d.timeframe, barMs: d.barMs, warnings: d.warnings, sample: s.id }
-}
-
-const INTERVALS = ['15m', '1h', '4h', '1d', '1w']
-
-async function loadBinance(symbol: string, interval: string, since: number): Promise<Dataset> {
-  const recs: [number, number, number, number, number, number][] = []
-  let start = since
-  for (let page = 0; page < 20; page++) {
-    const url = `https://data-api.binance.vision/api/v3/klines?symbol=${encodeURIComponent(symbol)}&interval=${interval}&startTime=${start}&limit=1000`
-    const res = await fetch(url)
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const rows = (await res.json()) as (string | number)[][]
-    if (!Array.isArray(rows) || !rows.length) break
-    for (const r of rows) recs.push([Number(r[0]), Number(r[1]), Number(r[2]), Number(r[3]), Number(r[4]), Number(r[5])])
-    const last = Number(rows[rows.length - 1][0])
-    if (rows.length < 1000 || last <= start) break
-    start = last + 1
-  }
-  if (recs.length < 2) throw new Error('no data')
-  // La dernière barre est encore ouverte : elle est retirée.
-  recs.pop()
-  const d = barsFromRecords(recs)
-  return { bars: d.bars, name: `${symbol} · Binance`, timeframe: d.timeframe, barMs: d.barMs, warnings: d.warnings }
-}
+const GROUPS: MarketGroup[] = ['crypto', 'stocks', 'commodities', 'indices']
 
 export default function DataPanel({
   t, lang, data, onLoaded, from, to, onWindow,
@@ -77,13 +22,16 @@ export default function DataPanel({
   to: string
   onWindow: (from: string, to: string) => void
 }) {
-  const [mode, setMode] = useState<'samples' | 'csv' | 'binance'>('samples')
+  const [mode, setMode] = useState<'samples' | 'hyperliquid' | 'binance' | 'csv'>('samples')
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [drag, setDrag] = useState(false)
   const [symbol, setSymbol] = useState('BTCUSDT')
   const [tf, setTf] = useState('1d')
   const [since, setSince] = useState('2020-01-01')
+  const [group, setGroup] = useState<MarketGroup>('crypto')
+  const [coin, setCoin] = useState('BTC')
+  const [hlTf, setHlTf] = useState('15m')
   const fileRef = useRef<HTMLInputElement>(null)
 
   const wrap = async (key: string, f: () => Promise<Dataset>) => {
@@ -94,6 +42,7 @@ export default function DataPanel({
     } catch (e) {
       if (e instanceof DataError) setError(e.msg[lang])
       else if (key === 'binance') setError(t.binanceError)
+      else if (key === 'hyperliquid') setError(t.hlError)
       else setError(e instanceof Error ? e.message : String(e))
     } finally {
       setBusy(null)
@@ -107,9 +56,9 @@ export default function DataPanel({
   return (
     <div className="bt-step-body">
       <div className="bt-seg" role="tablist">
-        {(['samples', 'csv', 'binance'] as const).map(m => (
+        {(['samples', 'hyperliquid', 'binance', 'csv'] as const).map(m => (
           <button key={m} role="tab" aria-selected={mode === m} className={mode === m ? 'on' : ''} onClick={() => setMode(m)}>
-            {m === 'samples' ? t.samples : m === 'csv' ? t.csvFile : t.binance}
+            {m === 'samples' ? t.samples : m === 'csv' ? t.csvFile : m === 'binance' ? t.binance : t.hyperliquid}
           </button>
         ))}
       </div>
@@ -117,7 +66,7 @@ export default function DataPanel({
       {mode === 'samples' && (
         <div className="bt-list">
           {SAMPLES.map(s => (
-            <button key={s.id} className={`bt-list-item${data?.sample === s.id ? ' on' : ''}`} onClick={() => wrap(s.id, () => loadSample(s.id))} disabled={!!busy}>
+            <button key={s.id} className={`bt-list-item${data?.sample === s.id ? ' on' : ''}`} onClick={() => wrap(s.id, () => loadDataset(s.id))} disabled={!!busy}>
               <span>{t[s.label]}</span>
               <span className="bt-muted bt-small">{busy === s.id ? t.loading : data?.sample === s.id ? '✓' : t.load}</span>
             </button>
@@ -143,11 +92,38 @@ export default function DataPanel({
         </div>
       )}
 
+      {mode === 'hyperliquid' && (
+        <div className="bt-form-grid">
+          <div className="bt-seg bt-seg-sm bt-span2">
+            {GROUPS.map(g => (
+              <button key={g} className={group === g ? 'on' : ''} onClick={() => { setGroup(g); setCoin(HL_MARKETS[g][0].coin) }}>{t[`hlGroup_${g}` as const]}</button>
+            ))}
+          </div>
+          <label className="bt-field"><span>{t.market}</span>
+            <select value={coin} onChange={e => setCoin(e.target.value)}>
+              {HL_MARKETS[group].map(m => <option key={m.coin} value={m.coin}>{m.label[lang]}</option>)}
+            </select>
+          </label>
+          <label className="bt-field"><span>{t.interval}</span>
+            <select value={hlTf} onChange={e => setHlTf(e.target.value)}>{HL_INTERVALS.map(i => <option key={i} value={i}>{i}</option>)}</select>
+          </label>
+          <button className="bt-btn bt-btn-ghost bt-span2" disabled={!!busy} onClick={() => wrap('hyperliquid', () => loadHyperliquid(coin, hlTf))}>
+            {busy === 'hyperliquid' ? t.loading : t.fetch}
+          </button>
+          <p className="bt-muted bt-small bt-span2">{group === 'crypto' ? t.hlHint : t.hlHintXyz}</p>
+        </div>
+      )}
+
       {mode === 'binance' && (
         <div className="bt-form-grid">
+          <div className="bt-seg bt-seg-sm bt-span2">
+            {BINANCE_QUICK.map(q => (
+              <button key={q.symbol} className={symbol === q.symbol ? 'on' : ''} onClick={() => setSymbol(q.symbol)}>{q.label[lang]}</button>
+            ))}
+          </div>
           <label className="bt-field"><span>{t.symbol}</span><input value={symbol} onChange={e => setSymbol(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} /></label>
           <label className="bt-field"><span>{t.interval}</span>
-            <select value={tf} onChange={e => setTf(e.target.value)}>{INTERVALS.map(i => <option key={i} value={i}>{i}</option>)}</select>
+            <select value={tf} onChange={e => setTf(e.target.value)}>{BINANCE_INTERVALS.map(i => <option key={i} value={i}>{i}</option>)}</select>
           </label>
           <label className="bt-field"><span>{t.since}</span><input type="date" value={since} onChange={e => setSince(e.target.value)} /></label>
           <button className="bt-btn bt-btn-ghost bt-self-end" disabled={!!busy || !symbol} onClick={() => wrap('binance', () => loadBinance(symbol, tf, Date.parse(since + 'T00:00:00Z') || 0))}>
