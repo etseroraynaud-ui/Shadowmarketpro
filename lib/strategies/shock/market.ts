@@ -94,6 +94,8 @@ function htfIndex(m: Market, htf: Bars, minutes: number): Float64Array {
 }
 
 export interface Prepared {
+  /** Z-score du rendement de la barre : taille du choc. */
+  z: Float64Array
   atr: Float64Array
   vwap: Float64Array
   lamPct: Float64Array
@@ -249,7 +251,7 @@ export function prepare(m: Market, p: ShockParams): Prepared {
     htfBull[i] = bull ? 1 : 0
   }
   return {
-    atr: atrV, vwap, lamPct, volZ, htfVal, mainShock, impulseLong, impulseShort, fadeLong, fadeShort,
+    z, atr: atrV, vwap, lamPct, volZ, htfVal, mainShock, impulseLong, impulseShort, fadeLong, fadeShort,
     impulseEntryLong, impulseEntryShort, fadeEntryLong, fadeEntryShort, allowLambda, htfBull,
   }
 }
