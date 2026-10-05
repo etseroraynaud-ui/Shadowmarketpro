@@ -106,6 +106,8 @@ export interface ShockPreset {
   selectedOn?: { from: number; to: number; oos: Msg }
   /** Timeframe conseillé, en minutes. */
   tf: number | null
+  /** Code Pine v6 du préréglage, à télécharger (généré par research/shock/export-pine.ts). */
+  pine?: string
   build: () => { params: ShockParams; adaptive: Adaptive | null }
 }
 
@@ -145,14 +147,14 @@ export const SHOCK_PRESETS: ShockPreset[] = [
     build: () => ({ params: P(WF15), adaptive: null }),
   },
   {
-    id: 'adaptive15', tf: 15,
+    id: 'adaptive15', tf: 15, pine: '/backtest/strategies/shock-engine-adaptive-15m.pine',
     selectedOn: { from: Date.UTC(2017, 0, 1), to: Date.UTC(2026, 9, 4), oos: { fr: 'Hors échantillon : Sharpe de 1,48, 0,22 ou 0,85 selon le tirage des candidats (2019-2026). Pas encore fiable.', en: 'Out of sample: Sharpe of 1.48, 0.22 or 0.85 depending on the candidate draw (2019-2026). Not reliable yet.' } },
     name: { fr: 'Adaptatif volatilité · 15 min (expérimental)', en: 'Volatility-adaptive · 15 min (experimental)' },
     desc: { fr: 'Change de réglages selon la volatilité journalière (calme ou agitée). Résultat hors échantillon instable selon le tirage des candidats : à valider.', en: 'Switches settings with daily volatility (calm or agitated). Out-of-sample result unstable across candidate draws: to be validated.' },
     build: () => ({ params: P(ADAPTIVE15.calm ?? {}), adaptive: { calm: ADAPTIVE15.calm ? P(ADAPTIVE15.calm) : null, agitated: ADAPTIVE15.agitated ? P(ADAPTIVE15.agitated) : null } }),
   },
   {
-    id: 'adaptive30', tf: 30,
+    id: 'adaptive30', tf: 30, pine: '/backtest/strategies/shock-engine-adaptive-30m.pine',
     selectedOn: { from: Date.UTC(2017, 0, 1), to: Date.UTC(2026, 9, 4), oos: { fr: 'Hors échantillon : Sharpe de 0,98, 0,10 ou 0,13 selon le tirage des candidats (2019-2026). Pas encore fiable.', en: 'Out of sample: Sharpe of 0.98, 0.10 or 0.13 depending on the candidate draw (2019-2026). Not reliable yet.' } },
     name: { fr: 'Adaptatif volatilité · 30 min (expérimental)', en: 'Volatility-adaptive · 30 min (experimental)' },
     desc: { fr: 'Même principe en 30 min. À valider.', en: 'Same principle on 30 min. To be validated.' },
