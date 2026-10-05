@@ -5,6 +5,8 @@
 #
 # Installe Docker, ferme tous les ports entrants sauf SSH, active les mises à jour de sécurité,
 # récupère le code dans /opt/shadowmarketpro et démarre le shadow mode (aucun ordre, aucune clé).
+# Propose ensuite de configurer le bot réel (testnet) : adresse du compte, sous-compte, clé de
+# l'agent, vérifiées auprès de Hyperliquid avant le démarrage.
 # Relancer le script ne casse rien : il met simplement à jour.
 set -euo pipefail
 
@@ -46,6 +48,16 @@ Installé. Le shadow mode tourne : il suit le marché et simule les trades, sans
   smp-bot status          état
   smp-bot logs            journal en direct (Ctrl+C pour quitter)
   smp-bot trades          trades simulés
-
-Bot réel (testnet d'abord) : voir bot/DEPLOY.md, étape 4.
 MSG
+
+# Bot réel : trois questions (adresse du compte, sous-compte, clé de l'agent), sur le terminal.
+if (: < /dev/tty) 2>/dev/null && [ ! -f "$DIR/bot/deploy/live.env" ]; then
+  printf '\nConfigurer maintenant le bot réel sur le testnet ? [O/n] : ' > /dev/tty
+  read -r answer < /dev/tty || answer=n
+  case "${answer:-o}" in
+    o|O|oui|y|Y) echo; smp-bot configure || echo "Configuration interrompue. Pour recommencer : smp-bot configure" ;;
+    *) echo "Plus tard : smp-bot configure" ;;
+  esac
+else
+  echo "Bot réel : smp-bot configure"
+fi

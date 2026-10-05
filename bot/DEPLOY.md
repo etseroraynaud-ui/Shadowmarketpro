@@ -42,7 +42,9 @@ curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/Shadowmarketpro/ma
 
 Le script installe Docker, ferme tous les ports entrants sauf SSH, active les mises à jour de
 sécurité automatiques, récupère le code dans `/opt/shadowmarketpro` et démarre le shadow mode.
-Aucune clé n'est nécessaire à ce stade.
+Aucune clé n'est nécessaire à ce stade. À la fin, il propose de configurer le bot réel sur le
+testnet : réponds « n » si les étapes 1 à 3 de la partie 4 ne sont pas encore faites
+(`smp-bot configure` reprend la configuration à tout moment).
 
 Vérifier :
 
@@ -55,6 +57,7 @@ Au bout de quelques secondes :
 ```
 [shadow] history bars=4999 days=… gaps=0 …
 [shadow] shadow_ready …
+[shadow/paper] live_phase phase=trading …
 ```
 
 puis une ligne `bar …` après chaque clôture de 15 minutes (`Ctrl+C` pour quitter l'affichage ; le
@@ -75,19 +78,22 @@ la stratégie : son marché est trop différent du vrai.
    `shock-engine`, puis l'autoriser. **Copie sa clé privée** : elle n'est affichée qu'une fois.
    L'agent peut trader mais pas retirer de fonds. Les agents du testnet et du mainnet sont
    distincts.
-4. **Sur le serveur**, crée le fichier de configuration du bot réel, lisible par root seul :
+4. **Sur le serveur**, une commande pose trois questions :
    ```
-   cd /opt/shadowmarketpro/bot/deploy
-   cp live.env.example live.env
-   chmod 600 live.env
-   nano live.env
+   smp-bot configure
    ```
-   Remplis `HL_ACCOUNT_ADDRESS` (ton compte), `HL_SUBACCOUNT_ADDRESS` (le sous-compte, ou vide)
-   et `HL_AGENT_PRIVATE_KEY` (la clé de l'agent). Laisse `BOT_MODE=testnet`. Enregistrer :
-   `Ctrl+O`, `Entrée`, puis `Ctrl+X`.
-5. **Démarrer** :
+   - réseau : `Entrée` (testnet) ;
+   - 1/3 l'adresse de ton compte Hyperliquid ;
+   - 2/3 l'adresse du sous-compte (`Entrée` s'il n'y en a pas) ;
+   - 3/3 la clé privée de l'agent (elle ne s'affiche pas pendant la saisie : colle-la, puis
+     `Entrée`).
+
+   La configuration est vérifiée auprès de Hyperliquid **avant** d'être enregistrée, sans aucun
+   ordre : agent approuvé par ton compte sur le testnet, sous-compte bien rattaché, compte lisible
+   (capital, position, ordres). Si quelque chose ne va pas, rien n'est changé et le message dit
+   quoi corriger. Sinon, la commande propose de démarrer le bot.
+5. **Suivre** :
    ```
-   smp-bot live-start
    smp-bot logs live
    ```
    Au démarrage, le bot vérifie que le sous-compte appartient bien à ton compte (ligne
@@ -96,8 +102,9 @@ la stratégie : son marché est trop différent du vrai.
 6. **Suivre sur le site** :
    `https://shadowmarketpro.vercel.app/live?address=ADRESSE_DU_SOUS_COMPTE&net=testnet`
 
-**La clé de l'agent ne va que dans `live.env` sur le serveur** : jamais dans le code, jamais dans
-git (le fichier est ignoré), jamais dans une conversation.
+**La clé de l'agent ne va que dans `bot/deploy/live.env` sur le serveur** (écrit par
+`smp-bot configure`, lisible par root seul) : jamais dans le code, jamais dans git (le fichier est
+ignoré), jamais dans une conversation.
 
 ## 5. Mainnet, en petite taille
 
@@ -106,16 +113,19 @@ shadow mode.
 
 1. Sur le mainnet : un sous-compte dédié avec **une somme que tu acceptes de perdre**, et un
    **nouveau** wallet agent (celui du testnet ne marche pas sur le mainnet).
-2. Dans `live.env` : `BOT_MODE=mainnet`, les adresses et la clé du mainnet. Garde
-   `BOT_MAX_NOTIONAL_USD` bas au début.
-3. `smp-bot live-stop`, puis `smp-bot live-start`. L'état du testnet est conservé à part : le bot
-   repart proprement sur le mainnet.
+2. `smp-bot configure`, réseau `mainnet` : il faut taper `MAINNET` pour confirmer, puis donner
+   la valeur maximale d'une position (100 $ par défaut ; garde-la basse au début), les adresses
+   et la clé de l'agent du mainnet. La vérification se fait cette fois sur le mainnet.
+3. À la question « Démarrer », `Entrée` : le bot testnet s'arrête et le bot mainnet démarre.
+   L'état du testnet est conservé à part ; l'ancienne configuration est gardée dans
+   `live.env.bak.<date>`.
 4. Pour publier le track record sur le site, il suffit d'ajouter l'adresse du sous-compte dans
    `app/live/accounts.ts` (une adresse Hyperliquid est publique ; elle ne donne aucun accès).
 
 ## Au quotidien
 
 ```
+smp-bot configure       (re)configurer le bot réel : réseau, adresses, clé de l'agent
 smp-bot status          état des services
 smp-bot logs [live]     journal en direct
 smp-bot trades [live]   trades fermés (CSV : entrée, sortie, régime, ATR, z-scores, MAE, MFE, frais…)

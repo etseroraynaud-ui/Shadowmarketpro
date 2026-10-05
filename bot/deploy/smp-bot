@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Commandes du bot Shock Engine sur le serveur (installé par install.sh comme « smp-bot »).
 #
+#   smp-bot configure              configure le bot réel (questions : réseau, adresses, clé de l'agent)
 #   smp-bot status                 état des services
 #   smp-bot logs [shadow|live]     journal en direct (Ctrl+C pour quitter)
 #   smp-bot trades [shadow|live]   trades fermés (CSV)
@@ -23,13 +24,85 @@ service() { case "${1:-shadow}" in shadow|live) echo "${1:-shadow}" ;; *) echo "
 running() { [ -n "$(compose ps -q --status running "$1" 2>/dev/null)" ]; }
 
 check_env() {
-  [ -f "$ENV_FILE" ] || { echo "Il manque $ENV_FILE : copier live.env.example, le remplir, puis chmod 600." >&2; exit 1; }
+  [ -f "$ENV_FILE" ] || { echo "Bot réel pas encore configuré : smp-bot configure" >&2; exit 1; }
   local perm; perm=$(stat -c %a "$ENV_FILE")
   [ "$perm" = 600 ] || { echo "$ENV_FILE contient la clé de l'agent : chmod 600 $ENV_FILE (actuellement $perm)." >&2; exit 1; }
   grep -Eq '^BOT_MODE=(testnet|mainnet)$' "$ENV_FILE" || { echo "BOT_MODE doit valoir testnet ou mainnet dans $ENV_FILE." >&2; exit 1; }
 }
 
+# Questions posées sur le terminal, même quand le script arrive par « curl … | bash ».
+TTY=${SMP_TTY:-/dev/tty}
+ask() { local v; printf '%s' "$1" >&2; IFS= read -r v < "$TTY" || true; printf '%s' "$v"; }
+ask_secret() { local v; printf '%s' "$1" >&2; IFS= read -rs v < "$TTY" || true; echo >&2; printf '%s' "$v"; }
+is_address() { [[ "$1" =~ ^0x[0-9a-fA-F]{40}$ ]]; }
+
+configure() {
+  echo "Configuration du bot réel. Les réponses vont seulement dans $ENV_FILE, lisible par root seul."
+  echo
+  local net account sub key notional extra="" confirm start
+  net=$(ask "Réseau — testnet ou mainnet [testnet] : "); net=${net:-testnet}
+  case "$net" in
+    testnet) notional=1000 ;;
+    mainnet)
+      echo "MAINNET : le bot trade de l'argent réel, avec le capital du compte tradé." >&2
+      confirm=$(ask "Tape MAINNET pour confirmer : ")
+      [ "$confirm" = MAINNET ] || { echo "Annulé." >&2; exit 1; }
+      notional=$(ask "Valeur maximale d'une position, en dollars [100] : "); notional=${notional:-100}
+      [[ "$notional" =~ ^[0-9]+$ ]] && [ "$notional" -ge 10 ] || { echo "Montant invalide (10 $ au moins)." >&2; exit 1; }
+      extra="BOT_ALLOW_MAINNET=1"
+      ;;
+    *) echo "Réseau inconnu : $net (testnet ou mainnet)." >&2; exit 1 ;;
+  esac
+  account=$(ask "1/3 Adresse de ton compte Hyperliquid (0x…) : ")
+  is_address "$account" || { echo "Adresse invalide : 0x suivi de 40 caractères hexadécimaux." >&2; exit 1; }
+  sub=$(ask "2/3 Adresse du sous-compte du bot (Entrée s'il n'y en a pas) : ")
+  [ -z "$sub" ] || is_address "$sub" || { echo "Adresse de sous-compte invalide." >&2; exit 1; }
+  key=$(ask_secret "3/3 Clé privée du wallet agent « $net » (ne s'affiche pas) : ")
+  [[ "$key" =~ ^0x ]] || key="0x$key"
+  [[ "$key" =~ ^0x[0-9a-fA-F]{64}$ ]] || { echo "Clé invalide : 64 caractères hexadécimaux attendus." >&2; exit 1; }
+
+  # L'ancien fichier est gardé de côté jusqu'à ce que la nouvelle configuration soit vérifiée.
+  local backup=""
+  if [ -f "$ENV_FILE" ]; then backup="$ENV_FILE.bak.$(date +%Y%m%d-%H%M%S)"; cp -p "$ENV_FILE" "$backup"; fi
+  ( umask 077
+    { echo "# Écrit par « smp-bot configure » le $(date -u +%Y-%m-%dT%H:%MZ). Contient la clé de l'agent."
+      echo "BOT_MODE=$net"
+      [ -n "$extra" ] && echo "$extra"
+      echo "BOT_COIN=BTC"
+      echo "HL_ACCOUNT_ADDRESS=$account"
+      echo "HL_SUBACCOUNT_ADDRESS=$sub"
+      printf 'HL_AGENT_PRIVATE_KEY=%s\n' "$key"
+      echo "BOT_EQUITY_PCT=100"
+      echo "BOT_LEVERAGE=1"
+      echo "BOT_MAX_NOTIONAL_USD=$notional"
+    } > "$ENV_FILE.new" )
+  key=""
+  local was_running=0
+  running live && was_running=1
+  mv "$ENV_FILE.new" "$ENV_FILE"
+  chmod 600 "$ENV_FILE"
+
+  echo
+  echo "Vérification auprès de Hyperliquid ($net), sans aucun ordre :"
+  if ! compose run --rm --no-deps -T live node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/access-check.ts < /dev/null; then
+    if [ -n "$backup" ]; then mv "$backup" "$ENV_FILE"; else rm -f "$ENV_FILE"; fi
+    echo "Configuration refusée : rien n'a été changé." >&2
+    exit 1
+  fi
+  [ -z "$backup" ] || echo "Ancienne configuration gardée dans $backup."
+  echo
+  start=$(ask "Démarrer le bot réel ($net) maintenant ? [O/n] : ")
+  case "${start:-o}" in
+    o|O|oui|y|Y) compose up -d --force-recreate live; echo "Bot réel démarré. Suivre : smp-bot logs live" ;;
+    *)
+      if [ "$was_running" = 1 ]; then compose stop live; echo "Bot réel arrêté (nouvelle configuration prise en compte au prochain smp-bot live-start)."
+      else echo "Pour le démarrer plus tard : smp-bot live-start"; fi
+      ;;
+  esac
+}
+
 case "${1:-help}" in
+  configure) configure ;;
   status) compose ps ;;
   logs) compose logs -f --tail 100 "$(service "${2:-}")" ;;
   trades) compose exec "$(service "${2:-}")" sh -c 'cat /data/logs/trades-*.csv 2>/dev/null || echo "Aucun trade fermé pour l’instant."' ;;
@@ -61,5 +134,5 @@ case "${1:-help}" in
     # shellcheck disable=SC2086
     compose up -d --build $services
     ;;
-  *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

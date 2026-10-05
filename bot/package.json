@@ -14,6 +14,7 @@
     "ws-check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/ws-check.ts",
     "source-compare": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/source-compare.ts",
     "testnet-check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/testnet-check.ts",
+    "access-check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/access-check.ts",
     "shadow-report": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/shadow-report.ts",
     "paper-replay": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/tools/paper-replay.ts"
   },
