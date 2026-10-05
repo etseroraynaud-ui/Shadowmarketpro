@@ -27,17 +27,27 @@ N'importe quel VPS sous **Ubuntu 24.04** avec 1 Go de mémoire suffit. Par exemp
 
 ## 2. Se connecter au serveur
 
-- Mac ou Linux : Terminal ; Windows : PowerShell. Puis :
+- Mac ou Linux : Terminal ; Windows : PowerShell. Puis, avec l'utilisateur donné par l'hébergeur
+  (`ubuntu` chez OVH, `root` chez Hetzner) :
   ```
-  ssh root@ADRESSE_IP
+  ssh ubuntu@ADRESSE_IP
   ```
-- Téléphone : une application SSH (Termius, par exemple), avec la même adresse et l'utilisateur
-  `root`.
+  À la première connexion, répondre `yes`, puis taper le mot de passe (rien ne s'affiche pendant
+  la saisie, c'est normal).
+- Téléphone : une application SSH (Termius, par exemple), avec la même adresse et le même
+  utilisateur.
+
+Si l'utilisateur n'est pas `root`, passer root une fois connecté (les commandes `smp-bot` le
+demandent) :
+
+```
+sudo -i
+```
 
 ## 3. Installer et démarrer le shadow mode (une commande)
 
 ```
-curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/Shadowmarketpro/main/bot/deploy/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/Shadowmarketpro/main/bot/deploy/install.sh | sudo bash
 ```
 
 Le script installe Docker, ferme tous les ports entrants sauf SSH, active les mises à jour de

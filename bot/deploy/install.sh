@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Installation du bot Shock Engine sur un serveur Ubuntu neuf (22.04 ou 24.04), en root :
 #
-#   curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/Shadowmarketpro/main/bot/deploy/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/Shadowmarketpro/main/bot/deploy/install.sh | sudo bash
 #
 # Installe Docker, ferme tous les ports entrants sauf SSH, active les mises à jour de sécurité,
 # récupère le code dans /opt/shadowmarketpro et démarre le shadow mode (aucun ordre, aucune clé).
@@ -14,12 +14,14 @@ REPO=https://github.com/etseroraynaud-ui/Shadowmarketpro.git
 DIR=/opt/shadowmarketpro
 BRANCH=${BRANCH:-main}
 
-[ "$(id -u)" = 0 ] || { echo "À lancer en root (sudo -i, puis relancer)." >&2; exit 1; }
+[ "$(id -u)" = 0 ] || { echo "À lancer en root : curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/Shadowmarketpro/main/bot/deploy/install.sh | sudo bash" >&2; exit 1; }
 export DEBIAN_FRONTEND=noninteractive
 
 echo "== Paquets et mises à jour de sécurité automatiques"
-apt-get update -q
-apt-get install -y -q ca-certificates curl git ufw unattended-upgrades
+# Un serveur neuf installe souvent ses mises à jour au démarrage : attendre qu'apt soit libre.
+APT="apt-get -o DPkg::Lock::Timeout=900"
+$APT update -q
+$APT install -y -q ca-certificates curl git ufw unattended-upgrades
 dpkg-reconfigure -f noninteractive unattended-upgrades
 
 echo "== Docker"
