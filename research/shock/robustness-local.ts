@@ -79,9 +79,16 @@ if (!isMainThread) {
 // ---------------------------------------------------------------- réglages
 type Kind = 'int' | 'real' | 'z'
 type Family = 'preset' | 'script' | 'inactive'
-interface Knob { reg: 0 | 1; key: keyof ShockParams; kind: Kind; family: Family; min: number; max: number; why?: string }
+interface Knob { reg: 0 | 1; key: keyof ShockParams; kind: Kind; family: Family; min: number; max: number; why?: string; note?: string }
 const REG = ['calme', 'agité']
 const knob = (reg: 0 | 1, key: keyof ShockParams, kind: Kind, family: Family, min = 0, max = Infinity, why?: string): Knob => ({ reg, key, kind, family, min, max, why })
+// Réglages du préréglage qui agissent en principe mais pas, ou presque pas, dans le régime agité
+// (longs seulement, mode High Activity) : gardés dans les perturbations, signalés dans le rapport.
+const NOTES: Record<string, string> = {
+  'agité · kMain': 'le choc agité se déclenche dès |z| > kMicro − 0,2 = 2,0 (micro-choc, mode High Activity) : kMain = 2,4 ne compte que s\'il passe sous 2,0',
+  'agité · wickThr': 'un long exige une clôture dans le quart haut de la bougie, donc une mèche haute < 0,25 : un seuil de 0,36 à 0,54 ne filtre rien',
+  'agité · volZThr': 'un long exige déjà un volume au-dessus de sa moyenne (z > 0) : un seuil de −0,7 à −0,3 ne filtre rien',
+}
 
 const KNOBS: Knob[] = [
   // Réglages du préréglage, actifs.
@@ -118,6 +125,8 @@ const KNOBS: Knob[] = [
 const PRESET = adaptivePreset(15, 1)
 const valueOf = (k: Knob) => PRESET.sets[k.reg][k.key] as number
 const knobName = (k: Knob) => `${REG[k.reg]} · ${k.key}`
+/** Valeur lisible : 4 chiffres significatifs au plus (0.32000000000000006 → 0.32). */
+const show = (v: number) => String(+v.toPrecision(4))
 
 function moved(k: Knob, d: number): number {
   const x = valueOf(k)
@@ -297,7 +306,7 @@ async function main() {
   const same = (a: Pack[], b: Pack[]) => a.every((x, w) => x.every((v, j) => v === b[w][j] || (Number.isNaN(v) && Number.isNaN(b[w][j]))))
   const oatRows = KNOBS.map((k, i) => {
     const runs = oat[i].map(get)
-    return { knob: knobName(k), family: k.family, why: k.why ?? null, values: OAT.map(d => moved(k, d)), sharpe: runs.map(r => r[0][2]), w: runs, noEffect: runs.every(r => same(r, P.w)) }
+    return { knob: knobName(k), family: k.family, why: k.why ?? null, values: OAT.map(d => +show(moved(k, d))), sharpe: runs.map(r => r[0][2]), w: runs, noEffect: runs.every(r => same(r, P.w)) }
   })
 
   // Cartes : métriques 2017–2026 et Sharpe par sous-période.
@@ -307,7 +316,7 @@ async function main() {
     const flat = sh.flat()
     const center = sh[4][4]
     return {
-      x: knobName(a), y: knobName(b), xs: STEPS.map(d => moved(a, d)), ys: STEPS.map(d => moved(b, d)), steps: STEPS,
+      x: knobName(a), y: knobName(b), xs: STEPS.map(d => +show(moved(a, d))), ys: STEPS.map(d => +show(moved(b, d))), steps: STEPS,
       metrics: Object.fromEntries(MET.map((name, j) => [name, cells.map(row => row.map(c => finite(c[0][j])))])),
       /** Toutes les métriques de chaque case : [ligne][colonne][sous-période][métrique]. */
       cells,
@@ -361,11 +370,14 @@ async function main() {
 
   lines.push('## Ce qui est perturbé', '', `Réglages fixés par le préréglage et utilisés par le moteur : ${presetKnobs.length}, tous perturbés en même temps. Famille étendue : ${extKnobs.length - presetKnobs.length} réglages du script en plus, que le préréglage laisse à leur valeur par défaut mais qui agissent.`, '')
   table(['régime', 'réglage', 'valeur', 'perturbation', 'à ±20 %', 'famille'], KNOBS.filter(k => k.family !== 'inactive').map(k => [
-    REG[k.reg], `\`${k.key}\``, String(valueOf(k)), k.kind === 'z' ? `additive : ± L × ${Math.max(Math.abs(valueOf(k)), 1)}` : k.kind === 'int' ? 'relative, arrondie' : 'relative',
-    `${moved(k, -0.2)} → ${moved(k, 0.2)}`, k.family === 'preset' ? 'préréglage' : 'étendue',
+    REG[k.reg], `\`${k.key}\``, show(valueOf(k)), k.kind === 'z' ? `additive : ± L × ${show(Math.max(Math.abs(valueOf(k)), 1))}` : k.kind === 'int' ? 'relative, arrondie' : 'relative',
+    `${show(moved(k, -0.2))} → ${show(moved(k, 0.2))}`, k.family === 'preset' ? 'préréglage' : 'étendue',
   ]))
+  const quiet = oatRows.filter(r => r.family === 'preset' && NOTES[r.knob])
+  lines.push('Trois réglages du régime agité, bien que fixés par le préréglage, n\'agissent pas ou presque dans la zone testée. Ils restent perturbés (comme tous les autres), mais leurs écarts ne changent rien :', '')
+  table(['réglage', 'effet mesuré à ±20 %', 'pourquoi'], quiet.map(r => [r.knob, r.noEffect ? 'aucune bougie ne change' : `seulement à ${show(r.values[0])} (Sharpe ${num(r.sharpe[0])})`, NOTES[r.knob]]))
   lines.push('Réglages du préréglage **sans effet**, donc non perturbés (vérifié : à ±5, ±10 et ±20 %, aucune bougie ne change) :', '')
-  table(['régime', 'réglage', 'valeur', 'pourquoi', 'vérifié sans effet'], KNOBS.filter(k => k.family === 'inactive').map(k => [REG[k.reg], `\`${k.key}\``, String(valueOf(k)), k.why!, oatRows[KNOBS.indexOf(k)].noEffect ? 'oui' : '**non**']))
+  table(['régime', 'réglage', 'valeur', 'pourquoi', 'vérifié sans effet'], KNOBS.filter(k => k.family === 'inactive').map(k => [REG[k.reg], `\`${k.key}\``, show(valueOf(k)), k.why!, oatRows[KNOBS.indexOf(k)].noEffect ? 'oui' : '**non**']))
   lines.push('Restent fixes aussi les choix de structure : sens autorisés, TP1 et micro-chocs activés ou non, mode High Activity, filtre 60 min, sortie sur signal inverse.', '')
 
   lines.push('## Voisins aléatoires · 2017–2026', '', 'Rang : part des voisins que le préréglage bat (Max DD : moins profond). Autour de 50 % : le préréglage est au milieu de ses voisins (plateau) ; proche de 100 % : il est au sommet d\'un pic.', '')
@@ -379,14 +391,14 @@ async function main() {
   lines.push('### Famille étendue (réglages du script en plus)', '')
   table(['niveau', 'voisins', 'Sharpe préréglage', 'Sharpe P10 · méd. · P90', 'CAGR P10 · méd. · P90', 'Max DD P10 · méd. · P90', 'rentables', 'rang Sharpe'], LEVELS.map(lv => {
     const d = D('étendue', lv, 0)
-    return [L(lv), String(d.n), num(d.preset.sharpe), d.q.sharpe.filter((_, i) => i % 2 === 0).map(num).join(' · '), d.q.cagr.filter((_, i) => i % 2 === 0).map(x => pct(x)).join(' · '), d.q.dd.filter((_, i) => i % 2 === 0).map(x => pct(x)).join(' · '), pct(d.profitable, 0), pct(d.rank.sharpe, 0)]
+    return [L(lv), String(d.n), num(d.preset.sharpe), d.q.sharpe.filter((_, i) => i % 2 === 0).map(x => num(x)).join(' · '), d.q.cagr.filter((_, i) => i % 2 === 0).map(x => pct(x)).join(' · '), d.q.dd.filter((_, i) => i % 2 === 0).map(x => pct(x)).join(' · '), pct(d.profitable, 0), pct(d.rank.sharpe, 0)]
   }))
 
   lines.push('## Par sous-période', '', 'Même simulation, découpée. Une sous-période commence avec le capital atteint à son début.', '')
   table(['période', 'niveau', 'Sharpe préréglage', 'Sharpe P10 · P25 · méd. · P75 · P90', 'rendement préréglage', 'rendement méd. (P10–P90)', 'achat conservé', 'voisins rentables', 'battent l\'achat conservé', 'rang Sharpe'],
     wins.slice(1).flatMap((_, k) => LEVELS.map(lv => {
       const w = k + 1, d = D('preset', lv, w)
-      return [SPLITS[w][0], L(lv), num(d.preset.sharpe), d.q.sharpe.map(num).join(' · '), pct(d.preset.ret), `${pct(d.q.ret[2])} (${pct(d.q.ret[0])} – ${pct(d.q.ret[4])})`, pct(bh[w].ret), pct(d.profitable, 0), pct(d.beatBh, 0), pct(d.rank.sharpe, 0)]
+      return [SPLITS[w][0], L(lv), num(d.preset.sharpe), d.q.sharpe.map(x => num(x)).join(' · '), pct(d.preset.ret), `${pct(d.q.ret[2])} (${pct(d.q.ret[0])} – ${pct(d.q.ret[4])})`, pct(bh[w].ret), pct(d.profitable, 0), pct(d.beatBh, 0), pct(d.rank.sharpe, 0)]
     })))
   table(['période', 'Max DD préréglage', 'Max DD méd. ±10 % (P10)', 'PF préréglage', 'PF méd. ±10 % (P10)', 'trades préréglage', 'trades méd. ±10 %'], wins.map((_, w) => {
     const d = D('preset', 0.1, w)
@@ -396,7 +408,7 @@ async function main() {
   lines.push('## Un réglage à la fois · Sharpe 2017–2026', '', `Les autres réglages restent ceux du préréglage (Sharpe ${num(P.w[0][2])}).`, '')
   table(['régime · réglage', ...OAT.map(d => `${d > 0 ? '+' : '−'}${Math.abs(d * 100)} %`), 'pire écart'], oatRows.filter(r => r.family !== 'inactive').map(r => {
     const worst = Math.min(...r.sharpe) - P.w[0][2]
-    return [r.knob, ...r.sharpe.map((s, i) => `${num(s)} (${r.values[i]})`), num(worst)]
+    return [r.knob, ...r.sharpe.map((s, i) => `${num(s)} (${show(r.values[i])})`), r.noEffect ? 'aucun effet' : num(worst)]
   }))
 
   lines.push('## Quels réglages comptent · voisins à ±20 %', '', 'Corrélation de rang (Spearman) entre l\'écart de chaque réglage et le résultat 2017–2026, sur les voisins aléatoires à ±20 %. Positive : augmenter le réglage améliore le résultat. Proche de 0 : le réglage ne pèse presque pas dans cette zone.', '')
@@ -406,7 +418,7 @@ async function main() {
   for (const mp of mapOut) {
     lines.push(`### ${mp.y} (lignes) × ${mp.x} (colonnes)`, '')
     lines.push(`Cases à au moins 90 % du Sharpe du préréglage : ${pct(mp.within90, 0)} · le préréglage bat ${pct(mp.centerRank, 0)} des autres cases · anneau ±10 % : médiane ${num(mp.inner.median)}, minimum ${num(mp.inner.min)}.`, '')
-    table([`${mp.y.split(' · ')[1]} \\ ${mp.x.split(' · ')[1]}`, ...mp.xs.map(String)], mp.metrics.sharpe.map((row, i) => [String(mp.ys[i]), ...row.map((v, j) => (i === 4 && j === 4 ? `[${num(v)}]` : num(v)))]))
+    table([`${mp.y.split(' · ')[1]} \\ ${mp.x.split(' · ')[1]}`, ...mp.xs.map(show)], mp.metrics.sharpe.map((row, i) => [show(mp.ys[i]), ...row.map((v, j) => (i === 4 && j === 4 ? `[${num(v)}]` : num(v)))]))
   }
 
   lines.push(
@@ -424,7 +436,7 @@ async function main() {
   const clean = (x: unknown): unknown => JSON.parse(JSON.stringify(x, (_, v) => (typeof v === 'number' && !Number.isFinite(v) ? null : v)))
   writeFileSync(`${base}.json`, JSON.stringify(clean({
     period: [firstDay, lastDay], costs: COSTS, seed: SEED, levels: LEVELS, splits: SPLITS.map(s => s[0]), metrics: MET,
-    knobs: KNOBS.map(k => ({ name: knobName(k), reg: REG[k.reg], key: k.key, value: valueOf(k), kind: k.kind, family: k.family, why: k.why ?? null })),
+    knobs: KNOBS.map(k => ({ name: knobName(k), reg: REG[k.reg], key: k.key, value: valueOf(k), kind: k.kind, family: k.family, why: k.why ?? NOTES[knobName(k)] ?? null })),
     preset: P.w, buyHold: bh, dists, sensitivity: sens, oneAtATime: { steps: OAT, rows: oatRows }, maps: mapOut,
     fan: { t: weekly.map(k => bars.t[dayEnd[k]]), preset: presetCurve, buyHold: bhCurve, levels: fan },
     samples: samples.map(s => ({ family: s.family, level: s.level, d: s.d.map(x => Math.round(x * 1e4) / 1e4), w: get(s.key) })),
