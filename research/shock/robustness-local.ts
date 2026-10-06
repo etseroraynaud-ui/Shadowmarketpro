@@ -85,7 +85,7 @@ const knob = (reg: 0 | 1, key: keyof ShockParams, kind: Kind, family: Family, mi
 // Réglages du préréglage qui agissent en principe mais pas, ou presque pas, dans le régime agité
 // (longs seulement, mode High Activity) : gardés dans les perturbations, signalés dans le rapport.
 const NOTES: Record<string, string> = {
-  'agité · kMain': 'le choc agité se déclenche dès |z| > kMicro − 0,2 = 2,0 (micro-choc, mode High Activity) : kMain = 2,4 ne compte que s\'il passe sous 2,0',
+  'agité · kMain': 'le choc agité se déclenche dès que z dépasse kMicro − 0,2 = 2,0 en valeur absolue (micro-choc, mode High Activity) : kMain = 2,4 ne compte que s\'il passe sous 2,0',
   'agité · wickThr': 'un long exige une clôture dans le quart haut de la bougie, donc une mèche haute < 0,25 : un seuil de 0,36 à 0,54 ne filtre rien',
   'agité · volZThr': 'un long exige déjà un volume au-dessus de sa moyenne (z > 0) : un seuil de −0,7 à −0,3 ne filtre rien',
 }
