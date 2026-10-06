@@ -12,10 +12,18 @@ Grille par régime : seuil du choc 2 / 2.4 / 2.8 / 3.2 × stop 0.8 / 1.2 / 1.8 /
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | **Walk-forward, plateaux** | 174 % | 16.1 % | 0.81 | 1.13 | -38.7 % | 1.37 | 315 | 33 % | 42 % |
 | Walk-forward, meilleur Sharpe isolé | 59 % | 7.1 % | 0.45 | 0.63 | -37.7 % | 1.21 | 354 | 27 % | 38 % |
+| Contrôle : plateaux, régime figé au début de chaque test | 113 % | 11.9 % | 0.63 | 0.87 | -39.0 % | 1.30 | 320 | 34 % | 40 % |
 | Préréglage fixe (choisi sur 2017-2026 : flatteur) | 1311 % | 47.9 % | 1.51 | 2.21 | -29.6 % | 1.45 | 762 | 29 % | 26 % |
 | Achat conservé | 1084 % | 44.2 % | — | — | -77.3 % | — | — | — | 100 % |
 
 Sharpe et Sortino annualisés sur les rendements par bougie de 15 min.
+
+## Ce qui est figé, ce qui évolue pendant chaque test
+
+- **Figé au début de chaque fenêtre de test** (choisi sur la calibration seulement) : les deux jeux de réglages, l'un pour le régime calme, l'autre pour le régime agité (seuil du choc, stop, stop suiveur), ou l'absence de trade dans un régime.
+- **Recalculé à chaque bougie, comme en live** : tous les indicateurs (chocs, ATR, volume, lambda, compression, filtre 60 min, VWAP), le régime de volatilité (relu chaque jour sur la dernière journée close, contre sa médiane des 365 jours précédents), donc le jeu appliqué à chaque bougie, et les stops (stop, TP1, stop suiveur). Une position garde les réglages qui l'ont ouverte jusqu'à sa sortie.
+- **Mesuré** : 123 changements de régime pendant les tests, dans 27 fenêtres sur 28 ; régime agité 47 % du temps ; trades ouverts en régime calme 179, en régime agité 136.
+- **Contrôle** : la ligne « régime figé » du tableau ci-dessus fige volontairement le régime à sa valeur du début de chaque test. Son écart avec le walk-forward montre que celui-ci suit bien le régime en continu.
 
 ## Par année (walk-forward, plateaux)
 
@@ -31,36 +39,36 @@ Sharpe et Sortino annualisés sur les rendements par bougie de 15 min.
 
 ## Réglages retenus à chaque fenêtre
 
-| test | calibration | régime calme (note de plateau) | régime agité (note de plateau) | test : stratégie | test : BTC | trades |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 2020-01-01 → 2020-03-31 | 2017-01-01 → 2019-12-31 | choc 2 · stop 3.6 ATR · suiveur non (0.87) | choc 2.8 · stop 1.8 ATR · suiveur non (1.57) | 14.3 % | -10.4 % | 6 |
-| 2020-04-01 → 2020-06-30 | 2017-04-01 → 2020-03-31 | choc 2 · stop 3.6 ATR · suiveur non (0.77) | choc 2.8 · stop 1.8 ATR · suiveur non (1.53) | 22.4 % | 42.2 % | 0 |
-| 2020-07-01 → 2020-09-30 | 2017-07-01 → 2020-06-30 | choc 2 · stop 3.6 ATR · suiveur non (0.62) | choc 2.8 · stop 1.8 ATR · suiveur non (1.25) | 11.1 % | 18.0 % | 0 |
-| 2020-10-01 → 2020-12-31 | 2017-10-01 → 2020-09-30 | choc 2 · stop 3.6 ATR · suiveur non (0.72) | choc 3.2 · stop 3.6 ATR · suiveur non (1.01) | 79.6 % | 169.0 % | 1 |
-| 2021-01-01 → 2021-03-31 | 2018-01-01 → 2020-12-31 | choc 2 · stop 2.6 ATR · suiveur non (0.60) | choc 3.2 · stop 2.6 ATR · suiveur non (1.13) | 19.4 % | 102.7 % | 6 |
-| 2021-04-01 → 2021-06-30 | 2018-04-01 → 2021-03-31 | choc 2 · stop 2.6 ATR · suiveur non (0.56) | choc 3.2 · stop 3.6 ATR · suiveur non (1.19) | -8.0 % | -40.4 % | 10 |
-| 2021-07-01 → 2021-09-30 | 2018-07-01 → 2021-06-30 | choc 2 · stop 2.6 ATR · suiveur non (0.65) | choc 3.2 · stop 2.6 ATR · suiveur non (1.08) | 6.0 % | 25.1 % | 6 |
-| 2021-10-01 → 2021-12-31 | 2018-10-01 → 2021-09-30 | choc 2 · stop 3.6 ATR · suiveur non (0.87) | choc 3.2 · stop 2.6 ATR · suiveur non (1.02) | 4.2 % | 5.4 % | 9 |
-| 2022-01-01 → 2022-03-31 | 2019-01-01 → 2021-12-31 | choc 2 · stop 2.6 ATR · suiveur non (0.82) | choc 3.2 · stop 3.6 ATR · suiveur non (0.95) | -9.3 % | -1.5 % | 12 |
-| 2022-04-01 → 2022-06-30 | 2019-04-01 → 2022-03-31 | choc 2 · stop 3.6 ATR · suiveur non (0.79) | choc 3.2 · stop 3.6 ATR · suiveur non (1.01) | -4.6 % | -56.2 % | 8 |
-| 2022-07-01 → 2022-09-30 | 2019-07-01 → 2022-06-30 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (0.51) | choc 2.8 · stop 1.8 ATR · suiveur non (0.78) | -5.6 % | -2.5 % | 22 |
-| 2022-10-01 → 2022-12-31 | 2019-10-01 → 2022-09-30 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (0.45) | choc 2.8 · stop 1.8 ATR · suiveur non (0.64) | -0.6 % | -14.9 % | 14 |
-| 2023-01-01 → 2023-03-31 | 2020-01-01 → 2022-12-31 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (0.61) | choc 2.8 · stop 1.8 ATR · suiveur non (0.75) | 19.7 % | 72.3 % | 21 |
-| 2023-04-01 → 2023-06-30 | 2020-04-01 → 2023-03-31 | choc 2 · stop 3.6 ATR · suiveur 2 ATR (1.11) | choc 2.8 · stop 1.8 ATR · suiveur non (0.61) | -4.2 % | 7.0 % | 4 |
-| 2023-07-01 → 2023-09-30 | 2020-07-01 → 2023-06-30 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (0.78) | choc 2.8 · stop 2.6 ATR · suiveur non (0.59) | -3.0 % | -11.5 % | 11 |
-| 2023-10-01 → 2023-12-31 | 2020-10-01 → 2023-09-30 | choc 2 · stop 3.6 ATR · suiveur 2 ATR (0.63) | choc 2.8 · stop 2.6 ATR · suiveur non (0.53) | 5.2 % | 56.7 % | 18 |
-| 2024-01-01 → 2024-03-31 | 2021-01-01 → 2023-12-31 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (1.01) | choc 2 · stop 1.8 ATR · suiveur 2 ATR (0.24) | 0.2 % | 68.7 % | 26 |
-| 2024-04-01 → 2024-06-30 | 2021-04-01 → 2024-03-31 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (1.19) | choc 2 · stop 1.8 ATR · suiveur 2 ATR (0.24) | -2.7 % | -12.1 % | 21 |
-| 2024-07-01 → 2024-09-30 | 2021-07-01 → 2024-06-30 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (1.09) | choc 2 · stop 3.6 ATR · suiveur 2 ATR (0.40) | -8.3 % | 1.0 % | 28 |
-| 2024-10-01 → 2024-12-31 | 2021-10-01 → 2024-09-30 | choc 2 · stop 1.8 ATR · suiveur 5 ATR (0.89) | choc 2 · stop 2.6 ATR · suiveur 2 ATR (0.19) | 0.4 % | 47.5 % | 30 |
-| 2025-01-01 → 2025-03-31 | 2022-01-01 → 2024-12-31 | choc 2 · stop 1.8 ATR · suiveur non (1.03) | choc 2 · stop 2.6 ATR · suiveur non (0.10) | -3.0 % | -11.6 % | 11 |
-| 2025-04-01 → 2025-06-30 | 2022-04-01 → 2025-03-31 | choc 2 · stop 2.6 ATR · suiveur non (0.88) | pas de trade (-0.04) | 4.2 % | 29.9 % | 3 |
-| 2025-07-01 → 2025-09-30 | 2022-07-01 → 2025-06-30 | choc 2 · stop 2.6 ATR · suiveur non (0.98) | choc 2 · stop 2.6 ATR · suiveur non (0.05) | 1.4 % | 6.4 % | 7 |
-| 2025-10-01 → 2025-12-31 | 2022-10-01 → 2025-09-30 | choc 3.2 · stop 3.6 ATR · suiveur non (1.07) | choc 2.8 · stop 2.6 ATR · suiveur non (0.14) | -2.9 % | -23.3 % | 14 |
-| 2026-01-01 → 2026-03-31 | 2023-01-01 → 2025-12-31 | choc 3.2 · stop 3.6 ATR · suiveur non (1.14) | choc 2.8 · stop 2.6 ATR · suiveur non (0.10) | -5.1 % | -22.0 % | 11 |
-| 2026-04-01 → 2026-06-30 | 2023-04-01 → 2026-03-31 | choc 3.2 · stop 3.6 ATR · suiveur non (0.84) | pas de trade (-0.07) | -4.2 % | -14.2 % | 7 |
-| 2026-07-01 → 2026-09-30 | 2023-07-01 → 2026-06-30 | choc 3.2 · stop 3.6 ATR · suiveur non (0.69) | pas de trade (-0.09) | 4.9 % | 42.8 % | 9 |
-| 2026-10-01 → 2026-10-04 | 2023-10-01 → 2026-09-30 | choc 3.2 · stop 3.6 ATR · suiveur non (0.95) | pas de trade (-0.16) | 0.0 % | 1.5 % | 0 |
+| test | calibration | régime calme (note de plateau) | régime agité (note de plateau) | test : temps agité · changements de régime | test : stratégie | test : BTC | trades (calme / agité) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2020-01-01 → 2020-03-31 | 2017-01-01 → 2019-12-31 | choc 2 · stop 3.6 ATR · suiveur non (0.87) | choc 2.8 · stop 1.8 ATR · suiveur non (1.57) | 41 % · 7 | 14.3 % | -10.4 % | 6 (1 / 5) |
+| 2020-04-01 → 2020-06-30 | 2017-04-01 → 2020-03-31 | choc 2 · stop 3.6 ATR · suiveur non (0.77) | choc 2.8 · stop 1.8 ATR · suiveur non (1.53) | 78 % · 7 | 22.4 % | 42.2 % | 0 (0 / 0) |
+| 2020-07-01 → 2020-09-30 | 2017-07-01 → 2020-06-30 | choc 2 · stop 3.6 ATR · suiveur non (0.62) | choc 2.8 · stop 1.8 ATR · suiveur non (1.25) | 34 % · 4 | 11.1 % | 18.0 % | 0 (0 / 0) |
+| 2020-10-01 → 2020-12-31 | 2017-10-01 → 2020-09-30 | choc 2 · stop 3.6 ATR · suiveur non (0.72) | choc 3.2 · stop 3.6 ATR · suiveur non (1.01) | 58 % · 3 | 79.6 % | 169.0 % | 1 (0 / 1) |
+| 2021-01-01 → 2021-03-31 | 2018-01-01 → 2020-12-31 | choc 2 · stop 2.6 ATR · suiveur non (0.60) | choc 3.2 · stop 2.6 ATR · suiveur non (1.13) | 99 % · 2 | 19.4 % | 102.7 % | 6 (0 / 6) |
+| 2021-04-01 → 2021-06-30 | 2018-04-01 → 2021-03-31 | choc 2 · stop 2.6 ATR · suiveur non (0.56) | choc 3.2 · stop 3.6 ATR · suiveur non (1.19) | 74 % · 2 | -8.0 % | -40.4 % | 10 (4 / 6) |
+| 2021-07-01 → 2021-09-30 | 2018-07-01 → 2021-06-30 | choc 2 · stop 2.6 ATR · suiveur non (0.65) | choc 3.2 · stop 2.6 ATR · suiveur non (1.08) | 37 % · 4 | 6.0 % | 25.1 % | 6 (3 / 3) |
+| 2021-10-01 → 2021-12-31 | 2018-10-01 → 2021-09-30 | choc 2 · stop 3.6 ATR · suiveur non (0.87) | choc 3.2 · stop 2.6 ATR · suiveur non (1.02) | 25 % · 5 | 4.2 % | 5.4 % | 9 (8 / 1) |
+| 2022-01-01 → 2022-03-31 | 2019-01-01 → 2021-12-31 | choc 2 · stop 2.6 ATR · suiveur non (0.82) | choc 3.2 · stop 3.6 ATR · suiveur non (0.95) | 41 % · 6 | -9.3 % | -1.5 % | 12 (10 / 2) |
+| 2022-04-01 → 2022-06-30 | 2019-04-01 → 2022-03-31 | choc 2 · stop 3.6 ATR · suiveur non (0.79) | choc 3.2 · stop 3.6 ATR · suiveur non (1.01) | 48 % · 7 | -4.6 % | -56.2 % | 8 (4 / 4) |
+| 2022-07-01 → 2022-09-30 | 2019-07-01 → 2022-06-30 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (0.51) | choc 2.8 · stop 1.8 ATR · suiveur non (0.78) | 39 % · 7 | -5.6 % | -2.5 % | 22 (14 / 8) |
+| 2022-10-01 → 2022-12-31 | 2019-10-01 → 2022-09-30 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (0.45) | choc 2.8 · stop 1.8 ATR · suiveur non (0.64) | 22 % · 2 | -0.6 % | -14.9 % | 14 (13 / 1) |
+| 2023-01-01 → 2023-03-31 | 2020-01-01 → 2022-12-31 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (0.61) | choc 2.8 · stop 1.8 ATR · suiveur non (0.75) | 32 % · 7 | 19.7 % | 72.3 % | 21 (18 / 3) |
+| 2023-04-01 → 2023-06-30 | 2020-04-01 → 2023-03-31 | choc 2 · stop 3.6 ATR · suiveur 2 ATR (1.11) | choc 2.8 · stop 1.8 ATR · suiveur non (0.61) | 16 % · 7 | -4.2 % | 7.0 % | 4 (3 / 1) |
+| 2023-07-01 → 2023-09-30 | 2020-07-01 → 2023-06-30 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (0.78) | choc 2.8 · stop 2.6 ATR · suiveur non (0.59) | 15 % · 4 | -3.0 % | -11.5 % | 11 (10 / 1) |
+| 2023-10-01 → 2023-12-31 | 2020-10-01 → 2023-09-30 | choc 2 · stop 3.6 ATR · suiveur 2 ATR (0.63) | choc 2.8 · stop 2.6 ATR · suiveur non (0.53) | 71 % · 4 | 5.2 % | 56.7 % | 18 (10 / 8) |
+| 2024-01-01 → 2024-03-31 | 2021-01-01 → 2023-12-31 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (1.01) | choc 2 · stop 1.8 ATR · suiveur 2 ATR (0.24) | 66 % · 5 | 0.2 % | 68.7 % | 26 (9 / 17) |
+| 2024-04-01 → 2024-06-30 | 2021-04-01 → 2024-03-31 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (1.19) | choc 2 · stop 1.8 ATR · suiveur 2 ATR (0.24) | 71 % · 1 | -2.7 % | -12.1 % | 21 (2 / 19) |
+| 2024-07-01 → 2024-09-30 | 2021-07-01 → 2024-06-30 | choc 2 · stop 3.6 ATR · suiveur 3.2 ATR (1.09) | choc 2 · stop 3.6 ATR · suiveur 2 ATR (0.40) | 61 % · 8 | -8.3 % | 1.0 % | 28 (12 / 16) |
+| 2024-10-01 → 2024-12-31 | 2021-10-01 → 2024-09-30 | choc 2 · stop 1.8 ATR · suiveur 5 ATR (0.89) | choc 2 · stop 2.6 ATR · suiveur 2 ATR (0.19) | 30 % · 4 | 0.4 % | 47.5 % | 30 (21 / 9) |
+| 2025-01-01 → 2025-03-31 | 2022-01-01 → 2024-12-31 | choc 2 · stop 1.8 ATR · suiveur non (1.03) | choc 2 · stop 2.6 ATR · suiveur non (0.10) | 38 % · 4 | -3.0 % | -11.6 % | 11 (8 / 3) |
+| 2025-04-01 → 2025-06-30 | 2022-04-01 → 2025-03-31 | choc 2 · stop 2.6 ATR · suiveur non (0.88) | pas de trade (-0.04) | 24 % · 4 | 4.2 % | 29.9 % | 3 (3 / 0) |
+| 2025-07-01 → 2025-09-30 | 2022-07-01 → 2025-06-30 | choc 2 · stop 2.6 ATR · suiveur non (0.98) | choc 2 · stop 2.6 ATR · suiveur non (0.05) | 1 % · 2 | 1.4 % | 6.4 % | 7 (7 / 0) |
+| 2025-10-01 → 2025-12-31 | 2022-10-01 → 2025-09-30 | choc 3.2 · stop 3.6 ATR · suiveur non (1.07) | choc 2.8 · stop 2.6 ATR · suiveur non (0.14) | 72 % · 4 | -2.9 % | -23.3 % | 14 (2 / 12) |
+| 2026-01-01 → 2026-03-31 | 2023-01-01 → 2025-12-31 | choc 3.2 · stop 3.6 ATR · suiveur non (1.14) | choc 2.8 · stop 2.6 ATR · suiveur non (0.10) | 74 % · 5 | -5.1 % | -22.0 % | 11 (1 / 10) |
+| 2026-04-01 → 2026-06-30 | 2023-04-01 → 2026-03-31 | choc 3.2 · stop 3.6 ATR · suiveur non (0.84) | pas de trade (-0.07) | 59 % · 5 | -4.2 % | -14.2 % | 7 (7 / 0) |
+| 2026-07-01 → 2026-09-30 | 2023-07-01 → 2026-06-30 | choc 3.2 · stop 3.6 ATR · suiveur non (0.69) | pas de trade (-0.09) | 36 % · 3 | 4.9 % | 42.8 % | 9 (9 / 0) |
+| 2026-10-01 → 2026-10-04 | 2023-10-01 → 2026-09-30 | choc 3.2 · stop 3.6 ATR · suiveur non (0.95) | pas de trade (-0.16) | 100 % · 0 | 0.0 % | 1.5 % | 0 (0 / 0) |
 
 Changements de réglages d'une fenêtre à la suivante : 13 sur 27 en régime calme, 15 sur 27 en régime agité.
 

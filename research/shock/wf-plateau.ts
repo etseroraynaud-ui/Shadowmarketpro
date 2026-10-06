@@ -146,17 +146,26 @@ for (let a = Date.parse(FROM); a < end; a = addMonths(a, TEST)) {
 
 // ---------------------------------------------------------------- 4. courbes hors échantillon
 const oosStart = idxAt(Date.parse(FROM))
-function stitched(pick: (w: Win, regime: 0 | 1) => Point | null) {
+// Pendant le test, seuls les deux jeux de réglages (calme, agité) sont figés. Le reste évolue à
+// chaque bougie comme en live : indicateurs (choc, ATR, volume, lambda, compression, filtre 60
+// min, VWAP), régime de volatilité (relu chaque jour sur la dernière journée close, contre sa
+// médiane des 365 jours précédents) et donc jeu appliqué, stops et stop suiveur.
+// `freezeRegime` : contrôle seulement, régime figé à sa valeur du début de la fenêtre.
+function stitched(pick: (w: Win, regime: 0 | 1) => Point | null, freezeRegime = false) {
   const sets: ShockParams[] = []
+  const setRegime: (0 | 1)[] = []
   const sel = new Int8Array(bars.n).fill(-1)
   for (const w of wins) {
-    const ids = [0, 1].map(regime => { const p = pick(w, regime as 0 | 1); if (!p) return -1; sets.push(paramsOf(regime as 0 | 1, p)); return sets.length - 1 })
-    for (let i = idxAt(w.a); i < bars.n && bars.t[i] < w.b; i++) { const rg = regimeOf(i); if (rg >= 0) sel[i] = ids[rg] }
+    const ids = [0, 1].map(regime => { const p = pick(w, regime as 0 | 1); if (!p) return -1; sets.push(paramsOf(regime as 0 | 1, p)); setRegime.push(regime as 0 | 1); return sets.length - 1 })
+    const a = idxAt(w.a)
+    for (let i = a; i < bars.n && bars.t[i] < w.b; i++) { const rg = regimeOf(freezeRegime ? a : i); if (rg >= 0) sel[i] = ids[rg] }
   }
-  return simulate(m, sets.length ? sets : [DEFAULT_PARAMS], COSTS, oosStart, bars.n - 1, sel)
+  const r = simulate(m, sets.length ? sets : [DEFAULT_PARAMS], COSTS, oosStart, bars.n - 1, sel)
+  return Object.assign(r, { setRegime })
 }
 const wfPlateau = stitched((w, r) => w.plateau[r])
 const wfBest = stitched((w, r) => w.best[r])
+const wfFrozen = stitched((w, r) => w.plateau[r], true)
 const fixed = simulate(m, preset.sets, COSTS, oosStart, bars.n - 1, presetSelect)
 const last = bars.n - 1
 
@@ -182,11 +191,31 @@ out('## Courbe hors échantillon (segments de test seulement)'); out()
 table(['', 'rendement', 'CAGR', 'Sharpe', 'Sortino', 'pire baisse', 'profit factor', 'trades', 'gagnants', 'temps investi'], [
   row('**Walk-forward, plateaux**', wfPlateau),
   row('Walk-forward, meilleur Sharpe isolé', wfBest),
+  row('Contrôle : plateaux, régime figé au début de chaque test', wfFrozen),
   row('Préréglage fixe (choisi sur 2017-2026 : flatteur)', fixed),
   ['Achat conservé', pct(bh, 0), pct(Math.pow(1 + bh, 1 / yearsOOS) - 1), '—', '—', pct(bhDd), '—', '—', '—', '100 %'],
 ])
 out()
 out('Sharpe et Sortino annualisés sur les rendements par bougie de 15 min.'); out()
+
+// Ce qui est figé, ce qui évolue.
+let switches = 0, agiBars = 0, known = 0
+const winSwitch: number[] = []
+for (const w of wins) {
+  let n = 0, prev = -2
+  for (let i = idxAt(w.a); i < bars.n && bars.t[i] < w.b; i++) {
+    const rg = regimeOf(i)
+    if (rg >= 0) { known++; agiBars += rg; if (prev >= 0 && rg !== prev) n++; prev = rg }
+  }
+  winSwitch.push(n); switches += n
+}
+const byRegime = [0, 1].map(rg => wfPlateau.positions.filter(p => wfPlateau.setRegime[p.set] === rg).length)
+out('## Ce qui est figé, ce qui évolue pendant chaque test'); out()
+out('- **Figé au début de chaque fenêtre de test** (choisi sur la calibration seulement) : les deux jeux de réglages, l\'un pour le régime calme, l\'autre pour le régime agité (seuil du choc, stop, stop suiveur), ou l\'absence de trade dans un régime.')
+out('- **Recalculé à chaque bougie, comme en live** : tous les indicateurs (chocs, ATR, volume, lambda, compression, filtre 60 min, VWAP), le régime de volatilité (relu chaque jour sur la dernière journée close, contre sa médiane des 365 jours précédents), donc le jeu appliqué à chaque bougie, et les stops (stop, TP1, stop suiveur). Une position garde les réglages qui l\'ont ouverte jusqu\'à sa sortie.')
+out(`- **Mesuré** : ${switches} changements de régime pendant les tests, dans ${winSwitch.filter(x => x > 0).length} fenêtres sur ${wins.length} ; régime agité ${pct(agiBars / Math.max(1, known), 0)} du temps ; trades ouverts en régime calme ${byRegime[0]}, en régime agité ${byRegime[1]}.`)
+out('- **Contrôle** : la ligne « régime figé » du tableau ci-dessus fige volontairement le régime à sa valeur du début de chaque test. Son écart avec le walk-forward montre que celui-ci suit bien le régime en continu.')
+out()
 
 // Par année.
 out('## Par année (walk-forward, plateaux)'); out()
@@ -207,9 +236,13 @@ const wr: string[][] = []
 for (const w of wins) {
   const a = idxAt(w.a), b = Math.min(last, idxAt(w.b) - 1)
   const e0 = a > oosStart ? wfPlateau.equity[a - 1] : COSTS.capital
-  wr.push([`${day(w.a)} → ${day(Math.min(w.b, end) - 1)}`, `${day(w.trainFrom)} → ${day(w.a - 1)}`, `${label(w.plateau[0])} (${num(w.score[0])})`, `${label(w.plateau[1])} (${num(w.score[1])})`, pct(wfPlateau.equity[b] / e0 - 1), pct(bars.c[b] / bars.c[Math.max(0, a - 1)] - 1), String(wfPlateau.positions.filter(p => p.entryIdx >= a && p.entryIdx <= b).length)])
+  const inWin = wfPlateau.positions.filter(p => p.entryIdx >= a && p.entryIdx <= b)
+  const nC = inWin.filter(p => wfPlateau.setRegime[p.set] === 0).length
+  let agi = 0, kn = 0, sw = 0, prev = -2
+  for (let i = a; i <= b; i++) { const rg = regimeOf(i); if (rg >= 0) { kn++; agi += rg; if (prev >= 0 && rg !== prev) sw++; prev = rg } }
+  wr.push([`${day(w.a)} → ${day(Math.min(w.b, end) - 1)}`, `${day(w.trainFrom)} → ${day(w.a - 1)}`, `${label(w.plateau[0])} (${num(w.score[0])})`, `${label(w.plateau[1])} (${num(w.score[1])})`, `${pct(agi / Math.max(1, kn), 0)} · ${sw}`, pct(wfPlateau.equity[b] / e0 - 1), pct(bars.c[b] / bars.c[Math.max(0, a - 1)] - 1), `${inWin.length} (${nC} / ${inWin.length - nC})`])
 }
-table(['test', 'calibration', 'régime calme (note de plateau)', 'régime agité (note de plateau)', 'test : stratégie', 'test : BTC', 'trades'], wr)
+table(['test', 'calibration', 'régime calme (note de plateau)', 'régime agité (note de plateau)', 'test : temps agité · changements de régime', 'test : stratégie', 'test : BTC', 'trades (calme / agité)'], wr)
 out()
 // Stabilité des choix.
 const changes = (r: 0 | 1) => wins.slice(1).filter((w, k) => label(w.plateau[r]) !== label(wins[k].plateau[r])).length
