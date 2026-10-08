@@ -1,62 +1,93 @@
 import Link from 'next/link'
-import { LogoSVG, LogoSVGSmall, CheckIcon } from './components/Logo'
+import { CheckIcon } from './components/Logo'
 import HomeClientScripts from './scripts/HomeClientScripts'
+import './_site/site.css'
+import SiteHeader from './_site/SiteHeader'
+import LineChart from './_site/LineChart'
+import { SiteFooter } from './_site/ui'
+import { COLORS, P, sample, sampleStart, series } from './_site/data'
+import { int, num, pct } from './_site/format'
+
+const STEP = 3
+const EV = P.evidence
 
 export default function HomePage() {
+  const n = P.chart.days
+  const start = sampleStart(P.chart.start, n, STEP)
+  const F = P.series.portfolio
   return (
     <>
-      <div className="bgm"></div>
-      <canvas id="pc"></canvas>
       <div className="rel">
+        <SiteHeader />
 
-        {/* NAV */}
-        <nav className="nav" id="nv">
-          <div className="nav-in">
-            <Link href="#" className="nb">
-              <LogoSVG />
-              <span className="nbt">ShadowMarket<em>Pro</em><sup style={{ fontSize: '9px', color: 'var(--g2)' }}>™</sup></span>
-            </Link>
-            <div className="nl">
-              <a href="#features">Features</a>
-              <a href="#indicators">Indicators</a>
-              <a href="#pricing">Pricing</a>
-              <a href="#faq">FAQ</a>
-              <Link href="/backtest">Backtest</Link>
-              <Link href="/payment">Payment</Link>
+        {/* SHOCK ENGINE — HERO */}
+        <section className="s-home-hero">
+          <div className="s-main">
+            <p className="s-eyebrow">Shock Engine · systematic crypto research</p>
+            <h1 className="s-h1 s-home-h1">Trading the continuation after volatility shocks.</h1>
+            <p className="s-sub">One strategy, with rules frozen on Bitcoin and applied unchanged to Ethereum. Tested with placebo entries, delayed entries, walk-forward and zero-shot transfer, and published with its failures.</p>
+            <div className="s-home-sim"><span className="s-tag">Historical simulation</span><span>BTC/ETH portfolio, 50/50 · {P.commonPeriod.start} → {P.commonPeriod.end} · after modeled commissions · not live performance</span></div>
+            <div className="s-home-stats">
+              <div><span>Sharpe ratio</span><strong>{num(F.m.sharpe)}</strong><em>BTC {num(P.headline.btcSharpe)} · ETH {num(P.headline.ethSharpe)}</em></div>
+              <div><span>CAGR</span><strong>{pct(F.m.cagr)}</strong><em>{P.commonPeriod.years.toFixed(1)} years</em></div>
+              <div><span>Max drawdown</span><strong>{pct(F.m.maxDD)}</strong><em>daily closes</em></div>
+              <div><span>BTC/ETH correlation</span><strong>{num(P.correlation.dailyPearson)}</strong><em>strategy returns, daily</em></div>
+              <div><span>Trades</span><strong>{int(P.headline.trades.total)}</strong><em>{int(P.headline.trades.btc)} BTC · {int(P.headline.trades.eth)} ETH</em></div>
             </div>
+            <div className="s-actions">
+              <Link href="/research" className="bp"><span>Read the research</span></Link>
+              <Link href="/institutional" className="bo">Institutional</Link>
+              <Link href="/shock-engine/portfolio" className="bo">BTC/ETH portfolio</Link>
+            </div>
+            <p className="s-note-line">{P.disclaimers[0]} {P.disclaimers[1]}</p>
           </div>
-        </nav>
+        </section>
 
-        {/* HERO */}
-         <section className="hero">
-            <div className="heroGlow"></div>
-            <div className="heroVignette"></div>
-            <canvas className="hero-chart-bg" id="heroBg" />
-            <div className="hero-ov1"></div>
-            <div className="hero-ov2"></div>
-            <div className="hero-c">
-
-            <div className="gl hbadge afi">
-              <span className="hbd"></span>
-              <span className="hbt">Quantitative Adaptive Indicators</span>
+        {/* SHOCK ENGINE — EVIDENCE */}
+        <section className="s-home-band">
+          <div className="s-main">
+            <p className="s-eyebrow">Evidence</p>
+            <h2 className="s-h2">Tests designed to break the result</h2>
+            <div className="s-grid4">
+              <div className="s-card"><div className="s-card-k">Random-entry placebo</div><h3>{pct(EV.btc.randomBeaten, 0)} · {pct(EV.eth.randomBeaten, 0)}</h3><p>Share of 200 random-entry runs (same exits) beaten on BTC and ETH. The edge is in the timing of entries.</p></div>
+              <div className="s-card"><div className="s-card-k">Delayed entry</div><h3>{pct(EV.btc.delay1Share, 0)} · {pct(EV.eth.delay1Share, 0)}</h3><p>Share of the average trade gain kept on BTC and ETH when every entry is taken one 15-minute bar late.</p></div>
+              <div className="s-card"><div className="s-card-k">Walk-forward, BTC</div><h3>Sharpe {EV.walkForward.sharpe}</h3><p>Out of sample over {EV.walkForward.windows} quarterly windows, 2020–2026, parameters re-selected on past data only.</p></div>
+              <div className="s-card"><div className="s-card-k">Zero-shot transfer</div><h3>ETH: pass · Gold: no</h3><p>The Bitcoin preset, unchanged, passed every pre-set criterion on ETH (two data sources) and was rejected on gold.</p></div>
             </div>
-            <h1 className="afu" style={{ animationDelay: '.1s' }}>
-              Any Market. Any Timeframe.
-              <span className="l2">Most indicators show information. ShadowMarket indicators deliver <span className="tv">high-quality trading signals.</span></span>
-              <span className="l3">
-                Built to adapt to bull markets, bear markets, and everything in between — across crypto, forex, indices and stocks, on any timeframe.
-                <br />
-                <span style={{ color: 'var(--tm)', fontSize: '.9em', marginTop: '6px', display: 'inline-block' }}>
-                  Signals are generated from market structure, volatility regimes and probability — not lagging indicators, not visual noise.
-                </span>
-              </span>
-            </h1>
-            <div className="hc afu" style={{ animationDelay: '.35s' }}>
-              <a href="#indicators" className="bp"><span>Explore Indicators</span></a>
-              <a href="#pricing" className="bo">View Pricing</a>
+            <p className="s-p"><Link className="s-link" href="/shock-engine">How the Shock Engine works</Link> · <Link className="s-link" href="/research">All studies and verdicts</Link></p>
+          </div>
+        </section>
+
+        {/* SHOCK ENGINE — PORTFOLIO */}
+        <section className="s-home-band">
+          <div className="s-main">
+            <p className="s-eyebrow">BTC/ETH portfolio <span className="s-tag">Historical simulation</span></p>
+            <h2 className="s-h2">Two sleeves, one engine, half the capital each</h2>
+            <p className="s-p">Each sleeve compounds only its own half. The portfolio improves on both sleeves&apos; Sharpe ratio and drawdown; its strategy returns correlate at {num(P.correlation.dailyPearson)}, against {num(P.correlation.underlyingDaily)} for the two coins&apos; prices.</p>
+            <LineChart title="Equity curves, log scale" start={start} step={STEP} fmt="idx" log height={280} series={[
+              { name: 'BTC', color: COLORS.btc, values: sample(series(P.chart.eqBtc), STEP) },
+              { name: 'ETH', color: COLORS.eth, values: sample(series(P.chart.eqEth), STEP) },
+              { name: 'Portfolio', color: COLORS.portfolio, values: sample(series(P.chart.eqPortfolio), STEP) },
+            ]} />
+            <p className="s-small">Indexed to 100 on {P.commonPeriod.start}, log scale. Commission 0.045 % per order; slippage, funding and market impact not modeled. <Link className="s-link" href="/shock-engine/portfolio">Full results, risks and downloads</Link></p>
+          </div>
+        </section>
+
+        {/* SHOCK ENGINE — LIVE ET INSTITUTIONNEL */}
+        <section className="s-home-band">
+          <div className="s-main">
+            <div className="s-grid2">
+              <div className="s-card"><div className="s-card-k">Live / forward results</div><h3>Not started yet</h3><p>The live bot runs the same engine as the backtest, decision for decision. Its track record will be published on its own page, from its own start date, and never blended with the simulation.</p><Link className="s-card-link" href="/live">Live track record</Link></div>
+              <div className="s-card"><div className="s-card-k">Institutional</div><h3>Research materials</h3><p>Full report, daily return series, reproducibility manifest, and a plain list of what is not done yet: live record, capacity study, independent verification.</p><Link className="s-card-link" href="/institutional">For allocators and partners</Link></div>
             </div>
           </div>
         </section>
+
+        {/* INDICATEURS — TRANSITION */}
+        <div className="s-divider">
+          <p className="s-eyebrow">TradingView indicators</p>
+          <p>ShadowMarketPro also publishes quantitative indicators for TradingView, by subscription. They are decision-support tools, separate from the Shock Engine strategy and its results.</p>
+        </div>
 
         {/* BRAND STATEMENT */}
         <section className="brand-stmt">
@@ -319,46 +350,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* FOOTER */}
-        <footer className="ft">
-          <div className="mx">
-            <div className="ftg">
-              <div>
-                <Link href="#" className="ftb">
-                  <LogoSVGSmall />
-                  <span className="ftbn">ShadowMarket<em>Pro</em>™</span>
-                </Link>
-                <p className="ftd">Adaptive quantitative trading indicators for demanding traders worldwide.</p>
-              </div>
-              <div>
-                <h4>Navigation</h4>
-                <ul>
-                  <li><a href="#features">Features</a></li>
-                  <li><a href="#indicators">Indicators</a></li>
-                  <li><a href="#pricing">Pricing</a></li>
-                  <li><a href="#faq">FAQ</a></li>
-                  <li><Link href="/backtest">Backtest Lab</Link></li>
-                </ul>
-              </div>
-              <div>
-                <h4>Payment</h4>
-                <ul>
-                  <li><Link href="/payment">Pay with crypto</Link></li>
-                </ul>
-                <h4 style={{ marginTop: '20px' }}>Accepted</h4>
-                <ul>
-                  <li><a href="#">USDT — BEP20</a></li>
-                  <li><a href="#">USDT — TRC20</a></li>
-                </ul>
-              </div>
-            </div>
-            <div className="gline" style={{ marginBottom: '28px' }}></div>
-            <div className="ftbt">
-              <p className="ftdi">ShadowMarketPro™ indicators are decision-support tools. They do not constitute financial advice and do not guarantee any results. Trade at your own risk.</p>
-              <p className="ftco">© 2026 ShadowMarketPro™</p>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter />
       </div>
 
       <HomeClientScripts />
