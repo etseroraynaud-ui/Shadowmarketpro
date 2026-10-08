@@ -672,3 +672,116 @@ mkdirSync(OUT, { recursive: true })
 writeFileSync(join(OUT, 'short-entry-study.md'), L.join('\n'))
 writeFileSync(join(OUT, 'short-entry-study.json'), JSON.stringify(json, (_, x) => (typeof x === 'number' && !Number.isInteger(x) ? +x.toPrecision(10) : x), 1))
 log(`écrit ${OUT}/short-entry-study.{md,json} · ${verdict}`)
+
+// ================================================================ 10. avenant : BTC et ETH
+// Demandé après lecture du verdict : les mêmes variantes et la même mesure, sur BTC et ETH seulement.
+// Ces données ont motivé l'étude (baisse des shorts en seconde moitié) : la lecture est descriptive et
+// ne peut pas confirmer une règle. Le pré-enregistrement et son verdict ci-dessus ne changent pas.
+const SEEN = ASSETS.filter(a => !a.unseen)
+const SM0 = Math.min(...SEEN.map(a => P.monthKey(dayOf(a.bars.t[a.lo]))))
+const SM1 = Math.max(...SEEN.map(a => P.monthKey(dayOf(a.bars.t[a.end]))))
+const SNM = SM1 - SM0 + 1
+const HS = [0, 1, 2] as const // première moitié, seconde moitié, tout
+const SB = SEEN.map(a => BV.map(v => HS.map(hh => {
+  const s = new Float64Array(SNM), c = new Float64Array(SNM)
+  for (const x of TR.get(runKey(a.key, v, 1))!) if (hh === 2 || x.half === hh) { s[x.month - SM0] += x.R; c[x.month - SM0]++ }
+  return { s, c }
+})))
+const deltaOn = (as: Asset[], v: V, k: number, hh: 0 | 1 | 2) => {
+  const xs = as.map(a => { const f = (w: V) => meanR(TR.get(runKey(a.key, w, k))!.filter(x => hh === 2 || x.half === hh)); return f(v) - f('V0') }).filter(Number.isFinite)
+  return P.mean(xs)
+}
+const randS = P.rng(SEED)
+const BS: Record<string, Float64Array[]> = Object.fromEntries(TESTED.map(v => [v, HS.map(() => new Float64Array(NBOOT))]))
+const sdraw = new Int32Array(SNM)
+for (let b = 0; b < NBOOT; b++) {
+  for (let j = 0; j < SNM; j++) sdraw[j] = Math.floor(randS() * SNM)
+  for (const hh of HS) {
+    const e = SEEN.map((_, ai) => BV.map((_, vi) => { const { s, c } = SB[ai][vi][hh]; let S = 0, C = 0; for (let j = 0; j < SNM; j++) { S += s[sdraw[j]]; C += c[sdraw[j]] } return { S, C } }))
+    TESTED.forEach(v => {
+      const vi = BV.indexOf(v)
+      let acc = 0, na = 0
+      for (let ai = 0; ai < SEEN.length; ai++) { const x = e[ai][vi], y = e[ai][0]; if (x.C > 0 && y.C > 0) { acc += x.S / x.C - y.S / y.C; na++ } }
+      BS[v][hh][b] = na ? acc / na : NaN
+    })
+  }
+}
+const sv = (x: Float64Array) => Array.from(x).filter(Number.isFinite)
+const SEENTEST = Object.fromEntries(TESTED.map(v => [v, {
+  delta: HS.map(hh => deltaOn(SEEN, v, 1, hh)), delta2: deltaOn(SEEN, v, 2, 2),
+  ci90: HS.map(hh => [P.quantile(sv(BS[v][hh]), 0.05), P.quantile(sv(BS[v][hh]), 0.95)]),
+  p: HS.map(hh => { const xs = sv(BS[v][hh]); return xs.filter(x => x <= 0).length / xs.length }),
+  perAsset: Object.fromEntries(SEEN.map(a => [a.key, ebar(a.key, v) - ebar(a.key, 'V0')])),
+  improved: SEEN.filter(a => ebar(a.key, v) > ebar(a.key, 'V0')).length,
+}])) as Record<V, { delta: number[]; delta2: number; ci90: number[][]; p: number[]; perAsset: Record<string, number>; improved: number }>
+
+// Portefeuille 50/50 officiel : écart de Sharpe avec V0, bootstrap par mois civils (mêmes mois pour les deux variantes).
+const PR = Object.fromEntries(VARIANTS.map(v => [v, P.book(sleeveDaily(BTC, RUNS.get(runKey('BTC', v, 1))!), sleeveDaily(ETH, RUNS.get(runKey('ETH', v, 1))!)).r])) as Record<V, number[]>
+const pMonths: number[][] = []
+pdays.forEach((d, k) => { const m = P.monthKey(d); if (!pMonths.length || P.monthKey(pdays[pMonths[pMonths.length - 1][0]]) !== m) pMonths.push([]); pMonths[pMonths.length - 1].push(k) })
+const randP = P.rng(SEED + 1)
+const PB: Record<string, Float64Array> = Object.fromEntries(VARIANTS.filter(v => v !== 'V0').map(v => [v, new Float64Array(NBOOT)]))
+for (let b = 0; b < NBOOT; b++) {
+  const idx: number[] = []
+  for (let j = 0; j < pMonths.length; j++) idx.push(...pMonths[Math.floor(randP() * pMonths.length)])
+  const s0 = sharpeOf(idx.map(k => PR.V0[k]))
+  for (const v of VARIANTS) if (v !== 'V0') PB[v][b] = sharpeOf(idx.map(k => PR[v][k])) - s0
+}
+const PDIFF = Object.fromEntries(VARIANTS.filter(v => v !== 'V0').map(v => [v, {
+  delta: PORT[v].sharpe - PORT.V0.sharpe, ci90: [P.quantile(Array.from(PB[v]), 0.05), P.quantile(Array.from(PB[v]), 0.95)],
+  pNotBetter: Array.from(PB[v]).filter(x => x <= 0).length / NBOOT,
+}])) as Record<V, { delta: number; ci90: number[]; pNotBetter: number }>
+log('avenant BTC/ETH')
+
+const A: string[] = []
+A.push('# Avenant — les mêmes variantes sur BTC et ETH', '')
+A.push(`Analyse demandée après lecture du verdict de l'étude pré-enregistrée (\`short-entry-study.md\`, plan \`${PREREG}\`). Mêmes variantes, même mesure, même bootstrap, sur BTC et ETH seulement. Produit par \`node research/shock/short-entry-study.ts\` au commit \`${commit.slice(0, 7)}\`${clean ? '' : ' (arbre de travail modifié)'}.`, '')
+A.push('**Données déjà vues.** BTC et ETH sont les données où la baisse des shorts a été observée, et qui ont motivé l\'étude. Ce qui suit dit ce que chaque variante aurait fait sur le produit, pas si elle marchera : aucun chiffre ici ne peut confirmer une règle. E1 et E2 restent exploratoires.', '')
+A.push('Simulation historique après coûts modélisés. Pas une performance live.', '')
+A.push('## Mesure principale : espérance nette d\'un short par unité de risque', '')
+A.push('R = (PnL net / equity à l\'entrée) / σ journalière des 30 jours précédents. Δ = moyenne sur BTC et ETH de [Ē(variante) − Ē(V0)]. Bootstrap : mois civils tirés en commun pour les deux sleeves et toutes les variantes, 10 000 réplications.', '')
+A.push('| Variante | Shorts BTC + ETH | Δ BTC | Δ ETH | Δ (moyenne) | 90 % | p unilatéral | Δ 1re moitié | Δ 2de moitié | Δ à coûts × 2 |', '|---|---|---|---|---|---|---|---|---|---|')
+A.push(`| ${LABEL.V0} | ${STATS.BTC.V0[1].n + STATS.ETH.V0[1].n} | Ē = ${sgn(STATS.BTC.V0[1].meanR)} | Ē = ${sgn(STATS.ETH.V0[1].meanR)} | — | — | — | — | — | — |`)
+for (const v of TESTED) {
+  const x = SEENTEST[v]
+  A.push(`| ${LABEL[v]} | ${STATS.BTC[v][1].n + STATS.ETH[v][1].n} | ${sgn(x.perAsset.BTC)} | ${sgn(x.perAsset.ETH)} | ${sgn(x.delta[2])} | ${sgn(x.ci90[2][0])} à ${sgn(x.ci90[2][1])} | ${pv(x.p[2])} | ${sgn(x.delta[0])} (p ${pv(x.p[0])}) | ${sgn(x.delta[1])} (p ${pv(x.p[1])}) | ${sgn(x.delta2)} |`)
+}
+A.push('', 'Moitiés : shorts entrés jusqu\'au 2022-09-15, puis après (découpage de l\'attribution du Sharpe).', '')
+A.push('## Portefeuille 50/50 officiel', '')
+A.push('50/50 au départ, sans rebalancement, période commune 2018-09-01 → 2026-09-30 ; par moitié, 50/50 au début de chaque moitié. Écart de Sharpe avec V0 : bootstrap par mois civils, mêmes mois pour les deux variantes.', '')
+A.push('| Variante | Sharpe | Écart avec V0 | 90 % | Part des tirages sans gain | CAGR | Drawdown max | Sharpe 1re moitié | Sharpe 2de moitié |', '|---|---|---|---|---|---|---|---|---|')
+for (const v of VARIANTS) {
+  const p = PORT[v], d = PDIFF[v]
+  A.push(`| ${LABEL[v]} | ${num(p.sharpe)} | ${d ? sgn(d.delta) : '—'} | ${d ? `${sgn(d.ci90[0])} à ${sgn(d.ci90[1])}` : '—'} | ${d ? pct(d.pNotBetter, 0) : '—'} | ${pct(p.cagr)} | ${pct(p.maxDD)} | ${num(p.sharpeH1)} | ${num(p.sharpeH2)} |`)
+}
+A.push('')
+A.push('## La règle de l\'étude, transposée à BTC et ETH (indicatif)', '')
+const s3 = SEENTEST.V3
+const rule: [string, string, string, boolean][] = [
+  ['Bootstrap, p unilatéral de Δ(V3)', pv(s3.p[2]), '< 0,05', s3.p[2] < 0.05],
+  ['Constance, sleeves où Ē(V3) > Ē(V0)', `${s3.improved} / 2`, '2 / 2', s3.improved === 2],
+  ['Shorts V3', String(STATS.BTC.V3[1].n + STATS.ETH.V3[1].n), '≥ 100', STATS.BTC.V3[1].n + STATS.ETH.V3[1].n >= 100],
+  ['Δ(V3) à coûts × 2', sgn(s3.delta2), '> 0', s3.delta2 > 0],
+  ['Sharpe du portefeuille 50/50, V3 − V0', sgn(PDIFF.V3.delta), '≥ 0', PDIFF.V3.delta >= 0],
+]
+A.push('| Condition | Valeur | Seuil | Résultat |', '|---|---|---|---|')
+for (const [n, val, thr, ok] of rule) A.push(`| ${n} | ${val} | ${thr} | ${ok ? 'oui' : 'non'} |`)
+A.push('')
+A.push('## Shorts par sleeve (coûts × 1)', '')
+A.push('| Sleeve | Variante | Shorts | Par an | Réussite | Ē | Rendement net moyen | PF | Semi-écart R | Pire R | Épisodes : shorts · Σ net | Baisse > 30 % : shorts · Ē | Ē 1re moitié | Ē 2de moitié | Sharpe sleeve |', '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|')
+for (const a of SEEN) for (const v of VARIANTS) {
+  const s = STATS[a.key][v][1]
+  A.push(`| ${a.key} | ${LABEL[v]} | ${s.n} | ${num(s.perYear, 1)} | ${pct(s.winRate, 0)} | ${sgn(s.meanR)} | ${pct(s.meanNet, 2)} | ${num(s.pf)} | ${num(s.semiDevR)} | ${num(s.worstR)} | ${s.episodes.n} · ${pct(s.episodes.sumNet, 0)} | ${s.bear.n} · ${sgn(s.bear.meanR)} | ${sgn(s.byHalf[0].meanR)} (${s.byHalf[0].n}) | ${sgn(s.byHalf[1].meanR)} (${s.byHalf[1].n}) | ${num(s.full.sharpe)} |`)
+}
+A.push('')
+const SY = [...new Set(SEEN.flatMap(a => TR.get(runKey(a.key, 'V0', 1))!.map(x => x.year)))].sort()
+A.push('## Ē par année, BTC et ETH mis en commun', '')
+A.push(`| Variante | ${SY.join(' | ')} |`, `|---|${SY.map(() => '---').join('|')}|`)
+for (const v of VARIANTS.filter(x => x !== 'V4')) {
+  A.push(`| ${LABEL[v]} | ${SY.map(y => { const ts = SEEN.flatMap(a => TR.get(runKey(a.key, v, 1))!.filter(x => x.year === y)); return `${sgn(meanR(ts), 2)} (${ts.length})` }).join(' | ')} |`)
+}
+A.push('')
+A.push('Contrôles : ceux de `short-entry-study.md` (V0 = rapports validés de la v1 et Sharpe publié du portefeuille, entrées reconstruites = moteur, variantes sous-ensembles des shorts v1).', '')
+writeFileSync(join(OUT, 'short-entry-btc-eth.md'), A.join('\n'))
+writeFileSync(join(OUT, 'short-entry-btc-eth.json'), JSON.stringify({ commit, sourcesClean: clean, seenData: true, tests: SEENTEST, portfolio: PORT, portfolioVsV0: PDIFF, sleeves: { BTC: STATS.BTC, ETH: STATS.ETH }, bootstrap: { replications: NBOOT, seed: SEED, months: SNM, firstMonth: P.monthLabel(SM0), lastMonth: P.monthLabel(SM1) } }, (_, x) => (typeof x === 'number' && !Number.isInteger(x) ? +x.toPrecision(10) : x), 1))
+log(`écrit ${OUT}/short-entry-btc-eth.{md,json}`)
