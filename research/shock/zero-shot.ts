@@ -54,11 +54,17 @@ const DAY = 864e5
 const M15 = 15 * 60000
 
 // ---------------------------------------------------------------- actifs
-interface Asset { label: string; mintick: number; slipPct: number; start: string; warm: string }
+interface Asset { label: string; mintick: number; slipPct: number; start: string; warm: string; crypto?: boolean; file?: string }
 const ASSETS: Record<string, Asset> = {
   btc: { label: 'BTC/USD (Bitstamp)', mintick: 1, slipPct: 0, start: '2017-01-01', warm: '2016-01-01' },
   xauusd: { label: 'Or comptant XAU/USD (Dukascopy)', mintick: 0.01, slipPct: 0.01, start: '2013-01-01', warm: '2012-01-01' },
   lightcmdusd: { label: 'Pétrole WTI, CFD Dukascopy (LIGHT.CMD/USD)', mintick: 0.001, slipPct: 0.02, start: '2013-01-01', warm: '2012-01-01' },
+  // Cryptos : marché 24 h/24, jours UTC comme pour BTC. Préchauffage d'un an (TAO : 4 mois, coté
+  // depuis avril 2024 ; le régime n'exige que 60 jours d'historique). Glissement selon la liquidité.
+  'eth-dukascopy': { label: 'ETH/USD (Dukascopy)', mintick: 0.01, slipPct: 0, start: '2019-01-01', warm: '2018-01-01', crypto: true, file: 'research/data/ethusd-dukascopy_15m.csv.gz' },
+  ethusdt: { label: 'ETH/USDT (Binance)', mintick: 0.01, slipPct: 0, start: '2018-09-01', warm: '2017-08-17', crypto: true },
+  solusdt: { label: 'SOL/USDT (Binance)', mintick: 0.01, slipPct: 0.01, start: '2021-09-01', warm: '2020-08-11', crypto: true },
+  taousdt: { label: 'TAO/USDT (Binance)', mintick: 0.01, slipPct: 0.02, start: '2024-08-15', warm: '2024-04-11', crypto: true },
 }
 const A = ASSETS[ASSET]
 if (!A) throw new Error(`actif inconnu : ${ASSET}`)
@@ -96,11 +102,11 @@ if (ASSET === 'btc') {
   bars = sliceBars(all, Date.parse(A.warm), all.t[all.n - 1])
   daily = resample(loadBtc(60), DAY)
 } else {
-  const file = opt('file', `research/data/${ASSET}_15m.csv.gz`)
+  const file = opt('file', A.file ?? `research/data/${ASSET}_15m.csv.gz`)
   if (!existsSync(file)) throw new Error(`fichier introuvable : ${file}`)
   const all = loadCsv(file)
   bars = sliceBars(all, Date.parse(A.warm), all.t[all.n - 1])
-  daily = sessionDays(bars)
+  daily = A.crypto ? resample(bars, DAY) : sessionDays(bars)
 }
 const n = bars.n
 const { o, h, l, c, t } = bars

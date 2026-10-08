@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 HOST = 'datafeed.dukascopy.com'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36'
-POINT = {'XAUUSD': 1000, 'LIGHTCMDUSD': 1000, 'BRENTCMDUSD': 1000, 'EURUSD': 100000}
+POINT = {'XAUUSD': 1000, 'LIGHTCMDUSD': 1000, 'BRENTCMDUSD': 1000, 'EURUSD': 100000, 'ETHUSD': 10}
 
 ctx = ssl.create_default_context(cafile=os.environ.get('SSL_CERT_FILE') or ('/root/.ccr/ca-bundle.crt' if os.path.exists('/root/.ccr/ca-bundle.crt') else None))
 PROXY = urlparse(os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy') or '')
