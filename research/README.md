@@ -56,6 +56,25 @@ npm run research:compare-tv -- --tf 5 --tv liste_des_trades.csv
 npm run test:research
 ```
 
+Portefeuille BTC/ETH des deux stratégies figées (rapport, CSV, résumé JSON et manifeste dans
+`research/reports/btc-eth-portfolio/`) :
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts [--boot 5000]
+```
+
+Puis, pour le site (pages `/`, `/shock-engine`, `/shock-engine/portfolio`, `/research`,
+`/institutional`) : copie les résultats figés dans `lib/research/btc-eth-portfolio.json` et les
+fichiers à télécharger dans `public/research/btc-eth-portfolio/`, sans rien recalculer (refuse de
+publier si un contrôle est en échec) :
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/publish-portfolio.ts
+```
+
+L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
+`NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
+
 Les rapports sont écrits dans `research/reports/`.
 
 Pour mettre à jour le site (onglet Shock Engine de Backtest Lab et page `/backtest/recherche`) :
@@ -92,6 +111,12 @@ dans `public/backtest/reports` et régénère le code Pine des préréglages ada
   Strategy Tester dans le port.
 
 ## Résultats
+
+Portefeuille BTC/ETH (`shock/portfolio.ts`) : les sleeves BTC et ETH du préréglage du bot, rejouées
+exactement comme `shock/zero-shot.ts` (le script s'arrête si elles diffèrent des rapports validés),
+50/50 sans rebalancement sur la période commune, avec corrélations, contributions au risque,
+drawdowns, bootstrap par mois et contrôles. Rapport : `reports/btc-eth-portfolio/btc-eth-portfolio.html`.
+`research:publish` ne les copie pas : c'est `shock/publish-portfolio.ts` qui les publie pour le site.
 
 Synthèse des deux passages (diagnostic, walk-forward, paramètres par régime) :
 [`reports/SYNTHESE.md`](reports/SYNTHESE.md).

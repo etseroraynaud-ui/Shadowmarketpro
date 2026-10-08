@@ -26,3 +26,4 @@ bot/state/
 bot/logs/
 # bot : secrets du serveur (clé de l'agent)
 bot/deploy/*.env
+research/data/.dukascopy-cache/

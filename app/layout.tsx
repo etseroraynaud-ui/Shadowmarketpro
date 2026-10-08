@@ -2,20 +2,20 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'ShadowMarketPro™ — Quantitative Trading Indicators',
-  description: 'ShadowMarketPro™ delivers adaptive quantitative trading indicators for crypto, forex, indices and stocks. All timeframes. All market conditions.',
-  keywords: 'quantitative trading indicators, crypto indicators, forex indicators, adaptive trading, TradingView indicators',
+  title: 'ShadowMarketPro™ — Shock Engine research and quantitative indicators',
+  description: 'Systematic crypto research on the Shock Engine strategy, published as historical simulations with their tests and limits, and adaptive quantitative indicators for TradingView.',
+  keywords: 'Shock Engine, systematic trading research, crypto strategy research, quantitative trading indicators, TradingView indicators',
   authors: [{ name: 'ShadowMarketPro' }],
   openGraph: {
-    title: 'ShadowMarketPro™ — Quantitative Trading Indicators',
-    description: 'Adaptive quantitative trading indicators for crypto, forex, indices and stocks. All timeframes. All market conditions.',
+    title: 'ShadowMarketPro™ — Shock Engine research and quantitative indicators',
+    description: 'Systematic crypto research on the Shock Engine strategy (historical simulation, not live performance) and adaptive TradingView indicators.',
     type: 'website',
     images: ['/favicon.png'],
   },
   twitter: {
     card: 'summary',
-    title: 'ShadowMarketPro™ — Quantitative Trading Indicators',
-    description: 'Adaptive quantitative trading indicators for crypto, forex, indices and stocks.',
+    title: 'ShadowMarketPro™ — Shock Engine research and quantitative indicators',
+    description: 'Systematic crypto research on the Shock Engine strategy and adaptive TradingView indicators.',
   },
   icons: {
     icon: [

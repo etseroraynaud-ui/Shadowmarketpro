@@ -1,0 +1,304 @@
+{
+ "version": "shock-engine-v1",
+ "generatedAt": "2026-10-08T18:27:40.557Z",
+ "status": "HISTORICAL SIMULATION",
+ "git": {
+  "commit": "d85266b5229b0dac6f6ccd3611083fd9ac570ee6",
+  "branch": "claude/shock-engine-portfolio-g79j1v",
+  "sourcesClean": true,
+  "dirtyFiles": []
+ },
+ "runtime": {
+  "node": "v22.22.0",
+  "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts",
+  "seeds": {
+   "bootstrap": 20261008,
+   "overlapBaseline": 20261009,
+   "copulaNull": 20261008
+  }
+ },
+ "datasets": {
+  "btc": {
+   "file": "research/data/btcusd_15m.csv.gz",
+   "sha256": "f5c3e0231748c757c61c44fc95af489608362e6f4b0820067c5943e83dcf48bb",
+   "instrument": "BTC/USD",
+   "venue": "Bitstamp spot",
+   "timeframe": "15m",
+   "timestamps": "bar open, ms UTC",
+   "firstBar": "2016-01-01T00:00:00.000Z",
+   "lastBar": "2026-10-04T02:45:00.000Z",
+   "warmUpFrom": "2016-01-01",
+   "simulationFrom": "2017-01-01",
+   "simulatedBars": 341941,
+   "commonWindowBars": 283277,
+   "regimeSource": "research/data/btcusd_60m.csv.gz",
+   "regimeSha256": "83fe0a5ed963ab22930da8799810507e39b8e3d02ad160e9adb2f70bf711fe8d"
+  },
+  "eth": {
+   "file": "research/data/ethusdt_15m.csv.gz",
+   "sha256": "875b3defedeecc7b9b089cd5949c8ff371761a4c2c6d2ebe4fa16386dcf36454",
+   "instrument": "ETH/USDT",
+   "venue": "Binance spot",
+   "timeframe": "15m",
+   "timestamps": "bar open, ms UTC",
+   "firstBar": "2017-08-17T04:00:00.000Z",
+   "lastBar": "2026-09-30T23:45:00.000Z",
+   "warmUpFrom": "2017-08-17",
+   "simulationFrom": "2018-09-01",
+   "simulatedBars": 283081,
+   "commonWindowBars": 283081,
+   "regimeSource": "daily bars resampled from the same 15-min file"
+  }
+ },
+ "commonPeriod": {
+  "start": "2018-09-01",
+  "end": "2026-09-30",
+  "days": 2952,
+  "years": 8.082135523613964,
+  "rule": "first UTC day on which both strategies are simulated after warm-up (ETH simulation start) → last complete UTC day covered by both"
+ },
+ "strategy": {
+  "name": "Shock Engine, adaptive volatility preset, 15 min (bot preset, full entries)",
+  "source": "lib/strategies/shock/presets.ts ADAPTIVE15 over lib/strategies/shock/params.ts DEFAULT_PARAMS",
+  "regimes": [
+   "calm",
+   "agitated"
+  ],
+  "parametersSha256": "c6ac30464bce14ddb6e5625cbcf08f68e69e3cc5e5454a0c2268583070a74435",
+  "parameters": [
+   {
+    "allowLong": true,
+    "allowShort": true,
+    "atrLen": 30,
+    "atrStopMult": 3.3,
+    "atrTrailMult": 50,
+    "atrZWin": 30,
+    "compThr": -0.5,
+    "cooldownBars": 3,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": true,
+    "flipIncludeFade": true,
+    "flipMainOnly": true,
+    "flipMinLifeATR": 0,
+    "highActivityMode": true,
+    "htfEmaLen": 70,
+    "htfMinutes": 60,
+    "htfSlopeBars": 3,
+    "htfSlopeMode": "htf",
+    "kMain": 2.9,
+    "kMicro": 1.7,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "longLamPct": 55,
+    "onlyHighLam": false,
+    "rangeWin": 15,
+    "tp1AtrMult": 0.8,
+    "tp1QtyPct": 20,
+    "useCompression": true,
+    "useFlipExit": true,
+    "useHTF": true,
+    "useImpulse": true,
+    "useMicroShock": false,
+    "useTP1": false,
+    "useVWAPExit": true,
+    "useVolFilter": true,
+    "volFadeMax": 1,
+    "volWin": 130,
+    "volZThr": 1.3,
+    "volZWin": 75,
+    "vwapLen": 30,
+    "wickThr": 0.4
+   },
+   {
+    "allowLong": true,
+    "allowShort": false,
+    "atrLen": 22,
+    "atrStopMult": 1.1,
+    "atrTrailMult": 3.2,
+    "atrZWin": 30,
+    "compThr": 0.2,
+    "cooldownBars": 4,
+    "directionalOnly": true,
+    "fadeOnlyLowLam": true,
+    "flipIncludeFade": true,
+    "flipMainOnly": true,
+    "flipMinLifeATR": 0,
+    "highActivityMode": true,
+    "htfEmaLen": 65,
+    "htfMinutes": 60,
+    "htfSlopeBars": 3,
+    "htfSlopeMode": "htf",
+    "kMain": 2.4,
+    "kMicro": 2.2,
+    "lamEmaWin": 150,
+    "lamNormWin": 300,
+    "lamPctThr": 50,
+    "longLamPct": 55,
+    "onlyHighLam": false,
+    "rangeWin": 50,
+    "tp1AtrMult": 0.9,
+    "tp1QtyPct": 20,
+    "useCompression": true,
+    "useFlipExit": true,
+    "useHTF": true,
+    "useImpulse": true,
+    "useMicroShock": true,
+    "useTP1": true,
+    "useVWAPExit": true,
+    "useVolFilter": true,
+    "volFadeMax": 1,
+    "volWin": 150,
+    "volZThr": -0.5,
+    "volZWin": 25,
+    "vwapLen": 30,
+    "wickThr": 0.45
+   }
+  ],
+  "ethCalibration": "none: ETH inherits the BTC preset unchanged",
+  "entryMask": "first bar after a data gap does not trigger an entry (as in zero-shot.ts)"
+ },
+ "assumptions": {
+  "capitalPerSleeve": "each sleeve compounds only its own capital; 100 % of sleeve equity per position; one position at a time per sleeve; no leverage",
+  "commissionPctPerOrder": 0.045,
+  "slippagePctPerOrder": 0,
+  "funding": "not modeled (0)",
+  "riskFree": 0,
+  "annualization": 365.25
+ },
+ "portfolio": {
+  "weights": {
+   "btc": 0.5,
+   "eth": 0.5
+  },
+  "rebalancing": "none (official variant A)",
+  "diagnostics": {
+   "B": "monthly 50/50 at month-end UTC close, commission on resized open positions",
+   "C": "exploratory equal risk, inverse 90-day volatility, monthly, no leverage"
+  }
+ },
+ "validatedReference": [
+  {
+   "file": "research/reports/shock-15m-zeroshot-btc.json",
+   "sha256": "90498d3214ca4f2949b365a2a9bfed8bdb1d2318cfa866f8d739c1a63af59b9e",
+   "reproduced": true
+  },
+  {
+   "file": "research/reports/shock-15m-zeroshot-ethusdt.json",
+   "sha256": "42ea58cb546b13c5d55aa8834ea14ee128d5970dd82a55b331ca0d311bc0d1ba",
+   "reproduced": true
+  }
+ ],
+ "scripts": [
+  {
+   "path": "research/shock/portfolio.ts",
+   "sha256": "ffa1918c2609cc28efeacc84f70944424df2fd4169a384de6df609d1b0715f97"
+  },
+  {
+   "path": "research/shock/portfolio-html.ts",
+   "sha256": "baf66c2ea329118ab236a1b3c66a3cd5830c93ceb26ceeef3c7a592e606373b7"
+  },
+  {
+   "path": "research/lib/portfolio.ts",
+   "sha256": "c6a082172b6ee2bf142093a9139002b4d466376c481d00c068857c66f46d4dc1"
+  },
+  {
+   "path": "research/lib/frozen-shock.ts",
+   "sha256": "be445aa726433c3e92bcd0cd1bc4626e56d103a309c5e29a5d7cd3f990bed710"
+  },
+  {
+   "path": "research/lib/svg.ts",
+   "sha256": "e7f2760748c7f45353631db85fd16b94573f408d059fee1be20ea8704f5206f5"
+  },
+  {
+   "path": "research/lib/data.ts",
+   "sha256": "0a74461150628f4cf8c13f1c10ad1f5c24a03ae48f4c454081047881e55249df"
+  },
+  {
+   "path": "research/lib/stats.ts",
+   "sha256": "84b410fb3de5ecfd03bc80d9e4614ddd36aaff7da1ac1d431c10e1e7e8e4b8fa"
+  },
+  {
+   "path": "research/shock/zero-shot.ts",
+   "sha256": "9dbec6ed07df1c57b40498436920b6cd16e59b19aa0f4bd5ece3879819b91398"
+  },
+  {
+   "path": "lib/strategies/shock/engine.ts",
+   "sha256": "15211a3e185b1214fb6afee229f9eb2b51ee09bbd80fcd48dd831ce99157e62f"
+  },
+  {
+   "path": "lib/strategies/shock/market.ts",
+   "sha256": "b69ad8f8f89a4dedc05a1298e87acced6dace0893bbf15b74c858d74aa02ffff"
+  },
+  {
+   "path": "lib/strategies/shock/strategy.ts",
+   "sha256": "fafb22d6373b19bf9026ec23ff68b2fb07507dd7c8d9653d9450523b7c4161bc"
+  },
+  {
+   "path": "lib/strategies/shock/broker.ts",
+   "sha256": "bad42836b9d61569cb167883a8e9fe0db5e4c5303e654ccbfe99d087b012a97b"
+  },
+  {
+   "path": "lib/strategies/shock/live.ts",
+   "sha256": "05caf82ece9ad7f8c355f0390bbda4fe6e3bffe1802933d0952b5c3dc10edeb2"
+  },
+  {
+   "path": "lib/strategies/shock/params.ts",
+   "sha256": "5f7cd0c941d702733165da4df7947168b87381eecac179264874807f862d4df6"
+  },
+  {
+   "path": "lib/strategies/shock/presets.ts",
+   "sha256": "f97449733ec945bb984a9692d03e51d34b5a9213aea2cbc56bf4bdca8e7d4ae2"
+  },
+  {
+   "path": "lib/strategies/shock/regimes.ts",
+   "sha256": "d72f79d1d97c214de781e96fd580a83c4910272d7b37ea6ca44304a077ec99c8"
+  },
+  {
+   "path": "lib/backtest/data.ts",
+   "sha256": "26fa7de9308702b4ffcc982e5f724bfdc71fcb00ea13ae3c0e1daa5db2ab5f82"
+  },
+  {
+   "path": "lib/backtest/indicators.ts",
+   "sha256": "64bd6009860968376cd53e625ce4bf454c39bdec89e291f6704da62728528440"
+  },
+  {
+   "path": "lib/backtest/metrics.ts",
+   "sha256": "21990ec73cf904f60fa04c68653c8bd088b293933b6793448d131c7ec4b0a8ad"
+  }
+ ],
+ "outputs": [
+  {
+   "path": "research/reports/btc-eth-portfolio/portfolio_daily_returns.csv",
+   "sha256": "e37b018e9f07334b3df1cdfa60b70c6dd157203c90f3d7add3eb846f8c4dd105"
+  },
+  {
+   "path": "research/reports/btc-eth-portfolio/portfolio_monthly_returns.csv",
+   "sha256": "2c5ab24f33ad92b38e72fd1448404636e09c9bbe20128313031dce86bab726d0"
+  },
+  {
+   "path": "research/reports/btc-eth-portfolio/portfolio_annual_returns.csv",
+   "sha256": "124fc5d65d5643cfdda3746894df6a1366063430d4915ffe0826c8f2fa5f42cf"
+  },
+  {
+   "path": "research/reports/btc-eth-portfolio/portfolio_drawdowns.csv",
+   "sha256": "034bb241036ec117685adc2e8edf7d33e5ab5bc8f7f88b6897421a600fb99f8b"
+  },
+  {
+   "path": "research/reports/btc-eth-portfolio/portfolio_correlation_rolling.csv",
+   "sha256": "c5a0fff0a27bb7123603565e811ad9c39e71d9148d2798f7971c9ccad4f3ba77"
+  },
+  {
+   "path": "research/reports/btc-eth-portfolio/portfolio_summary.json",
+   "sha256": "417bb299b3c3f109a8374dbc9c1f7942ffa4f0a60a1f8130be0ed69b23fa7725"
+  },
+  {
+   "path": "research/reports/btc-eth-portfolio/btc-eth-portfolio.html",
+   "sha256": "ee6f3ef84d27e759499cf776561fd99e407269b8d458b4641f57f667cee27062"
+  }
+ ],
+ "sanityChecks": {
+  "passed": 38,
+  "failed": []
+ }
+}
