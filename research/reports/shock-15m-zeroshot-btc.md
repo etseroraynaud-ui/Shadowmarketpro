@@ -61,6 +61,26 @@ Rendement après l'événement, en ATR de la bougie, dans le sens de l'événeme
 | 16 bougies (4 h) | 7384 | +0.220 | +0.221 | +0.135 à +0.312 | 100 % | +0.223 | +0.219 | 80 % de 10 |
 | 64 bougies (16 h) | 7384 | +0.678 | +0.651 | +0.457 à +0.830 | 100 % | +0.789 | +0.515 | 90 % de 10 |
 
+### Par plage horaire (descriptif, non utilisé pour décider)
+
+Excès en ATR après les événements, selon l'heure de New York de la bougie du choc. Cinq plages comparées : un écart isolé peut être dû au hasard.
+
+| chocs bruts dans le sens de la tendance 60 min | événements | excès à 1 h | intervalle 90 % | excès à 4 h | intervalle 90 % |
+| --- | --- | --- | --- | --- | --- |
+| Asie (18 h – 2 h) | 2053 | +0.242 | +0.126 à +0.360 | +0.338 | +0.180 à +0.509 |
+| Londres (2 h – 8 h) | 1411 | +0.108 | +0.014 à +0.206 | +0.233 | +0.045 à +0.412 |
+| New York matin (8 h – 12 h) | 2066 | +0.186 | +0.072 à +0.301 | +0.354 | +0.141 à +0.574 |
+| dont bougie de 8 h 30 (annonces) | 140 | −0.153 | −0.394 à +0.086 | −0.484 | −1.417 à +0.517 |
+| New York après-midi (12 h – 18 h) | 1854 | −0.032 | −0.142 à +0.088 | −0.066 | −0.226 à +0.104 |
+
+| signaux d'entrée complets | événements | excès à 1 h | intervalle 90 % | excès à 4 h | intervalle 90 % |
+| --- | --- | --- | --- | --- | --- |
+| Asie (18 h – 2 h) | 555 | +0.420 | +0.196 à +0.672 | +0.520 | +0.186 à +0.852 |
+| Londres (2 h – 8 h) | 303 | +0.246 | −0.017 à +0.525 | +0.521 | +0.192 à +0.854 |
+| New York matin (8 h – 12 h) | 493 | +0.360 | +0.098 à +0.622 | +0.374 | −0.054 à +0.790 |
+| dont bougie de 8 h 30 (annonces) | 35 | −0.190 | −0.710 à +0.337 | −1.299 | −3.063 à +0.439 |
+| New York après-midi (12 h – 18 h) | 420 | +0.016 | −0.252 à +0.268 | +0.056 | −0.304 à +0.401 |
+
 ## 2. Stratégie complète
 
 | variante | rendement | CAGR | Sharpe | Sortino | PF | Max DD | Calmar | trades | gagnants | gain moyen | perte moyenne | payoff | skew | part des 5 % meilleurs | exposition | rotation / an | frais / an | glissement / an |
@@ -77,7 +97,9 @@ Rendement après l'événement, en ATR de la bougie, dans le sens de l'événeme
 
 ### préréglage du bot, entrées complètes
 
-Sharpe journalier 1.55, intervalle à 90 % (bootstrap des mois) 1.12 à 1.94, P(Sharpe > 0) 100 %.
+Sharpe journalier 1.55, intervalle à 90 % (bootstrap des mois) 1.09 à 1.95, P(Sharpe > 0) 100 %.
+
+Coûts et Sharpe : × 0 → 1.93 · × 0,25 → 1.85 · × 0,5 → 1.77 · × 0,75 → 1.69 · × 1 → 1.61. Rentable sur toute la plage.
 
 | année | rendement | Sharpe | Max DD | trades |
 | --- | --- | --- | --- | --- |
@@ -98,7 +120,7 @@ Sharpe journalier 1.55, intervalle à 90 % (bootstrap des mois) 1.12 à 1.94, P(
 | calme | short | 430 | 27 % | 0.54 % | 1.97 |
 | agité | long | 378 | 34 % | 0.04 % | 0.13 |
 
-Entrées au hasard (200 tirages, mêmes sorties, 1055 trades en médiane) : Sharpe médian 0.04, 95e centile 0.51 ; la stratégie en bat 100 %.
+Entrées au hasard (200 tirages, mêmes sorties, 1045 trades en médiane) : Sharpe médian 0.04, 95e centile 0.52 ; la stratégie en bat 100 %.
 
 | entrée | Sharpe | PF | trades | gain moyen par trade | part du gain moyen à l'heure |
 | --- | --- | --- | --- | --- | --- |
@@ -111,7 +133,9 @@ Entrées au hasard (200 tirages, mêmes sorties, 1055 trades en médiane) : Shar
 
 ### préréglage, entrées « cœur » (choc + cassure + bougie + tendance 60 min)
 
-Sharpe journalier 1.51, intervalle à 90 % (bootstrap des mois) 1.13 à 1.91, P(Sharpe > 0) 100 %.
+Sharpe journalier 1.51, intervalle à 90 % (bootstrap des mois) 1.11 à 1.92, P(Sharpe > 0) 100 %.
+
+Coûts et Sharpe : × 0 → 1.95 · × 0,25 → 1.86 · × 0,5 → 1.76 · × 0,75 → 1.66 · × 1 → 1.57. Rentable sur toute la plage.
 
 | année | rendement | Sharpe | Max DD | trades |
 | --- | --- | --- | --- | --- |
@@ -132,7 +156,7 @@ Sharpe journalier 1.51, intervalle à 90 % (bootstrap des mois) 1.13 à 1.91, P(
 | calme | short | 464 | 27 % | 0.47 % | 1.83 |
 | agité | long | 564 | 34 % | 0.04 % | 0.19 |
 
-Entrées au hasard (200 tirages, mêmes sorties, 1332 trades en médiane) : Sharpe médian -0.03, 95e centile 0.46 ; la stratégie en bat 100 %.
+Entrées au hasard (200 tirages, mêmes sorties, 1325 trades en médiane) : Sharpe médian -0.05, 95e centile 0.39 ; la stratégie en bat 100 %.
 
 | entrée | Sharpe | PF | trades | gain moyen par trade | part du gain moyen à l'heure |
 | --- | --- | --- | --- | --- | --- |

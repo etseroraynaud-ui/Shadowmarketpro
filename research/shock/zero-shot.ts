@@ -33,10 +33,10 @@ import { gunzipSync } from 'node:zlib'
 import { loadBtc } from '../lib/data.ts'
 import { metricsOf, pct, num } from '../lib/stats.ts'
 import { resample, sliceBars } from '../../lib/backtest/data.ts'
-import { sma, highest, lowest } from '../../lib/backtest/indicators.ts'
+import { sma, ema, stdev, highest, lowest } from '../../lib/backtest/indicators.ts'
 import type { Bars } from '../../lib/backtest/types.ts'
 import { adaptivePreset, marketFor, selectFor } from '../../lib/strategies/shock/live.ts'
-import { prepare } from '../../lib/strategies/shock/market.ts'
+import { prepare, percentrank } from '../../lib/strategies/shock/market.ts'
 import type { Prepared } from '../../lib/strategies/shock/market.ts'
 import { simulate } from '../../lib/strategies/shock/engine.ts'
 import type { ShockResult } from '../../lib/strategies/shock/engine.ts'
@@ -46,6 +46,10 @@ const args = process.argv.slice(2)
 const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d }
 const ASSET = opt('asset', 'xauusd')
 const DRAWS = Number(opt('draws', '200'))
+// Normalisation saisonnière (option) : rendement et volume divisés par leur niveau habituel au même
+// quart d'heure (heure de New York), mesuré sur les 60 jours de séance précédents.
+const SEASONAL = args.includes('--seasonal')
+const SEASON_DAYS = 60
 const DAY = 864e5
 const M15 = 15 * 60000
 
@@ -145,22 +149,110 @@ const bullStrong = preset.sets.map((p, k) => {
   return out
 })
 
+// ---------------------------------------------------------------- normalisation saisonnière
+// Heure de New York (heure d'été américaine : du 2e dimanche de mars au 1er dimanche de novembre).
+function nyOffset(ts: number): number {
+  const y = new Date(ts).getUTCFullYear()
+  const sunday = (month: number, nth: number) => { const d = new Date(Date.UTC(y, month, 1)); const first = (7 - d.getUTCDay()) % 7; return Date.UTC(y, month, 1 + first + 7 * (nth - 1)) }
+  const start = sunday(2, 2) + 7 * 3600000, stop = sunday(10, 1) + 6 * 3600000
+  return ts >= start && ts < stop ? -4 * 3600000 : -5 * 3600000
+}
+const nyMin = new Int32Array(n), nyDay = new Int32Array(n)
+for (let i = 0; i < n; i++) { const x = t[i] + nyOffset(t[i]); nyMin[i] = Math.floor((x % DAY) / 60000); nyDay[i] = Math.floor(x / DAY) }
+const slot = (i: number) => Math.floor(nyMin[i] / 15)
+/** Facteurs saisonniers causaux (1 sans l'option) : niveau du quart d'heure / niveau moyen, 60 jours précédents. */
+const fR = new Float64Array(n).fill(1), fV = new Float64Array(n).fill(1)
+if (SEASONAL) {
+  const days: number[] = []
+  const dayOfBar = new Int32Array(n)
+  for (let i = 0; i < n; i++) { if (!days.length || days[days.length - 1] !== nyDay[i]) days.push(nyDay[i]); dayOfBar[i] = days.length - 1 }
+  const D = days.length
+  const r2 = new Float64Array(D * 96), vs = new Float64Array(D * 96), ns = new Float64Array(D * 96)
+  for (let i = 1; i < n; i++) { if (gap[i]) continue; const k = dayOfBar[i] * 96 + slot(i); r2[k] += Math.log(c[i] / c[i - 1]) ** 2; vs[k] += bars.v[i]; ns[k]++ }
+  // Sommes glissantes sur les SEASON_DAYS jours qui précèdent le jour de la bougie.
+  const accR = new Float64Array(96), accV = new Float64Array(96), accN = new Float64Array(96)
+  let totR = 0, totV = 0, totN = 0, dCur = 0
+  for (let i = 0; i < n; i++) {
+    const d = dayOfBar[i]
+    while (dCur < d) {
+      for (let q = 0; q < 96; q++) { const k = dCur * 96 + q; accR[q] += r2[k]; accV[q] += vs[k]; accN[q] += ns[k]; totR += r2[k]; totV += vs[k]; totN += ns[k] }
+      const old = dCur - SEASON_DAYS
+      if (old >= 0) for (let q = 0; q < 96; q++) { const k = old * 96 + q; accR[q] -= r2[k]; accV[q] -= vs[k]; accN[q] -= ns[k]; totR -= r2[k]; totV -= vs[k]; totN -= ns[k] }
+      dCur++
+    }
+    const q = slot(i)
+    if (accN[q] >= 20 && totN > 0 && totR > 0 && totV > 0) {
+      fR[i] = Math.sqrt((accR[q] / accN[q]) / (totR / totN))
+      fV[i] = (accV[q] / accN[q]) / (totV / totN)
+      if (!(fR[i] > 0)) fR[i] = 1
+      if (!(fV[i] > 0)) fV[i] = 1
+    }
+  }
+}
+
+// ---------------------------------------------------------------- entrées recalculées
+// Même logique que le moteur (market.ts), à partir du rendement et du volume éventuellement
+// normalisés ; sans l'option, elle redonne exactement les signaux du moteur (vérifié plus bas).
+const rAdj = new Float64Array(n), vAdj = new Float64Array(n)
+for (let i = 0; i < n; i++) { rAdj[i] = (i ? Math.log(Math.max(c[i], 1e-10) / Math.max(c[i - 1], 1e-10)) : 0) / fR[i]; vAdj[i] = bars.v[i] / fV[i] }
+const EPS = 1e-10
+const entry = preset.sets.map((P, k) => {
+  if (!P.highActivityMode || !P.directionalOnly || !P.useImpulse || !P.useHTF || !P.useVolFilter) throw new Error('réglage non prévu par la recomposition')
+  const mu = sma(rAdj, P.volWin), sdv = stdev(rAdj, P.volWin)
+  const z = new Float64Array(n)
+  for (let i = 0; i < n; i++) z[i] = sdv[i] > EPS ? (rAdj[i] - mu[i]) / sdv[i] : 0
+  const s0 = P.useMicroShock ? Math.min(P.kMain, Math.max(P.kMicro - 0.2, 0.8)) : P.kMain
+  const shock = new Float64Array(n)
+  for (let i = 0; i < n; i++) shock[i] = Math.abs(z[i]) > P.kMain || (P.useMicroShock && Math.abs(z[i]) > Math.max(P.kMicro - 0.2, 0.8)) ? 1 : 0
+  const lam = percentrank(ema(shock, P.lamEmaWin) as Float64Array, P.lamNormWin)
+  const vm = sma(vAdj, P.volZWin), vsd = stdev(vAdj, P.volZWin)
+  const volZ = new Float64Array(n)
+  for (let i = 0; i < n; i++) volZ[i] = vsd[i] > EPS ? (vAdj[i] - vm[i]) / vsd[i] : 0
+  const hh = highest(h, P.rangeWin), ll = lowest(l, P.rangeWin)
+  const R = presetPrs[k]
+  const iL = new Uint8Array(n), iS = new Uint8Array(n), full = { long: new Uint8Array(n), short: new Uint8Array(n) }
+  for (let i = 1; i < n; i++) {
+    const r0 = Math.log(Math.max(c[i], EPS) / Math.max(c[i - 1], EPS))
+    const sh = shock[i] === 1
+    const rng = Math.max(h[i] - l[i], A.mintick)
+    const upW = (h[i] - Math.max(o[i], c[i])) / rng, dnW = (Math.min(o[i], c[i]) - l[i]) / rng
+    const hhPrev = !Number.isNaN(hh[i - 1]) ? hh[i - 1] : hh[i], llPrev = !Number.isNaN(ll[i - 1]) ? ll[i - 1] : ll[i]
+    iL[i] = sh && r0 > 0 && c[i] > hhPrev && upW < P.wickThr && Math.abs(c[i] - o[i]) / rng > 0.55 && (c[i] - l[i]) / rng > 0.75 ? 1 : 0
+    iS[i] = sh && r0 < 0 && c[i] < llPrev && dnW < P.wickThr ? 1 : 0
+    const volOK = volZ[i] > P.volZThr
+    full.long[i] = iL[i] && bullStrong[k][i] && lam[i] > P.longLamPct && volZ[i] > 0 && volOK ? 1 : 0
+    full.short[i] = iS[i] && c[i] < R.htfVal[i] && volOK ? 1 : 0
+  }
+  return { z, s0, iL, iS, full }
+})
+
 /** Signaux d'entrée, la bougie qui suit une fermeture exclue (option : sans ce masque). */
 function signals(v: Version, mask = true) {
   const long = new Uint8Array(n), short = new Uint8Array(n)
   for (let i = lo; i <= end; i++) {
     const e = setAt(v, i)
     if (e < 0 || (mask && gap[i])) continue
-    const R = presetPrs[e], P = v.sets[e]
+    const E = entry[e], P = v.sets[e], R = presetPrs[e]
     if (v.key === 'preset') {
-      if (P.allowLong && (R.impulseEntryLong[i] || R.fadeEntryLong[i])) long[i] = 1
-      if (P.allowShort && (R.impulseEntryShort[i] || R.fadeEntryShort[i])) short[i] = 1
+      if (P.allowLong && E.full.long[i]) long[i] = 1
+      if (P.allowShort && E.full.short[i]) short[i] = 1
     } else {
-      if (P.allowLong && R.impulseLong[i] && bullStrong[e][i]) long[i] = 1
-      if (P.allowShort && R.impulseShort[i] && c[i] < R.htfVal[i]) short[i] = 1
+      if (P.allowLong && E.iL[i] && bullStrong[e][i]) long[i] = 1
+      if (P.allowShort && E.iS[i] && c[i] < R.htfVal[i]) short[i] = 1
     }
   }
   return { long, short }
+}
+// Contrôle : sans normalisation, la recomposition redonne exactement les signaux du moteur.
+let recompose = 0
+if (!SEASONAL) {
+  for (let i = lo; i <= end; i++) {
+    const e = sel[i]
+    if (e < 0) continue
+    const R = presetPrs[e], E = entry[e]
+    if (E.full.long[i] !== R.impulseEntryLong[i] || E.full.short[i] !== R.impulseEntryShort[i] || E.iL[i] !== R.impulseLong[i] || E.iS[i] !== R.impulseShort[i]) recompose++
+  }
+  if (recompose) throw new Error(`recomposition des signaux : ${recompose} écarts`)
 }
 const run = (v: Version, costs: Costs, ov: { long: Uint8Array; short: Uint8Array }) => simulate(m, v.sets, costs, lo, end, v.select, ov)
 
@@ -215,7 +307,7 @@ const evShock = (trend: boolean): Ev[] => {
   for (let i = lo; i <= end; i++) {
     const e = sel[i]
     if (e < 0 || gap[i]) continue
-    const z = presetPrs[e].z[i]
+    const z = entry[e].z[i]
     if (!(Math.abs(z) > sPreset[e])) continue
     const dir = ret[i] > 0 ? 1 : -1
     if (trend) { const hv = presetPrs[e].htfVal[i]; if (!(dir === 1 ? c[i] > hv : c[i] < hv)) continue }
@@ -250,6 +342,37 @@ const events = FAMILIES.map(f => ({
     return { h: hh, n: raw.length, raw: mean(raw), excess: mean(exc), ci: [b.lo, b.hi], pPos: b.pPos, halves: half.map(mean), yearsPos: yr.filter(x => x > 0).length / yr.length, nYears: yr.length }
   }),
 }))
+
+// Diagnostic descriptif (non utilisé pour décider) : excès par plage horaire de New York.
+const BLOCKS: [string, (mn: number) => boolean][] = [
+  ['Asie (18 h – 2 h)', mn => mn >= 18 * 60 || mn < 2 * 60],
+  ['Londres (2 h – 8 h)', mn => mn >= 2 * 60 && mn < 8 * 60],
+  ['New York matin (8 h – 12 h)', mn => mn >= 8 * 60 && mn < 12 * 60],
+  ['dont bougie de 8 h 30 (annonces)', mn => mn >= 8 * 60 + 30 && mn < 8 * 60 + 45],
+  ['New York après-midi (12 h – 18 h)', mn => mn >= 12 * 60 && mn < 18 * 60],
+]
+const sessionDiag = ['shock-trend', 'sig-preset'].map(key => {
+  const f = FAMILIES.find(x => x.key === key)!
+  return {
+    key, label: f.label,
+    rows: BLOCKS.map(([name, test]) => ({
+      name,
+      byH: [4, 16].map(hh => {
+        const j = HS.indexOf(hh)
+        const byMonth = new Map<number, number[]>()
+        let k = 0
+        for (const { i, dir } of f.ev) {
+          if (!test(nyMin[i]) || i + hh > end || !(f.atr[i] > 0)) continue
+          const e = (dir * (c[i + hh] - c[i])) / f.atr[i] - dir * f.base(j, i)
+          const mo = monthOf(i); if (!byMonth.has(mo)) byMonth.set(mo, []); byMonth.get(mo)!.push(e); k++
+        }
+        const all = [...byMonth.values()].flat()
+        const b = bootMean(byMonth)
+        return { h: hh, n: k, excess: mean(all), ci: [b.lo, b.hi] }
+      }),
+    })),
+  }
+})
 
 // ---------------------------------------------------------------- 2. stratégie complète
 const dayEnds: number[] = []
@@ -324,6 +447,8 @@ for (const v of VERSIONS) {
   const base = run(v, COSTS(1), sig)
   const costRuns = [0, 1, 2].map(k => ({ k, s: stats(k === 1 ? base : run(v, COSTS(k), sig), COSTS(k)) }))
   const unmasked = stats(run(v, COSTS(1), signals(v, false)), COSTS(1))
+  // Coûts intermédiaires : où passe le seuil de rentabilité ?
+  const costCurve = [0, 0.25, 0.5, 0.75, 1].map(k => ({ k, sharpe: k === 1 ? costRuns[1].s.sharpe : k === 0 ? costRuns[0].s.sharpe : stats(run(v, COSTS(k), sig), COSTS(k)).sharpe }))
   // Décalages : un signal à la bougie i donne une entrée à i + k (k < 0 : avance, utilise le futur).
   const shifts = [-2, -1, 1, 2, 4].map(k => {
     const long = new Uint8Array(n), short = new Uint8Array(n)
@@ -348,7 +473,7 @@ for (const v of VERSIONS) {
   for (let d = 0; d < DRAWS; d++) { const r = draw(f); rnd.push(metricsOf(bars, r, lo, end).sharpe); rndTrades.push(r.positions.length) }
   const sh = costRuns[1].s.sharpe
   strat[v.key] = {
-    label: v.label, costs: costRuns, unmasked, shifts, boot: bootSharpe(base), years: yearly(base), regimes: byRegime(base, v),
+    label: v.label, costs: costRuns, costCurve, unmasked, shifts, boot: bootSharpe(base), years: yearly(base), regimes: byRegime(base, v),
     random: { draws: DRAWS, trades: quantile(rndTrades, 0.5), median: quantile(rnd, 0.5), p95: quantile(rnd, 0.95), beaten: rnd.filter(x => x < sh).length / rnd.length },
   }
   process.stderr.write(`  ${v.key} : ${((Date.now() - t0) / 1000).toFixed(0)} s\n`)
@@ -385,9 +510,10 @@ const table = (head: string[], rows: string[][]) => { L.push(`| ${head.join(' | 
 const sg = (x: number, d = 2) => (Number.isFinite(x) ? (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(d) : '—')
 const yes = (b: boolean) => (b ? 'oui' : '**non**')
 L.push(
-  `# Zéro-shot du Shock Engine · ${A.label}`,
+  `# Zéro-shot du Shock Engine · ${A.label}${SEASONAL ? ' · normalisation saisonnière' : ''}`,
   '',
-  `15 min, ${iso(lo)} → ${iso(end)} (${years.toFixed(1)} ans, préchauffage depuis ${iso(0)}). Stratégie figée, aucune variable ajoutée, aucun réglage réestimé. Coûts × 1 : commission 0,045 % par ordre${A.slipPct ? ` + glissement ${A.slipPct.toString().replace('.', ',')} % par ordre (données au prix acheteur)` : ''}, sans levier. Produit par \`node research/shock/zero-shot.ts --asset ${ASSET} --draws ${DRAWS}\`.`,
+  `15 min, ${iso(lo)} → ${iso(end)} (${years.toFixed(1)} ans, préchauffage depuis ${iso(0)}). Stratégie figée, aucune variable ajoutée, aucun réglage réestimé. Coûts × 1 : commission 0,045 % par ordre${A.slipPct ? ` + glissement ${A.slipPct.toString().replace('.', ',')} % par ordre (données au prix acheteur)` : ''}, sans levier. Produit par \`node research/shock/zero-shot.ts --asset ${ASSET} --draws ${DRAWS}${SEASONAL ? ' --seasonal' : ''}\`.`,
+  ...(SEASONAL ? ['', `**Normalisation saisonnière** (déclarée avant le test, sans paramètre ajusté) : pour détecter les chocs et le volume, le rendement de chaque bougie est divisé par la volatilité habituelle de son quart d'heure (heure de New York) et le volume par le volume habituel de ce quart d'heure, mesurés sur les ${SEASON_DAYS} jours de séance précédents. Sorties, stops et ATR inchangés.`] : []),
   '',
   '## Données',
   '',
@@ -416,6 +542,11 @@ for (const e of events) {
   ]))
 }
 
+L.push('### Par plage horaire (descriptif, non utilisé pour décider)', '', 'Excès en ATR après les événements, selon l\'heure de New York de la bougie du choc. Cinq plages comparées : un écart isolé peut être dû au hasard.', '')
+for (const d of sessionDiag) {
+  table([`${d.label}`, 'événements', 'excès à 1 h', 'intervalle 90 %', 'excès à 4 h', 'intervalle 90 %'], d.rows.map(r => [r.name, String(r.byH[0].n), sg(r.byH[0].excess, 3), `${sg(r.byH[0].ci[0], 3)} à ${sg(r.byH[0].ci[1], 3)}`, sg(r.byH[1].excess, 3), `${sg(r.byH[1].ci[0], 3)} à ${sg(r.byH[1].ci[1], 3)}`]))
+}
+
 L.push('## 2. Stratégie complète', '')
 const rowS = (name: string, s: S) => [name, pct(s.totalReturn, 0), pct(s.cagr), num(s.sharpe), num(s.sortino), num(s.pf), pct(s.dd), num(s.calmar), String(s.trades), pct(s.winRate, 0), pct(s.avgWin, 2), pct(s.avgLoss, 2), num(s.payoff), num(s.skew), pct(s.top5Share, 0), pct(s.exposure, 0), num(s.turnover, 0) + '×', pct(s.feesPct), pct(s.slipPct)]
 const headS = ['variante', 'rendement', 'CAGR', 'Sharpe', 'Sortino', 'PF', 'Max DD', 'Calmar', 'trades', 'gagnants', 'gain moyen', 'perte moyenne', 'payoff', 'skew', 'part des 5 % meilleurs', 'exposition', 'rotation / an', 'frais / an', 'glissement / an']
@@ -431,6 +562,10 @@ for (const v of VERSIONS) {
   const s = strat[v.key] as { boot: { sharpe: number; lo: number; hi: number; pPos: number }; years: { y: number; ret: number; sharpe: number; dd: number; trades: number }[]; regimes: { set: number; dir: number; n: number; win: number; mean: number; sumLog: number }[]; random: { draws: number; trades: number; median: number; p95: number; beaten: number }; shifts: { k: number; s: S }[]; costs: { k: number; s: S }[] }
   L.push(`### ${v.label}`, '')
   L.push(`Sharpe journalier ${num(s.boot.sharpe)}, intervalle à 90 % (bootstrap des mois) ${num(s.boot.lo)} à ${num(s.boot.hi)}, P(Sharpe > 0) ${pct(s.boot.pPos, 0)}.`, '')
+  const cc = (strat[v.key] as { costCurve: { k: number; sharpe: number }[] }).costCurve
+  let be = NaN
+  for (let j = 1; j < cc.length; j++) if (cc[j - 1].sharpe > 0 && cc[j].sharpe <= 0) be = cc[j - 1].k + (cc[j].k - cc[j - 1].k) * cc[j - 1].sharpe / (cc[j - 1].sharpe - cc[j].sharpe)
+  L.push(`Coûts et Sharpe : ${cc.map(x => `× ${x.k.toString().replace('.', ',')} → ${num(x.sharpe)}`).join(' · ')}. ${Number.isFinite(be) ? `Seuil de rentabilité vers × ${be.toFixed(2).replace('.', ',')}, soit ${((0.045 + A.slipPct) * be).toFixed(3).replace('.', ',')} % de coût par ordre.` : cc[cc.length - 1].sharpe > 0 ? 'Rentable sur toute la plage.' : 'Pas rentable même sans coûts.'}`, '')
   table(['année', 'rendement', 'Sharpe', 'Max DD', 'trades'], s.years.map(y => [String(y.y), pct(y.ret, 0), num(y.sharpe), pct(y.dd), String(y.trades)]))
   table(['jeu', 'sens', 'trades', 'gagnants', 'moyenne par trade', 'somme (log)'], s.regimes.map(r => [v.sets.length > 1 ? (r.set ? 'agité' : 'calme') : 'unique', r.dir > 0 ? 'long' : 'short', String(r.n), pct(r.win, 0), pct(r.mean, 2), num(r.sumLog)]))
   L.push(`Entrées au hasard (${s.random.draws} tirages, mêmes sorties, ${s.random.trades} trades en médiane) : Sharpe médian ${num(s.random.median)}, 95e centile ${num(s.random.p95)} ; la stratégie en bat ${pct(s.random.beaten, 0)}.`, '')
@@ -441,7 +576,7 @@ for (const v of VERSIONS) {
     ...s.shifts.filter(x => x.k > 0).map(x => [`+${x.k} bougie${x.k > 1 ? 's' : ''}`, num(x.s.sharpe), num(x.s.pf), String(x.s.trades), pct(x.s.meanTrade, 3), pct(x.s.meanTrade / x1.meanTrade, 0)]),
   ])
 }
-const out = `research/reports/shock-15m-zeroshot-${ASSET}`
+const out = `research/reports/shock-15m-zeroshot-${ASSET}${SEASONAL ? '-seasonal' : ''}`
 writeFileSync(`${out}.md`, L.join('\n'))
 writeFileSync(`${out}.json`, JSON.stringify({ asset: ASSET, label: A.label, period: [iso(lo), iso(end)], years, data: { bars: end - lo + 1, gaps: nGap, zeroVol, sd15: sdIn }, verdict, events, strategy: strat, buyHold: bh }, (_, v) => (typeof v === 'number' && !Number.isFinite(v) ? null : v)))
 process.stderr.write(`écrit ${out}.md et ${out}.json en ${((Date.now() - t0) / 1000).toFixed(0)} s\n`)
