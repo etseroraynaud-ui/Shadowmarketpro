@@ -72,6 +72,15 @@ publier si un contrôle est en échec) :
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/publish-portfolio.ts
 ```
 
+Étude pré-enregistrée de l'entrée des shorts (plan : `research/preregistration/short-entry-v1.1.md`,
+commité avant tout calcul ; rapport dans `research/reports/short-entry-study/`). Les variantes sont
+des masques sur la liste des entrées short ; la v1 n'est pas modifiée. Données des 8 actifs vierges
+(XRP, BNB, DOGE, TRX, ADA, LINK, XLM, LTC) : `python3 research/data/fetch-binance.py XRPUSDT 2017-07 2026-09`.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/short-entry-study.ts
+```
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 
