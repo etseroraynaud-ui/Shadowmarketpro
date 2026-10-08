@@ -2,7 +2,10 @@
 // le préréglage est-il sur un plateau (ses voisins font à peu près aussi bien) ou sur un pic isolé
 // (le moindre écart le dégrade nettement) ? Aucun nouveau réglage n'est choisi ni proposé.
 //
-//   node research/shock/robustness-local.ts [--n 300] [--n-ext 100] [--seed 7] [--workers 4]
+//   node research/shock/robustness-local.ts [--asset btc|ethusdt] [--n 300] [--n-ext 100] [--seed 7] [--workers 4]
+//
+// --asset : BTC (Bitstamp, par défaut) ou un autre actif lu dans research/data/<actif>_15m.csv.gz
+// (bougies 15 min, timestamp ms, open, high, low, close, volume), avec le même préréglage.
 //
 // Méthode :
 // 1. Réglages perturbés : ceux que le préréglage fixe (choisis par optimisation) et que le moteur
@@ -16,7 +19,7 @@
 // 3. Un réglage à la fois : ±5, ±10, ±20 % sur chaque réglage, les autres inchangés.
 // 4. Cartes : grilles 9 × 9 (−20 % à +20 %, pas de 5 %) sur des paires choisies a priori : seuil
 //    du choc, fenêtre de volatilité, stop, stop suiveur.
-// Chaque configuration est une seule simulation 2017-01-01 → fin des données, régime de
+// Chaque configuration est une seule simulation du début de la période à la fin des données, régime de
 // volatilité recalculé en ligne comme dans le bot ; les métriques sont ensuite découpées par
 // sous-période (le capital de départ d'une sous-période est celui atteint à son début).
 
@@ -24,32 +27,53 @@ import { Worker, isMainThread, parentPort } from 'node:worker_threads'
 import { fileURLToPath } from 'node:url'
 import { writeFileSync } from 'node:fs'
 import { cpus } from 'node:os'
+import { readFileSync } from 'node:fs'
+import { gunzipSync } from 'node:zlib'
 import { loadBtc } from '../lib/data.ts'
+import type { Bars } from '../../lib/backtest/types.ts'
 import { metricsOf, pct, num } from '../lib/stats.ts'
 import { resample, sliceBars } from '../../lib/backtest/data.ts'
 import { adaptivePreset, marketFor, selectFor } from '../../lib/strategies/shock/live.ts'
 import { simulate } from '../../lib/strategies/shock/engine.ts'
 import type { Costs, ShockParams } from '../../lib/strategies/shock/params.ts'
 
-const COSTS: Costs = { capital: 10000, qtyPct: 100, commissionPct: 0.045, slippageTicks: 0, slippagePct: 0, mintick: 1, leverage: 1, maintenancePct: 0.5, fundingPct: 0 }
-const SPLITS: [string, string, string | null][] = [
-  ['2017–2026', '2017-01-01', null],
-  ['2017–2018', '2017-01-01', '2019-01-01'],
-  ['2019–2020', '2019-01-01', '2021-01-01'],
-  ['2021–2022', '2021-01-01', '2023-01-01'],
-  ['2023–2024', '2023-01-01', '2025-01-01'],
-  ['2025–2026', '2025-01-01', null],
-]
+// Actif (lu aussi par les workers, qui reçoivent les mêmes arguments).
+const ARGV = process.argv.slice(2)
+const ASSET = (() => { const i = ARGV.indexOf('--asset'); return i >= 0 ? ARGV[i + 1] : 'btc' })()
+interface AssetCfg { label: string; mintick: number; warm: string; splits: [string, string, string | null][] }
+const ASSETS: Record<string, AssetCfg> = {
+  btc: {
+    label: 'BTC/USD Bitstamp', mintick: 1, warm: '2016-01-01',
+    splits: [['2017–2026', '2017-01-01', null], ['2017–2018', '2017-01-01', '2019-01-01'], ['2019–2020', '2019-01-01', '2021-01-01'], ['2021–2022', '2021-01-01', '2023-01-01'], ['2023–2024', '2023-01-01', '2025-01-01'], ['2025–2026', '2025-01-01', null]],
+  },
+  ethusdt: {
+    label: 'ETH/USDT Binance', mintick: 0.01, warm: '2017-08-17',
+    splits: [['2018–2026', '2018-09-01', null], ['2018–2020', '2018-09-01', '2021-01-01'], ['2021–2022', '2021-01-01', '2023-01-01'], ['2023–2024', '2023-01-01', '2025-01-01'], ['2025–2026', '2025-01-01', null]],
+  },
+}
+const AC = ASSETS[ASSET]
+if (!AC) throw new Error(`actif inconnu : ${ASSET}`)
+const COSTS: Costs = { capital: 10000, qtyPct: 100, commissionPct: 0.045, slippageTicks: 0, slippagePct: 0, mintick: AC.mintick, leverage: 1, maintenancePct: 0.5, fundingPct: 0 }
+const SPLITS = AC.splits
+const FULL = SPLITS[0][0]
+const SUFFIX = ASSET === 'btc' ? '' : `-${ASSET}`
+
+function loadCsv(path: string): Bars {
+  const lines = gunzipSync(readFileSync(path)).toString('latin1').split('\n')
+  const rows = lines.filter(x => /^\d/.test(x)).map(x => x.split(',').map(Number))
+  const col = (k: number) => Float64Array.from(rows, r => r[k])
+  return { n: rows.length, t: col(0), o: col(1), h: col(2), l: col(3), c: col(4), v: col(5) }
+}
 // Métriques gardées par sous-période, dans cet ordre.
 const MET = ['ret', 'cagr', 'sharpe', 'sortino', 'pf', 'dd', 'trades'] as const
 type Pack = number[]
 
 function setup() {
-  const all = loadBtc(15)
-  const bars = sliceBars(all, Date.parse('2016-01-01'), all.t[all.n - 1])
-  const daily = resample(loadBtc(60), 86400000)
-  const m = marketFor(bars, 15, 1)
-  const preset = adaptivePreset(15, 1)
+  const all = ASSET === 'btc' ? loadBtc(15) : loadCsv(`research/data/${ASSET}_15m.csv.gz`)
+  const bars = sliceBars(all, Date.parse(AC.warm), all.t[all.n - 1])
+  const daily = ASSET === 'btc' ? resample(loadBtc(60), 86400000) : resample(bars, 86400000)
+  const m = marketFor(bars, 15, AC.mintick)
+  const preset = adaptivePreset(15, AC.mintick)
   const { select } = selectFor(preset, m, daily)
   const idxAt = (t: number) => { let lo = 0, hi = bars.n; while (lo < hi) { const md = (lo + hi) >> 1; if (bars.t[md] < t) lo = md + 1; else hi = md } return lo }
   const wins = SPLITS.map(([, a, b]) => [idxAt(Date.parse(a)), b ? idxAt(Date.parse(b)) - 1 : bars.n - 1] as [number, number])
@@ -122,7 +146,7 @@ const KNOBS: Knob[] = [
   knob(0, 'tp1AtrMult', 'real', 'inactive', 0.05, Infinity, 'TP1 coupé en régime calme (useTP1 = false)'),
   knob(0, 'tp1QtyPct', 'int', 'inactive', 1, 100, 'TP1 coupé en régime calme (useTP1 = false)'),
 ]
-const PRESET = adaptivePreset(15, 1)
+const PRESET = adaptivePreset(15, AC.mintick)
 const valueOf = (k: Knob) => PRESET.sets[k.reg][k.key] as number
 const knobName = (k: Knob) => `${REG[k.reg]} · ${k.key}`
 /** Valeur lisible : 4 chiffres significatifs au plus (0.32000000000000006 → 0.32). */
@@ -189,7 +213,7 @@ async function runAll(jobs: Job[], workers: number): Promise<Map<string, Res>> {
   let next = 0
   return new Promise((resolve, reject) => {
     for (let k = 0; k < Math.min(workers, jobs.length); k++) {
-      const wk = new Worker(fileURLToPath(import.meta.url), { execArgv: ['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON'] })
+      const wk = new Worker(fileURLToPath(import.meta.url), { execArgv: ['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON'], argv: ARGV })
       wk.on('error', reject)
       wk.on('message', (msg: Res | { ready: true }) => {
         if ('key' in msg) {
@@ -293,7 +317,7 @@ async function main() {
   }
   const D = (family: string, L: number, w: number) => dists.find(d => d.family === family && d.level === L && d.win === w)!
 
-  // Sensibilité : corrélation de rang entre l'écart de chaque réglage et le Sharpe 2017–2026 (±20 %).
+  // Sensibilité : corrélation de rang entre l'écart de chaque réglage et le Sharpe sur toute la période (±20 %).
   const s20 = samples.filter(s => s.family === 'preset' && s.level === 0.2)
   const sens = presetKnobs.map((k, i) => ({
     knob: knobName(k),
@@ -309,7 +333,7 @@ async function main() {
     return { knob: knobName(k), family: k.family, why: k.why ?? null, values: OAT.map(d => +show(moved(k, d))), sharpe: runs.map(r => r[0][2]), w: runs, noEffect: runs.every(r => same(r, P.w)) }
   })
 
-  // Cartes : métriques 2017–2026 et Sharpe par sous-période.
+  // Cartes : métriques sur toute la période et Sharpe par sous-période.
   const mapOut = PAIRS.map(([a, b], p) => {
     const cells = maps[p].map(row => row.map(get))
     const sh = cells.map(row => row.map(c => c[0][2]))
@@ -353,11 +377,11 @@ async function main() {
   lines.push(
     '# Robustesse locale du préréglage · Shock Engine 15 min',
     '',
-    `BTC/USD Bitstamp 15 min, ${firstDay} → ${lastDay}, préréglage du bot (adaptatif volatilité, régime recalculé en ligne comme en réel), commission 0,045 % par ordre, sans levier. Produit par \`node research/shock/robustness-local.ts --n ${N} --n-ext ${NEXT} --seed ${SEED}\` (${jobs.size} simulations).`,
+    `${AC.label} 15 min, ${firstDay} → ${lastDay}, préréglage du bot (adaptatif volatilité, régime recalculé en ligne comme en réel), commission 0,045 % par ordre, sans levier. Produit par \`node research/shock/robustness-local.ts${ASSET === 'btc' ? '' : ` --asset ${ASSET}`} --n ${N} --n-ext ${NEXT} --seed ${SEED}\` (${jobs.size} simulations).`,
     '',
     '**But : mesurer la robustesse du préréglage actuel, pas en choisir un autre.** Aucune configuration voisine n\'est retenue ni proposée, même quand elle fait mieux.',
     '',
-    '**Limite à garder en tête** : le préréglage a été choisi sur tout 2017–2026. Ce test dit si ce choix est un point stable ou un réglage chanceux au milieu de voisins médiocres ; il ne remplace pas le walk-forward (rien ici n\'est hors échantillon).',
+    ASSET === 'btc' ? '**Limite à garder en tête** : le préréglage a été choisi sur tout 2017–2026. Ce test dit si ce choix est un point stable ou un réglage chanceux au milieu de voisins médiocres ; il ne remplace pas le walk-forward (rien ici n\'est hors échantillon).' : `**Le préréglage a été choisi sur BTC, jamais sur cet actif** : ce test dit si, transposé tel quel, il tombe sur un plateau de ${AC.label.split(' ')[0]} ou sur un pic isolé.`,
     '',
     '## En bref',
     '',
@@ -380,7 +404,7 @@ async function main() {
   table(['régime', 'réglage', 'valeur', 'pourquoi', 'vérifié sans effet'], KNOBS.filter(k => k.family === 'inactive').map(k => [REG[k.reg], `\`${k.key}\``, show(valueOf(k)), k.why!, oatRows[KNOBS.indexOf(k)].noEffect ? 'oui' : '**non**']))
   lines.push('Restent fixes aussi les choix de structure : sens autorisés, TP1 et micro-chocs activés ou non, mode High Activity, filtre 60 min, sortie sur signal inverse.', '')
 
-  lines.push('## Voisins aléatoires · 2017–2026', '', 'Rang : part des voisins que le préréglage bat (Max DD : moins profond). Autour de 50 % : le préréglage est au milieu de ses voisins (plateau) ; proche de 100 % : il est au sommet d\'un pic.', '')
+  lines.push(`## Voisins aléatoires · ${FULL}`, '', 'Rang : part des voisins que le préréglage bat (Max DD : moins profond). Autour de 50 % : le préréglage est au milieu de ses voisins (plateau) ; proche de 100 % : il est au sommet d\'un pic.', '')
   for (const lv of LEVELS) {
     const d = D('preset', lv, 0)
     lines.push(`### ${L(lv)} · ${d.n} voisins`, '')
@@ -405,16 +429,16 @@ async function main() {
     return [SPLITS[w][0], pct(d.preset.dd), `${pct(d.q.dd[2])} (${pct(d.q.dd[0])})`, num(d.preset.pf), `${num(d.q.pf[2])} (${num(d.q.pf[0])})`, d.preset.trades.toFixed(0), d.q.trades[2].toFixed(0)]
   }))
 
-  lines.push('## Un réglage à la fois · Sharpe 2017–2026', '', `Les autres réglages restent ceux du préréglage (Sharpe ${num(P.w[0][2])}).`, '')
+  lines.push(`## Un réglage à la fois · Sharpe ${FULL}`, '', `Les autres réglages restent ceux du préréglage (Sharpe ${num(P.w[0][2])}).`, '')
   table(['régime · réglage', ...OAT.map(d => `${d > 0 ? '+' : '−'}${Math.abs(d * 100)} %`), 'pire écart'], oatRows.filter(r => r.family !== 'inactive').map(r => {
     const worst = Math.min(...r.sharpe) - P.w[0][2]
     return [r.knob, ...r.sharpe.map((s, i) => `${num(s)} (${show(r.values[i])})`), r.noEffect ? 'aucun effet' : num(worst)]
   }))
 
-  lines.push('## Quels réglages comptent · voisins à ±20 %', '', 'Corrélation de rang (Spearman) entre l\'écart de chaque réglage et le résultat 2017–2026, sur les voisins aléatoires à ±20 %. Positive : augmenter le réglage améliore le résultat. Proche de 0 : le réglage ne pèse presque pas dans cette zone.', '')
+  lines.push('## Quels réglages comptent · voisins à ±20 %', '', 'Corrélation de rang (Spearman) entre l\'écart de chaque réglage et le résultat sur toute la période, sur les voisins aléatoires à ±20 %. Positive : augmenter le réglage améliore le résultat. Proche de 0 : le réglage ne pèse presque pas dans cette zone.', '')
   table(['régime · réglage', 'Sharpe', 'CAGR', 'Max DD'], sens.map(s => [s.knob, num(s.sharpe), num(s.cagr), num(s.dd)]))
 
-  lines.push('## Cartes · Sharpe 2017–2026', '', 'Grilles 9 × 9 de −20 % à +20 % (pas de 5 %), les autres réglages au préréglage. Le préréglage est au centre, entre crochets.', '')
+  lines.push(`## Cartes · Sharpe ${FULL}`, '', 'Grilles 9 × 9 de −20 % à +20 % (pas de 5 %), les autres réglages au préréglage. Le préréglage est au centre, entre crochets.', '')
   for (const mp of mapOut) {
     lines.push(`### ${mp.y} (lignes) × ${mp.x} (colonnes)`, '')
     lines.push(`Cases à au moins 90 % du Sharpe du préréglage : ${pct(mp.within90, 0)} · le préréglage bat ${pct(mp.centerRank, 0)} des autres cases · anneau ±10 % : médiane ${num(mp.inner.median)}, minimum ${num(mp.inner.min)}.`, '')
@@ -427,11 +451,11 @@ async function main() {
     '- Une configuration = une simulation complète du moteur (mêmes fonctions que le backtest et le bot), régime calme ou agité choisi chaque jour à partir des seuls jours clos, comme en réel. Seuls les réglages changent.',
     '- Les sous-périodes découpent cette même simulation : elles héritent de la position et du capital en cours au 1er janvier.',
     '- Sharpe et Sortino : rendements par bougie de 15 min, annualisés. CAGR et Max DD : sur la courbe de capital. Profit factor plafonné à 99 quand il n\'y a aucune perte.',
-    `- Tirages reproductibles (graine ${SEED}). Données complètes (chaque configuration, chaque sous-période) dans \`shock-15m-robustness-local.json\`.`,
+    `- Tirages reproductibles (graine ${SEED}). Données complètes (chaque configuration, chaque sous-période) dans \`shock-15m-robustness-local${SUFFIX}.json\`.`,
     '',
   )
 
-  const base = 'research/reports/shock-15m-robustness-local'
+  const base = `research/reports/shock-15m-robustness-local${SUFFIX}`
   writeFileSync(`${base}.md`, lines.join('\n'))
   const clean = (x: unknown): unknown => JSON.parse(JSON.stringify(x, (_, v) => (typeof v === 'number' && !Number.isFinite(v) ? null : v)))
   writeFileSync(`${base}.json`, JSON.stringify(clean({
