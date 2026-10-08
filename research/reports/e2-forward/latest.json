@@ -1,0 +1,167 @@
+{
+ "preregistration": "research/preregistration/e2-forward.md",
+ "commit": "f59ee70aaea48483d43b5248ff7990475f28dfbc",
+ "sourcesClean": true,
+ "generatedAt": "2026-10-08T23:28:47.541Z",
+ "cutoff": "2026-10-01",
+ "start": "2026-10-12",
+ "status": "en cours",
+ "reverse": false,
+ "lookNow": null,
+ "looks": [],
+ "forward": {
+  "n1": 0,
+  "n0": 0,
+  "m1": null,
+  "m0": null,
+  "d": null,
+  "open": 0,
+  "byAsset": {
+   "BTC": {
+    "n1": 0,
+    "n0": 0,
+    "m1": null,
+    "m0": null,
+    "d": null
+   },
+   "ETH": {
+    "n1": 0,
+    "n0": 0,
+    "m1": null,
+    "m0": null,
+    "d": null
+   }
+  },
+  "trades": []
+ },
+ "challenger": [],
+ "history": {
+  "n1": 251,
+  "n0": 543,
+  "m1": 0.502572215653,
+  "m0": 0.0798017362976,
+  "d": 0.422770479355,
+  "ci90": [
+   0.103351561932,
+   0.835608312785
+  ],
+  "byAsset": {
+   "BTC": {
+    "n1": 143,
+    "n0": 287,
+    "m1": 0.442372841375,
+    "m0": 0.135128678169,
+    "d": 0.307244163207
+   },
+   "ETH": {
+    "n1": 108,
+    "n0": 256,
+    "m1": 0.582280646409,
+    "m0": 0.0177750475592,
+    "d": 0.56450559885
+   }
+  }
+ },
+ "data": {
+  "BTC": {
+   "lastBar": "2026-09-30T23:45:00.000Z",
+   "fileLastBar": "2026-10-04T02:45:00.000Z"
+  },
+  "ETH": {
+   "lastBar": "2026-09-30T23:45:00.000Z",
+   "fileLastBar": "2026-09-30T23:45:00.000Z"
+  }
+ },
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "b69ad8f8f89a4ded"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "fafb22d6373b19bf"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "bad42836b9d61569"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "15211a3e185b1214"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/params.ts",
+   "ok": true,
+   "detail": "5f7cd0c941d70273"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/presets.ts",
+   "ok": true,
+   "detail": "f97449733ec945bb"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/regimes.ts",
+   "ok": true,
+   "detail": "d72f79d1d97c214d"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/live.ts",
+   "ok": true,
+   "detail": "05caf82ece9ad7f8"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "be445aa726433c3e"
+  },
+  {
+   "name": "initialisation : coupure au plus tôt le 2026-10-01",
+   "ok": true,
+   "detail": "coupure 2026-10-01"
+  },
+  {
+   "name": "BTC : horodatages sur la grille 15 min, croissants",
+   "ok": true,
+   "detail": "341641 barres jusqu'au 2026-09-30T23:45:00.000Z, 33 trous"
+  },
+  {
+   "name": "BTC : régime recalculé = régime du moteur",
+   "ok": true,
+   "detail": "0 écart(s) sur 377044 barres"
+  },
+  {
+   "name": "ETH : horodatages sur la grille 15 min, croissants",
+   "ok": true,
+   "detail": "283081 barres jusqu'au 2026-09-30T23:45:00.000Z, 23 trous"
+  },
+  {
+   "name": "ETH : régime recalculé = régime du moteur",
+   "ok": true,
+   "detail": "0 écart(s) sur 319294 barres"
+  },
+  {
+   "name": "initialisation : pas d'instantané existant",
+   "ok": true,
+   "detail": "baseline.json et state.json absents"
+  },
+  {
+   "name": "base historique : trades de la v1 fermés avant le 2026-10-01 identiques à l'instantané",
+   "ok": true,
+   "detail": "1967 trades, a69ca1e1b45f8158 (instantané a69ca1e1b45f8158, 1967 trades)"
+  },
+  {
+   "name": "σ journalière définie pour chaque short",
+   "ok": true,
+   "detail": "0 shorts forward, 794 shorts historiques"
+  },
+  {
+   "name": "E2 sans look-ahead : recalculé sur l'historique coupé à la barre = valeur utilisée",
+   "ok": true,
+   "detail": "200 barres (100 tirées au hasard par actif + 0 entrées de shorts forward), 0 écart(s)"
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+{
+ "cut": "2026-10-01T00:00:00.000Z",
+ "takenAt": "2026-10-08T23:28:44.800Z",
+ "trades": 1967,
+ "perAsset": {
+  "BTC": 1050,
+  "ETH": 917
+ },
+ "sha256": "a69ca1e1b45f8158a31fd14b9ff1189684cb370a2aec1211acc2e0e138851b27",
+ "rule": "trades de la v1 (BTC, ETH) fermés par une vraie sortie, barre de sortie close avant le 2026-10-01 ; lignes : actif, sens, entrée, sortie (ms UTC, ouverture de bougie), prix d'entrée, prix de sortie, PnL"
+}
