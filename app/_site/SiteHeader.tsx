@@ -1,18 +1,18 @@
 'use client'
 
-// En-tête commun : logo, cinq entrées (le Shock Engine d'abord, les outils de trading à part),
-// appel vers la recherche, menu sur mobile.
+// En-tête commun : logo, quatre entrées (le Shock Engine d'abord), menu sur mobile.
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { LogoSVG } from '../components/Logo'
 
+// Performance et Research ne sont pas dans le menu : on y accède depuis la page Shock Engine, dont
+// l'onglet reste actif sur ces pages.
 const LINKS: { href: string; label: string; match?: (p: string) => boolean }[] = [
-  { href: '/shock-engine', label: 'Shock Engine', match: p => p === '/shock-engine' },
-  { href: '/shock-engine/portfolio', label: 'Performance' },
-  { href: '/research', label: 'Research' },
-  { href: '/trading-tools', label: 'Trading Tools', match: p => p === '/trading-tools' || p.startsWith('/backtest') },
+  { href: '/shock-engine', label: 'Shock Engine', match: p => p.startsWith('/shock-engine') || p.startsWith('/research') },
+  { href: '/backtest', label: 'Backtest' },
+  { href: '/trading-tools', label: 'Trading Tools' },
   { href: '/institutional', label: 'Institutional' },
 ]
 
@@ -37,7 +37,6 @@ export default function SiteHeader() {
         </Link>
         <nav className="s-nav" aria-label="Main">
           {LINKS.map(l => <Link key={l.href} href={l.href} className={active(l) ? 's-active' : undefined} aria-current={active(l) ? 'page' : undefined}>{l.label}</Link>)}
-          <Link href="/research" className="s-btn s-btn-ghost s-header-cta">View Research</Link>
         </nav>
         <button type="button" className="s-menu-btn" aria-expanded={open} aria-controls="s-mobile-nav" onClick={() => setOpen(v => !v)}>
           <span className="s-sr">Menu</span>
