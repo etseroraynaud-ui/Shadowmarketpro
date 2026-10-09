@@ -4,7 +4,7 @@ import SiteHeader from './_site/SiteHeader'
 import HeroChart from './_site/HeroChart'
 import { CountUp, SeriesPanel } from './_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Section, SimNote, SiteFooter, StatusList } from './_site/ui'
-import { BH, BH_NAME, COLORS, DOWNLOADS, P, SIM, TESTNET_SINCE, sample, sampleStart, series, verdictOf } from './_site/data'
+import { BH, BH_NAME, COLORS, DOWNLOADS, P, PAPER, SIM, TESTNET_SINCE, sample, sampleStart, series, verdictOf } from './_site/data'
 import { int, num, pct } from './_site/format'
 
 const STEP = 3
@@ -135,7 +135,7 @@ export default function HomePage() {
 
         <CtaBand title="Read the research" actions={<>
           <Link href="/research" className="s-btn s-btn-primary">View Research <Arrow /></Link>
-          <a href={`${DOWNLOADS}/btc-eth-portfolio.html`} className="s-btn s-btn-ghost">Download Research Report</a>
+          <a href={`${DOWNLOADS}/${PAPER}`} className="s-btn s-btn-ghost" download>Download Research Paper (PDF)</a>
         </>}>Methods, verdicts, failed markets, and every file needed to check the figures.</CtaBand>
 
         <Disclaimer />

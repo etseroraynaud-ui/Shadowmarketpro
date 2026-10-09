@@ -4,7 +4,8 @@
 // v1 restent dans research/reports/btc-eth-portfolio/ et ne sont plus publiés.
 // - lib/research/btc-eth-portfolio.json : résumé et séries des graphiques, lus par les pages
 //   /, /shock-engine, /shock-engine/portfolio, /research et /institutional ;
-// - public/research/btc-eth-portfolio/ : rapport complet, CSV, résumé JSON et manifeste à télécharger.
+// - public/research/btc-eth-portfolio/ : papier de recherche (PDF, research/paper/build-paper.ts),
+//   rapport complet, CSV, résumé JSON et manifeste à télécharger.
 //
 //   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/publish-portfolio.ts
 //
@@ -34,6 +35,20 @@ const csv = (f: string) => {
   const cols = head.split(',')
   return rows.map(r => Object.fromEntries(r.split(',').map((v, i) => [cols[i], i === 0 ? v : v === '' ? null : +v]))) as Record<string, number | string | null>[]
 }
+// Fichiers publiés au téléchargement : ceux du rapport du portefeuille, et le papier de recherche
+// composé par research/paper/build-paper.ts à partir des résultats déjà publiés (à relancer avant).
+const DOWNLOADS: { file: string; label: string; from?: string }[] = [
+  { file: 'shock-engine-research-paper.pdf', label: 'Research paper (PDF)', from: 'research/reports/paper' },
+  { file: 'btc-eth-portfolio.html', label: 'Full research report (HTML)' },
+  { file: 'portfolio_daily_returns.csv', label: 'Daily returns and equity (CSV)' },
+  { file: 'portfolio_monthly_returns.csv', label: 'Monthly returns (CSV)' },
+  { file: 'portfolio_annual_returns.csv', label: 'Annual returns (CSV)' },
+  { file: 'portfolio_drawdowns.csv', label: 'Drawdown episodes (CSV)' },
+  { file: 'portfolio_correlation_rolling.csv', label: 'Rolling correlations (CSV)' },
+  { file: 'portfolio_summary.json', label: 'Machine-readable summary (JSON)' },
+  { file: 'shock-engine-manifest.json', label: 'Research manifest: versions and hashes (JSON)' },
+]
+
 const daily = csv('portfolio_daily_returns.csv')
 const rolling = csv('portfolio_correlation_rolling.csv')
 const r4 = (x: number | string | null) => (typeof x === 'number' && Number.isFinite(x) ? +x.toPrecision(5) : null)
@@ -138,23 +153,14 @@ const out = {
   },
   buyHold,
   falsification, forward, residualAlpha,
-  downloads: [
-    { file: 'btc-eth-portfolio.html', label: 'Full research report (HTML)' },
-    { file: 'portfolio_daily_returns.csv', label: 'Daily returns and equity (CSV)' },
-    { file: 'portfolio_monthly_returns.csv', label: 'Monthly returns (CSV)' },
-    { file: 'portfolio_annual_returns.csv', label: 'Annual returns (CSV)' },
-    { file: 'portfolio_drawdowns.csv', label: 'Drawdown episodes (CSV)' },
-    { file: 'portfolio_correlation_rolling.csv', label: 'Rolling correlations (CSV)' },
-    { file: 'portfolio_summary.json', label: 'Machine-readable summary (JSON)' },
-    { file: 'shock-engine-manifest.json', label: 'Research manifest: versions and hashes (JSON)' },
-  ],
+  downloads: DOWNLOADS.map(({ file, label }) => ({ file, label })),
 }
 
 mkdirSync(PUB, { recursive: true })
 mkdirSync(LIB, { recursive: true })
 // Le dossier public ne garde que les fichiers publiés ici (les copies retirées restent dans research/reports).
-const keep = new Set(out.downloads.map(d => d.file))
+const keep = new Set(DOWNLOADS.map(d => d.file))
 for (const f of readdirSync(PUB)) if (!keep.has(f)) { unlinkSync(join(PUB, f)); process.stderr.write(`retiré du dossier public : ${f}\n`) }
-for (const d of out.downloads) copyFileSync(join(SRC, d.file), join(PUB, d.file))
+for (const d of DOWNLOADS) copyFileSync(join(d.from ? join(ROOT, d.from) : SRC, d.file), join(PUB, d.file))
 writeFileSync(join(LIB, 'btc-eth-portfolio.json'), JSON.stringify(out))
 process.stderr.write(`écrit lib/research/btc-eth-portfolio.json et ${out.downloads.length} fichiers dans public/research/btc-eth-portfolio\n`)

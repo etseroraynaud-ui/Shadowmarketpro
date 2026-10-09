@@ -1,0 +1,369 @@
+% Shock Engine research paper. Template filled by research/paper/build-paper.ts from the published
+% research files: every figure in this document is read from them, none is typed by hand.
+% Placeholders are upper-case names between double at-signs (values, tables and figures).
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.5cm,headheight=14pt]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,threeparttable,makecell}
+\usepackage[table]{xcolor}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{fillbetween}
+\usepackage[font=small,labelfont=bf,margin=0pt]{caption}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage[authoryear,round]{natbib}
+\usepackage[colorlinks=true,linkcolor=linkblue,citecolor=linkblue,urlcolor=linkblue,pdftitle={Shock Engine: Conditional Post-Shock Continuation in Bitcoin and Ether},pdfauthor={ShadowMarketPro Research}]{hyperref}
+
+\definecolor{linkblue}{RGB}{20,70,140}
+\definecolor{pfcol}{RGB}{0,140,110}
+\definecolor{btccol}{RGB}{40,100,190}
+\definecolor{ethcol}{RGB}{215,110,40}
+\definecolor{bhcol}{RGB}{120,120,120}
+\definecolor{negcol}{RGB}{190,50,50}
+
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\parskip}{3pt}
+\renewcommand{\arraystretch}{1.12}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape Shock Engine: conditional post-shock continuation}
+\fancyhead[R]{\small\itshape ShadowMarketPro Research}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\newcommand{\SR}{\mathrm{SR}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\1}{\mathbf{1}}
+
+\begin{document}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\vspace*{1.2cm}
+{\LARGE\bfseries Shock Engine: Conditional Post-Shock Continuation\\[4pt] in Bitcoin and Ether\par}
+\vspace{10pt}
+{\large Design, falsification and residual alpha of a systematic intraday strategy\par}
+\vspace{18pt}
+{\large ShadowMarketPro Research\par}
+\vspace{4pt}
+{\small Working paper v1.0 \textperiodcentered{} @@PAPER_DATE@@ \textperiodcentered{} specification E2 \textperiodcentered{} \texttt{@@VERSION@@}\par}
+\vspace{22pt}
+\begin{abstract}
+\noindent We study a systematic strategy that trades the continuation of abnormal 15-minute price moves in Bitcoin (BTC) and Ether (ETH). A position is opened when a return that is extreme relative to its local volatility breaks the recent range and is confirmed by higher-timeframe structure, candle quality, participation and a price-impact filter; risk is managed with volatility-scaled exits. Shock Engine is defined by its specification E2, the reference version studied here, in which the short side is a \emph{conditional mirror} of the long side: short entries reproduce the long logic in the opposite direction and are admitted only when the daily trend regime is bearish. The rules were calibrated on Bitcoin and applied unchanged to Ether. Over @@PERIOD_START@@ to @@PERIOD_END@@, a 50/50 BTC/ETH portfolio shows a Sharpe ratio of @@SR_PF@@, a compound annual growth rate of @@CAGR_PF@@ and a maximum drawdown of @@MDD_PF@@ after transaction costs, against @@SR_BH@@, @@CAGR_BH@@ and @@MDD_BH@@ for buy-and-hold. Random-entry placebos, delayed entries, parameter neighbourhoods, cross-asset transfer, a Monte Carlo falsification battery for the short-entry condition and a regression on six standard trend-following strategies (residual alpha of @@RA_ALPHA@@ a year, Newey--West $t=@@RA_T@@$) do not explain the result away. The evidence is nonetheless in-sample: the Bitcoin rules were selected on data covering the period, and the short-entry condition was specified after the period had been studied. We report the failures (Solana, gold, TAO; a walk-forward Sharpe of @@WF_SR@@) and pre-register a forward test.
+\end{abstract}
+\vspace{8pt}
+\noindent{\small\textbf{Keywords:} cryptocurrency, intraday momentum, time-series momentum, jumps, regime conditioning, backtest overfitting, pre-registration, residual alpha.\\
+\textbf{JEL:} G11, G12, G14, C12, C58.}
+
+\vfill
+\noindent{\footnotesize\textbf{Important.} All performance figures in this paper come from a historical simulation of fixed rules after modelled transaction costs. They are not live trading results. Simulated results have inherent limitations: they benefit from hindsight in the design of the rules and do not reflect the liquidity, slippage, funding and market impact of a real account. Past simulated performance does not predict future results. Nothing in this document is investment advice or an offer of any financial product or service.}
+\end{titlepage}
+
+\section{Introduction}
+
+Cryptocurrency markets trade continuously, are dominated by a small number of liquid perpetual and spot venues, and move in bursts. A large share of daily variance arrives in a few intraday intervals, often after news, liquidations or the release of resting liquidity. Two competing views predict what happens next. Under \emph{underreaction}, information is incorporated gradually and a large move is followed by drift in the same direction \citep{HongStein1999}. Under \emph{overreaction} or liquidity provision, the move is partly a temporary price concession that reverts. Which view dominates is an empirical question, and the answer may depend on the state of the market.
+
+This paper documents a rule-based strategy, \emph{Shock Engine}, built on the first view: it enters in the direction of an abnormal 15-minute move once the move has been qualified by a small set of filters, and exits through volatility-scaled risk management. Our contribution is less the rule itself than the way it is tested. We make five points.
+
+\begin{enumerate}[label=(\roman*)]
+\item The rules were set on Bitcoin and transferred \emph{without recalibration} to Ether, where they meet every pre-set criterion on two independent price feeds; they fail on Solana, gold and TAO, and we report these failures.
+\item Random-entry placebos with identical exits and one-bar entry delays show that the edge lies in the timing of entries rather than in market drift or in the shape of the exits.
+\item In specification E2, the reference version of Shock Engine, the short side is a \emph{conditional mirror} of the long side: short entries are allowed only in a bearish daily trend regime. Because this condition was specified after the sample had been studied, we subject it to three Monte Carlo falsification tests specified before they were run.
+\item A regression of the daily returns on buy-and-hold and on six standard trend-following strategies leaves @@RA_UNEXPL@@ of the average return unexplained, with a Newey--West $t$-statistic of @@RA_T@@.
+\item We pre-register a forward test of the short-entry condition with interim analyses, and run the strategy on Hyperliquid's test network so that its decisions are timestamped by a third party.
+\end{enumerate}
+
+The headline numbers are strong, which is precisely why they deserve suspicion. Throughout, we try to separate what the data can establish (the result is not a simple artefact of drift, exits, costs, a single parameter choice or a generic trend factor) from what it cannot (that the result will persist out of sample).
+
+\section{Related literature}
+
+\paragraph{Momentum and trend following.} Cross-sectional momentum in equities was documented by \citet{JegadeeshTitman1993}; \citet{MoskowitzOoiPedersen2012} show that an asset's own past return predicts its future return across futures markets (time-series momentum), and \citet{HurstOoiPedersen2017} extend the evidence over a century. Momentum payoffs are state dependent and can crash in rebounds after market declines \citep{DanielMoskowitz2016}, which motivates conditioning the short side on the state of the market rather than treating it as a symmetric copy of the long side. Simple trend rules based on moving averages and range breakouts were evaluated against bootstrap null models by \citet{BrockLakonishokLeBaron1992}; moving-average timing filters are popularised by \citet{Faber2007}.
+
+\paragraph{Intraday dynamics and jumps.} \citet{GaoHanLiZhou2018} show that the first half-hour return of the S\&P~500 ETF predicts its last half-hour return, a form of intraday momentum linked to late-informed and hedging flows. Our shock statistic standardises a short-horizon return by an estimate of local volatility, in the spirit of the nonparametric jump test of \citet{LeeMykland2008}. Jumps cluster in time: self-exciting point processes \citep{Hawkes1971} capture this clustering and its propagation across markets \citep{AitSahaliaCachoDiazLaeven2015}, and one of our filters measures the local intensity of shocks. Scaling exposure and exits with volatility relates to the volatility-managed portfolios of \citet{MoreiraMuir2017}.
+
+\paragraph{Cryptocurrency returns.} \citet{LiuTsyvinski2021} find that cryptocurrency returns load on crypto-specific factors, notably momentum and investor attention, rather than on traditional asset factors; \citet{LiuTsyvinskiWu2022} propose a three-factor model (market, size, momentum) for the cross-section of cryptocurrencies. Our strategy operates at a much shorter horizon, and Section~\ref{sec:alpha} measures how much of it a set of standard trend factors can span.
+
+\paragraph{Overfitting and inference.} Searching many rules on one history inflates in-sample performance. \citet{White2000} and \citet{Hansen2005} propose reality checks for data snooping; \citet{BaileyLopezdePrado2014} deflate the Sharpe ratio for the number of trials and non-normality; \citet{BaileyEtAl2017} estimate the probability of backtest overfitting; \citet{HarveyLiuZhu2016} argue for a $t$-statistic hurdle of about 3 for new factors. We use heteroskedasticity- and autocorrelation-consistent standard errors \citep{NeweyWest1987}, block bootstraps \citep{Kunsch1989,PolitisRomano1994}, the Sharpe-ratio standard error of \citet{Lo2002}, and pre-registration with interim analyses in the tradition of clinical trials \citep{Haybittle1971,PetoEtAl1976,NosekEtAl2018}.
+
+\section{Data and conventions}\label{sec:data}
+
+Bitcoin is BTC/USD on Bitstamp and Ether is ETH/USDT on Binance spot, both in 15-minute bars timestamped at the open in UTC. After a warm-up period, Bitcoin is simulated from January 2017 and Ether from September 2018. An independent Ether feed (ETH/USD, Dukascopy) is used for replication. The common period of the portfolio is @@PERIOD_START@@ to @@PERIOD_END@@ (@@DAYS@@ days, @@YEARS@@ years).
+
+Daily returns are close-to-close on UTC days, the close of a day being the close of its last 15-minute bar. Annualisation uses $\sqrt{365.25}$ and a zero risk-free rate. Every order pays a commission of 0.045\% of notional, the base taker fee of the intended execution venue. Slippage and perpetual funding are \emph{not} included in the headline figures; Section~\ref{sec:frictions} adds them. Each market trades 100\% of its own capital, one position at a time, without leverage.
+
+\section{The strategy}\label{sec:strategy}
+
+We describe the logic of the rules and the mathematics of their building blocks. Thresholds, window lengths, timeframes and exit multiples are proprietary and are not disclosed; none of the tests below depends on knowing them. The specification is called E2: it is the reference version of Shock Engine, the one reported on the public website, run on the test network and covered by the pre-registration of Section~\ref{sec:forward}.
+
+\subsection{Shock detection}
+
+Let $P_t$ be the close of 15-minute bar $t$, $O_t,H_t,L_t$ its open, high and low, and $r_t=\ln(P_t/P_{t-1})$. Rolling estimates of the mean $\hat\mu_t$ and standard deviation $\hat\sigma_t$ of $r$ over a trailing window give the standardised return
+\begin{equation}
+z_t=\frac{r_t-\hat\mu_t}{\hat\sigma_t},\qquad S_t=\1\{|z_t|>\kappa\}.
+\end{equation}
+An up-shock ($S_t=1$, $r_t>0$) is directional when the close also breaks the range of the preceding bars, $P_t>\max_{t-h\le s<t}H_s$; a down-shock is the mirror image. The standardisation makes the trigger adaptive: the same absolute move is a shock in a calm market and noise in an agitated one, as in local-volatility jump tests \citep{LeeMykland2008}.
+
+\subsection{Qualification}
+
+A directional shock becomes an entry only if the following filters agree.
+\begin{enumerate}[label=(\alph*)]
+\item \emph{Structure.} Price is on the side of a higher-timeframe moving average that corresponds to the trade; long entries also require the average to be rising.
+\item \emph{Candle quality.} The shock bar closes near its extreme with a small counter-direction wick, e.g.\ for a long $(H_t-\max(O_t,P_t))/(H_t-L_t)<\omega$, so that the move was not rejected within the bar.
+\item \emph{Participation.} Volume is abnormal relative to its own recent distribution, $(V_t-\bar V_t)/s_{V,t}>\nu$.
+\item \emph{Shock clustering.} The local intensity of shocks is estimated by an exponentially weighted average of past shock indicators,
+\begin{equation}
+\hat\lambda_t=(1-\eta)\,\hat\lambda_{t-1}+\eta\,S_t,
+\end{equation}
+and ranked against its own trailing distribution. Long entries require shocks to be clustering (a high percentile of $\hat\lambda_t$), the empirical signature of the self-exciting dynamics of jumps \citep{Hawkes1971,AitSahaliaCachoDiazLaeven2015}.
+\item \emph{Volatility state.} The average true range, standardised against its own recent history, must lie below a regime-specific level, so that entries depend on the volatility state that precedes the shock.
+\end{enumerate}
+A short cooling-off period follows each trade.
+
+\subsection{Volatility regimes}
+
+Daily realised volatility over a short window is ranked against its own trailing one-year distribution. The market is \emph{calm} below the median and \emph{agitated} above. Each regime has its own parameter set (shock threshold, filters, exits, and the directions it may trade), and the active set is read from the last closed day, so that the rule never uses information from the current day.
+
+\subsection{Exits and risk}
+
+At entry the strategy records the average true range $A$. The initial stop is placed at $P_{\text{entry}}\mp m_s A$. Depending on the regime, part of the position may be taken off at $P_{\text{entry}}\pm m_p A$ and the remainder protected by a stop that trails the best price by $m_r A$. A position is also closed when price crosses back through a moving reference price, or when a qualified shock occurs in the opposite direction (flip exit). Each market holds at most one position, sized to its capital, with no pyramiding, no averaging down and no leverage.
+
+\subsection{The short side: a conditional mirror}\label{sec:mirror}
+
+Short entries reproduce the long logic in the opposite direction: a down-shock that breaks the recent low, closes near its low, occurs below the higher-timeframe average and is accompanied by abnormal volume. The long side carries additional qualification (rising structure and shock clustering), which reflects the asymmetry of crypto markets, whose long-run drift has been strongly positive.
+
+In specification E2 the mirror is \emph{conditional} on the daily trend regime. With $D(t)$ the last UTC day closed before bar $t$, $P^{\mathrm{d}}_D$ the daily close, $\bar P^{(n)}_D$ a medium-term moving average of daily closes and $k$ a slope horizon in days,
+\begin{equation}
+T_t=\1\Big\{P^{\mathrm{d}}_{D(t)}<\bar P^{(n)}_{D(t)}\ \text{and}\ \bar P^{(n)}_{D(t)}<\bar P^{(n)}_{D(t)-k}\Big\},
+\qquad
+\text{Short}_t=\text{Mirror}_t\times T_t .
+\end{equation}
+Long entries, exits and the flip rule do not depend on $T_t$; the condition only decides whether a new short position may be opened. The economic motivation is the state dependence of momentum \citep{DanielMoskowitz2016}: selling a downside shock is a continuation trade in a falling market and a counter-trend trade in a rising one. Over the sample, @@SHORTS@@ of the @@TRADES@@ trades are shorts.
+
+\textbf{Disclosure.} An unconditional (symmetric) mirror was used while the strategy was developed. The trend condition that defines E2 was specified in October 2026, \emph{after} the period studied in this paper had been examined, so every historical figure in this paper is in-sample with respect to it. Section~\ref{sec:falsification} asks whether a condition of the same kind chosen at random would have done as well, and Section~\ref{sec:forward} tests it prospectively.
+
+\subsection{Portfolio}
+
+The portfolio allocates half of the capital to the Bitcoin strategy and half to the Ether strategy on the first day and never rebalances. Rebalancing monthly or weighting by risk changes the Sharpe ratio by at most @@REBAL_DIFF@@ and is not part of the specification.
+
+\section{Statistical framework}\label{sec:stats}
+
+\paragraph{Performance.} With daily returns $r_d$, mean $\bar r$ and population standard deviation $s$,
+\begin{equation}
+\SR=\sqrt{365.25}\,\frac{\bar r}{s},\qquad
+\text{Sortino}=\sqrt{365.25}\,\frac{\bar r}{\sqrt{\tfrac1N\sum_d \min(r_d,0)^2}},\qquad
+\text{MDD}=\min_t\Big(\frac{V_t}{\max_{s\le t}V_s}-1\Big),
+\end{equation}
+and the Calmar ratio is CAGR$/|$MDD$|$. The standard error of an estimated annual Sharpe ratio over $T$ years is approximately \citep{Lo2002}
+\begin{equation}\label{eq:lo}
+\widehat{\mathrm{SE}}(\widehat\SR)\approx\sqrt{\frac{1+\tfrac12\SR^2}{T}} .
+\end{equation}
+
+\paragraph{Risk-normalised trade returns.} To compare trades across volatility regimes and assets, trade $i$ with profit $\pi_i$, equity at entry $E_i$ and entry day $d_i$ is scored as
+\begin{equation}
+R_i=\frac{\pi_i/E_i}{\sigma_{d_i}},
+\end{equation}
+where $\sigma_{d}$ is the standard deviation of the 30 daily log returns before day $d$. For a set of short trades, $\mathrm{EV}=\overline{R}$, and the regime contrast is
+\begin{equation}
+\Delta=\overline{R}_{\,T=1}-\overline{R}_{\,T=0}.
+\end{equation}
+
+\paragraph{Monte Carlo inference.} For a statistic $\theta$ and $N$ counterfactual draws $\theta^*_j$, the one-sided Monte Carlo $p$-value is
+\begin{equation}
+p=\frac{1+\#\{j:\theta^*_j\ge\theta\}}{1+N}.
+\end{equation}
+
+\paragraph{Residual alpha.} Daily strategy returns are regressed on benchmark returns,
+\begin{equation}\label{eq:reg}
+r_t=\alpha+\sum_{k=1}^{K}\beta_k f_{k,t}+\varepsilon_t,
+\end{equation}
+by ordinary least squares, with the Newey--West covariance
+\begin{equation}
+\hat V=(X^\top X)^{-1}\Big[\hat\Gamma_0+\sum_{l=1}^{L}\Big(1-\frac{l}{L+1}\Big)\big(\hat\Gamma_l+\hat\Gamma_l^\top\big)\Big](X^\top X)^{-1},
+\qquad \hat\Gamma_l=\sum_{t=l+1}^{T}\hat\varepsilon_t\hat\varepsilon_{t-l}\,x_t x_{t-l}^\top,
+\end{equation}
+and lag $L=\lfloor4(T/100)^{2/9}\rfloor$. The residual information ratio is $\sqrt{365.25}\,\hat\alpha/\hat\sigma_\varepsilon$. A moving-block bootstrap draws calendar months with replacement, the same months for all series, so that cross-sectional dependence is preserved \citep{Kunsch1989}.
+
+\section{Results}\label{sec:results}
+
+\subsection{Headline performance}
+
+Table~\ref{tab:headline} reports the two markets, the portfolio and a buy-and-hold benchmark built in the same way (half of the capital in each coin on the first day, no rebalancing, no costs). Figure~\ref{fig:equity} shows the equity curves on a logarithmic scale.
+
+@@TABLE_HEADLINE@@
+
+@@FIGURE_EQUITY@@
+
+The return distribution is strongly right-skewed: the strategy is in the market @@TIME_IN_MARKET@@ of the time, wins @@WIN_RATE@@ of its trades, and its average winner is @@PAYOFF@@ times its average loser. The best 5\% of trades account for @@TOP5@@ of the portfolio's log growth; without them the CAGR would be @@CAGR_NO_TOP5@@. This is the profile of a convex, trend-capturing strategy, and it implies that the result is sensitive to whether a few large moves are captured.
+
+\subsection{Drawdowns and stability}
+
+@@FIGURE_DRAWDOWN@@
+
+The deepest portfolio drawdown is @@MDD_PF@@, against @@MDD_BH@@ for buy-and-hold (Figure~\ref{fig:dd}). Split in two halves, the portfolio Sharpe ratio is @@SR_H1@@ (@@H1_RANGE@@) and @@SR_H2@@ (@@H2_RANGE@@); the second half is weaker and the correlation between the two markets' strategy returns rises from @@CORR_H1@@ to @@CORR_H2@@. The rolling one-year Sharpe ratio (Figure~\ref{fig:rolling}) is positive in @@ROLL_POS@@ of windows and above one in @@ROLL_ABOVE1@@, with a minimum of @@ROLL_MIN@@. A month-block bootstrap of @@BOOT_N@@ resampled histories gives a 90\% interval of @@BOOT_SR_LO@@ to @@BOOT_SR_HI@@ for the Sharpe ratio; a bootstrap resamples history and is not a forecast. Calendar-year results are in Table~\ref{tab:annual}.
+
+@@FIGURE_ROLLING@@
+
+@@TABLE_ANNUAL@@
+
+\subsection{Diversification}
+
+Bitcoin and Ether prices are highly correlated (daily correlation @@CORR_SPOT@@), but the two strategies much less (@@CORR_STRAT@@): each is out of the market most of the time and their trades rarely coincide. The portfolio Sharpe ratio exceeds that of either market alone. In seven named market stress episodes defined from spot prices only, the portfolio was positive in @@CRISIS_POS@@.
+
+\subsection{Frictions}\label{sec:frictions}
+
+@@TABLE_FRICTIONS@@
+
+Turnover is high, about @@TURNOVER@@ times the capital a year, so costs matter. Doubling commissions, which is equivalent to adding 0.045\% of slippage on every fill, lowers the Sharpe ratio to @@SR_COST2@@. Historical perpetual funding, with the correct sign for long and short positions, lowers it to @@SR_FUNDING@@ (Table~\ref{tab:frictions}). Capacity and market impact are not modelled: the strategy enters precisely when liquidity is thinnest, which is the first thing a larger account would pay for.
+
+\section{Robustness}\label{sec:robustness}
+
+\subsection{Placebos, delays and transfer across markets}
+
+For each market we fix pass/fail criteria before the result is seen: a positive event study of the signals and of shocks in the direction of the trend, a profit factor and a Sharpe ratio above preset levels, a rank above the 95th percentile of 200 random-entry runs that keep the exits identical, and a minimum share of the average trade retained when every entry is delayed by one bar. Table~\ref{tab:transfer} reports the result.
+
+@@TABLE_TRANSFER@@
+
+The random-entry placebo is the most informative test: with the exits held fixed, random entry times do much worse, so the edge is not a by-product of market drift or of the exit structure. Delaying every entry by one bar keeps most of the average trade, so the result does not depend on a perfect fill. Ether, never used for calibration, passes on two independent feeds. Solana, gold and TAO do not: the rules are not a universal law of markets, and we see no reason to hide it.
+
+\subsection{Parameter neighbourhoods}
+
+All parameters are perturbed together by up to $\pm5\%$, $\pm10\%$ and $\pm20\%$, with 300 random neighbours per level (Table~\ref{tab:neigh}). Every neighbour is profitable on both markets. On Bitcoin the chosen parameters sit at the top of their neighbourhood, as expected of rules selected on that data; on Ether they sit in the middle, a plateau rather than a peak.
+
+@@TABLE_NEIGH@@
+
+\subsection{Walk-forward}
+
+On Bitcoin, re-selecting the shock threshold, stop and trailing-stop settings of each regime every quarter on the previous 36 months only, choosing plateaus rather than isolated optima, over @@WF_WINDOWS@@ windows from 2020 to 2026, gives a Sharpe ratio of @@WF_SR@@ (15-minute returns), against @@WF_PRESET@@ for the fixed settings over the same windows. The strategy remains profitable out of sample, but clearly below the fixed preset: part of the headline performance is a selection effect, and the forward test of Section~\ref{sec:forward} is the right place to measure it.
+
+\section{Falsification of the short-entry condition}\label{sec:falsification}
+
+The conditional mirror was introduced after the sample had been studied, so its in-sample improvement is not evidence. We pre-registered three tests asking whether the historical advantage is exceptional relative to counterfactuals with comparable properties. The condition itself is frozen; no parameter was changed after the results.
+
+\paragraph{Test A: random selection.} Keep exactly as many of the original short trades as the condition keeps, chosen at random within each market and year, @@TA_DRAWS@@ times. The average risk-normalised return of the shorts actually kept ranks at the @@TA_EV_PCT@@ percentile of the draws ($p=@@TA_EV_P@@$); the portfolio Sharpe ratio at the @@TA_SR_PCT@@ percentile ($p=@@TA_SR_P@@$).
+
+\paragraph{Test B: shifted regimes.} Shift the bearish periods circularly in time, keeping their persistence and their share of time, with a minimum shift of @@TB_KMIN@@ days (@@TB_SHIFTS@@ shifts). The contrast $\Delta$ between shorts inside and outside the bearish regime is $@@TB_D@@$ with the real dates, larger than with @@TB_PCT@@ of the shifts ($p=@@TB_P@@$ for the portfolio, @@TB_P_BTC@@ for Bitcoin and @@TB_P_ETH@@ for Ether).
+
+\paragraph{Test C: synthetic markets.} Resample calendar blocks of 1, 3, 7, 14 and 30 days with replacement, the same blocks for both coins, rebuild synthetic 15-minute price paths, and recompute the engine, the regimes and the condition on each path (1,000 paths per block length). A generic effect of the condition would show up as a high probability of improvement on synthetic markets; an exceptional one as a historical improvement above the synthetic 95th percentile. Figure~\ref{fig:testc} shows the change in the average risk-normalised short return and Table~\ref{tab:testc} the details.
+
+@@FIGURE_TESTC@@
+
+\paragraph{Reading.} On synthetic markets the condition improves the average short in only about half of the paths, so its benefit to the quality of shorts is not mechanical; the historical improvement exceeds the synthetic 95th percentile at every block length. By contrast, the gains in Sharpe ratio and drawdown are largely generic: removing shorts outside bearish regimes improves drawdowns in most synthetic paths as well. These tests use the same history that was studied before the condition was specified; they measure how unusual the result is, not how it will behave.
+
+\section{Is it just trend following? Residual alpha}\label{sec:alpha}
+
+A natural objection is that a strategy entering in the direction of large moves is a repackaged trend follower. We regress the portfolio's daily returns on buy-and-hold Bitcoin and Ether and on six standard trend strategies whose parameters were fixed before the study: time-series momentum over 30, 90 and 180 days, a 55/20-day breakout, a 20/100-day moving-average crossover and a 24h/12h breakout on 15-minute bars (Appendix~\ref{app:bench}). The benchmarks use the same bars and commissions, positions decided at the close and applied to the next period. The pre-set verdict required $\hat\alpha>0$, a Newey--West $t\ge3$ \citep{HarveyLiuZhu2016} and fewer than 1\% of bootstrap histories with $\hat\alpha\le0$. Table~\ref{tab:alpha} reports three nested models, Table~\ref{tab:bench} the benchmarks on their own and Figure~\ref{fig:betas} the loadings of the pre-set model.
+
+@@TABLE_ALPHA@@
+
+@@FIGURE_BETAS@@
+
+The residual alpha is @@RA_ALPHA@@ a year with $t=@@RA_T@@$; no bootstrap history out of @@RA_BOOT_N@@ produced $\hat\alpha\le0$, and the 90\% interval is @@RA_CI_LO@@ to @@RA_CI_HI@@. The factors explain $R^2=@@RA_R2@@$ of the daily variance and leave @@RA_UNEXPL@@ of the average return unexplained. The largest loading is on the intraday breakout, which shares part of the timing of the strategy but loses money on its own after costs. Using 19 trend strategies at once, which deliberately favours the benchmarks, leaves the conclusion unchanged ($t=@@RA_T_GRID@@$). The verdict is ``residual alpha demonstrated, in-sample'': simple trend strategies do not reproduce the historical result. The regression cannot tell whether the alpha will persist.
+
+\section{Forward validation and live deployment}\label{sec:forward}
+
+\paragraph{Pre-registered forward test.} The hypothesis $H_1:\ \E[R\mid T=1]>\E[R\mid T=0]$ for short signals is tested prospectively from @@FWD_START@@, with the definition, statistic, thresholds and stopping date committed before the first observation. Interim analyses occur when 25, 50 and 75 shorts have closed in the bearish regime, each at $p<0.001$; the final analysis occurs when both groups reach 100 closed shorts, at $p<0.047$, and no later than @@FWD_CUTOFF@@, for a total type-I error of at most 0.05 \citep{Haybittle1971,PetoEtAl1976}. With roughly @@TRADES_PER_YEAR@@ trades a year across both markets, few of them shorts, the test will take years rather than months.
+
+\paragraph{Why live Sharpe ratios take time.} By Equation~\eqref{eq:lo}, a strategy with a true Sharpe ratio of 1.5 observed for one year has a standard error of about 1.46: a single year of live trading cannot distinguish it from zero. What a first year can establish is \emph{implementation fidelity}: that the live system takes the same decisions as the simulation on the same bars, at a measurable execution cost.
+
+\paragraph{Deployment.} The live engine shares its decision code with the backtester and is tested for decision-by-decision parity. Since @@TESTNET_SINCE@@ it runs the public specification on Hyperliquid's test network, where every order is publicly timestamped by the exchange; testnet funds are fictitious and its market differs from the real one, so these results check mechanics, not performance.
+
+\section{Limitations}
+
+\begin{itemize}
+\item \textbf{Selection.} The Bitcoin rules were selected on 2017--2026 data, which contains the whole portfolio period; Ether is a transfer across markets, not across time. The walk-forward Sharpe ratio (@@WF_SR@@) is clearly below the fixed preset.
+\item \textbf{Post-hoc condition.} The short-entry condition was specified after the period had been studied; Section~\ref{sec:falsification} measures how unusual its benefit is but does not make it out-of-sample.
+\item \textbf{Frictions.} Slippage and funding are excluded from the headline figures. Capacity and market impact are not modelled, and the strategy trades when order books are thinnest.
+\item \textbf{Right tail.} A small number of large trades drive the long-run growth; missing a few of them in live trading would change the outcome materially.
+\item \textbf{Venues.} Data venues (Bitstamp, Binance spot) differ from the intended execution venue (Hyperliquid perpetuals) in prices, fees, funding and stop mechanics.
+\item \textbf{Multiple testing.} Many tests are reported. Their criteria were fixed in advance and failures are reported, but the overall research process still involved choices that no single test accounts for.
+\end{itemize}
+
+\section{Conclusion}
+
+Shock Engine trades the continuation of qualified 15-minute shocks in Bitcoin and Ether, with a short side that mirrors the long side only in bearish daily regimes. On eight years of data the 50/50 portfolio delivers a Sharpe ratio of @@SR_PF@@ with a maximum drawdown of @@MDD_PF@@, survives placebo, delay, cost, parameter and cross-asset tests, and is not spanned by standard trend strategies. The same evidence is in-sample, depends on a convex right tail, and excludes capacity. The decisive tests are the pre-registered forward analysis and a live track record, both under way and reported as they arrive, whatever they show.
+
+\clearpage
+\appendix
+\section{Benchmark strategies}\label{app:bench}
+
+For each market, a position $q_t\in\{-1,0,1\}$ is decided at the close of period $t$ with information up to $t$ and earns $q_t\,(P_{t+1}/P_t-1)-c\,|q_t-q_{t-1}|$ with $c=0.045\%$. Portfolio factors average the two markets with daily rebalancing; buy-and-hold Bitcoin and Ether enter separately.
+\begin{itemize}
+\item \textbf{Time-series momentum} TSMOM$(L)$: $q_t=\operatorname{sign}(P_t/P_{t-L}-1)$, $L\in\{30,90,180\}$ days.
+\item \textbf{Breakout} (55/20 days): from flat, long if $P_t>\max_{t-55\le s<t}P_s$ and short if $P_t<\min_{t-55\le s<t}P_s$; a long exits when $P_t<\min_{t-20\le s<t}P_s$ and a short when $P_t>\max_{t-20\le s<t}P_s$.
+\item \textbf{Moving averages} (20/100 days): $q_t=+1$ if $\mathrm{EMA}_{20}(t)>\mathrm{EMA}_{100}(t)$, $-1$ otherwise.
+\item \textbf{Intraday breakout} (15-minute bars): the breakout rule with 96-bar entry and 48-bar exit windows (24 and 12 hours).
+\end{itemize}
+Long-only versions are not added: with positions $\pm1$ their returns are, up to costs, the average of the long/short version and buy-and-hold, already in the span of the regressors.
+
+\section{Synthetic markets (Test C)}
+
+Calendar blocks of $L$ days are drawn with replacement from the full history, the same blocks for both coins. Within a block, 15-minute bars are rescaled so that the synthetic path is continuous at block boundaries; volumes are normalised by their trailing mean; the price grid follows a fixed rule. The engine, the volatility regimes and the trend condition are recomputed from scratch on each path. On the identity path the construction reproduces the original strategy exactly (identical regimes and equity bar by bar), which validates the pipeline.
+
+\section{Reproducibility}
+
+Every number in this paper is produced by versioned code from versioned data and read from the published research files (research version \texttt{@@VERSION@@}, code commit \texttt{@@COMMIT@@}, parameter hash \texttt{@@PARAM_HASH@@}); the portfolio pipeline runs @@CHECKS_TOTAL@@ consistency checks, all passing. Pre-registration documents were committed before the corresponding computations. Data files, daily returns and the full numerical report are available at \url{https://www.shadowmarketpro.com/research}.
+
+\clearpage
+\begin{thebibliography}{99}
+\setlength{\itemsep}{2pt}\small
+
+\bibitem[A\"it-Sahalia et~al.(2015)]{AitSahaliaCachoDiazLaeven2015} A\"it-Sahalia, Y., Cacho-Diaz, J., and Laeven, R.~J.~A. (2015). Modeling financial contagion using mutually exciting jump processes. \emph{Journal of Financial Economics}, 117(3), 585--606.
+
+\bibitem[Bailey et~al.(2017)]{BaileyEtAl2017} Bailey, D.~H., Borwein, J.~M., L\'opez de Prado, M., and Zhu, Q.~J. (2017). The probability of backtest overfitting. \emph{Journal of Computational Finance}, 20(4), 39--69.
+
+\bibitem[Bailey and L\'opez de Prado(2014)]{BaileyLopezdePrado2014} Bailey, D.~H., and L\'opez de Prado, M. (2014). The deflated Sharpe ratio: Correcting for selection bias, backtest overfitting, and non-normality. \emph{Journal of Portfolio Management}, 40(5), 94--107.
+
+\bibitem[Brock et~al.(1992)]{BrockLakonishokLeBaron1992} Brock, W., Lakonishok, J., and LeBaron, B. (1992). Simple technical trading rules and the stochastic properties of stock returns. \emph{Journal of Finance}, 47(5), 1731--1764.
+
+\bibitem[Daniel and Moskowitz(2016)]{DanielMoskowitz2016} Daniel, K., and Moskowitz, T.~J. (2016). Momentum crashes. \emph{Journal of Financial Economics}, 122(2), 221--247.
+
+\bibitem[Faber(2007)]{Faber2007} Faber, M.~T. (2007). A quantitative approach to tactical asset allocation. \emph{Journal of Wealth Management}, 9(4), 69--79.
+
+\bibitem[Gao et~al.(2018)]{GaoHanLiZhou2018} Gao, L., Han, Y., Li, S.~Z., and Zhou, G. (2018). Market intraday momentum. \emph{Journal of Financial Economics}, 129(2), 394--414.
+
+\bibitem[Hansen(2005)]{Hansen2005} Hansen, P.~R. (2005). A test for superior predictive ability. \emph{Journal of Business \& Economic Statistics}, 23(4), 365--380.
+
+\bibitem[Harvey et~al.(2016)]{HarveyLiuZhu2016} Harvey, C.~R., Liu, Y., and Zhu, H. (2016). \ldots{} and the cross-section of expected returns. \emph{Review of Financial Studies}, 29(1), 5--68.
+
+\bibitem[Haybittle(1971)]{Haybittle1971} Haybittle, J.~L. (1971). Repeated assessment of results in clinical trials of cancer treatment. \emph{British Journal of Radiology}, 44(526), 793--797.
+
+\bibitem[Hawkes(1971)]{Hawkes1971} Hawkes, A.~G. (1971). Spectra of some self-exciting and mutually exciting point processes. \emph{Biometrika}, 58(1), 83--90.
+
+\bibitem[Hong and Stein(1999)]{HongStein1999} Hong, H., and Stein, J.~C. (1999). A unified theory of underreaction, momentum trading, and overreaction in asset markets. \emph{Journal of Finance}, 54(6), 2143--2184.
+
+\bibitem[Hurst et~al.(2017)]{HurstOoiPedersen2017} Hurst, B., Ooi, Y.~H., and Pedersen, L.~H. (2017). A century of evidence on trend-following investing. \emph{Journal of Portfolio Management}, 44(1), 15--29.
+
+\bibitem[Jegadeesh and Titman(1993)]{JegadeeshTitman1993} Jegadeesh, N., and Titman, S. (1993). Returns to buying winners and selling losers: Implications for stock market efficiency. \emph{Journal of Finance}, 48(1), 65--91.
+
+\bibitem[K\"unsch(1989)]{Kunsch1989} K\"unsch, H.~R. (1989). The jackknife and the bootstrap for general stationary observations. \emph{Annals of Statistics}, 17(3), 1217--1241.
+
+\bibitem[Lee and Mykland(2008)]{LeeMykland2008} Lee, S.~S., and Mykland, P.~A. (2008). Jumps in financial markets: A new nonparametric test and jump dynamics. \emph{Review of Financial Studies}, 21(6), 2535--2563.
+
+\bibitem[Liu and Tsyvinski(2021)]{LiuTsyvinski2021} Liu, Y., and Tsyvinski, A. (2021). Risks and returns of cryptocurrency. \emph{Review of Financial Studies}, 34(6), 2689--2727.
+
+\bibitem[Liu et~al.(2022)]{LiuTsyvinskiWu2022} Liu, Y., Tsyvinski, A., and Wu, X. (2022). Common risk factors in cryptocurrency. \emph{Journal of Finance}, 77(2), 1133--1177.
+
+\bibitem[Lo(2002)]{Lo2002} Lo, A.~W. (2002). The statistics of Sharpe ratios. \emph{Financial Analysts Journal}, 58(4), 36--52.
+
+\bibitem[Moreira and Muir(2017)]{MoreiraMuir2017} Moreira, A., and Muir, T. (2017). Volatility-managed portfolios. \emph{Journal of Finance}, 72(4), 1611--1644.
+
+\bibitem[Moskowitz et~al.(2012)]{MoskowitzOoiPedersen2012} Moskowitz, T.~J., Ooi, Y.~H., and Pedersen, L.~H. (2012). Time series momentum. \emph{Journal of Financial Economics}, 104(2), 228--250.
+
+\bibitem[Newey and West(1987)]{NeweyWest1987} Newey, W.~K., and West, K.~D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \emph{Econometrica}, 55(3), 703--708.
+
+\bibitem[Nosek et~al.(2018)]{NosekEtAl2018} Nosek, B.~A., Ebersole, C.~R., DeHaven, A.~C., and Mellor, D.~T. (2018). The preregistration revolution. \emph{Proceedings of the National Academy of Sciences}, 115(11), 2600--2606.
+
+\bibitem[Peto et~al.(1976)]{PetoEtAl1976} Peto, R., Pike, M.~C., Armitage, P., Breslow, N.~E., Cox, D.~R., Howard, S.~V., Mantel, N., McPherson, K., Peto, J., and Smith, P.~G. (1976). Design and analysis of randomized clinical trials requiring prolonged observation of each patient. I. Introduction and design. \emph{British Journal of Cancer}, 34(6), 585--612.
+
+\bibitem[Politis and Romano(1994)]{PolitisRomano1994} Politis, D.~N., and Romano, J.~P. (1994). The stationary bootstrap. \emph{Journal of the American Statistical Association}, 89(428), 1303--1313.
+
+\bibitem[White(2000)]{White2000} White, H. (2000). A reality check for data snooping. \emph{Econometrica}, 68(5), 1097--1126.
+
+\end{thebibliography}
+
+\end{document}
