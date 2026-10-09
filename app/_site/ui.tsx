@@ -158,8 +158,7 @@ export function SiteFooter() {
           <h3>Shock Engine</h3>
           <ul>
             <li><Link href="/shock-engine">Overview</Link></li>
-            <li><Link href="/shock-engine/portfolio">Performance</Link></li>
-            <li><Link href="/research">Research</Link></li>
+            <li><Link href="/backtest">Backtest</Link></li>
             <li><Link href="/live">Live track record</Link></li>
           </ul>
         </div>
@@ -168,7 +167,6 @@ export function SiteFooter() {
           <ul>
             <li><Link href="/trading-tools">TradingView indicators</Link></li>
             <li><Link href="/trading-tools#pricing">Pricing</Link></li>
-            <li><Link href="/backtest">Backtest Lab</Link></li>
             <li><Link href="/payment">Pay with crypto</Link></li>
           </ul>
         </div>
@@ -176,7 +174,6 @@ export function SiteFooter() {
           <h3>Company</h3>
           <ul>
             <li><Link href="/institutional">Institutional</Link></li>
-            <li><Link href="/research#versions">Versions and manifest</Link></li>
           </ul>
         </div>
       </div>
