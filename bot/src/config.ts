@@ -14,6 +14,13 @@
 //   BOT_STATE_DIR         bot/state (état persistant)
 //   BOT_LOG_DIR           bot/logs (journal JSONL des signaux et des trades)
 //
+// Stratégie :
+//   BOT_SHORT_TREND_FILTER 1 : version publique du Shock Engine, une entrée short n'est autorisée
+//                         qu'en régime de tendance journalier baissier (engine/short-trend.ts) ;
+//                         0 (défaut) : le moteur v1, sans cette condition. À changer seulement compte
+//                         à plat avec BOT_RESET_STATE=1 : les signaux à partir de là ne sont plus les
+//                         mêmes que ceux de l'état sauvegardé.
+//
 // Exécution et risque (ne changent pas les signaux, seulement la taille et les garde-fous) :
 //   BOT_EQUITY_PCT        part du capital engagée par position, en % (défaut 100, comme le backtest)
 //   BOT_LEVERAGE          levier de la position (défaut 1)
@@ -47,6 +54,8 @@ export interface BotConfig {
   dataNetwork: 'mainnet' | 'testnet'
   coin: string
   tfMin: 15
+  /** Version publique : shorts seulement en régime de tendance journalier baissier. */
+  shortTrendFilter: boolean
   account: `0x${string}` | null
   subAccount: `0x${string}` | null
   agentKey: `0x${string}` | null
@@ -80,6 +89,13 @@ function num(env: NodeJS.ProcessEnv, key: string, def: number, min: number, max:
   return v
 }
 
+function flag(env: NodeJS.ProcessEnv, key: string): boolean {
+  const raw = env[key]?.trim()
+  if (raw == null || raw === '' || raw === '0') return false
+  if (raw === '1') return true
+  throw new Error(`${key}=${raw} : 0 ou 1`)
+}
+
 function hex(env: NodeJS.ProcessEnv, key: string, len: number): `0x${string}` | null {
   const raw = env[key]?.trim()
   if (!raw) return null
@@ -107,6 +123,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
     dataNetwork,
     coin: env.BOT_COIN ?? 'BTC',
     tfMin: 15,
+    shortTrendFilter: flag(env, 'BOT_SHORT_TREND_FILTER'),
     account,
     subAccount,
     agentKey,

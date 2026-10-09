@@ -27,7 +27,7 @@
 // - une seule opération à la fois (bougie, prix, fills), un seul processus par compte (verrou).
 
 import type { Bars } from '../../../lib/backtest/types.ts'
-import { ShockRunner, ShockSession } from '../../../lib/strategies/shock/live.ts'
+import type { ShockRunner } from '../../../lib/strategies/shock/live.ts'
 import type { Bar, ShockConfig } from '../../../lib/strategies/shock/live.ts'
 import type { Decision, EntryOrder } from '../../../lib/strategies/shock/strategy.ts'
 import type { Costs } from '../../../lib/strategies/shock/params.ts'
@@ -41,6 +41,8 @@ import { RiskEngine } from './risk.ts'
 import { SET_NAMES, iso, regimeName } from './shadow.ts'
 import type { BotState, LivePosition } from './state.ts'
 import { StateStore, indexOfTime, loadStrategy, saveStrategy } from './state.ts'
+import { newRunner, newSession } from './short-trend.ts'
+import type { Session } from './short-trend.ts'
 
 export interface LiveOptions {
   cfg: BotConfig
@@ -71,12 +73,12 @@ export class LiveEngine {
   readonly tfMs: number
   runner: ShockRunner
   /** Premier lancement : backtest pas à pas jusqu'à ce qu'il soit à plat. */
-  session: ShockSession | null
+  session: Session | null
   state: BotState
   private queue: Promise<unknown> = Promise.resolve()
   private lastMove = 0
 
-  private constructor(o: LiveOptions, runner: ShockRunner, session: ShockSession | null, state: BotState) {
+  private constructor(o: LiveOptions, runner: ShockRunner, session: Session | null, state: BotState) {
     this.o = o
     this.ex = o.exchange
     this.risk = new RiskEngine(o.cfg, o.exchange.asset)
@@ -119,7 +121,7 @@ export class LiveEngine {
     const now = o.now ? o.now() : Date.now()
     let eng: LiveEngine
     if (!saved) {
-      const session = new ShockSession(o.shock, handoffCosts(o.cfg, o.shock), chart, 0, { regimeBars: daily })
+      const session = newSession(o.shock, handoffCosts(o.cfg, o.shock), chart, 0, { regimeBars: daily }, o.cfg.shortTrendFilter)
       const state: BotState = {
         version: 1, network: o.network, coin: o.cfg.coin, account: tradedAccount(o.cfg) ?? '', anchor: chart.t[0], lastBarTime: chart.t[chart.n - 1],
         strategy: saveStrategy(session.runner.strategy.state, chart.t), position: null, seenFills: [], lastFillTime: now, lastFundingTime: now, halted: null, pending: null,
@@ -132,12 +134,12 @@ export class LiveEngine {
       const bad = saved.anchor !== chart.t[0] ? 'première bougie de l\'historique différente' : saved.network !== o.network || saved.coin !== o.cfg.coin || saved.account !== (tradedAccount(o.cfg) ?? '') ? 'réseau, actif ou compte différent' : null
       const idx = indexOfTime(chart.t, saved.lastBarTime)
       if (bad || idx < 0) {
-        const runner = new ShockRunner(o.shock, chart, { regimeBars: daily })
+        const runner = newRunner(o.shock, chart, { regimeBars: daily }, o.cfg.shortTrendFilter)
         eng = new LiveEngine(o, runner, null, saved)
         eng.halt(`état sauvegardé incompatible avec l'historique : ${bad ?? 'dernière bougie traitée absente'}`)
         return eng
       }
-      const runner = new ShockRunner(o.shock, head(chart, idx + 1), { regimeBars: daily, state: loadStrategy(saved.strategy, chart.t) })
+      const runner = newRunner(o.shock, head(chart, idx + 1), { regimeBars: daily, state: loadStrategy(saved.strategy, chart.t) }, o.cfg.shortTrendFilter)
       eng = new LiveEngine(o, runner, null, saved)
       o.journal.event('live_restart', { lastBar: iso(saved.lastBarTime), missed: chart.n - 1 - idx, position: saved.position ? (saved.position.dir === 1 ? 'long' : 'short') : 'flat', halted: saved.halted })
       if (!saved.halted) {
