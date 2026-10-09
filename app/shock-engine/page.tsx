@@ -5,7 +5,7 @@ import SiteHeader from '../_site/SiteHeader'
 import HeroChart from '../_site/HeroChart'
 import { CountUp, SeriesPanel, SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table, Verdict } from '../_site/ui'
-import { BH, BH_NAME, COLORS, DOWNLOADS, P, RA, SIM, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
+import { BH, BH_NAME, COLORS, DOWNLOADS, P, PAPER, RA, SIM, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
 import { int, month, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -224,7 +224,7 @@ export default function ShockEnginePage() {
 
         <CtaBand title="Explore the research" actions={<>
           <Link href="/research" className="s-btn s-btn-primary">View Research <Arrow /></Link>
-          <a href={`${DOWNLOADS}/btc-eth-portfolio.html`} className="s-btn s-btn-ghost">Download Research Report</a>
+          <a href={`${DOWNLOADS}/${PAPER}`} className="s-btn s-btn-ghost" download>Download Research Paper (PDF)</a>
           <Link href="/institutional" className="s-btn s-btn-ghost">Institutional Access</Link>
         </>}>{SIM}</CtaBand>
 

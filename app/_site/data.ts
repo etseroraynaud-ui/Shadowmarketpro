@@ -15,7 +15,9 @@ if (!P.disclaimers.includes(SIM)) throw new Error('la mention de simulation hist
 /** Dossier public des fichiers téléchargeables, et manifeste publié. */
 export const DOWNLOADS = '/research/btc-eth-portfolio'
 export const MANIFEST = 'shock-engine-manifest.json'
+export const PAPER = 'shock-engine-research-paper.pdf'
 if (!P.downloads.some(d => d.file === MANIFEST)) throw new Error('manifeste absent des téléchargements publiés')
+if (!P.downloads.some(d => d.file === PAPER)) throw new Error('papier de recherche absent des téléchargements publiés')
 
 /**
  * Série du graphique : jours sans valeur (fenêtres glissantes incomplètes) en NaN, valeurs arrondies à

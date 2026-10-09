@@ -3,7 +3,7 @@ import Link from 'next/link'
 import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import { Arrow, Disclaimer, Metrics, Section, SimNote, SiteFooter, StatusList } from '../_site/ui'
-import { CONTACT_EMAIL, DOWNLOADS, MANIFEST, P } from '../_site/data'
+import { CONTACT_EMAIL, DOWNLOADS, MANIFEST, P, PAPER } from '../_site/data'
 import { num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -36,7 +36,7 @@ export default function InstitutionalPage() {
           <div className="s-actions">
             {CONTACT_EMAIL
               ? <a className="s-btn s-btn-primary" href={`mailto:${CONTACT_EMAIL}?subject=${subject}`}>Request the research pack <Arrow /></a>
-              : <a className="s-btn s-btn-primary" href={`${DOWNLOADS}/btc-eth-portfolio.html`}>Open the full report <Arrow /></a>}
+              : <a className="s-btn s-btn-primary" href={`${DOWNLOADS}/${PAPER}`} download>Download the research paper <Arrow /></a>}
             <Link href="/shock-engine/portfolio" className="s-btn s-btn-ghost">Performance dashboard</Link>
           </div>
         </section>
@@ -55,12 +55,12 @@ export default function InstitutionalPage() {
 
         <Section id="materials" eyebrow="Materials" title="What is available">
           <div className="s-grid2">
-            <Doc k="Report" title="Full research report" href={`${DOWNLOADS}/btc-eth-portfolio.html`} label="Open the report">Performance, reconciliation with the validated backtests, correlations in stress, risk contributions, drawdown episodes, resampling, costs, concentration and every consistency check.</Doc>
+            <Doc k="Paper" title="Research paper" href={`${DOWNLOADS}/${PAPER}`} label="Download the paper (PDF)" download>Design, statistical framework, results, robustness, falsification of the short-entry condition, residual alpha against trend strategies, limitations and the pre-registered forward test, with references.</Doc>
             <Doc k="Data" title="Return series" href={`${DOWNLOADS}/portfolio_daily_returns.csv`} label="Daily returns (CSV)" download>Daily returns and equity of both markets and the portfolio, monthly and annual returns, drawdown episodes and rolling correlations, as CSV.</Doc>
             <Doc k="Manifest" title="Reproducibility manifest" href={`${DOWNLOADS}/${MANIFEST}`} label="Manifest (JSON)">Code commit, dataset hashes, parameter hash, cost assumptions and random seeds. The research code regenerates the same files from the same data.</Doc>
             <Doc k="Evidence" title="Studies and verdicts" href="/research" label="Research">Event studies, random-entry placebos, delayed entries, walk-forward, parameter neighborhoods, transfers to ETH, SOL, gold and TAO, including the failed tests.</Doc>
           </div>
-          <p className="s-p">On request: trade-level files, a walkthrough of the backtest engine, and the earlier research history.</p>
+          <p className="s-p">Every table behind the figures, including the reconciliation with the validated backtests and all {P.manifest.checksTotal} consistency checks, is in the <a className="s-link" href={`${DOWNLOADS}/btc-eth-portfolio.html`}>full numerical report (HTML)</a>. On request: trade-level files, a walkthrough of the backtest engine, and the earlier research history.</p>
         </Section>
 
         <Section id="not-done" eyebrow="Limits" title="What is not done yet" intro={<p>Stated plainly, so that it can be weighed.</p>}>
