@@ -31,6 +31,8 @@ const DAY = 86400000
 const WARMUP = 14 * DAY
 const REFRESH_MS = 60000
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/
+/** Début du suivi : date (AAAA-MM-JJ, minuit UTC) ou instant ISO complet. */
+const sinceMs = (s: string | undefined) => (s ? Date.parse(s.length > 10 ? s : s + 'T00:00:00Z') : NaN)
 
 interface Backtest {
   trips: BacktestTrip[]
@@ -54,7 +56,7 @@ function targetFromUrl(): LiveAccount | null {
 }
 
 async function load(target: LiveAccount): Promise<Loaded> {
-  const since = target.since ? Date.parse(target.since + 'T00:00:00Z') : 0
+  const since = target.since ? sinceMs(target.since) : 0
   const [account, data] = await Promise.all([
     loadAccount(target.network, target.address, target.coin, Number.isFinite(since) ? since : 0),
     loadHyperliquid(target.coin, '15m', target.network === 'testnet'),
@@ -219,7 +221,7 @@ function Dashboard({ t, lang, target, data }: { t: LiveDict; lang: Lang; target:
   const { account, backtest } = data
   const view = useMemo(() => {
     const { trips, skipped } = roundTrips(account.fills, account.funding)
-    const configured = target.since ? Date.parse(target.since + 'T00:00:00Z') : NaN
+    const configured = sinceMs(target.since)
     const firstBot = trips.find(x => x.bot)?.entryTime
     const start = Number.isFinite(configured) ? configured : firstBot ?? trips[0]?.entryTime ?? NaN
     const mine = Number.isFinite(start) ? trips.filter(x => x.entryTime >= start) : []

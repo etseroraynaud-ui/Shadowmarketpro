@@ -88,7 +88,7 @@ export function EvidenceCard({ k, stat, sub, verdict, children, href = '/researc
 }
 
 /** Liste de statut : ce qui est fait, en attente, absent. */
-export function StatusList({ items }: { items: { label: string; state: 'ok' | 'wait' | 'no'; note: string }[] }) {
+export function StatusList({ items }: { items: { label: string; state: 'ok' | 'wait' | 'no'; note: ReactNode }[] }) {
   const ico = { ok: '✓', wait: '…', no: '–' }
   return (
     <ul className="s-status-list s-reveal">

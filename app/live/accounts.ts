@@ -13,7 +13,7 @@ export interface LiveAccount {
   coin: string
   network: Network
   label: string
-  /** Début du track record (AAAA-MM-JJ). Absent : premier ordre du bot sur ce compte. */
+  /** Début du track record (AAAA-MM-JJ, ou instant ISO complet). Absent : premier ordre du bot sur ce compte. */
   since?: string
   /**
    * Version du bot suivie, pour le backtest de comparaison : `public` (défaut) n'autorise les shorts
@@ -23,4 +23,8 @@ export interface LiveAccount {
   version?: 'public' | 'v1'
 }
 
-export const LIVE_ACCOUNTS: LiveAccount[] = []
+export const LIVE_ACCOUNTS: LiveAccount[] = [
+  // Bot testnet (argent fictif), version publique depuis son redémarrage du 2026-10-09 ; le compte
+  // principal est tradé (pas de sous-compte) : aucun trade manuel sur ce compte.
+  { address: '0xE29695f76908a8e8C0e70D38C99FE20103B2498A', coin: 'BTC', network: 'testnet', label: 'Shock Engine · BTC · testnet', since: '2026-10-09T13:25:30Z', version: 'public' },
+]

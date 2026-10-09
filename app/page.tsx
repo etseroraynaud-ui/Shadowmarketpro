@@ -4,7 +4,7 @@ import SiteHeader from './_site/SiteHeader'
 import HeroChart from './_site/HeroChart'
 import { CountUp, SeriesPanel } from './_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Section, SimNote, SiteFooter, StatusList } from './_site/ui'
-import { COLORS, DOWNLOADS, P, SIM, sample, sampleStart, series, verdictOf } from './_site/data'
+import { COLORS, DOWNLOADS, P, SIM, TESTNET_SINCE, sample, sampleStart, series, verdictOf } from './_site/data'
 import { int, num, pct } from './_site/format'
 
 const STEP = 3
@@ -111,6 +111,7 @@ export default function HomePage() {
               { label: 'Historical simulation', state: 'ok', note: `${CP.start.slice(0, 4)} → ${CP.end.slice(0, 4)}, ${int(F.trades.trades)} trades` },
               { label: 'Robustness testing', state: 'ok', note: 'placebo, delay, costs, parameters' },
               { label: 'Forward validation', state: 'wait', note: `pre-registered; observation starts ${P.forward.start}` },
+              ...(TESTNET_SINCE ? [{ label: 'Testnet bot', state: 'wait' as const, note: <>public version, play money, since {TESTNET_SINCE} · <Link className="s-link" href="/live">live page</Link></> }] : []),
               { label: 'Live track record', state: 'no', note: 'not available' },
             ]} />
             <div className="s-card s-card-glow s-reveal">

@@ -3,6 +3,7 @@
 // fichier pèse ~300 Ko et ne doit pas partir dans le JavaScript du navigateur.
 
 import data from '../../lib/research/btc-eth-portfolio.json'
+import { LIVE_ACCOUNTS } from '../live/accounts'
 
 export const P = data
 export type Portfolio = typeof data
@@ -69,3 +70,7 @@ for (const f of [...RA.factors.map(x => x.name), ...RA.benchmarks.map(x => x.id)
 /** Verdict de l'étude, selon la règle fixée d'avance (t ≥ 3 et P(α ≤ 0) ≤ 1 %). */
 export const raVerdict = (): { kind: 'pass' | 'partial' | 'fail'; label: string } =>
   RA.verdict === 'demonstrated' ? { kind: 'pass', label: 'demonstrated · in-sample' } : RA.verdict === 'indicative' ? { kind: 'partial', label: 'indicative' } : { kind: 'fail', label: 'not demonstrated' }
+
+/** Bot testnet suivi sur /live (argent fictif) : début du suivi, version publique. */
+export const TESTNET = LIVE_ACCOUNTS.find(a => a.network === 'testnet' && a.version !== 'v1')
+export const TESTNET_SINCE = TESTNET?.since?.slice(0, 10)
