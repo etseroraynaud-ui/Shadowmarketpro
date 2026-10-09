@@ -2,103 +2,216 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
-import LineChart from '../_site/LineChart'
-import { Disclaimer, Section, SimBar, SimTag, SiteFooter, StatusBoxes, Table, Tiles } from '../_site/ui'
-import { COLORS, P, series } from '../_site/data'
-import { int, num, pct, times } from '../_site/format'
+import HeroChart from '../_site/HeroChart'
+import { CountUp, SeriesPanel, SubNav } from '../_site/interactive'
+import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table } from '../_site/ui'
+import { COLORS, DOWNLOADS, P, SIM, longestDrawdown, sample, sampleStart, series, verdictOf } from '../_site/data'
+import { int, month, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
   title: 'Shock Engine — ShadowMarketPro™',
-  description: 'A systematic strategy that trades continuation after volatility shocks, with rules frozen on Bitcoin and tested unchanged on other markets. Historical simulation, not live performance.',
+  description: 'A systematic 15-minute strategy that trades the continuation after abnormal moves on Bitcoin and Ethereum, with short positions only in bearish daily trends. Historical simulation after modeled transaction costs, not live performance.',
 }
 
 const EV = P.evidence
-const CA = P.capacity
-type Z = typeof EV.btc
-const verdict = (ok: boolean) => (ok ? <span className="s-pass">yes</span> : <span className="s-fail">no</span>)
-const status = (s: 'pass' | 'partial' | 'fail', label: string) => <span className={s === 'pass' ? 's-pass' : s === 'partial' ? 's-partial' : 's-fail'}>{label}</span>
-const fixMinus = (x: string) => x.replace(/(^|\s)-(?=\d)/g, '$1−')
+const F = P.series.portfolio
+const CP = P.commonPeriod
+const STEP = 2
+const N = P.chart.days
+const START = sampleStart(P.chart.start, N, STEP)
+const S = (xs: (number | null)[]) => sample(series(xs), STEP)
+const rob20 = (k: 'robBtc' | 'robEth') => EV[k].levels.find(l => l.level === 0.2)!
+const fails = (['sol', 'gold', 'tao'] as const).filter(k => verdictOf(EV[k]).kind === 'fail')
+const names = { sol: 'Solana', gold: 'Gold', tao: 'TAO' }
+const LD = longestDrawdown()
+const fund = P.stress.funding[0]
+
+const SECTIONS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'performance', label: 'Performance' },
+  { id: 'method', label: 'Method' },
+  { id: 'evidence', label: 'Evidence' },
+  { id: 'risk', label: 'Risk' },
+  { id: 'research-status', label: 'Research' },
+]
+
+const Icon = ({ d }: { d: string }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
 
 export default function ShockEnginePage() {
-  const row = (name: string, data: string, z: Z, st: React.ReactNode) => [
-    name, data, `${z.period[0].slice(0, 4)}–${z.period[1].slice(0, 4)}`, num(z.sharpe), pct(z.cagr), pct(z.dd), int(z.trades),
-    verdict(z.eventsShockTrend), pct(z.randomBeaten, 0), z.meanTrade > 0 ? pct(z.delay1Share, 0) : 'n/m', st,
-  ]
-  const rob = (k: 'robBtc' | 'robEth') => EV[k].levels.map(l => [`${k === 'robBtc' ? 'BTC' : 'ETH'} · ±${Math.round(l.level * 100)} %`, num(l.preset), num(l.medianSharpe), `${num(l.p10)} – ${num(l.p90)}`, pct(l.rank, 0), pct(l.profitable, 0)])
   return (
     <div className="s-page">
       <SiteHeader />
-      <SimBar />
+      <SubNav items={SECTIONS} />
       <main className="s-main">
-        <div className="s-hero">
-          <p className="s-eyebrow">Systematic strategy · crypto, 15-minute bars</p>
-          <h1 className="s-h1">Shock Engine</h1>
-          <p className="s-sub">Trades the continuation that follows a volatility shock. The rules were set on Bitcoin, then frozen and applied unchanged to other markets.</p>
-          <p className="s-lead">The research question is narrow: after an abnormal 15-minute move in the direction of the hourly trend, does the market tend to keep going? On Bitcoin and Ethereum the answer has been yes, consistently enough to survive costs, placebo tests and delayed entries. On gold it was no, and the results are published as well.</p>
-          <div className="s-actions">
-            <Link href="/shock-engine/portfolio" className="bp"><span>BTC/ETH portfolio results</span></Link>
-            <Link href="/research" className="bo">Research and evidence</Link>
+        {/* ---------------------------------------------------------------- héros */}
+        <section className="s-hero s-anchor" id="overview">
+          <div className="s-hero-grid">
+            <div className="s-hero-copy">
+              <p className="s-eyebrow">Systematic strategy · crypto</p>
+              <h1 className="s-h1">Shock Engine</h1>
+              <p className="s-sub">Systematic post-shock continuation for Bitcoin and Ethereum: it enters after an abnormal move that keeps its direction, and manages risk with volatility.</p>
+              <div className="s-chips">
+                <span className="s-chip"><span className="s-chip-dot" /><b>BTC / ETH</b></span>
+                <span className="s-chip">15-minute systematic strategy</span>
+                <span className="s-chip"><span className="s-chip-dot" style={{ background: 'var(--s-amber)' }} />Historical simulation</span>
+              </div>
+              <div className="s-actions">
+                <Link href="/shock-engine/portfolio" className="s-btn s-btn-primary">Explore Performance <Arrow /></Link>
+                <Link href="/research" className="s-btn s-btn-ghost">View Research</Link>
+              </div>
+            </div>
+            <HeroChart />
           </div>
-          <StatusBoxes period={`BTC ${EV.btc.period[0]} → ${EV.btc.period[1]}, ETH ${EV.eth.period[0]} → ${EV.eth.period[1]}`} />
-        </div>
+          <Kpis items={[
+            { label: 'Sharpe ratio', value: <CountUp value={F.m.sharpe} decimals={2} />, sub: `BTC ${num(P.headline.btcSharpe)} · ETH ${num(P.headline.ethSharpe)}`, accent: true },
+            { label: 'CAGR', value: <CountUp value={F.m.cagr} percent decimals={1} suffix="%" />, sub: `${CP.years.toFixed(1)} years · 50/50 portfolio` },
+            { label: 'Max drawdown', value: <CountUp value={F.m.maxDD} percent decimals={1} suffix="%" />, sub: 'daily closes' },
+            { label: 'Markets', value: 'BTC + ETH', sub: `${CP.start.slice(0, 4)} → ${CP.end.slice(0, 4)}` },
+          ]} />
+          <SimNote />
+        </section>
 
-        <Section title="How it works" intro={<p>Four layers, computed at the close of each 15-minute bar from closed data only. The same code runs the backtest and the live bot.</p>}>
-          <div className="s-grid2 s-steps">
-            <div className="s-card"><h3>Detect a shock</h3><p>The bar&apos;s return is compared with the distribution of recent 15-minute returns. A move several standard deviations away from the norm is a shock; everything else is ignored.</p></div>
-            <div className="s-card"><h3>Require continuation evidence</h3><p>The shock bar must break the recent range and close near its extreme with a strong body, in the direction of the 60-minute trend, on above-average volume, while short-term volatility is not already above its recent norm.</p></div>
-            <div className="s-card"><h3>Adapt to the volatility regime</h3><p>Each day, the realized volatility of the last 20 closed days is compared with its own past year. A calm regime and an agitated regime each have their own parameter set. In the agitated regime the strategy only trades long.</p></div>
-            <div className="s-card"><h3>Manage the position</h3><p>One position per market, sized at the sleeve&apos;s equity without leverage. Exits are volatility-scaled: a stop based on the average true range, a partial profit and a trailing stop in the agitated regime, and an exit on an opposite shock.</p></div>
+        {/* ---------------------------------------------------------------- performance */}
+        <Section id="performance" eyebrow="Performance" title="Two markets, one engine" intro={<p>Half of the capital in each market, each half compounding on its own, from {CP.start} to {CP.end}. Commission of 0.045 % on every order.</p>}
+          head={<Link className="s-arrow" href="/shock-engine/portfolio">Full performance dashboard</Link>}>
+          <div className="s-reveal">
+            <SeriesPanel title="Equity, indexed to 100" sub="Log scale · daily closes" start={START} step={STEP} fmt="idx" log height={360} series={[
+              { name: 'Portfolio', color: COLORS.portfolio, values: S(P.chart.eqPortfolio) },
+              { name: 'BTC', color: COLORS.btc, values: S(P.chart.eqBtc) },
+              { name: 'ETH', color: COLORS.eth, values: S(P.chart.eqEth) },
+            ]} />
           </div>
-          <p className="s-small">About {num(CA.tradesPerYear.btc, 0)} (BTC) and {num(CA.tradesPerYear.eth, 0)} (ETH) trades a year, a median holding time of {num(CA.holdingHours.btc[1], 1)} and {num(CA.holdingHours.eth[1], 1)} hours, in the market {pct(CA.sleeves.btc.timeInMarket, 0)} and {pct(CA.sleeves.eth.timeInMarket, 0)} of the time. The preset, with its Pine Script code, is available in the Shock Engine tab of the <Link className="s-link" href="/backtest">Backtest Lab</Link>.</p>
-        </Section>
-
-        <Section title="One preset, several markets" intro={<p>The preset was selected on Bitcoin. Every other market runs it unchanged (&quot;zero-shot&quot;), with pass/fail criteria fixed before each test. Sharpe ratios here use 15-minute returns over each market&apos;s full test period, after a commission of 0.045 % per order.</p>}>
-          <Table head={['Market', 'Data', 'Period', 'Sharpe', 'CAGR', 'Max DD', 'Trades', 'Shock → continuation', 'Random entries beaten', 'Edge kept with 1-bar delay', 'Verdict']} rows={[
-            row('Bitcoin', 'BTC/USD · Bitstamp', EV.btc, status('pass', 'calibration')),
-            row('Ethereum', 'ETH/USDT · Binance', EV.eth, status('pass', 'zero-shot pass')),
-            row('Ethereum (replication)', 'ETH/USD · Dukascopy', EV.ethDukascopy, status('pass', 'pass')),
-            row('Solana', 'SOL/USDT · Binance', EV.sol, status('partial', 'partial')),
-            row('Gold', 'XAU/USD · Dukascopy', EV.gold, status('fail', 'rejected')),
-            row('Bittensor (TAO)', 'TAO/USDT · Binance', EV.tao, status('fail', 'insufficient')),
+          <Metrics items={[
+            { label: 'Sharpe', value: num(F.m.sharpe), sub: `Sortino ${num(F.m.sortino)}` },
+            { label: 'CAGR', value: pct(F.m.cagr), sub: 'after commissions' },
+            { label: 'Max drawdown', value: pct(F.m.maxDD), sub: `Calmar ${num(F.m.calmar)}` },
+            { label: 'Volatility', value: pct(F.m.vol), sub: 'annualized' },
+            { label: 'Trades', value: int(F.trades.trades), sub: `${int(P.headline.trades.btc)} BTC · ${int(P.headline.trades.eth)} ETH` },
+            { label: 'Profit factor', value: num(F.trades.profitFactor), sub: `win rate ${pct(F.trades.winRate, 0)}` },
           ]} />
-          <p className="s-small">Random entries: 200 placebo runs with the same exits and number of trades but random entry times. Delay: share of the average trade gain kept when every entry is taken one bar late (n/m: not meaningful when the on-time gain is negative). <SimTag /></p>
         </Section>
 
-        <Section title="Bitcoin and Ethereum together" intro={<p>The two sleeves are combined 50/50, each compounding its own capital, over their common period {P.commonPeriod.start} → {P.commonPeriod.end}.</p>}>
-          <Tiles items={[
-            { label: 'Portfolio Sharpe', value: num(P.headline.portfolioSharpe), sub: `BTC ${num(P.headline.btcSharpe)} · ETH ${num(P.headline.ethSharpe)}` },
-            { label: 'Portfolio CAGR', value: pct(P.headline.portfolioCagr), sub: 'after modeled commissions' },
-            { label: 'Portfolio max drawdown', value: pct(P.headline.portfolioMaxDD), sub: 'daily closes' },
-            { label: 'Strategy correlation', value: num(P.correlation.dailyPearson), sub: `spot prices: ${num(P.correlation.underlyingDaily)}` },
+        {/* ---------------------------------------------------------------- méthode */}
+        <Section id="method" eyebrow="How it works" title="Four steps, computed at every 15-minute close" intro={<p>Closed bars only, no look-ahead. The rules were set on Bitcoin and run unchanged on Ethereum.</p>}>
+          <div className="s-pipe">
+            {[
+              { n: '01', t: 'Shock', p: 'Detects an abnormal directional move: a 15-minute return far outside its recent distribution, breaking the recent range.', d: 'M3 17l5-5 4 4 8-9' },
+              { n: '02', t: 'Trend', p: 'Confirms that the move is aligned with the higher-timeframe structure, with a decisive candle and active volume.', d: 'M4 19h16M7 15l3-4 3 2 4-6' },
+              { n: '03', t: 'Regime', p: 'Short positions are only enabled when the daily trend regime is bearish. Long and short parameter sets also adapt to calm or agitated volatility.', d: 'M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5' },
+              { n: '04', t: 'Risk', p: 'One position per market, no leverage. Stops and exits scale with volatility; an opposite shock closes the trade.', d: 'M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z' },
+            ].map(s => (
+              <div className="s-pipe-step s-reveal" key={s.n}>
+                <div className="s-card s-card-hover">
+                  <div className="s-pipe-n">{s.n}</div>
+                  <div className="s-pipe-ico"><Icon d={s.d} /></div>
+                  <h3>{s.t}</h3>
+                  <p>{s.p}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="s-small">Proprietary thresholds are not published. The engine trades about {num(P.capacity.tradesPerYear.btc, 0)} times a year on BTC and {num(P.capacity.tradesPerYear.eth, 0)} on ETH, with a median holding time of {num(P.capacity.holdingHours.pooled[1], 0)} hours, and is in the market {pct(F.expo.timeInMarket, 0)} of the time.</p>
+        </Section>
+
+        {/* ---------------------------------------------------------------- preuves */}
+        <Section id="evidence" eyebrow="Research evidence" title="We tried to break it" intro={<p>Each test has a pass/fail criterion fixed before the result is seen. Single-market figures use 15-minute returns over each market&apos;s full test period.</p>}
+          head={<Link className="s-arrow" href="/research">All studies and verdicts</Link>}>
+          <div className="s-grid3">
+            <EvidenceCard k="ETH transfer" stat={num(EV.eth.sharpe)} sub="Sharpe" verdict={verdictOf(EV.eth)} href="/research#studies">
+              The Bitcoin parameters, applied to Ethereum without any ETH calibration, met every pre-set criterion; an independent ETH price feed gives the same verdict (Sharpe {num(EV.ethDukascopy.sharpe)}).
+            </EvidenceCard>
+            <EvidenceCard k="Random entry test" stat={`${pct(EV.btc.randomBeaten, 0)} · ${pct(EV.eth.randomBeaten, 0)}`} sub="BTC · ETH" href="/research#studies">
+              Share of 200 runs with identical exits and random entry times that the strategy beats. The timing of entries carries the edge, not the exits or the market&apos;s drift.
+            </EvidenceCard>
+            <EvidenceCard k="Delayed entry" stat={`${pct(EV.btc.delay1Share, 0)} · ${pct(EV.eth.delay1Share, 0)}`} sub="BTC · ETH" href="/research#studies">
+              Share of the average trade gain kept when every entry is taken one 15-minute bar late. The result does not depend on a perfect fill.
+            </EvidenceCard>
+            <EvidenceCard k="Cost stress" stat={num(P.costs.stress[2].portfolio.sharpe)} sub="Sharpe at 2× commissions" href="/shock-engine/portfolio#costs">
+              Doubling commissions (equivalent to 0.045 % slippage per fill) keeps the portfolio Sharpe at {num(P.costs.stress[2].portfolio.sharpe)}; with historical perpetual funding it is {num(fund.sharpe)}.
+            </EvidenceCard>
+            <EvidenceCard k="Parameter robustness" stat={pct(Math.min(rob20('robBtc').profitable, rob20('robEth').profitable), 0)} sub="neighbors profitable" href="/research#studies">
+              All parameters perturbed together by up to ±20 %, 300 neighbors per level: median Sharpe {num(rob20('robBtc').medianSharpe)} on BTC and {num(rob20('robEth').medianSharpe)} on ETH. On ETH the parameters sit mid-neighborhood, a plateau rather than a peak.
+            </EvidenceCard>
+            <EvidenceCard k="Negative controls" stat={`${fails.length} of 3`} sub="did not pass" verdict={{ kind: 'fail', label: 'published' }} href="/research#studies">
+              The same rules on {fails.map(k => names[k]).join(', ')} did not meet the pre-set criteria. Failures are published next to the successes.
+            </EvidenceCard>
+          </div>
+        </Section>
+
+        {/* ---------------------------------------------------------------- risque */}
+        <Section id="risk" eyebrow="Risk" title="Drawdowns, stress and stability" intro={<p>The same weight as the returns: how deep, how long, and how stable the results have been.</p>}>
+          <div className="s-split">
+            <div className="s-reveal">
+              <SeriesPanel title="Drawdown from the previous peak" sub="Daily closes" start={START} step={STEP} fmt="pct" yMax={0} area height={280} defaultKey="Portfolio" endLabels={false} series={[
+                { name: 'Portfolio', color: COLORS.portfolio, values: S(P.chart.ddPortfolio) },
+                { name: 'BTC', color: COLORS.btc, values: S(P.chart.ddBtc) },
+                { name: 'ETH', color: COLORS.eth, values: S(P.chart.ddEth) },
+              ]} />
+            </div>
+            <div className="s-metrics s-reveal" style={{ alignContent: 'start', margin: 0 }}>
+              <div className="s-metric"><div className="s-metric-l">Max drawdown</div><div className="s-metric-v">{pct(F.m.maxDD)}</div><div className="s-metric-s">{P.drawdowns.top10.portfolio[0].start} → {P.drawdowns.top10.portfolio[0].recovery ?? 'not recovered'}</div></div>
+              <div className="s-metric"><div className="s-metric-l">Longest drawdown</div><div className="s-metric-v">{int(LD.days)} days</div><div className="s-metric-s">from {LD.start}{LD.recovery ? '' : ', not recovered'}</div></div>
+              <div className="s-metric"><div className="s-metric-l">Worst month</div><div className="s-metric-v">{pct(F.m.worstMonth.ret)}</div><div className="s-metric-s">{month(P.headline.worstMonth.month)}</div></div>
+              <div className="s-metric"><div className="s-metric-l">Positive 12-month windows</div><div className="s-metric-v">{pct(P.stability.rolling12.portfolio.positive, 0)}</div><div className="s-metric-s">{pct(P.stability.rolling12.portfolio.aboveOne, 0)} with Sharpe above 1</div></div>
+            </div>
+          </div>
+          <div className="s-gap" />
+          <div className="s-reveal">
+            <SeriesPanel title="Rolling 12-month Sharpe ratio" sub="365-day windows of daily returns" start={START} step={STEP} fmt="num" height={240} defaultKey="Portfolio" endLabels={false} refs={[{ y: 0 }, { y: 1, label: 'Sharpe 1' }]} series={[
+              { name: 'Portfolio', color: COLORS.portfolio, values: S(P.chart.sharpe365.portfolio) },
+              { name: 'BTC', color: COLORS.btc, values: S(P.chart.sharpe365.btc) },
+              { name: 'ETH', color: COLORS.eth, values: S(P.chart.sharpe365.eth) },
+            ]} />
+          </div>
+          <h3 className="s-h3 s-mt">Named market stress episodes</h3>
+          <Table stack head={['Episode', 'Dates', 'Portfolio', 'BTC spot', 'ETH spot']} rows={P.crisis.episodes.map(e => [e.name, `${e.from} → ${e.to}`, <span key="p" className={e.portfolio >= 0 ? 's-pass' : 's-fail'}>{pct(e.portfolio)}</span>, pct(e.spotBtc), pct(e.spotEth)])} />
+          <p className="s-small">Episode windows were fixed from known market events, never from strategy results.</p>
+        </Section>
+
+        {/* ---------------------------------------------------------------- diversification */}
+        <Section id="diversification" eyebrow="Portfolio" title="Why BTC and ETH together" intro={<p>The two coins move together. The two strategies much less: each is out of the market most of the time, and their trades rarely overlap.</p>}>
+          <div className="s-split">
+            <div className="s-card s-reveal">
+              <div className="s-bars">
+                {[
+                  { l: 'BTC vs ETH prices, daily', v: P.correlation.underlyingDaily, c: 'var(--s-muted)' },
+                  { l: 'BTC vs ETH strategy returns', v: P.correlation.dailyPearson, c: 'var(--s-accent)' },
+                ].map(b => (
+                  <div className="s-bar-row" key={b.l}>
+                    <span className="s-bar-l">{b.l}</span>
+                    <span className="s-bar-track"><span className="s-bar-fill" style={{ width: `${Math.max(0, b.v) * 100}%`, display: 'block', background: b.c }} /></span>
+                    <span className="s-bar-v">{num(b.v)}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="s-small">Daily correlation, {CP.start} → {CP.end}.</p>
+            </div>
+            <div className="s-metrics s-reveal" style={{ alignContent: 'start', margin: 0 }}>
+              <div className="s-metric"><div className="s-metric-l">Portfolio Sharpe</div><div className="s-metric-v">{num(F.m.sharpe)}</div><div className="s-metric-s">BTC {num(P.headline.btcSharpe)} · ETH {num(P.headline.ethSharpe)}</div></div>
+              <div className="s-metric"><div className="s-metric-l">Max drawdown</div><div className="s-metric-v">{pct(F.m.maxDD)}</div><div className="s-metric-s">BTC {pct(P.series.btc.m.maxDD)} · ETH {pct(P.series.eth.m.maxDD)}</div></div>
+            </div>
+          </div>
+        </Section>
+
+        {/* ---------------------------------------------------------------- statut */}
+        <Section id="research-status" eyebrow="Research status" title="What is established, and what is not yet" intro={<p>Stated plainly, so it can be weighed.</p>}>
+          <StatusList items={[
+            { label: 'Historical simulation', state: 'ok', note: `${CP.start} → ${CP.end}, reproduced from versioned code (${P.manifest.checksPassed}/${P.manifest.checksTotal} checks)` },
+            { label: 'Modeled transaction costs', state: 'ok', note: 'commission 0.045 % per order; cost stress published' },
+            { label: 'BTC / ETH evidence', state: 'ok', note: 'event study, placebo entries, delayed entries, two ETH data sources' },
+            { label: 'Robustness testing', state: 'ok', note: 'parameter neighborhoods, cost stress, resampled histories' },
+            { label: 'Forward validation', state: 'wait', note: `pre-registered; observation starts ${P.forward.start}` },
+            { label: 'Live track record', state: 'no', note: 'not available' },
+            { label: 'Capacity / market impact', state: 'no', note: 'not yet modeled' },
           ]} />
-          <LineChart title="Equity curves, log scale" start={P.chart.start} fmt="idx" log height={260} series={[
-            { name: 'BTC', color: COLORS.btc, values: series(P.chart.eqBtc) },
-            { name: 'ETH', color: COLORS.eth, values: series(P.chart.eqEth) },
-            { name: 'Portfolio', color: COLORS.portfolio, values: series(P.chart.eqPortfolio) },
-          ]} />
-          <p className="s-p"><Link className="s-link" href="/shock-engine/portfolio">Full portfolio results</Link>: risk contributions, crisis behavior, bootstrap, costs and drawdowns. <SimTag /></p>
+          <p className="s-small">The daily-trend condition on short entries was specified in October 2026, after this historical period had been studied: the figures above are in-sample for it, which is why a forward validation has been pre-registered. Slippage and perpetual funding are not in the headline figures.</p>
         </Section>
 
-        <Section title="Why we think the edge is real" intro={<p>A backtest alone proves little. These tests try to break the result.</p>}>
-          <ul className="s-list">
-            <li><strong>Event study.</strong> Before any trading rule, the average move after shocks in the direction of the hourly trend is measured against the same hour on random days. On BTC and ETH the excess is positive at 1 and 4 hours, in both halves of the sample and in most years.</li>
-            <li><strong>Random-entry placebo.</strong> Keeping the exact exits and replacing only the entry times with random ones: the strategy beats {pct(EV.btc.randomBeaten, 0)} of 200 placebos on BTC and {pct(EV.eth.randomBeaten, 0)} on ETH. The timing of entries carries the edge, not the exit rules or the market&apos;s drift.</li>
-            <li><strong>Delayed entries.</strong> Entering one bar late keeps {pct(EV.btc.delay1Share, 0)} (BTC) and {pct(EV.eth.delay1Share, 0)} (ETH) of the average trade gain: the result does not hinge on a perfect fill on the signal bar.</li>
-            <li><strong>Walk-forward.</strong> Re-selecting the parameters every quarter on the previous 36 months only, BTC 2020–2026 out of sample: Sharpe {EV.walkForward.sharpe}, CAGR {fixMinus(EV.walkForward.cagr)}, max drawdown {fixMinus(EV.walkForward.dd)} over {EV.walkForward.windows} windows.</li>
-            <li><strong>Local robustness.</strong> All parameters perturbed together by ±5, 10 and 20 %: every neighbor stays profitable. On ETH the preset sits in the middle of its neighborhood, a plateau rather than a peak.</li>
-            <li><strong>Costs.</strong> Doubling commissions (equivalent to 0.045 % slippage per fill) lowers the BTC/ETH portfolio Sharpe from {num(P.costs.stress[1].portfolio.sharpe)} to {num(P.costs.stress[2].portfolio.sharpe)}.</li>
-          </ul>
-          <Table caption="Local robustness: 300 jointly perturbed neighbors per level (15-minute Sharpe)" head={['Market · perturbation', 'Preset', 'Neighbor median', 'Neighbor P10 – P90', 'Preset beats', 'Neighbors profitable']} rows={[...rob('robBtc'), ...rob('robEth')]} compact />
-        </Section>
-
-        <Section title="What it is not" intro={null}>
-          <ul className="s-list">
-            <li><strong>Not a live track record.</strong> Every figure on this page is a historical simulation. The live bot&apos;s results will be published separately on the <Link className="s-link" href="/live">Live</Link> page.</li>
-            <li><strong>Not a high hit-rate system.</strong> About {pct(1 - P.series.portfolio.trades.winRate, 0)} of trades lose a little; a few large winners carry the result. The best 5 % of trades account for more than the whole net gain.</li>
-            <li><strong>Not frictionless.</strong> Turnover is high (about {times(P.series.portfolio.cost.turnoverOneWay)} the capital a year), so execution quality matters. Slippage, funding, market impact and capacity are not modeled yet.</li>
-            <li><strong>Not out of sample in time for Bitcoin.</strong> The preset was chosen on BTC data that overlaps the reported period; Ethereum is a transfer across assets, not across time.</li>
-          </ul>
-        </Section>
+        <CtaBand title="Explore the research" actions={<>
+          <Link href="/research" className="s-btn s-btn-primary">View Research <Arrow /></Link>
+          <a href={`${DOWNLOADS}/btc-eth-portfolio.html`} className="s-btn s-btn-ghost">Download Research Report</a>
+          <Link href="/institutional" className="s-btn s-btn-ghost">Institutional Access</Link>
+        </>}>{SIM}</CtaBand>
 
         <Disclaimer />
       </main>

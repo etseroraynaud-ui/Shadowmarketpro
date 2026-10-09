@@ -23,11 +23,24 @@ import { metricsOf } from '../lib/stats.ts'
 import type { ShockResult } from '../../lib/strategies/shock/engine.ts'
 import * as P from '../lib/portfolio.ts'
 import { renderReport } from './portfolio-html.ts'
+import { trendDown } from '../lib/e2.ts'
+import { loadBtc } from '../lib/data.ts'
+import { resample } from '../../lib/backtest/data.ts'
+import { simulate } from '../../lib/strategies/shock/engine.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const OUT = join(ROOT, 'research/reports/btc-eth-portfolio')
 const args = process.argv.slice(2)
 const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d }
+// --variant e2 : les shorts ne sont autorisés qu'en régime de tendance journalier baissier
+// (research/lib/e2.ts), spécification publique du Shock Engine depuis octobre 2026. Sorties à part :
+// les résultats de la v1 (research/reports/btc-eth-portfolio/) restent tels quels.
+const VARIANT = opt('variant', 'v1')
+if (VARIANT !== 'v1' && VARIANT !== 'e2') throw new Error(`variante inconnue : ${VARIANT}`)
+const E2V = VARIANT === 'e2'
+const OUT = join(ROOT, E2V ? 'research/reports/btc-eth-portfolio-e2' : 'research/reports/btc-eth-portfolio')
+/** Rapport validé de référence de chaque sleeve : zero-shot.ts (avec --e2 pour la variante E2). */
+const VALIDATED = (key: SleeveKey) => (E2V ? `research/reports/shock-15m-zeroshot-${key}-e2.json` : SLEEVES[key].validated)
+const MANIFEST = E2V ? 'shock-engine-manifest.json' : 'shock-engine-v1-manifest.json'
 const NBOOT = Number(opt('boot', '5000'))
 const SEED = 20261008
 const DAY = P.DAY, M15 = 15 * 60000, ANN = P.ANN
@@ -41,6 +54,14 @@ const log = (s: string) => process.stderr.write(`${s} (${((Date.now() - t0) / 10
 const NAMES: Record<SleeveKey, string> = { btc: 'BTC', ethusdt: 'ETH' }
 const KEYS: SleeveKey[] = ['btc', 'ethusdt']
 const S: Record<SleeveKey, Sleeve> = { btc: loadSleeve('btc'), ethusdt: loadSleeve('ethusdt') }
+// Variante E2 : mêmes sleeves, entrées short masquées hors régime de tendance baissier, sur les mêmes
+// barres journalières que le régime de volatilité.
+if (E2V) for (const key of KEYS) {
+  const s = S[key]
+  const trend = trendDown(s.bars, key === 'btc' ? resample(loadBtc(60), DAY) : resample(s.bars, DAY))
+  const signals = { long: s.signals.long, short: Uint8Array.from(s.signals.short, (x, i) => (x && trend[i] ? 1 : 0)) }
+  S[key] = { ...s, signals, run: (k: number) => simulate(s.m, s.preset.sets, costsFor(key, k), s.lo, s.end, s.select, signals) }
+}
 const R: Record<SleeveKey, Record<number, Detailed>> = { btc: {}, ethusdt: {} }
 const checks: { name: string; detail: string; ok: boolean }[] = []
 const check = (name: string, ok: boolean, detail: string) => { checks.push({ name, ok, detail }); if (!ok) process.stderr.write(`ÉCHEC : ${name} · ${detail}\n`) }
@@ -49,7 +70,7 @@ const reconcile: { key: string; k: number; field: string; validated: number; rec
 
 for (const key of KEYS) {
   const s = S[key]
-  const ref = JSON.parse(readFileSync(join(ROOT, SLEEVES[key].validated), 'utf8'))
+  const ref = JSON.parse(readFileSync(join(ROOT, VALIDATED(key)), 'utf8'))
   for (const k of KS) {
     R[key][k] = runDetailed(s, k)
     const sim = s.run(k)
@@ -61,7 +82,7 @@ for (const key of KEYS) {
     const pairs: [string, number, number][] = [['totalReturn', v.totalReturn, mt.totalReturn], ['cagr', v.cagr, mt.cagr], ['sharpe', v.sharpe, mt.sharpe], ['maxDD', v.dd, mt.maxDrawdown], ['profitFactor', v.pf, mt.profitFactor], ['trades', v.trades, sim.positions.length]]
     let worst = 0
     for (const [field, a, b] of pairs) { reconcile.push({ key: NAMES[key], k, field, validated: a, recomputed: b }); worst = Math.max(worst, Math.abs(a - b) / Math.max(1, Math.abs(a))) }
-    check(`${NAMES[key]} ×${k}: full-period metrics = validated report`, worst < 1e-9, `${SLEEVES[key].validated}, worst relative gap ${worst.toExponential(1)}`)
+    check(`${NAMES[key]} ×${k}: full-period metrics = validated report`, worst < 1e-9, `${VALIDATED(key)}, worst relative gap ${worst.toExponential(1)}`)
   }
   // Comptes : capital final = capital + somme des PnL des positions (toutes fermées en fin de run de référence ou valorisées).
   const d = R[key][1]
@@ -507,16 +528,34 @@ check('ETH runs the BTC preset unchanged', JSON.stringify(canon(S.ethusdt.preset
 
 // ================================================================ 14. preuves déjà établies (rapports existants)
 const rd = (f: string) => JSON.parse(readFileSync(join(ROOT, 'research/reports', f), 'utf8'))
-const zs = (f: string) => { const j = rd(f); const p = j.strategy.preset; const x1 = p.costs[1].s; const d1 = p.shifts.find((s: { k: number }) => s.k === 1).s; return { file: f, label: j.label, period: j.period, verdict: j.verdict, meanTrade: x1.meanTrade, sharpe: x1.sharpe, cagr: x1.cagr, dd: x1.dd, trades: x1.trades, randomBeaten: p.random.beaten, randomP95: p.random.p95, delay1Share: d1.meanTrade / x1.meanTrade, delay1Sharpe: d1.sharpe, eventsShockTrend: j.verdict.eventsShockTrend } }
-const rob = (f: string) => { const j = rd(f); return { file: f, period: j.period, levels: j.dists.filter((d: { family: string; win: number }) => d.family === 'preset' && d.win === 0).map((d: { level: number; q: { sharpe: number[] }; preset: { sharpe: number }; rank: { sharpe: number }; profitable: number; keepSharpe80: number }) => ({ level: d.level, medianSharpe: d.q.sharpe[2], p10: d.q.sharpe[0], p90: d.q.sharpe[4], preset: d.preset.sharpe, rank: d.rank.sharpe, profitable: d.profitable, keep80: d.keepSharpe80 })) } }
-const wfMd = readFileSync(join(ROOT, 'research/reports/shock-15m-wf-plateau-36-3.md'), 'utf8')
+const evFile = (f: string) => (E2V ? f.replace(/\.json$/, '-e2.json') : f)
+const zs = (f0: string) => { const f = evFile(f0); const j = rd(f); const p = j.strategy.preset; const x1 = p.costs[1].s; const d1 = p.shifts.find((s: { k: number }) => s.k === 1).s; return { file: f, label: j.label, period: j.period, verdict: j.verdict, meanTrade: x1.meanTrade, sharpe: x1.sharpe, cagr: x1.cagr, dd: x1.dd, trades: x1.trades, randomBeaten: p.random.beaten, randomP95: p.random.p95, delay1Share: d1.meanTrade / x1.meanTrade, delay1Sharpe: d1.sharpe, eventsShockTrend: j.verdict.eventsShockTrend } }
+const rob = (f0: string) => { const f = evFile(f0); const j = rd(f); return { file: f, period: j.period, levels: j.dists.filter((d: { family: string; win: number }) => d.family === 'preset' && d.win === 0).map((d: { level: number; q: { sharpe: number[] }; preset: { sharpe: number }; rank: { sharpe: number }; profitable: number; keepSharpe80: number }) => ({ level: d.level, medianSharpe: d.q.sharpe[2], p10: d.q.sharpe[0], p90: d.q.sharpe[4], preset: d.preset.sharpe, rank: d.rank.sharpe, profitable: d.profitable, keep80: d.keepSharpe80 })) } }
+const WF = E2V ? 'shock-15m-wf-plateau-36-3-e2.md' : 'shock-15m-wf-plateau-36-3.md'
+const wfMd = readFileSync(join(ROOT, 'research/reports', WF), 'utf8')
 const wfRow = wfMd.split('\n').find(l => l.startsWith('| **Walk-forward, plateaux**'))!.split('|').map(x => x.trim())
 const evidence = {
   btc: zs('shock-15m-zeroshot-btc.json'), eth: zs('shock-15m-zeroshot-ethusdt.json'), ethDukascopy: zs('shock-15m-zeroshot-eth-dukascopy.json'),
   gold: zs('shock-15m-zeroshot-xauusd.json'), sol: zs('shock-15m-zeroshot-solusdt.json'), tao: zs('shock-15m-zeroshot-taousdt.json'),
   robBtc: rob('shock-15m-robustness-local.json'), robEth: rob('shock-15m-robustness-local-ethusdt.json'),
-  walkForward: { file: 'shock-15m-wf-plateau-36-3.md', period: '2020-01-01 → 2026-10-04', windows: 28, cagr: wfRow[3], sharpe: wfRow[4], dd: wfRow[6], trades: wfRow[8] },
+  walkForward: { file: WF, period: '2020-01-01 → 2026-10-04', windows: 28, cagr: wfRow[3], sharpe: wfRow[4], dd: wfRow[6], trades: wfRow[8] },
 }
+
+// Variante E2 : recoupement avec les études précédentes (même stratégie calculée par d'autres scripts)
+// et limites chiffrées (funding des perpétuels, glissement), tirées de research/reports/e2-diagnostics.
+const e2Stress = (() => {
+  if (!E2V) return null
+  const dg = JSON.parse(readFileSync(join(ROOT, 'research/reports/e2-diagnostics/e2-diagnostics.json'), 'utf8'))
+  check('E2: portfolio Sharpe = E2 diagnostics (research/shock/e2-diagnostics.ts)', Math.abs(mP.sharpe - dg.portfolio.challengerE2) < 1e-8, `${mP.sharpe.toFixed(10)} vs ${dg.portfolio.challengerE2}`)
+  const se = JSON.parse(readFileSync(join(ROOT, 'research/reports/short-entry-study/short-entry-btc-eth.json'), 'utf8'))
+  check('E2: portfolio Sharpe, CAGR and max drawdown = short-entry study (research/shock/short-entry-study.ts)', Math.abs(mP.sharpe - se.portfolio.E2.sharpe) < 1e-8 && Math.abs(mP.cagr - se.portfolio.E2.cagr) < 1e-8 && Math.abs(mP.maxDD - se.portfolio.E2.maxDD) < 1e-8, `Sharpe ${mP.sharpe.toFixed(8)}, CAGR ${mP.cagr.toFixed(8)}, DD ${mP.maxDD.toFixed(8)}`)
+  const label: Record<string, string> = { binance: 'historical Binance perpetual funding (2020 onwards; constant +0.01 % per 8 h before 2020)', hyperliquid: 'same, with Hyperliquid funding from May 2023', shortsPay: 'stress: shorts pay 0.01 % per 8 h at all times' }
+  return {
+    source: 'research/reports/e2-diagnostics/e2-diagnostics.json',
+    funding: dg.funding.map((f: { scenario: string; e2: { sharpe: number; cagr: number; maxDD: number } }) => ({ scenario: label[f.scenario] ?? f.scenario, sharpe: f.e2.sharpe, cagr: f.e2.cagr, maxDD: f.e2.maxDD })),
+    slippage: dg.slippage.map((x: { slip: number; e2: number }) => ({ slippagePctPerOrder: x.slip, sharpe: x.e2 })),
+  }
+})()
 
 // ================================================================ 15. sorties
 mkdirSync(OUT, { recursive: true })
@@ -535,10 +574,13 @@ const files: Record<string, string> = {
 }
 const commonPeriod = { start: P.isoDay(D0), end: P.isoDay(D1), days: ND, years: YEARS, rule: 'first UTC day on which both strategies are simulated after warm-up (ETH simulation start) → last complete UTC day covered by both' }
 const summary = {
-  schema: 'shock-engine-portfolio-summary/1', version: 'shock-engine-v1', status: 'HISTORICAL SIMULATION', liveResults: null,
-  title: 'Shock Engine BTC/ETH Portfolio', subtitle: 'Frozen BTC-calibrated strategy · zero-shot Ethereum transfer',
+  schema: 'shock-engine-portfolio-summary/1', version: E2V ? 'shock-engine-2026.10' : 'shock-engine-v1', variant: VARIANT, status: 'HISTORICAL SIMULATION', liveResults: null,
+  title: 'Shock Engine BTC/ETH Portfolio', subtitle: E2V ? 'BTC-calibrated strategy · applied unchanged to Ethereum' : 'Frozen BTC-calibrated strategy · zero-shot Ethereum transfer',
   parametersSha256: paramsHash,
-  disclaimers: ['Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH.', 'Historical simulation after modeled transaction costs. Not live performance.', 'Capacity and market impact are not yet modeled.'],
+  disclaimers: E2V
+    ? ['Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH.', 'Historical simulation after modeled transaction costs. Not live performance.', 'Short entries are only allowed when the daily trend regime is bearish. This condition was specified in October 2026, after this historical period had been studied: the figures are in-sample, not an independent out-of-sample test.', 'Slippage and perpetual funding are not included in the headline figures.', 'Capacity and market impact are not yet modeled.']
+    : ['Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH.', 'Historical simulation after modeled transaction costs. Not live performance.', 'Capacity and market impact are not yet modeled.'],
+  ...(E2V ? { stress: e2Stress } : {}),
   commonPeriod,
   conventions: { returns: 'daily, UTC close-to-close (equity of the last 15-min bar of each day)', annualization: 365.25, riskFree: 0, sharpe: 'mean / population sd of daily returns × √365.25', costs: 'commission 0.045 % per order (each entry and exit fill); slippage 0 as in the validated reference; no funding; no leverage' },
   allocation: { weights: { btc: 0.5, eth: 0.5 }, rebalancing: 'none (official variant A: independent sleeves from a 50/50 start)', diagnostics: ['B: monthly rebalancing to 50/50 (month-end UTC close)', 'C (exploratory): inverse 90-day volatility, monthly, weights sum to 1'] },
@@ -572,24 +614,24 @@ for (const [name, content] of Object.entries(files)) writeFileSync(join(OUT, nam
 // Manifeste : de quoi prouver quelle version a produit ces résultats.
 const sha = (p: string) => createHash('sha256').update(readFileSync(join(ROOT, p))).digest('hex')
 const git = (c: string) => { try { return execSync(`git ${c}`, { cwd: ROOT, encoding: 'utf8' }).trim() } catch { return null } }
-const scripts = ['research/shock/portfolio.ts', 'research/shock/portfolio-html.ts', 'research/lib/portfolio.ts', 'research/lib/frozen-shock.ts', 'research/lib/svg.ts', 'research/lib/data.ts', 'research/lib/stats.ts', 'research/shock/zero-shot.ts',
+const scripts = ['research/shock/portfolio.ts', 'research/shock/portfolio-html.ts', 'research/lib/portfolio.ts', 'research/lib/frozen-shock.ts', ...(E2V ? ['research/lib/e2.ts'] : []), 'research/lib/svg.ts', 'research/lib/data.ts', 'research/lib/stats.ts', 'research/shock/zero-shot.ts',
   'lib/strategies/shock/engine.ts', 'lib/strategies/shock/market.ts', 'lib/strategies/shock/strategy.ts', 'lib/strategies/shock/broker.ts', 'lib/strategies/shock/live.ts', 'lib/strategies/shock/params.ts', 'lib/strategies/shock/presets.ts', 'lib/strategies/shock/regimes.ts', 'lib/backtest/data.ts', 'lib/backtest/indicators.ts', 'lib/backtest/metrics.ts']
 const dirty = git(`status --porcelain -- ${scripts.join(' ')} research/data`)
 const dataset = (key: SleeveKey) => { const s = S[key]; return { file: SLEEVES[key].file, sha256: sha(SLEEVES[key].file), instrument: SLEEVES[key].label, venue: SLEEVES[key].venue, timeframe: '15m', timestamps: 'bar open, ms UTC', firstBar: new Date(s.bars.t[0]).toISOString(), lastBar: new Date(s.bars.t[s.bars.n - 1]).toISOString(), warmUpFrom: SLEEVES[key].warm, simulationFrom: SLEEVES[key].start, simulatedBars: s.end - s.lo + 1, commonWindowBars: win[key].b - win[key].a + 1, ...(key === 'btc' ? { regimeSource: 'research/data/btcusd_60m.csv.gz', regimeSha256: sha('research/data/btcusd_60m.csv.gz') } : { regimeSource: 'daily bars resampled from the same 15-min file' }) } }
 const manifest = {
-  version: 'shock-engine-v1', generatedAt: new Date().toISOString(), status: 'HISTORICAL SIMULATION',
+  version: E2V ? 'shock-engine-2026.10' : 'shock-engine-v1', variant: VARIANT, generatedAt: new Date().toISOString(), status: 'HISTORICAL SIMULATION',
   git: { commit: git('rev-parse HEAD'), branch: git('rev-parse --abbrev-ref HEAD'), sourcesClean: dirty === '', dirtyFiles: dirty ? dirty.split('\n') : [] },
-  runtime: { node: process.version, command: 'node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts' + (NBOOT !== 5000 ? ` --boot ${NBOOT}` : ''), seeds: { bootstrap: SEED, overlapBaseline: SEED + 1, copulaNull: SEED } },
+  runtime: { node: process.version, command: 'node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts' + (E2V ? ' --variant e2' : '') + (NBOOT !== 5000 ? ` --boot ${NBOOT}` : ''), seeds: { bootstrap: SEED, overlapBaseline: SEED + 1, copulaNull: SEED } },
   datasets: { btc: dataset('btc'), eth: dataset('ethusdt') },
   commonPeriod,
-  strategy: { name: 'Shock Engine, adaptive volatility preset, 15 min (bot preset, full entries)', source: 'lib/strategies/shock/presets.ts ADAPTIVE15 over lib/strategies/shock/params.ts DEFAULT_PARAMS', regimes: ['calm', 'agitated'], parametersSha256: paramsHash, parameters: canon(params), ethCalibration: 'none: ETH inherits the BTC preset unchanged', entryMask: 'first bar after a data gap does not trigger an entry (as in zero-shot.ts)' },
+  strategy: { name: E2V ? 'Shock Engine, adaptive volatility preset, 15 min; short entries only in a bearish daily trend regime (research/lib/e2.ts)' : 'Shock Engine, adaptive volatility preset, 15 min (bot preset, full entries)', source: 'lib/strategies/shock/presets.ts ADAPTIVE15 over lib/strategies/shock/params.ts DEFAULT_PARAMS', regimes: ['calm', 'agitated'], parametersSha256: paramsHash, parameters: canon(params), ethCalibration: 'none: ETH inherits the BTC preset unchanged', entryMask: 'first bar after a data gap does not trigger an entry (as in zero-shot.ts)' },
   assumptions: { capitalPerSleeve: 'each sleeve compounds only its own capital; 100 % of sleeve equity per position; one position at a time per sleeve; no leverage', commissionPctPerOrder: 0.045, slippagePctPerOrder: 0, funding: 'not modeled (0)', riskFree: 0, annualization: 365.25 },
   portfolio: { weights: { btc: 0.5, eth: 0.5 }, rebalancing: 'none (official variant A)', diagnostics: { B: 'monthly 50/50 at month-end UTC close, commission on resized open positions', C: `exploratory equal risk, inverse ${VOL_WIN}-day volatility, monthly, no leverage` } },
-  validatedReference: KEYS.map(k => ({ file: SLEEVES[k].validated, sha256: sha(SLEEVES[k].validated), reproduced: checks.filter(c => c.name.startsWith(`${NAMES[k]} ×`)).every(c => c.ok) })),
+  validatedReference: KEYS.map(k => ({ file: VALIDATED(k), sha256: sha(VALIDATED(k)), reproduced: checks.filter(c => c.name.startsWith(`${NAMES[k]} ×`)).every(c => c.ok) })),
   scripts: scripts.map(p => ({ path: p, sha256: sha(p) })),
   outputs: Object.keys(files).map(f => ({ path: relative(ROOT, join(OUT, f)), sha256: createHash('sha256').update(files[f]).digest('hex') })),
   sanityChecks: { passed: checks.filter(c => c.ok).length, failed: checks.filter(c => !c.ok).map(c => c.name) },
 }
-writeFileSync(join(OUT, 'shock-engine-v1-manifest.json'), JSON.stringify(manifest, null, 1))
+writeFileSync(join(OUT, MANIFEST), JSON.stringify(manifest, null, 1))
 log(`écrit ${relative(ROOT, OUT)} · contrôles ${checks.filter(c => c.ok).length}/${checks.length}`)
 if (checks.some(c => !c.ok)) process.exitCode = 1

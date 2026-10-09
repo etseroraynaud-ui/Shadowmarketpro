@@ -44,6 +44,10 @@ const note = (s: string) => `<p class="note">${s}</p>`
 
 export function renderReport(I: ReportInput): string {
   const S = I.summary
+  // Variante E2 (spécification publique depuis octobre 2026) : shorts seulement en régime de tendance journalier baissier.
+  const E2V = S.variant === 'e2'
+  const sfx = E2V ? '-e2' : ''
+  const ST = S.stress as { funding: { scenario: string; sharpe: number; cagr: number; maxDD: number }[]; slippage: { slippagePctPerOrder: number; sharpe: number }[] } | undefined
   const B = S.series.btc, E = S.series.eth, Pf = S.series.portfolio
   const H = S.headline, CP = S.commonPeriod
   const ml = (m: Any) => `${monthLabel(m.key)}`
@@ -65,7 +69,7 @@ export function renderReport(I: ReportInput): string {
   const summary = `
 <div class="tiles">${tiles.map(([l, v, s]) => `<div class="tile"><div class="tl">${l}</div><div class="tv">${v}</div><div class="ts">${esc(s)}</div></div>`).join('')}</div>
 <p class="lead">Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH.</p>
-<p class="lead">Historical simulation after modeled transaction costs. Not live performance.</p>
+${E2V ? '<p class="lead">Short entries are only allowed when the daily trend regime is bearish. This condition was specified in October 2026, after this historical period had been studied: the figures are in-sample, not an independent out-of-sample test.</p>\n' : ''}<p class="lead">Historical simulation after modeled transaction costs. Not live performance.</p>
 <div class="status-grid">
   <div class="status-box hist"><div class="sb-h">Historical simulation</div><p>Every figure in this report. Frozen rules replayed on historical 15-minute bars, ${CP.start} → ${CP.end}, with a commission of 0.045 % per order. No slippage, no funding and no market impact are modeled.</p></div>
   <div class="status-box live"><div class="sb-h">Live / forward results</div><p>None in this report. No figure here comes from live trading, paper trading or a forward test. Forward results, when they exist, are to be reported separately, from the date the rules were frozen, and never blended with this simulation.</p></div>
@@ -73,10 +77,10 @@ export function renderReport(I: ReportInput): string {
 
   // ---------------------------------------------------------------- 1. méthode
   const method = `
-<p>Two sleeves run the same frozen Shock Engine: the bot's adaptive-volatility 15-minute preset (two parameter sets, calm and agitated, selected by a causal daily volatility regime), with full entry signals. The preset was selected on Bitcoin; Ethereum runs it unchanged (identical parameter hash <code>${esc(String(S.parametersSha256).slice(0, 16))}…</code> for both sleeves).</p>
+<p>Two sleeves run the same Shock Engine: the adaptive-volatility 15-minute preset (two parameter sets, calm and agitated, selected by a causal daily volatility regime), with full entry signals${E2V ? ', except that a short entry after a shock is only allowed when the daily trend regime, computed causally on closed days, is bearish' : ''}. The preset was selected on Bitcoin; Ethereum runs it unchanged (identical parameter hash <code>${esc(String(S.parametersSha256).slice(0, 16))}…</code> for both sleeves).</p>
 ${table(['Sleeve', 'Data', 'Simulated from (after warm-up)', 'Validated reference', 'Trades in common period'], [
-    [lab(COLORS.btc, 'BTC'), 'BTC/USD, Bitstamp spot, 15 min', '2017-01-01 (warm-up from 2016-01-01)', '<code>shock-15m-zeroshot-btc.json</code>', int(B.trades.trades)],
-    [lab(COLORS.eth, 'ETH'), 'ETH/USDT, Binance spot, 15 min', '2018-09-01 (warm-up from 2017-08-17)', '<code>shock-15m-zeroshot-ethusdt.json</code>', int(E.trades.trades)],
+    [lab(COLORS.btc, 'BTC'), 'BTC/USD, Bitstamp spot, 15 min', '2017-01-01 (warm-up from 2016-01-01)', `<code>shock-15m-zeroshot-btc${sfx}.json</code>`, int(B.trades.trades)],
+    [lab(COLORS.eth, 'ETH'), 'ETH/USDT, Binance spot, 15 min', '2018-09-01 (warm-up from 2017-08-17)', `<code>shock-15m-zeroshot-ethusdt${sfx}.json</code>`, int(E.trades.trades)],
   ], { cls: 'wrap text' })}
 <h3>Common period</h3>
 <p>Rule: ${esc(CP.rule)}. Result: <strong>${CP.start} → ${CP.end}</strong>, ${int(CP.days)} days (${CP.years.toFixed(2)} years). BTC, ETH and the portfolio are all measured on exactly these days.</p>
@@ -426,7 +430,7 @@ ${table(['Asset · perturbation', 'Preset Sharpe', 'Neighbor median', 'Neighbor 
 <p>Observations made while measuring the frozen portfolio. None of them changes the official portfolio. Each would need to be specified in advance and tested on data not used here (forward period).</p>
 <ul>
 <li><strong>Rebalancing.</strong> Monthly rebalancing (B, Sharpe ${num(V.B.m.sharpe)}) and equal risk (C, ${num(V.C.m.sharpe)}) did better than A (${num(V.A.m.sharpe)}) in this sample, mainly because A drifted to an average BTC weight of ${pct(W.A.mean, 0)}. Hypothesis: a calendar rebalancing rule improves the frozen portfolio out of sample. If tested, the rule should be fixed now and judged on forward data only.</li>
-<li><strong>Shared shocks.</strong> About a quarter of ETH entries coincide with a same-direction BTC entry, and losses on days when both lose are more aligned than the benchmark. Hypothesis: simultaneous same-direction entries carry most of the common risk. Studying this would mean changing the strategy, which is out of scope for the frozen v1.</li>
+<li><strong>Shared shocks.</strong> About a quarter of ETH entries coincide with a same-direction BTC entry, and losses on days when both lose are more aligned than the benchmark. Hypothesis: simultaneous same-direction entries carry most of the common risk. Studying this would mean changing the strategy, which is out of scope ${E2V ? 'here' : 'for the frozen v1'}.</li>
 <li><strong>Risk balance.</strong> At 50/50 in capital, ETH carries ${pct(RK.equalWeights.pct[1], 0)} of the variance. Whether risk balance helps out of sample is the same open question as the rebalancing one; it is not answered by this history.</li>
 </ul>`
 
@@ -438,10 +442,10 @@ ${table(['Check', 'Result', 'Detail'], (S.sanity as Any[]).map(c => [esc(c.name)
   // ---------------------------------------------------------------- 20. limites
   const limits = `
 <ul>
-<li><strong>In-sample selection for BTC.</strong> The preset was chosen on BTC 2017–2026, which contains the whole common period. The walk-forward study (section 16) supports the BTC edge out of sample from 2020, but the BTC sleeve figures here are in-sample. ETH is zero-shot across assets, not across time.</li>
+${E2V ? '<li><strong>In-sample trend condition.</strong> The daily-trend condition on short entries was specified in October 2026, after BTC and ETH over this period had been studied. Both sleeves are therefore in-sample for that condition; it is being followed forward separately and is not an independent out-of-sample result.</li>\n' : ''}<li><strong>In-sample selection for BTC.</strong> The preset was chosen on BTC 2017–2026, which contains the whole common period. The walk-forward study (section 16) supports the BTC edge out of sample from 2020, but the BTC sleeve figures here are in-sample. ETH is zero-shot across assets, not across time.</li>
 <li><strong>Execution costs.</strong> Slippage is zero and fills happen at the bar close or at the stop level. At about 230× two-way turnover a year, each 0.01 % of average slippage per fill costs about 2.3 % of equity a year. Cost ×2 lowers the portfolio Sharpe to ${num(C.stress[2].portfolio.sharpe)}.</li>
 <li><strong>Market impact and capacity</strong> are not modeled (section 15).</li>
-<li><strong>Funding.</strong> The simulation trades spot-like instruments without funding. Live execution on perpetual futures pays or receives funding while a position is open (about ${pct(Pf.expo.timeInMarket, 0)} of the time).</li>
+<li><strong>Funding.</strong> The simulation trades spot-like instruments without funding. Live execution on perpetual futures pays or receives funding while a position is open (about ${pct(Pf.expo.timeInMarket, 0)} of the time).${ST ? ` Stress tests (positions charged or credited at each funding time, correct sign for shorts): ${ST.funding.map(f => `${esc(f.scenario)}: Sharpe ${num(f.sharpe)}, CAGR ${pct(f.cagr)}, max drawdown ${pct(f.maxDD)}`).join('; ')}. Slippage per order: ${ST.slippage.map(x => `${num(x.slippagePctPerOrder, 2)} % → Sharpe ${num(x.sharpe)}`).join(', ')}.` : ''}</li>
 <li><strong>Data and venues.</strong> BTC/USD from Bitstamp and ETH/USDT from Binance. The execution venue (Hyperliquid perpetuals for the bot) has different prices, liquidity, fees and stop mechanics. ETH/USDT also carries USDT risk.</li>
 <li><strong>Live mechanics.</strong> Candle availability, latency and stop-trigger behavior observed on the live exchange can differ from the simulator's intrabar path (see the bot documentation).</li>
 <li><strong>Right-tail dependence.</strong> The best 5 % of trades carry the entire net gain. A market in which large trending moves after shocks disappear would remove the edge, and the bootstrap cannot represent such a regime.</li>
@@ -450,7 +454,7 @@ ${table(['Check', 'Result', 'Detail'], (S.sanity as Any[]).map(c => [esc(c.name)
 
   // ---------------------------------------------------------------- annexe
   const files = `
-<p>Produced by <code>node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts</code> (deterministic, fixed seeds). Next to this report: <code>portfolio_daily_returns.csv</code>, <code>portfolio_monthly_returns.csv</code>, <code>portfolio_annual_returns.csv</code>, <code>portfolio_drawdowns.csv</code>, <code>portfolio_correlation_rolling.csv</code>, <code>portfolio_summary.json</code> (machine-readable, for later integration) and <code>shock-engine-v1-manifest.json</code> (git commit, dataset and script hashes, parameter hash, assumptions).</p>`
+<p>Produced by <code>node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts${E2V ? ' --variant e2' : ''}</code> (deterministic, fixed seeds). Next to this report: <code>portfolio_daily_returns.csv</code>, <code>portfolio_monthly_returns.csv</code>, <code>portfolio_annual_returns.csv</code>, <code>portfolio_drawdowns.csv</code>, <code>portfolio_correlation_rolling.csv</code>, <code>portfolio_summary.json</code> (machine-readable, for later integration) and <code>${E2V ? 'shock-engine-manifest.json' : 'shock-engine-v1-manifest.json'}</code> (git commit, dataset and script hashes, parameter hash, assumptions).</p>`
 
   const toc: [string, string][] = [['method', 'Scope and method'], ['reconciliation', 'Reconciliation with the validated backtests'], ['performance', 'Performance on the common period'], ['rebalancing', 'Rebalancing'], ['costs', 'Transaction costs'], ['correlation', 'BTC/ETH correlation'], ['crisis', 'Downside and crisis correlation'], ['overlap', 'Trade overlap'], ['risk', 'Risk contribution'], ['diversification', 'Diversification'], ['drawdowns', 'Drawdowns'], ['calendar', 'Years and months'], ['concentration', 'Distribution and concentration'], ['bootstrap', 'Bootstrap'], ['capacity', 'Capacity and implementation proxies'], ['evidence', 'Research evidence'], ['interpretation', 'Interpretation'], ['hypotheses', 'Future hypotheses'], ['sanity', 'Sanity checks'], ['limits', 'Limitations and unmodeled risks']]
   const bodies: Record<string, string> = { method, reconciliation, performance, rebalancing, costs, correlation, crisis, overlap, risk, diversification, drawdowns, calendar, concentration, bootstrap, capacity, evidence, interpretation, hypotheses, sanity, limits }
@@ -461,7 +465,7 @@ ${table(['Check', 'Result', 'Detail'], (S.sanity as Any[]).map(c => [esc(c.name)
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shock Engine BTC/ETH Portfolio</title>
-<meta name="description" content="Historical simulation of a 50/50 portfolio of the frozen Shock Engine on BTC and ETH, ${CP.start} to ${CP.end}. Not live performance.">
+<meta name="description" content="Historical simulation of a 50/50 portfolio of the ${E2V ? '' : 'frozen '}Shock Engine on BTC and ETH, ${CP.start} to ${CP.end}. Not live performance.">
 <style>${CSS}</style>
 </head>
 <body>
@@ -470,14 +474,14 @@ ${table(['Check', 'Result', 'Detail'], (S.sanity as Any[]).map(c => [esc(c.name)
 <header>
 <p class="eyebrow">Shock Engine research · ${esc(S.version)}</p>
 <h1>Shock Engine BTC/ETH Portfolio</h1>
-<p class="subtitle">Frozen BTC-calibrated strategy · zero-shot Ethereum transfer</p>
+<p class="subtitle">${esc(S.subtitle)}</p>
 <p class="meta">Common period ${CP.start} → ${CP.end} · official allocation 50/50, no rebalancing · commission 0.045 % per order · daily Sharpe, √365.25, risk-free 0</p>
 </header>
 <section id="summary"><h2>Executive summary</h2>${summary}</section>
 <nav class="toc"><h2>Contents</h2><ol>${toc.map(([id, t]) => `<li><a href="#${id}">${t}</a></li>`).join('')}</ol></nav>
 ${toc.map(([id, t], i) => section(id, String(i + 1), t, bodies[id])).join('\n')}
 <section id="files"><h2>Files and reproducibility</h2>${files}</section>
-<footer><p>Historical simulation after modeled transaction costs. Not live performance. Past simulated results do not predict future results. Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH. Capacity and market impact are not yet modeled.</p></footer>
+<footer><p>${E2V ? (S.disclaimers as string[]).map(esc).join(' ') + ' Past simulated results do not predict future results.' : 'Historical simulation after modeled transaction costs. Not live performance. Past simulated results do not predict future results. Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH. Capacity and market impact are not yet modeled.'}</p></footer>
 </main>
 <script>${JS}</script>
 </body>

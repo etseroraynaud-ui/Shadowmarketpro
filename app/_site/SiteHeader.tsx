@@ -1,21 +1,19 @@
 'use client'
 
-// En-tête commun : logo, liens (recherche d'abord, indicateurs ensuite), menu sur mobile.
+// En-tête commun : logo, cinq entrées (le Shock Engine d'abord, les outils de trading à part),
+// appel vers la recherche, menu sur mobile.
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { LogoSVG } from '../components/Logo'
 
-const LINKS: { href: string; label: string }[] = [
-  { href: '/shock-engine', label: 'Shock Engine' },
-  { href: '/shock-engine/portfolio', label: 'BTC/ETH Portfolio' },
+const LINKS: { href: string; label: string; match?: (p: string) => boolean }[] = [
+  { href: '/shock-engine', label: 'Shock Engine', match: p => p === '/shock-engine' },
+  { href: '/shock-engine/portfolio', label: 'Performance' },
   { href: '/research', label: 'Research' },
-  { href: '/live', label: 'Live' },
+  { href: '/trading-tools', label: 'Trading Tools', match: p => p === '/trading-tools' || p.startsWith('/backtest') },
   { href: '/institutional', label: 'Institutional' },
-  { href: '/#indicators', label: 'Indicators' },
-  { href: '/#pricing', label: 'Pricing' },
-  { href: '/backtest', label: 'Backtest Lab' },
 ]
 
 export default function SiteHeader() {
@@ -29,7 +27,7 @@ export default function SiteHeader() {
     return () => window.removeEventListener('scroll', on)
   }, [])
   useEffect(() => setOpen(false), [path])
-  const active = (href: string) => !href.includes('#') && (path === href || (href !== '/shock-engine' && path.startsWith(href + '/')))
+  const active = (l: (typeof LINKS)[number]) => (l.match ? l.match(path) : path === l.href || path.startsWith(l.href + '/'))
   return (
     <header className={`s-header${scrolled || open ? ' s-header-solid' : ''}`}>
       <div className="s-header-in">
@@ -38,7 +36,8 @@ export default function SiteHeader() {
           <span className="s-brand-name">ShadowMarket<em>Pro</em><sup>™</sup></span>
         </Link>
         <nav className="s-nav" aria-label="Main">
-          {LINKS.map(l => <Link key={l.href} href={l.href} className={active(l.href) ? 's-active' : undefined} aria-current={active(l.href) ? 'page' : undefined}>{l.label}</Link>)}
+          {LINKS.map(l => <Link key={l.href} href={l.href} className={active(l) ? 's-active' : undefined} aria-current={active(l) ? 'page' : undefined}>{l.label}</Link>)}
+          <Link href="/research" className="s-btn s-btn-ghost s-header-cta">View Research</Link>
         </nav>
         <button type="button" className="s-menu-btn" aria-expanded={open} aria-controls="s-mobile-nav" onClick={() => setOpen(v => !v)}>
           <span className="s-sr">Menu</span>
@@ -49,7 +48,7 @@ export default function SiteHeader() {
       </div>
       {open && (
         <nav id="s-mobile-nav" className="s-mobile-nav" aria-label="Main">
-          {LINKS.map(l => <Link key={l.href} href={l.href} className={active(l.href) ? 's-active' : undefined} onClick={() => setOpen(false)}>{l.label}</Link>)}
+          {LINKS.map(l => <Link key={l.href} href={l.href} className={active(l) ? 's-active' : undefined} onClick={() => setOpen(false)}>{l.label}</Link>)}
         </nav>
       )}
     </header>

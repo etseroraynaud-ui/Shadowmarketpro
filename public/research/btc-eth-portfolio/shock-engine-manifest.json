@@ -1,16 +1,17 @@
 {
- "version": "shock-engine-v1",
- "generatedAt": "2026-10-08T18:27:40.557Z",
+ "version": "shock-engine-2026.10",
+ "variant": "e2",
+ "generatedAt": "2026-10-09T01:10:40.427Z",
  "status": "HISTORICAL SIMULATION",
  "git": {
-  "commit": "d85266b5229b0dac6f6ccd3611083fd9ac570ee6",
+  "commit": "0aac2d8efc44824820f01e628133f6233d2b8438",
   "branch": "claude/shock-engine-portfolio-g79j1v",
   "sourcesClean": true,
   "dirtyFiles": []
  },
  "runtime": {
   "node": "v22.22.0",
-  "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts",
+  "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts --variant e2",
   "seeds": {
    "bootstrap": 20261008,
    "overlapBaseline": 20261009,
@@ -58,7 +59,7 @@
   "rule": "first UTC day on which both strategies are simulated after warm-up (ETH simulation start) → last complete UTC day covered by both"
  },
  "strategy": {
-  "name": "Shock Engine, adaptive volatility preset, 15 min (bot preset, full entries)",
+  "name": "Shock Engine, adaptive volatility preset, 15 min; short entries only in a bearish daily trend regime (research/lib/e2.ts)",
   "source": "lib/strategies/shock/presets.ts ADAPTIVE15 over lib/strategies/shock/params.ts DEFAULT_PARAMS",
   "regimes": [
    "calm",
@@ -179,24 +180,24 @@
  },
  "validatedReference": [
   {
-   "file": "research/reports/shock-15m-zeroshot-btc.json",
-   "sha256": "90498d3214ca4f2949b365a2a9bfed8bdb1d2318cfa866f8d739c1a63af59b9e",
+   "file": "research/reports/shock-15m-zeroshot-btc-e2.json",
+   "sha256": "171c5e7116101756ac164e8a9e7204e608a40698e4a64f858aa64749ac1e0665",
    "reproduced": true
   },
   {
-   "file": "research/reports/shock-15m-zeroshot-ethusdt.json",
-   "sha256": "42ea58cb546b13c5d55aa8834ea14ee128d5970dd82a55b331ca0d311bc0d1ba",
+   "file": "research/reports/shock-15m-zeroshot-ethusdt-e2.json",
+   "sha256": "7ec32caeafe968620d994dc1205fa9d2b8549e3519c3c331a50616fc0b5c7ee5",
    "reproduced": true
   }
  ],
  "scripts": [
   {
    "path": "research/shock/portfolio.ts",
-   "sha256": "ffa1918c2609cc28efeacc84f70944424df2fd4169a384de6df609d1b0715f97"
+   "sha256": "ef4f371382f6f2b7201e317795310ffc811563b05e61561acd3c773587cb10da"
   },
   {
    "path": "research/shock/portfolio-html.ts",
-   "sha256": "baf66c2ea329118ab236a1b3c66a3cd5830c93ceb26ceeef3c7a592e606373b7"
+   "sha256": "fca1f90fc562dcc4f64bfac578b3c39a185d22fa456ca947d9c527e2d1cb498f"
   },
   {
    "path": "research/lib/portfolio.ts",
@@ -205,6 +206,10 @@
   {
    "path": "research/lib/frozen-shock.ts",
    "sha256": "be445aa726433c3e92bcd0cd1bc4626e56d103a309c5e29a5d7cd3f990bed710"
+  },
+  {
+   "path": "research/lib/e2.ts",
+   "sha256": "d871214da8d4efb72dc6cf3cddfe8d53112a642361656ce24d365f259f2820e8"
   },
   {
    "path": "research/lib/svg.ts",
@@ -220,7 +225,7 @@
   },
   {
    "path": "research/shock/zero-shot.ts",
-   "sha256": "9dbec6ed07df1c57b40498436920b6cd16e59b19aa0f4bd5ece3879819b91398"
+   "sha256": "a6487a2e74ac2284a59ec30b7fe3d2471d369577b86ba64a4f0f552930597d6d"
   },
   {
    "path": "lib/strategies/shock/engine.ts",
@@ -269,36 +274,36 @@
  ],
  "outputs": [
   {
-   "path": "research/reports/btc-eth-portfolio/portfolio_daily_returns.csv",
-   "sha256": "e37b018e9f07334b3df1cdfa60b70c6dd157203c90f3d7add3eb846f8c4dd105"
+   "path": "research/reports/btc-eth-portfolio-e2/portfolio_daily_returns.csv",
+   "sha256": "27b5907621461d317e04dbb6d73c19055fea4c5ad224adbfff396ccb5b29e1d4"
   },
   {
-   "path": "research/reports/btc-eth-portfolio/portfolio_monthly_returns.csv",
-   "sha256": "2c5ab24f33ad92b38e72fd1448404636e09c9bbe20128313031dce86bab726d0"
+   "path": "research/reports/btc-eth-portfolio-e2/portfolio_monthly_returns.csv",
+   "sha256": "2cf0e76f0fbb7fa23f058f7b777066723dfc49669e1b2decfbadb20fd148b2a7"
   },
   {
-   "path": "research/reports/btc-eth-portfolio/portfolio_annual_returns.csv",
-   "sha256": "124fc5d65d5643cfdda3746894df6a1366063430d4915ffe0826c8f2fa5f42cf"
+   "path": "research/reports/btc-eth-portfolio-e2/portfolio_annual_returns.csv",
+   "sha256": "6b1e170c7367d88f172e41b1485271e1091db0c42f67e396108654d50bda7746"
   },
   {
-   "path": "research/reports/btc-eth-portfolio/portfolio_drawdowns.csv",
-   "sha256": "034bb241036ec117685adc2e8edf7d33e5ab5bc8f7f88b6897421a600fb99f8b"
+   "path": "research/reports/btc-eth-portfolio-e2/portfolio_drawdowns.csv",
+   "sha256": "7372222dfc947761ba2137507a43c0679c34e11e7f9e346134477966b13717bc"
   },
   {
-   "path": "research/reports/btc-eth-portfolio/portfolio_correlation_rolling.csv",
-   "sha256": "c5a0fff0a27bb7123603565e811ad9c39e71d9148d2798f7971c9ccad4f3ba77"
+   "path": "research/reports/btc-eth-portfolio-e2/portfolio_correlation_rolling.csv",
+   "sha256": "d0b8c3f5e290a57b873898b49b61c4a54b3787993e1b777d9860119c27e6fd4b"
   },
   {
-   "path": "research/reports/btc-eth-portfolio/portfolio_summary.json",
-   "sha256": "417bb299b3c3f109a8374dbc9c1f7942ffa4f0a60a1f8130be0ed69b23fa7725"
+   "path": "research/reports/btc-eth-portfolio-e2/portfolio_summary.json",
+   "sha256": "7fc6c9df3abe809328a72d2f29dcf9100e248b26101b61294574a0cb4ca2bfba"
   },
   {
-   "path": "research/reports/btc-eth-portfolio/btc-eth-portfolio.html",
-   "sha256": "ee6f3ef84d27e759499cf776561fd99e407269b8d458b4641f57f667cee27062"
+   "path": "research/reports/btc-eth-portfolio-e2/btc-eth-portfolio.html",
+   "sha256": "6a8e2df9a918f3cad3c981bc39ea3b919a4edacc871dde8e52bbf2b6324ecd68"
   }
  ],
  "sanityChecks": {
-  "passed": 38,
+  "passed": 40,
   "failed": []
  }
 }

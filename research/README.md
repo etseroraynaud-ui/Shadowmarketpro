@@ -72,6 +72,30 @@ publier si un contrôle est en échec) :
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/publish-portfolio.ts
 ```
 
+Étude pré-enregistrée de l'entrée des shorts (plan : `research/preregistration/short-entry-v1.1.md`,
+commité avant tout calcul ; rapport dans `research/reports/short-entry-study/`). Les variantes sont
+des masques sur la liste des entrées short ; la v1 n'est pas modifiée. Données des 8 actifs vierges
+(XRP, BNB, DOGE, TRX, ADA, LINK, XLM, LTC) : `python3 research/data/fetch-binance.py XRPUSDT 2017-07 2026-09`.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/short-entry-study.ts
+```
+
+Validation forward de E2 sur BTC/ETH (plan : `research/preregistration/e2-forward.md`, commité avant
+le début de la fenêtre forward, le 2026-10-12). Hors ligne : la v1 et le bot ne sont pas modifiés ; E2
+est seulement un challenger en shadow. Une évaluation après chaque mois civil complet :
+
+```
+git clone --depth 1 https://github.com/ff137/bitstamp-btcusd-minute-data /tmp/bs
+npm run research:data -- /tmp/bs/data/historical/btcusd_bitstamp_1min_2012-2025.csv.gz /tmp/bs/data/updates/btcusd_bitstamp_1min_latest.csv
+python3 research/data/fetch-binance.py ETHUSDT 2017-08 AAAA-MM --out research/data/ethusdt_15m.csv.gz
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/e2-forward.ts
+```
+
+puis commit des données et de `research/reports/e2-forward/` (rapport du mois, `latest.{md,json}`,
+`state.json`). Le script s'arrête sans rien tester si un contrôle échoue (empreintes, base historique
+révisée, shorts déjà rapportés modifiés, look-ahead de E2).
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 
