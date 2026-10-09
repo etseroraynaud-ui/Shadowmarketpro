@@ -180,6 +180,19 @@ export interface AccessCheck {
 }
 
 /** Exécution réelle sur Hyperliquid (testnet ou mainnet). */
+export type AccountMode = 'unifiedAccount' | 'portfolioMargin' | 'disabled' | 'default'
+const UNIFIED = new Set<AccountMode>(['unifiedAccount', 'portfolioMargin'])
+
+/**
+ * Capital du compte pour la taille des positions. En compte unifié (ou marge de portefeuille), le
+ * collatéral USDC est tenu en spot : à plat, le solde perps vaut 0 ; position ouverte, Hyperliquid
+ * le montre côté perps. On prend donc le plus grand des deux, jamais leur somme (le même collatéral
+ * serait compté deux fois). Compte standard : le spot ne sert pas de marge, seul le perps compte.
+ */
+export function equityOf(perpValue: number, mode: AccountMode, spotUsdc: number): number {
+  return UNIFIED.has(mode) ? Math.max(perpValue, spotUsdc) : perpValue
+}
+
 export class HyperliquidExchange implements Exchange {
   readonly asset: AssetInfo
   readonly data: HyperliquidData
@@ -218,11 +231,22 @@ export class HyperliquidExchange implements Exchange {
     return formatSize(x, this.asset.szDecimals)
   }
 
+  private mode: { value: AccountMode; at: number } | null = null
+
+  /** Mode du compte (unifié, marge de portefeuille…), relu au plus une fois par heure. */
+  private async accountMode(): Promise<AccountMode> {
+    if (this.mode && Date.now() - this.mode.at < 3600000) return this.mode.value
+    const value = await this.data.info.userAbstraction({ user: this.user })
+    this.mode = { value, at: Date.now() }
+    return value
+  }
+
   async account(): Promise<AccountState> {
-    const s = await this.data.info.clearinghouseState({ user: this.user, dex: this.asset.dex })
+    const [s, mode] = await Promise.all([this.data.info.clearinghouseState({ user: this.user, dex: this.asset.dex }), this.accountMode()])
     const p = s.assetPositions.find(a => a.position.coin === this.coin)?.position
+    const spot = UNIFIED.has(mode) ? (await this.data.info.spotClearinghouseState({ user: this.user })).balances.find(b => b.coin === 'USDC') : undefined
     return {
-      equity: Number(s.crossMarginSummary.accountValue),
+      equity: equityOf(Number(s.crossMarginSummary.accountValue), mode, spot ? Number(spot.total) : 0),
       position: p ? { size: Number(p.szi), entryPx: Number(p.entryPx), liquidationPx: p.liquidationPx == null ? null : Number(p.liquidationPx) } : { size: 0, entryPx: 0, liquidationPx: null },
       time: s.time,
     }

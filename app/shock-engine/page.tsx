@@ -5,7 +5,7 @@ import SiteHeader from '../_site/SiteHeader'
 import HeroChart from '../_site/HeroChart'
 import { CountUp, SeriesPanel, SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table, Verdict } from '../_site/ui'
-import { COLORS, DOWNLOADS, P, RA, SIM, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
+import { COLORS, DOWNLOADS, P, RA, SIM, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
 import { int, month, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -212,6 +212,7 @@ export default function ShockEnginePage() {
             { label: 'BTC / ETH evidence', state: 'ok', note: 'event study, placebo entries, delayed entries, two ETH data sources' },
             { label: 'Robustness testing', state: 'ok', note: 'parameter neighborhoods, cost stress, resampled histories' },
             { label: 'Forward validation', state: 'wait', note: `pre-registered; observation starts ${P.forward.start}` },
+            ...(TESTNET_SINCE ? [{ label: 'Testnet bot', state: 'wait' as const, note: <>public version, play money, since {TESTNET_SINCE} · <Link className="s-link" href="/live">live page</Link></> }] : []),
             { label: 'Live track record', state: 'no', note: 'not available' },
             { label: 'Capacity / market impact', state: 'no', note: 'not yet modeled' },
           ]} />
