@@ -41,6 +41,7 @@ import type { Prepared } from '../../lib/strategies/shock/market.ts'
 import { simulate } from '../../lib/strategies/shock/engine.ts'
 import type { ShockResult } from '../../lib/strategies/shock/engine.ts'
 import type { Costs, ShockParams } from '../../lib/strategies/shock/params.ts'
+import { trendDown } from '../lib/e2.ts'
 
 const args = process.argv.slice(2)
 const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d }
@@ -49,6 +50,9 @@ const DRAWS = Number(opt('draws', '200'))
 // Normalisation saisonnière (option) : rendement et volume divisés par leur niveau habituel au même
 // quart d'heure (heure de New York), mesuré sur les 60 jours de séance précédents.
 const SEASONAL = args.includes('--seasonal')
+// --e2 : shorts autorisés seulement en régime de tendance journalier baissier (research/lib/e2.ts),
+// sur les mêmes barres journalières que le régime de volatilité. Sans l'option, rien ne change.
+const E2 = args.includes('--e2')
 const SEASON_DAYS = 60
 const DAY = 864e5
 const M15 = 15 * 60000
@@ -133,6 +137,7 @@ const COSTS = (k: number): Costs => ({ capital: 10000, qtyPct: 100, commissionPc
 const m = marketFor(bars, 15, A.mintick)
 const preset = adaptivePreset(15, A.mintick)
 const sel = selectFor(preset, m, daily).select!
+const TREND = E2 ? trendDown(m.bars, daily) : null
 const VERSIONS = [
   { key: 'preset', label: 'préréglage du bot, entrées complètes', sets: preset.sets, select: sel as Int8Array | null },
   { key: 'core', label: 'préréglage, entrées « cœur » (choc + cassure + bougie + tendance 60 min)', sets: preset.sets, select: sel as Int8Array | null },
@@ -246,6 +251,7 @@ function signals(v: Version, mask = true) {
       if (P.allowLong && E.iL[i] && bullStrong[e][i]) long[i] = 1
       if (P.allowShort && E.iS[i] && c[i] < R.htfVal[i]) short[i] = 1
     }
+    if (TREND && !TREND[i]) short[i] = 0
   }
   return { long, short }
 }
@@ -465,11 +471,13 @@ for (const v of VERSIONS) {
   const pools: number[][] = v.sets.map(() => [])
   const nL = v.sets.map(() => 0), nS = v.sets.map(() => 0)
   for (let i = lo; i <= end; i++) { const e = setAt(v, i); if (e < 0 || gap[i]) continue; pools[e].push(i); nL[e] += sig.long[i]; nS[e] += sig.short[i] }
+  // Avec E2, les shorts au hasard sont tirés dans le même cadre que ceux de la stratégie (régime baissier).
+  const poolsS = pools.map(p => (TREND ? p.filter(i => TREND[i]) : p))
   const draw = (f: number) => {
     const long = new Uint8Array(n), short = new Uint8Array(n)
     v.sets.forEach((_, e) => {
       for (let j = 0; j < Math.round(nL[e] * f); j++) long[pools[e][Math.floor(rand() * pools[e].length)]] = 1
-      for (let j = 0; j < Math.round(nS[e] * f); j++) short[pools[e][Math.floor(rand() * pools[e].length)]] = 1
+      for (let j = 0; j < Math.round(nS[e] * f); j++) short[poolsS[e][Math.floor(rand() * poolsS[e].length)]] = 1
     })
     return run(v, COSTS(1), { long, short })
   }
@@ -516,7 +524,7 @@ const table = (head: string[], rows: string[][]) => { L.push(`| ${head.join(' | 
 const sg = (x: number, d = 2) => (Number.isFinite(x) ? (x >= 0 ? '+' : '−') + Math.abs(x).toFixed(d) : '—')
 const yes = (b: boolean) => (b ? 'oui' : '**non**')
 L.push(
-  `# Zéro-shot du Shock Engine · ${A.label}${SEASONAL ? ' · normalisation saisonnière' : ''}`,
+  `# Zéro-shot du Shock Engine · ${A.label}${SEASONAL ? ' · normalisation saisonnière' : ''}${E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`,
   '',
   `15 min, ${iso(lo)} → ${iso(end)} (${years.toFixed(1)} ans, préchauffage depuis ${iso(0)}). Stratégie figée, aucune variable ajoutée, aucun réglage réestimé. Coûts × 1 : commission 0,045 % par ordre${A.slipPct ? ` + glissement ${A.slipPct.toString().replace('.', ',')} % par ordre (données au prix acheteur)` : ''}, sans levier. Produit par \`node research/shock/zero-shot.ts --asset ${ASSET} --draws ${DRAWS}${SEASONAL ? ' --seasonal' : ''}\`.`,
   ...(SEASONAL ? ['', `**Normalisation saisonnière** (déclarée avant le test, sans paramètre ajusté) : pour détecter les chocs et le volume, le rendement de chaque bougie est divisé par la volatilité habituelle de son quart d'heure (heure de New York) et le volume par le volume habituel de ce quart d'heure, mesurés sur les ${SEASON_DAYS} jours de séance précédents. Sorties, stops et ATR inchangés.`] : []),
@@ -582,7 +590,7 @@ for (const v of VERSIONS) {
     ...s.shifts.filter(x => x.k > 0).map(x => [`+${x.k} bougie${x.k > 1 ? 's' : ''}`, num(x.s.sharpe), num(x.s.pf), String(x.s.trades), pct(x.s.meanTrade, 3), pct(x.s.meanTrade / x1.meanTrade, 0)]),
   ])
 }
-const out = `research/reports/shock-15m-zeroshot-${ASSET}${SEASONAL ? '-seasonal' : ''}`
+const out = `research/reports/shock-15m-zeroshot-${ASSET}${SEASONAL ? '-seasonal' : ''}${E2 ? '-e2' : ''}`
 writeFileSync(`${out}.md`, L.join('\n'))
 writeFileSync(`${out}.json`, JSON.stringify({ asset: ASSET, label: A.label, period: [iso(lo), iso(end)], years, data: { bars: end - lo + 1, gaps: nGap, zeroVol, sd15: sdIn }, verdict, events, strategy: strat, buyHold: bh }, (_, v) => (typeof v === 'number' && !Number.isFinite(v) ? null : v)))
 process.stderr.write(`écrit ${out}.md et ${out}.json en ${((Date.now() - t0) / 1000).toFixed(0)} s\n`)

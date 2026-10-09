@@ -34,6 +34,7 @@ import { simulate } from '../../lib/strategies/shock/engine.ts'
 import { DEFAULT_PARAMS } from '../../lib/strategies/shock/params.ts'
 import type { Costs, ShockParams } from '../../lib/strategies/shock/params.ts'
 import { ADAPTIVE15 } from '../../lib/strategies/shock/presets.ts'
+import { engineEntries, trendDown } from '../lib/e2.ts'
 
 const args = process.argv.slice(2)
 const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d }
@@ -42,6 +43,9 @@ const TEST = Number(opt('test', '3'))
 const FROM = opt('from', '2020-01-01')
 const MIN_TRADES = Number(opt('min', '20'))
 const BASE = opt('base', 'preset') as 'preset' | 'script' | 'script-long'
+// --e2 : shorts autorisés seulement en régime de tendance journalier baissier (research/lib/e2.ts),
+// pour toutes les configurations de la grille et le préréglage. Sans l'option, rien ne change.
+const E2 = args.includes('--e2')
 const COSTS: Costs = { capital: 10000, qtyPct: 100, commissionPct: 0.045, slippageTicks: 0, slippagePct: 0, mintick: 1, leverage: 1, maintenancePct: 0.5, fundingPct: 0 }
 
 const K = [2.0, 2.4, 2.8, 3.2]
@@ -70,6 +74,8 @@ const daily = resample(loadBtc(60), 86400000)
 const m = marketFor(bars, 15, 1)
 const preset = adaptivePreset(15, 1)
 const { select: presetSelect, agitated } = selectFor(preset, m, daily)
+const TREND = E2 ? trendDown(bars, daily) : null
+const ov = (sets: ShockParams[], sel: Int8Array | null) => (TREND ? engineEntries(m, sets, sel, TREND) : undefined)
 const regimeOf = (i: number): 0 | 1 | -1 => (Number.isFinite(agitated![i]) ? (agitated![i] ? 1 : 0) : -1)
 const day = (t: number) => new Date(t).toISOString().slice(0, 10)
 const idxAt = (t: number) => { let lo = 0, hi = bars.n; while (lo < hi) { const md = (lo + hi) >> 1; if (bars.t[md] < t) lo = md + 1; else hi = md } return lo }
@@ -88,7 +94,7 @@ for (const regime of [0, 1] as const) {
   const sel = new Int8Array(bars.n).fill(-1)
   for (let i = 0; i < bars.n; i++) if (regimeOf(i) === regime) sel[i] = 0
   for (const p of grid) {
-    const r = simulate(m, [paramsOf(regime, p)], COSTS, start, bars.n - 1, sel)
+    const r = simulate(m, [paramsOf(regime, p)], COSTS, start, bars.n - 1, sel, ov([paramsOf(regime, p)], sel))
     // Sommes cumulées des rendements quotidiens (et de leurs carrés) pour un Sharpe en O(1) par fenêtre.
     const s1 = new Float64Array(dayEnd.length + 1), s2 = new Float64Array(dayEnd.length + 1)
     let prev = COSTS.capital
@@ -160,13 +166,13 @@ function stitched(pick: (w: Win, regime: 0 | 1) => Point | null, freezeRegime = 
     const a = idxAt(w.a)
     for (let i = a; i < bars.n && bars.t[i] < w.b; i++) { const rg = regimeOf(freezeRegime ? a : i); if (rg >= 0) sel[i] = ids[rg] }
   }
-  const r = simulate(m, sets.length ? sets : [DEFAULT_PARAMS], COSTS, oosStart, bars.n - 1, sel)
+  const r = simulate(m, sets.length ? sets : [DEFAULT_PARAMS], COSTS, oosStart, bars.n - 1, sel, ov(sets.length ? sets : [DEFAULT_PARAMS], sel))
   return Object.assign(r, { setRegime })
 }
 const wfPlateau = stitched((w, r) => w.plateau[r])
 const wfBest = stitched((w, r) => w.best[r])
 const wfFrozen = stitched((w, r) => w.plateau[r], true)
-const fixed = simulate(m, preset.sets, COSTS, oosStart, bars.n - 1, presetSelect)
+const fixed = simulate(m, preset.sets, COSTS, oosStart, bars.n - 1, presetSelect, ov(preset.sets, presetSelect))
 const last = bars.n - 1
 
 // ---------------------------------------------------------------- rapport
@@ -183,7 +189,7 @@ const row = (name: string, r: ReturnType<typeof simulate>) => {
 const table = (h: string[], rows: string[][]) => { out(`| ${h.join(' | ')} |`); out(`| ${h.map((_, k) => (k ? '---:' : '---')).join(' | ')} |`); for (const r of rows) out(`| ${r.join(' | ')} |`) }
 
 const BASE_TXT = { preset: 'réglages non optimisés : ceux du préréglage du bot (choisis sur 2017-2026, fuite d\'information vers les tests)', script: 'réglages non optimisés : valeurs par défaut du script (mode High Activity coupé), longs et shorts', 'script-long': 'réglages non optimisés : valeurs par défaut du script (mode High Activity coupé), longs seulement' }[BASE]
-out(`# Walk-forward ${TRAIN / 12} ans / ${TEST} mois, réglages choisis sur plateaux · adaptatif 15 min · ${BASE}`); out()
+out(`# Walk-forward ${TRAIN / 12} ans / ${TEST} mois, réglages choisis sur plateaux · adaptatif 15 min · ${BASE}${E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`); out()
 out(`Base : ${BASE_TXT}.`); out()
 out(`BTC/USD Bitstamp 15 min. Calibration sur les ${TRAIN} mois précédant chaque test, test de ${TEST} mois, pas de ${TEST} mois, de ${FROM} au ${day(bars.t[last])} (${wins.length} fenêtres). Frais : 0,045 % par ordre (taker Hyperliquid), sans levier ni financement. Les régimes de volatilité (calme / agité) sont ceux du bot, calculés sur des journées closes.`); out()
 out(`Grille par régime : seuil du choc ${K.join(' / ')} × stop ${STOP.join(' / ')} ATR × stop suiveur ${TRAIL.map(x => (x >= 50 ? 'sans' : x)).join(' / ')} ATR, soit ${grid.length} réglages ; les autres réglages restent ceux du préréglage. Note d'un réglage : Sharpe quotidien sur la calibration (0 s'il a moins de ${MIN_TRADES} trades). Note de plateau : moyenne sur le réglage et ses voisins immédiats (jusqu'à 27). Si le meilleur plateau n'est pas positif, le régime n'est pas tradé pendant le test.`); out()
@@ -248,7 +254,7 @@ out()
 const changes = (r: 0 | 1) => wins.slice(1).filter((w, k) => label(w.plateau[r]) !== label(wins[k].plateau[r])).length
 out(`Changements de réglages d'une fenêtre à la suivante : ${changes(0)} sur ${wins.length - 1} en régime calme, ${changes(1)} sur ${wins.length - 1} en régime agité.`); out()
 
-const file = new URL(`../reports/shock-15m-wf-plateau-${TRAIN}-${TEST}${BASE === 'preset' ? '' : `-${BASE}`}.md`, import.meta.url).pathname
+const file = new URL(`../reports/shock-15m-wf-plateau-${TRAIN}-${TEST}${BASE === 'preset' ? '' : `-${BASE}`}${E2 ? '-e2' : ''}.md`, import.meta.url).pathname
 writeFileSync(file, L.join('\n') + '\n')
 // Courbes quotidiennes pour le graphique.
 const curve = dayEnd.filter(i => i >= oosStart).map(i => ({ t: bars.t[i], wf: wfPlateau.equity[i] / COSTS.capital, best: wfBest.equity[i] / COSTS.capital, fixed: fixed.equity[i] / COSTS.capital, bh: bars.c[i] / bars.c[oosStart] }))

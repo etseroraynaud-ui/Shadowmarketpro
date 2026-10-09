@@ -1,4 +1,7 @@
-// Publie les résultats figés du portefeuille BTC/ETH pour le site, sans rien recalculer :
+// Publie les résultats du portefeuille BTC/ETH du Shock Engine pour le site, sans rien recalculer.
+// Spécification publique depuis octobre 2026 : variante E2 (shorts seulement en régime de tendance
+// journalier baissier), produite par `research/shock/portfolio.ts --variant e2`. Les résultats de la
+// v1 restent dans research/reports/btc-eth-portfolio/ et ne sont plus publiés.
 // - lib/research/btc-eth-portfolio.json : résumé et séries des graphiques, lus par les pages
 //   /, /shock-engine, /shock-engine/portfolio, /research et /institutional ;
 // - public/research/btc-eth-portfolio/ : rapport complet, CSV, résumé JSON et manifeste à télécharger.
@@ -8,18 +11,21 @@
 // À lancer après research/shock/portfolio.ts. Le site ne lit jamais research/ (exclu du
 // déploiement par .vercelignore) : tout ce qu'il affiche vient des fichiers écrits ici.
 
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SRC = join(ROOT, 'research/reports/btc-eth-portfolio')
+const SRC = join(ROOT, 'research/reports/btc-eth-portfolio-e2')
 const PUB = join(ROOT, 'public/research/btc-eth-portfolio')
 const LIB = join(ROOT, 'lib/research')
 
 const summary = JSON.parse(readFileSync(join(SRC, 'portfolio_summary.json'), 'utf8'))
-const manifest = JSON.parse(readFileSync(join(SRC, 'shock-engine-v1-manifest.json'), 'utf8'))
+const manifest = JSON.parse(readFileSync(join(SRC, 'shock-engine-manifest.json'), 'utf8'))
+// Refus de publier : contrôle de reproduction ou de cohérence en échec, ou résultats d'une autre variante.
 if (manifest.sanityChecks.failed.length) throw new Error(`contrôles en échec : ${manifest.sanityChecks.failed.join(', ')}`)
+if (summary.variant !== 'e2' || manifest.variant !== 'e2') throw new Error('les résultats à publier ne sont pas ceux de la spécification publique (variante e2)')
+if (!manifest.validatedReference.every((r: { reproduced: boolean }) => r.reproduced)) throw new Error('sleeves non reproduites à l\'identique')
 
 const csv = (f: string) => {
   const [head, ...rows] = readFileSync(join(SRC, f), 'utf8').trim().split('\n')
@@ -60,12 +66,15 @@ const out = {
     { file: 'portfolio_drawdowns.csv', label: 'Drawdown episodes (CSV)' },
     { file: 'portfolio_correlation_rolling.csv', label: 'Rolling correlations (CSV)' },
     { file: 'portfolio_summary.json', label: 'Machine-readable summary (JSON)' },
-    { file: 'shock-engine-v1-manifest.json', label: 'Research manifest: versions and hashes (JSON)' },
+    { file: 'shock-engine-manifest.json', label: 'Research manifest: versions and hashes (JSON)' },
   ],
 }
 
 mkdirSync(PUB, { recursive: true })
 mkdirSync(LIB, { recursive: true })
+// Le dossier public ne garde que les fichiers publiés ici (les copies retirées restent dans research/reports).
+const keep = new Set(out.downloads.map(d => d.file))
+for (const f of readdirSync(PUB)) if (!keep.has(f)) { unlinkSync(join(PUB, f)); process.stderr.write(`retiré du dossier public : ${f}\n`) }
 for (const d of out.downloads) copyFileSync(join(SRC, d.file), join(PUB, d.file))
 writeFileSync(join(LIB, 'btc-eth-portfolio.json'), JSON.stringify(out))
 process.stderr.write(`écrit lib/research/btc-eth-portfolio.json et ${out.downloads.length} fichiers dans public/research/btc-eth-portfolio\n`)

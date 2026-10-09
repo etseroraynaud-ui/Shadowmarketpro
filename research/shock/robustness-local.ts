@@ -36,6 +36,7 @@ import { resample, sliceBars } from '../../lib/backtest/data.ts'
 import { adaptivePreset, marketFor, selectFor } from '../../lib/strategies/shock/live.ts'
 import { simulate } from '../../lib/strategies/shock/engine.ts'
 import type { Costs, ShockParams } from '../../lib/strategies/shock/params.ts'
+import { engineEntries, trendDown } from '../lib/e2.ts'
 
 // Actif (lu aussi par les workers, qui reçoivent les mêmes arguments).
 const ARGV = process.argv.slice(2)
@@ -56,7 +57,10 @@ if (!AC) throw new Error(`actif inconnu : ${ASSET}`)
 const COSTS: Costs = { capital: 10000, qtyPct: 100, commissionPct: 0.045, slippageTicks: 0, slippagePct: 0, mintick: AC.mintick, leverage: 1, maintenancePct: 0.5, fundingPct: 0 }
 const SPLITS = AC.splits
 const FULL = SPLITS[0][0]
-const SUFFIX = ASSET === 'btc' ? '' : `-${ASSET}`
+// --e2 : shorts autorisés seulement en régime de tendance journalier baissier (research/lib/e2.ts),
+// pour chaque configuration voisine. Sans l'option, rien ne change.
+const E2 = ARGV.includes('--e2')
+const SUFFIX = (ASSET === 'btc' ? '' : `-${ASSET}`) + (E2 ? '-e2' : '')
 
 function loadCsv(path: string): Bars {
   const lines = gunzipSync(readFileSync(path)).toString('latin1').split('\n')
@@ -80,7 +84,8 @@ function setup() {
   const lo = wins[0][0]
   const dayEnd: number[] = []
   for (let i = lo; i < bars.n; i++) if (i === bars.n - 1 || Math.floor(bars.t[i + 1] / 864e5) !== Math.floor(bars.t[i] / 864e5)) dayEnd.push(i)
-  return { bars, m, preset, select, wins, lo, dayEnd }
+  const trend = E2 ? trendDown(bars, daily) : null
+  return { bars, m, preset, select, wins, lo, dayEnd, trend }
 }
 
 interface Job { key: string; sets: ShockParams[]; curve: boolean }
@@ -89,7 +94,7 @@ interface Res { key: string; w: Pack[]; eq: Float32Array | null }
 if (!isMainThread) {
   const S = setup()
   parentPort!.on('message', (job: Job) => {
-    const r = simulate(S.m, job.sets, COSTS, S.lo, S.bars.n - 1, S.select)
+    const r = simulate(S.m, job.sets, COSTS, S.lo, S.bars.n - 1, S.select, S.trend ? engineEntries(S.m, job.sets, S.select, S.trend) : undefined)
     const w = S.wins.map(([a, b]) => {
       const x = metricsOf(S.bars, r, a, b)
       return [x.totalReturn, x.cagr, x.sharpe, x.sortino, x.profitFactor, x.maxDrawdown, x.trades]
@@ -375,7 +380,7 @@ async function main() {
   const lastDay = new Date(bars.t[bars.n - 1]).toISOString().slice(0, 10)
 
   lines.push(
-    '# Robustesse locale du préréglage · Shock Engine 15 min',
+    `# Robustesse locale du préréglage · Shock Engine 15 min${E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`,
     '',
     `${AC.label} 15 min, ${firstDay} → ${lastDay}, préréglage du bot (adaptatif volatilité, régime recalculé en ligne comme en réel), commission 0,045 % par ordre, sans levier. Produit par \`node research/shock/robustness-local.ts${ASSET === 'btc' ? '' : ` --asset ${ASSET}`} --n ${N} --n-ext ${NEXT} --seed ${SEED}\` (${jobs.size} simulations).`,
     '',
