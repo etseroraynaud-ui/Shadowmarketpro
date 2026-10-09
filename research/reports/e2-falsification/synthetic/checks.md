@@ -1,0 +1,7 @@
+- ✔ BTC : trajectoire identité = barres source · 377044 barres
+- ✔ BTC : moteur de la trajectoire identité = v1 exactement · régime identique : true ; equity barre par barre : true ; 1050 trades
+- ✔ BTC : régime tiré des barres 15 min = régime tiré des barres 60 min, à historique égal · 0 barre(s) différente(s) sur 490948
+- ✔ ETH : trajectoire identité = barres source · 319294 barres
+- ✔ ETH : moteur de la trajectoire identité = v1 exactement · régime identique : true ; equity barre par barre : true ; 918 trades
+- Trajectoire identité dans la construction du test (2017-08-18 → 2026-09-30, simulation dès le 2018-09-01, volume normalisé, mintick de la règle) : Sharpe 50/50 V0 1.731 et E2 1.882 ; EV short V0 BTC 0.241, ETH 0.185 ; E2 BTC 0.370, ETH 0.579. Référence v1 publiée : Sharpe 50/50 1,726 (V0) et 1,880 (E2).
+- ✔ trajectoire déterministe (même graine → mêmes résultats) · L = 7, j = 0, calculée deux fois
