@@ -33,7 +33,9 @@ import type { Costs } from '../../lib/strategies/shock/params.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const OUT = join(ROOT, 'research/reports/e2-falsification')
-const RES = join(OUT, 'synthetic')
+// --res : dossier des résultats par trajectoire (par défaut dans le dépôt ; un dossier temporaire pendant
+// un long calcul, copié ensuite).
+const RES = (() => { const i = process.argv.indexOf('--res'); return i >= 0 ? process.argv[i + 1] : join(OUT, 'synthetic') })()
 const PRESPEC = 'research/preregistration/e2-falsification.md'
 const DAY = P.DAY, M15 = 15 * 60000, ANN = P.ANN
 const POOL0 = Math.floor(Date.parse('2017-08-18') / DAY), POOL1 = Math.floor(Date.parse('2026-09-30') / DAY)
