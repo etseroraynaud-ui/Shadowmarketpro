@@ -5,7 +5,7 @@ import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import { SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Section, SiteFooter, StatusList, Table, Verdict, type VerdictKind } from '../_site/ui'
-import { DOWNLOADS, MANIFEST, P, verdictOf } from '../_site/data'
+import { DOWNLOADS, FACTOR_NAMES, MANIFEST, P, RA, raVerdict, verdictOf } from '../_site/data'
 import { int, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -22,6 +22,7 @@ const yrs = (p: readonly string[]) => `${p[0].slice(0, 4)}–${p[1].slice(0, 4)}
 const SECTIONS = [
   { id: 'principles', label: 'Principles' },
   { id: 'studies', label: 'Studies' },
+  { id: 'residual-alpha', label: 'Residual alpha' },
   { id: 'short-condition', label: 'Short condition' },
   { id: 'forward', label: 'Forward' },
   { id: 'versions', label: 'Versions' },
@@ -32,6 +33,7 @@ type Study = { name: ReactNode; period: string; finding: ReactNode; verdict: { k
 export default function ResearchPage() {
   const studies: Study[] = [
     { name: <Link className="s-link" href="/shock-engine/portfolio">BTC/ETH portfolio, 50/50</Link>, period: `${P.commonPeriod.start.slice(0, 4)}–${P.commonPeriod.end.slice(0, 4)}`, finding: `Sharpe ${num(P.headline.portfolioSharpe)}, against ${num(P.headline.btcSharpe)} for BTC and ${num(P.headline.ethSharpe)} for ETH alone; strategy correlation ${num(P.correlation.dailyPearson)}; max drawdown ${pct(P.headline.portfolioMaxDD)}.`, verdict: { kind: 'pass', label: 'complete' } },
+    { name: <a className="s-link" href="#residual-alpha">Residual alpha vs simple trend strategies</a>, period: `${P.commonPeriod.start.slice(0, 4)}–${P.commonPeriod.end.slice(0, 4)}`, finding: `After buy & hold and six standard trend strategies are removed, alpha of ${pct(RA.alphaAnn)} a year (t = ${num(RA.t)}); ${pct(RA.unexplained, 0)} of the average return is not explained by them. In-sample.`, verdict: raVerdict() },
     { name: 'BTC: event study, random entries, delayed entry', period: yrs(EV.btc.period), finding: `Continuation after shocks confirmed; beats ${pct(EV.btc.randomBeaten, 0)} of random-entry runs; a one-bar delay keeps ${pct(EV.btc.delay1Share, 0)} of the average trade. Sharpe ${num(EV.btc.sharpe)} (15-min), ${int(EV.btc.trades)} trades.`, verdict: verdictOf(EV.btc) },
     { name: 'BTC: walk-forward, 36-month calibration, 3-month tests', period: EV.walkForward.period.slice(0, 4) + '–' + EV.walkForward.period.slice(-10, -6), finding: `${EV.walkForward.windows} windows, settings re-selected on past data only: Sharpe ${EV.walkForward.sharpe}, CAGR ${fixMinus(EV.walkForward.cagr)}, max drawdown ${fixMinus(EV.walkForward.dd)}. Positive out of sample, clearly below the fixed preset.`, verdict: { kind: 'partial', label: 'positive, weaker' } },
     { name: 'BTC: parameter neighborhood (1,810 runs)', period: yrs(EV.robBtc.period), finding: `All parameters perturbed together by up to ±20 %: median Sharpe ${num(rob('robBtc').medianSharpe)} against ${num(rob('robBtc').preset)}; ${pct(rob('robBtc').profitable, 0)} profitable. The preset tops its neighborhood, as expected of rules selected on this data.`, verdict: { kind: 'pass', label: 'pass, selection bias' } },
@@ -86,6 +88,28 @@ export default function ResearchPage() {
               </div>
             ))}
           </div>
+        </Section>
+
+        <Section id="residual-alpha" eyebrow="Residual alpha" title="Is it just trend following?" intro={<p>Could simple, well-known trend strategies reproduce the result? The daily returns of the portfolio are regressed on buy &amp; hold BTC and ETH and on six standard trend strategies whose parameters were fixed before the study: momentum over 30, 90 and 180 days, a 55/20-day breakout, a 20/100-day moving-average crossover and an intraday breakout on 15-minute bars. Same bars, same commission, positions decided at the close and applied to the next day.</p>}>
+          <div className="s-metrics s-reveal">
+            <div className="s-metric"><div className="s-metric-l">Residual alpha</div><div className="s-metric-v s-pos">{pct(RA.alphaAnn)}</div><div className="s-metric-s">per year, arithmetic</div></div>
+            <div className="s-metric"><div className="s-metric-l">t-statistic</div><div className="s-metric-v">{num(RA.t)}</div><div className="s-metric-s">Newey–West; threshold set at 3</div></div>
+            <div className="s-metric"><div className="s-metric-l">Not explained</div><div className="s-metric-v">{pct(RA.unexplained, 0)}</div><div className="s-metric-s">of the average return (R² {num(RA.r2)})</div></div>
+            <div className="s-metric"><div className="s-metric-l">Resampled histories</div><div className="s-metric-v">{int(RA.bootstrap.pNonPositive * RA.bootstrap.reps)} of {int(RA.bootstrap.reps)}</div><div className="s-metric-s">with alpha ≤ 0 · 90 %: {pct(RA.bootstrap.p5, 0)} to {pct(RA.bootstrap.p95, 0)}</div></div>
+          </div>
+          <div className="s-grid2">
+            <Table compact head={['Factor', 'Beta', 't']} rows={RA.factors.map(f => [FACTOR_NAMES[f.name], num(f.beta), num(f.t)])} caption="Exposure of the portfolio to each factor" />
+            <Table compact head={['Benchmark alone', 'Sharpe', 'Correlation with Shock Engine']} rows={RA.benchmarks.map(b => [FACTOR_NAMES[b.id], num(b.sharpe), num(b.corr)])} caption="The benchmarks on their own, 50/50 BTC/ETH" />
+          </div>
+          <Table compact head={['Variant (fixed in advance)', 'Alpha per year', 't']} caption="Sensitivity checks" rows={[
+            ['Main model', pct(RA.alphaAnn), num(RA.t)],
+            ['19 trend strategies at once (favors the benchmarks)', pct(RA.sensitivities.grid.alphaAnn), num(RA.sensitivities.grid.t)],
+            ['First half of the period', pct(RA.sensitivities.firstHalf.alphaAnn), num(RA.sensitivities.firstHalf.t)],
+            ['Second half of the period', pct(RA.sensitivities.secondHalf.alphaAnn), num(RA.sensitivities.secondHalf.t)],
+            ['Weekly returns', pct(RA.sensitivities.weekly.alphaAnn), num(RA.sensitivities.weekly.t)],
+            ['Benchmarks without commissions', pct(RA.sensitivities.frictionless.alphaAnn), num(RA.sensitivities.frictionless.t)],
+          ]} />
+          <p className="s-small">Pre-registered before any computation: alpha counts as demonstrated only if t ≥ 3 and fewer than 1 % of month-block resampled histories give alpha ≤ 0. In-sample: the rules were chosen on data covering this period, and the short-entry condition was specified after it had been studied. The test shows that simple trend strategies do not reproduce the historical result; it does not show that the alpha will persist. Closest factor: the intraday breakout, which shares part of the timing but loses money on its own after costs.</p>
         </Section>
 
         <Section id="short-condition" eyebrow="Short entries" title="Could the trend condition be luck?" intro={<p>Short positions are only opened when the daily trend regime is bearish. {P.disclaimers[2].split('. ').slice(1).join('. ')} Two placebo tests, specified before they were run, ask whether a condition of the same size, chosen at random, would have done as well.</p>}>

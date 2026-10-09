@@ -158,3 +158,11 @@ pas modifiée. La v1 et le bot ne le sont pas non plus.
   2. **exceptionnel** : si la valeur historique réelle de ΔEV dépasse le P95 synthétique de cette
      longueur.
 - **Pas de regroupement** des longueurs de bloc, ni des tests.
+
+## Écart (2026-10-09)
+
+Test C : l'extension au-delà de 1 000 trajectoires par longueur de bloc a été arrêtée sur décision
+(coût de calcul), avant toute lecture de ses résultats. Le rapport de référence reste
+`research/reports/e2-falsification/test-c.{md,json}`, à 1 000 trajectoires pour chacune des
+longueurs 1, 3, 7, 14 et 30 jours ; les trajectoires supplémentaires ne sont ni publiées ni
+utilisées.
