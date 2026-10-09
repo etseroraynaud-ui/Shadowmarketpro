@@ -37,6 +37,7 @@ Le backtest et le bot partagent la même stratégie :
 | Sur l'historique Hyperliquid | `npm run parity` (demande l'accès réseau à Hyperliquid) |
 | Seules les bougies closes entrent dans le moteur | `tests/candles.test.ts` : une bougie n'entre que si l'exchange a déjà ouvert la suivante (pas seulement d'après l'horloge locale) ; toute bougie relue différente est signalée (`candle_revised`) |
 | Reconnexions | `tests/stream.test.ts` : signal de clôture en double, reconnexion, coupure de 45 min rattrapée par REST, chaque bougie une seule fois ; `npm run ws-check` : coupures forcées sur le vrai WebSocket |
+| Condition de la version publique sur les shorts (`BOT_SHORT_TREND_FILTER=1`) | `bot/tests/short-trend.test.ts` : mêmes entrées que la recherche (`research/lib/e2.ts`), parité bougie par bougie avec le backtest filtré, shadow mode, moteur live et redémarrage identiques au backtest filtré |
 | Pas d'ordre en double | `tests/orders.test.ts` : réponse perdue, requête perdue, arrêt brutal en plein envoi (entrée, déplacement du stop), ordre du bot en trop, stop disparu, deux instances |
 | Exchange papier du shadow mode | `tests/paper.test.ts` : exécution au BBO, stops, limites, réduction seule |
 | Moteur live complet sur l'historique Hyperliquid | `npm run paper-replay` : BBO reconstitué le long de chaque bougie, réglages de production du stop suiveur, trades comparés au backtest |
@@ -111,6 +112,7 @@ compte principal, sinon il s'arrête. Plus tard, la même variable accepte l'adr
 | Variable | Défaut | Rôle |
 | --- | --- | --- |
 | `BOT_MODE` | `shadow` | `shadow`, `testnet`, `mainnet` |
+| `BOT_SHORT_TREND_FILTER` | 0 | `1` : version publique du Shock Engine, une entrée short seulement en régime de tendance journalier baissier (voir plus bas) ; `0` : moteur v1 |
 | `HL_SUBACCOUNT_ADDRESS` | | sous-compte (ou vault) tradé ; vide : le compte principal |
 | `BOT_EQUITY_PCT` | 100 | part du capital par position (comme le backtest) |
 | `BOT_LEVERAGE` | 1 | levier de la position |
@@ -129,6 +131,23 @@ compte principal, sinon il s'arrête. Plus tard, la même variable accepte l'adr
 | `BOT_SHADOW_CAPITAL`, `BOT_SHADOW_FEE_PCT` | 10000, 0.045 | broker simulé et exchange papier du shadow mode |
 | `BOT_SHADOW_PAPER` | 1 | `0` : pas de moteur live sur exchange papier en shadow |
 | `BOT_PAPER_MAKER_FEE_PCT` | 0.015 | frais des limites exécutées sur l'exchange papier |
+
+## Version publique : shorts seulement en tendance journalière baissière
+
+Depuis octobre 2026, la spécification publique du Shock Engine n'autorise une entrée short que
+lorsque le régime de tendance journalier est baissier : clôture journalière sous sa moyenne
+50 jours et moyenne en baisse sur 10 jours, au dernier jour clos (`classify`,
+`lib/strategies/shock/regimes.ts`). `BOT_SHORT_TREND_FILTER=1` l'applique
+(`bot/src/engine/short-trend.ts`) :
+
+- le moteur figé (`lib/strategies/shock/*`) n'est pas modifié : la condition passe par la liste
+  d'entrées de `ShockStrategy`, recalculée à chaque bougie close ; seules les entrées short
+  changent, les longs, les sorties et le flip sur choc opposé restent ceux du moteur ;
+- désactivée par défaut : sans la variable, le bot se comporte exactement comme avant ;
+- à activer seulement compte à plat, avec `BOT_RESET_STATE=1` : l'état sauvegardé a été construit
+  sans la condition ;
+- `npm run parity` et `npm run paper-replay` lisent la même variable et comparent au backtest
+  filtré.
 
 ## Lancement
 

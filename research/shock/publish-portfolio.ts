@@ -74,6 +74,25 @@ const falsification = {
 }
 const forward = { prespec: 'research/preregistration/e2-forward.md', start: fwd.start, cutoff: fwd.cutoff, status: fwd.status, closedShorts: fwd.forward.n1 + fwd.forward.n0 }
 
+// Alpha résiduel face à des stratégies de tendance simples : même période et mêmes rendements que le
+// portefeuille publié, contrôles tous passés, verdict recalculé avec la règle fixée d'avance.
+const ra = RR('residual-alpha/residual-alpha.json')
+if (ra.checks.some((c: { ok: boolean }) => !c.ok)) throw new Error('alpha résiduel : contrôle en échec')
+if (ra.period[0] !== summary.commonPeriod.start || ra.period[1] !== summary.commonPeriod.end || ra.days !== summary.commonPeriod.days) throw new Error('alpha résiduel : période différente du portefeuille publié')
+const raRule = ra.main.alphaAnn > 0 && ra.main.t >= 3 && ra.bootstrap.pNonPositive <= 0.01 ? 'demonstrated' : ra.main.t >= 2 ? 'indicative' : 'not demonstrated'
+const raLabel: Record<string, string> = { demonstrated: 'alpha résiduel démontré (en échantillon)', indicative: 'indicatif', 'not demonstrated': 'non démontré' }
+if (ra.verdict !== raLabel[raRule]) throw new Error(`alpha résiduel : verdict du rapport (${ra.verdict}) différent de la règle (${raRule})`)
+const raSens = (k: string) => ({ alphaAnn: ra.sensitivities[k].alphaAnn, t: ra.sensitivities[k].t })
+const residualAlpha = {
+  source: 'research/reports/residual-alpha/residual-alpha.json', prespec: 'research/preregistration/residual-alpha.md',
+  verdict: raRule, model: ra.main.model, nwLag: ra.nwLag,
+  alphaAnn: ra.main.alphaAnn, t: ra.main.t, ir: ra.main.ir, r2: ra.main.r2, meanAnn: ra.main.meanAnn, unexplained: ra.main.unexplained,
+  bootstrap: { reps: ra.bootstrap.reps, months: ra.bootstrap.months, p5: ra.bootstrap.p5, p95: ra.bootstrap.p95, pNonPositive: ra.bootstrap.pNonPositive },
+  factors: ra.main.betas.map((b: { name: string; beta: number; t: number }) => ({ name: b.name, beta: b.beta, t: b.t })),
+  benchmarks: ra.benchmarks.map((b: { id: string; '50/50': { sharpe: number; cagr: number; maxDD: number }; corrPortfolio: number }) => ({ id: b.id, sharpe: b['50/50'].sharpe, cagr: b['50/50'].cagr, maxDD: b['50/50'].maxDD, corr: b.corrPortfolio })),
+  sensitivities: { grid: raSens('S1'), firstHalf: raSens('S2 first'), secondHalf: raSens('S2 second'), weekly: raSens('S3'), frictionless: raSens('S4') },
+}
+
 const { reconciliation, sanity, ...rest } = summary
 const out = {
   ...rest,
@@ -91,7 +110,7 @@ const out = {
     corr90: col(rolling, 'rolling_90d'),
     sharpe365: { btc: RS.btc.map(r4), eth: RS.eth.map(r4), portfolio: RS.portfolio.map(r4) },
   },
-  falsification, forward,
+  falsification, forward, residualAlpha,
   downloads: [
     { file: 'btc-eth-portfolio.html', label: 'Full research report (HTML)' },
     { file: 'portfolio_daily_returns.csv', label: 'Daily returns and equity (CSV)' },

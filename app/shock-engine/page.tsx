@@ -4,8 +4,8 @@ import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import HeroChart from '../_site/HeroChart'
 import { CountUp, SeriesPanel, SubNav } from '../_site/interactive'
-import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table } from '../_site/ui'
-import { COLORS, DOWNLOADS, P, SIM, longestDrawdown, sample, sampleStart, series, verdictOf } from '../_site/data'
+import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table, Verdict } from '../_site/ui'
+import { COLORS, DOWNLOADS, P, RA, SIM, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
 import { int, month, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -116,6 +116,17 @@ export default function ShockEnginePage() {
         {/* ---------------------------------------------------------------- preuves */}
         <Section id="evidence" eyebrow="Research evidence" title="We tried to break it" intro={<p>Each test has a pass/fail criterion fixed before the result is seen. Single-market figures use 15-minute returns over each market&apos;s full test period.</p>}
           head={<Link className="s-arrow" href="/research">All studies and verdicts</Link>}>
+          <div className="s-card s-card-glow s-feature s-reveal">
+            <div className="s-feature-main">
+              <div className="s-card-k" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>Residual alpha<Verdict kind={raVerdict().kind}>{raVerdict().label}</Verdict></div>
+              <h3>Not reproduced by simple trend following</h3>
+              <p>Once buy &amp; hold and six standard trend strategies (momentum, breakouts, moving averages, an intraday breakout) are removed, {pct(RA.unexplained, 0)} of the average return remains unexplained. Pre-registered test, on the historical period the rules were chosen on.</p>
+              <div className="s-card-foot"><Link className="s-arrow" href="/research#residual-alpha">Residual alpha study</Link></div>
+            </div>
+            <div className="s-feature-stat"><span className="s-feature-v">{pct(RA.alphaAnn)}</span><span className="s-feature-l">alpha per year</span></div>
+            <div className="s-feature-stat"><span className="s-feature-v">{num(RA.t)}</span><span className="s-feature-l">t-statistic, threshold 3</span></div>
+            <div className="s-feature-stat"><span className="s-feature-v">{num(Math.max(...RA.benchmarks.map(b => b.corr)))}</span><span className="s-feature-l">highest correlation with a trend benchmark</span></div>
+          </div>
           <div className="s-grid3">
             <EvidenceCard k="ETH transfer" stat={num(EV.eth.sharpe)} sub="Sharpe" verdict={verdictOf(EV.eth)} href="/research#studies">
               The Bitcoin parameters, applied to Ethereum without any ETH calibration, met every pre-set criterion; an independent ETH price feed gives the same verdict (Sharpe {num(EV.ethDukascopy.sharpe)}).

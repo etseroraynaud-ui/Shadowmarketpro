@@ -56,3 +56,16 @@ export const MARKETS = [
 
 /** Plus longue période sous un précédent sommet (jours), parmi les épisodes publiés du portefeuille. */
 export const longestDrawdown = () => P.drawdowns.top10.portfolio.reduce((a, x) => (x.days > a.days ? x : a))
+
+/** Alpha résiduel face à des stratégies de tendance simples (research/reports/residual-alpha/). */
+export const RA = P.residualAlpha
+/** Noms publics des facteurs et des stratégies de référence. */
+export const FACTOR_NAMES: Record<string, string> = {
+  BH: 'Buy & hold BTC/ETH', 'BH BTC': 'Buy & hold BTC', 'BH ETH': 'Buy & hold ETH',
+  TSMOM30: 'Momentum, 30 days', TSMOM90: 'Momentum, 90 days', TSMOM180: 'Momentum, 180 days',
+  'DONCH55/20': 'Breakout, 55/20 days', 'EMA20/100': 'Moving averages, 20/100 days', 'DONCH15 96/48': 'Intraday breakout, 24 h / 12 h',
+}
+for (const f of [...RA.factors.map(x => x.name), ...RA.benchmarks.map(x => x.id)]) if (!FACTOR_NAMES[f]) throw new Error(`facteur sans nom public : ${f}`)
+/** Verdict de l'étude, selon la règle fixée d'avance (t ≥ 3 et P(α ≤ 0) ≤ 1 %). */
+export const raVerdict = (): { kind: 'pass' | 'partial' | 'fail'; label: string } =>
+  RA.verdict === 'demonstrated' ? { kind: 'pass', label: 'demonstrated · in-sample' } : RA.verdict === 'indicative' ? { kind: 'partial', label: 'indicative' } : { kind: 'fail', label: 'not demonstrated' }

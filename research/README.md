@@ -96,6 +96,16 @@ puis commit des données et de `research/reports/e2-forward/` (rapport du mois, 
 `state.json`). Le script s'arrête sans rien tester si un contrôle échoue (empreintes, base historique
 révisée, shorts déjà rapportés modifiés, look-ahead de E2).
 
+Alpha résiduel face à des stratégies de tendance simples (plan :
+`research/preregistration/residual-alpha.md`, commité avant tout calcul ; rapport dans
+`research/reports/residual-alpha/`). Régression des rendements journaliers publiés du portefeuille
+sur buy & hold, TSMOM, Donchian, EMA et Donchian 15 min (paramètres fixés d'avance), t de
+Newey–West et bootstrap par mois :
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/residual-alpha.ts
+```
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 

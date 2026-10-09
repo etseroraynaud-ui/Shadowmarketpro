@@ -7,7 +7,6 @@
 // À chaque clôture, les positions des deux moteurs sont comparées (événement « parity »).
 
 import type { Bars } from '../../../lib/backtest/types.ts'
-import { ShockSession } from '../../../lib/strategies/shock/live.ts'
 import type { Bar, ShockConfig } from '../../../lib/strategies/shock/live.ts'
 import type { PositionRecord } from '../../../lib/strategies/shock/broker.ts'
 import type { Costs } from '../../../lib/strategies/shock/params.ts'
@@ -17,19 +16,22 @@ import { midOf } from '../data/quotes.ts'
 import type { PaperExchange } from '../exec/paper.ts'
 import type { LiveEngine } from './live.ts'
 import { coalesce } from '../runtime.ts'
+import { newSession } from './short-trend.ts'
+import type { Session } from './short-trend.ts'
 
 export const SET_NAMES = ['calm', 'agitated']
 
 export class ShadowEngine {
-  readonly session: ShockSession
+  readonly session: Session
   readonly journal: Journal
   readonly tfMs: number
 
-  constructor(cfg: ShockConfig, costs: Costs, chart: Bars, daily: Bars, journal: Journal) {
+  /** `shortTrendFilter` : version publique (shorts seulement en tendance journalière baissière). */
+  constructor(cfg: ShockConfig, costs: Costs, chart: Bars, daily: Bars, journal: Journal, shortTrendFilter = false) {
     this.journal = journal
     this.tfMs = cfg.tfMin * 60000
     // Tout le cache est rejoué : l'état de la stratégie est celui du backtest sur le même historique.
-    this.session = new ShockSession(cfg, costs, chart, 0, { regimeBars: daily })
+    this.session = newSession(cfg, costs, chart, 0, { regimeBars: daily }, shortTrendFilter)
     const b = this.session.broker
     journal.event('shadow_ready', {
       bars: chart.n, from: iso(chart.t[0]), to: iso(chart.t[chart.n - 1]), positions: b.positions.length,

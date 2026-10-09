@@ -226,7 +226,7 @@
 .s-ev { display: flex; flex-direction: column }
 .s-ev .s-card-stat { font-size: 30px }
 .s-ev p { flex: 1 }
-.s-verdict { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: .04em; border-radius: 999px; padding: 3px 10px; border: 1px solid }
+.s-verdict { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; letter-spacing: .04em; border-radius: 999px; padding: 3px 10px; border: 1px solid }
 .s-verdict-pass { color: var(--s-accent); border-color: rgba(79, 224, 176, .35); background: var(--s-accent-dim) }
 .s-verdict-partial, .s-verdict-pending { color: var(--s-amber); border-color: rgba(232, 183, 90, .35); background: var(--s-amber-bg) }
 .s-verdict-fail { color: var(--s-neg); border-color: rgba(240, 114, 114, .35); background: rgba(240, 114, 114, .08) }
@@ -417,3 +417,14 @@
 .s-study p { margin: 0; color: var(--s-ink2); font-size: 14.5px }
 .s-study .s-verdict { justify-self: end; white-space: nowrap }
 @media (max-width: 760px) { .s-study { grid-template-columns: 1fr; gap: 8px; padding: 16px 18px } .s-study .s-verdict { justify-self: start } }
+
+/* ---------------------------------------------------------------- carte de preuve mise en avant */
+.s-feature { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)); gap: 28px; align-items: center; margin-bottom: 16px }
+.s-feature-main h3 { margin: 6px 0 8px }
+.s-feature-main p { margin: 0 }
+.s-feature-stat { display: flex; flex-direction: column; gap: 4px; padding-left: 24px; border-left: 1px solid var(--s-border) }
+.s-feature-v { font-family: 'Outfit', sans-serif; font-size: 34px; font-weight: 600; color: #fff; line-height: 1.1; letter-spacing: -.02em; font-variant-numeric: tabular-nums }
+.s-feature-main + .s-feature-stat .s-feature-v { color: var(--s-accent) }
+.s-feature-l { font-size: 13px; color: var(--s-muted) }
+@media (max-width: 960px) { .s-feature { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px } .s-feature-main { grid-column: 1 / -1 } .s-feature-stat:nth-child(2) { padding-left: 0; border-left: none } }
+@media (max-width: 560px) { .s-feature { grid-template-columns: 1fr } .s-feature-stat { padding: 12px 0 0; border-left: none; border-top: 1px solid var(--s-border) } .s-feature-v { font-size: 28px } }

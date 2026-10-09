@@ -1,0 +1,910 @@
+{
+ "prespec": "research/preregistration/residual-alpha.md",
+ "commit": "fa7e88b3745de8892e66dbb504aa113a7b0441d8",
+ "period": [
+  "2018-09-01",
+  "2026-09-30"
+ ],
+ "days": 2952,
+ "nwLag": 8,
+ "verdict": "alpha résiduel démontré (en échantillon)",
+ "checks": [
+  {
+   "name": "Shock Engine returns reproduce the published Sharpe ratios",
+   "ok": true,
+   "detail": "portfolio 1.877566 vs 1.877567, BTC 1.457987, ETH 1.750707; max error 5.9e-8"
+  },
+  {
+   "name": "Spot daily returns reproduce the published BTC/ETH correlation (same daily convention)",
+   "ok": true,
+   "detail": "0.8204072202 vs 0.8204072202"
+  },
+  {
+   "name": "No look-ahead: perturbing prices after a date leaves every earlier position unchanged",
+   "ok": true,
+   "detail": "6800 perturbations (200 dates × 17 references × 2 assets), positions changed: 0"
+  },
+  {
+   "name": "OLS recovers known coefficients on simulated data",
+   "ok": true,
+   "detail": "β = 0.0007, 0.5104, -0.3052 (true 0.001, 0.5, −0.3)"
+  },
+  {
+   "name": "Newey–West with lag 0 equals White standard errors",
+   "ok": true,
+   "detail": "max relative difference 0.0e+0"
+  },
+  {
+   "name": "Bootstrap OLS (constant only) equals the full OLS",
+   "ok": true,
+   "detail": "6.722597e-4 vs 6.722597e-4"
+  },
+  {
+   "name": "Bootstrap is deterministic (same seed, same draws)",
+   "ok": true,
+   "detail": "30 replications computed twice"
+  }
+ ],
+ "main": {
+  "model": "M2",
+  "series": "portfolio",
+  "n": 2952,
+  "alphaAnn": 0.40982056,
+  "t": 4.5633819,
+  "ir": 1.7365013,
+  "r2": 0.26622274,
+  "r2adj": 0.26422811,
+  "meanAnn": 0.51728731,
+  "unexplained": 0.7922494,
+  "betas": [
+   {
+    "name": "BH BTC",
+    "beta": -0.035729385,
+    "t": -1.5505712
+   },
+   {
+    "name": "BH ETH",
+    "beta": 0.077109242,
+    "t": 3.4977485
+   },
+   {
+    "name": "TSMOM30",
+    "beta": 0.065610415,
+    "t": 2.386265
+   },
+   {
+    "name": "TSMOM90",
+    "beta": 0.050569989,
+    "t": 1.4581689
+   },
+   {
+    "name": "TSMOM180",
+    "beta": -0.062901161,
+    "t": -2.1803086
+   },
+   {
+    "name": "DONCH55/20",
+    "beta": 0.051361816,
+    "t": 1.3540181
+   },
+   {
+    "name": "EMA20/100",
+    "beta": 0.031135222,
+    "t": 1.0885969
+   },
+   {
+    "name": "DONCH15 96/48",
+    "beta": 0.16156662,
+    "t": 5.8882632
+   }
+  ]
+ },
+ "bootstrap": {
+  "reps": 5000,
+  "seed": 20261009,
+  "months": 97,
+  "p2_5": 0.23280235,
+  "p5": 0.26096759,
+  "median": 0.40520643,
+  "p95": 0.55813368,
+  "p97_5": 0.58917099,
+  "pNonPositive": 0
+ },
+ "models": [
+  {
+   "model": "M0",
+   "series": "portfolio",
+   "n": 2952,
+   "alphaAnn": 0.49642907,
+   "t": 4.4809687,
+   "ir": 1.8217662,
+   "r2": 0.021735915,
+   "r2adj": 0.02107246,
+   "meanAnn": 0.51728731,
+   "unexplained": 0.95967765,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": -0.053668538,
+     "t": -1.9210629
+    },
+    {
+     "name": "BH ETH",
+     "beta": 0.07685055,
+     "t": 2.9056769
+    }
+   ]
+  },
+  {
+   "model": "M1",
+   "series": "portfolio",
+   "n": 2952,
+   "alphaAnn": 0.40279015,
+   "t": 4.1812796,
+   "ir": 1.5872252,
+   "r2": 0.15158643,
+   "r2adj": 0.14956915,
+   "meanAnn": 0.51728731,
+   "unexplained": 0.77865849,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": -0.044132093,
+     "t": -1.8091158
+    },
+    {
+     "name": "BH ETH",
+     "beta": 0.072932467,
+     "t": 3.1158605
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.088933666,
+     "t": 2.9232513
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.046296058,
+     "t": 1.7569556
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.046754161,
+     "t": -1.5975367
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.078181674,
+     "t": 1.9378005
+    },
+    {
+     "name": "EMA20/100",
+     "beta": -0.0011539806,
+     "t": -0.036897754
+    }
+   ]
+  },
+  {
+   "model": "M2",
+   "series": "portfolio",
+   "n": 2952,
+   "alphaAnn": 0.40982056,
+   "t": 4.5633819,
+   "ir": 1.7365013,
+   "r2": 0.26622274,
+   "r2adj": 0.26422811,
+   "meanAnn": 0.51728731,
+   "unexplained": 0.7922494,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": -0.035729385,
+     "t": -1.5505712
+    },
+    {
+     "name": "BH ETH",
+     "beta": 0.077109242,
+     "t": 3.4977485
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.065610415,
+     "t": 2.386265
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.050569989,
+     "t": 1.4581689
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.062901161,
+     "t": -2.1803086
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.051361816,
+     "t": 1.3540181
+    },
+    {
+     "name": "EMA20/100",
+     "beta": 0.031135222,
+     "t": 1.0885969
+    },
+    {
+     "name": "DONCH15 96/48",
+     "beta": 0.16156662,
+     "t": 5.8882632
+    }
+   ]
+  },
+  {
+   "model": "M0",
+   "series": "BTC",
+   "n": 2952,
+   "alphaAnn": 0.34996233,
+   "t": 3.6274461,
+   "ir": 1.36749,
+   "r2": 0.015715901,
+   "r2adj": 0.015382245,
+   "meanAnn": 0.37608905,
+   "unexplained": 0.93053049,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": 0.051868016,
+     "t": 1.9336013
+    }
+   ]
+  },
+  {
+   "model": "M1",
+   "series": "BTC",
+   "n": 2952,
+   "alphaAnn": 0.28756747,
+   "t": 3.4072796,
+   "ir": 1.1981077,
+   "r2": 0.13420721,
+   "r2adj": 0.13244329,
+   "meanAnn": 0.37608905,
+   "unexplained": 0.76462601,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": 0.048508624,
+     "t": 2.0414574
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.073710181,
+     "t": 2.637307
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.08457877,
+     "t": 2.558379
+    },
+    {
+     "name": "TSMOM180",
+     "beta": 0.0043372608,
+     "t": 0.18735749
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.07274731,
+     "t": 1.4494178
+    },
+    {
+     "name": "EMA20/100",
+     "beta": -0.065433006,
+     "t": -1.2630681
+    }
+   ]
+  },
+  {
+   "model": "M2",
+   "series": "BTC",
+   "n": 2952,
+   "alphaAnn": 0.34616774,
+   "t": 4.2433207,
+   "ir": 1.5533804,
+   "r2": 0.253648,
+   "r2adj": 0.25187339,
+   "meanAnn": 0.37608905,
+   "unexplained": 0.92044089,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": 0.048988651,
+     "t": 2.2114178
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.055676818,
+     "t": 2.3148722
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.10702064,
+     "t": 3.3135272
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.0097416286,
+     "t": -0.45250443
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.049519691,
+     "t": 1.1627018
+    },
+    {
+     "name": "EMA20/100",
+     "beta": -0.073832536,
+     "t": -1.6531739
+    },
+    {
+     "name": "DONCH15 96/48",
+     "beta": 0.16109322,
+     "t": 7.1250476
+    }
+   ]
+  },
+  {
+   "model": "M0",
+   "series": "ETH",
+   "n": 2952,
+   "alphaAnn": 0.56691806,
+   "t": 4.165371,
+   "ir": 1.6674089,
+   "r2": 0.016451662,
+   "r2adj": 0.016118256,
+   "meanAnn": 0.60019697,
+   "unexplained": 0.94455335,
+   "betas": [
+    {
+     "name": "BH ETH",
+     "beta": 0.053401558,
+     "t": 2.0044917
+    }
+   ]
+  },
+  {
+   "model": "M1",
+   "series": "ETH",
+   "n": 2952,
+   "alphaAnn": 0.46575881,
+   "t": 3.8386822,
+   "ir": 1.4568328,
+   "r2": 0.1303548,
+   "r2adj": 0.12858303,
+   "meanAnn": 0.60019697,
+   "unexplained": 0.77600994,
+   "betas": [
+    {
+     "name": "BH ETH",
+     "beta": 0.050953936,
+     "t": 1.9895962
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.067652558,
+     "t": 2.3524518
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.01958931,
+     "t": 0.64248423
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.050082873,
+     "t": -1.9166839
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.11041711,
+     "t": 2.7827966
+    },
+    {
+     "name": "EMA20/100",
+     "beta": 0.00133827,
+     "t": 0.051712701
+    }
+   ]
+  },
+  {
+   "model": "M2",
+   "series": "ETH",
+   "n": 2952,
+   "alphaAnn": 0.43157386,
+   "t": 3.9083373,
+   "ir": 1.4479247,
+   "r2": 0.24411167,
+   "r2adj": 0.24231438,
+   "meanAnn": 0.60019697,
+   "unexplained": 0.71905371,
+   "betas": [
+    {
+     "name": "BH ETH",
+     "beta": 0.058588014,
+     "t": 2.3224609
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.047352959,
+     "t": 1.6730479
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.0022229359,
+     "t": 0.081774037
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.046484354,
+     "t": -1.9639062
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.088841482,
+     "t": 2.6497117
+    },
+    {
+     "name": "EMA20/100",
+     "beta": 0.038054104,
+     "t": 1.3693972
+    },
+    {
+     "name": "DONCH15 96/48",
+     "beta": 0.16077324,
+     "t": 6.1645003
+    }
+   ]
+  }
+ ],
+ "benchmarks": [
+  {
+   "id": "BH",
+   "BTC": {
+    "sharpe": 0.80793862,
+    "cagr": 0.35866746,
+    "maxDD": -0.76663361
+   },
+   "ETH": {
+    "sharpe": 0.75680487,
+    "cagr": 0.32198458,
+    "maxDD": -0.79302535
+   },
+   "50/50": {
+    "sharpe": 0.81558462,
+    "cagr": 0.37714244,
+    "maxDD": -0.7627415
+   },
+   "corrPortfolio": 0.10773418,
+   "corrBtcSleeve": 0.12536308,
+   "corrEthSleeve": 0.12826403
+  },
+  {
+   "id": "TSMOM30",
+   "BTC": {
+    "sharpe": 0.74721548,
+    "cagr": 0.31381996,
+    "maxDD": -0.57704705
+   },
+   "ETH": {
+    "sharpe": 0.92162722,
+    "cagr": 0.52168991,
+    "maxDD": -0.71512778
+   },
+   "50/50": {
+    "sharpe": 0.96369715,
+    "cagr": 0.50905242,
+    "maxDD": -0.5223022
+   },
+   "corrPortfolio": 0.33442619,
+   "corrBtcSleeve": 0.29550936,
+   "corrEthSleeve": 0.30643574
+  },
+  {
+   "id": "TSMOM90",
+   "BTC": {
+    "sharpe": 0.47652453,
+    "cagr": 0.1041689,
+    "maxDD": -0.88874626
+   },
+   "ETH": {
+    "sharpe": 0.35277744,
+    "cagr": -0.055479793,
+    "maxDD": -0.93820874
+   },
+   "50/50": {
+    "sharpe": 0.45062912,
+    "cagr": 0.07867067,
+    "maxDD": -0.90557005
+   },
+   "corrPortfolio": 0.20995943,
+   "corrBtcSleeve": 0.26126839,
+   "corrEthSleeve": 0.15245189
+  },
+  {
+   "id": "TSMOM180",
+   "BTC": {
+    "sharpe": 0.44256215,
+    "cagr": 0.086569161,
+    "maxDD": -0.83332787
+   },
+   "ETH": {
+    "sharpe": 0.21928088,
+    "cagr": -0.15483992,
+    "maxDD": -0.95650064
+   },
+   "50/50": {
+    "sharpe": 0.36113896,
+    "cagr": 0.027075753,
+    "maxDD": -0.89297513
+   },
+   "corrPortfolio": 0.089313406,
+   "corrBtcSleeve": 0.12031077,
+   "corrEthSleeve": 0.059855658
+  },
+  {
+   "id": "DONCH55/20",
+   "BTC": {
+    "sharpe": 0.73993573,
+    "cagr": 0.28706253,
+    "maxDD": -0.57455707
+   },
+   "ETH": {
+    "sharpe": 0.75575378,
+    "cagr": 0.32098443,
+    "maxDD": -0.68620062
+   },
+   "50/50": {
+    "sharpe": 0.84285797,
+    "cagr": 0.35377563,
+    "maxDD": -0.59065249
+   },
+   "corrPortfolio": 0.32748251,
+   "corrBtcSleeve": 0.29387369,
+   "corrEthSleeve": 0.308259
+  },
+  {
+   "id": "EMA20/100",
+   "BTC": {
+    "sharpe": 0.60941058,
+    "cagr": 0.20520503,
+    "maxDD": -0.71481059
+   },
+   "ETH": {
+    "sharpe": 0.5219384,
+    "cagr": 0.086236208,
+    "maxDD": -0.90082419
+   },
+   "50/50": {
+    "sharpe": 0.64032498,
+    "cagr": 0.22554693,
+    "maxDD": -0.69870788
+   },
+   "corrPortfolio": 0.20620063,
+   "corrBtcSleeve": 0.19833924,
+   "corrEthSleeve": 0.15369083
+  },
+  {
+   "id": "DONCH15 96/48",
+   "BTC": {
+    "sharpe": -0.44371572,
+    "cagr": -0.33903745,
+    "maxDD": -0.98126934
+   },
+   "ETH": {
+    "sharpe": 0.36996759,
+    "cagr": 0.014071934,
+    "maxDD": -0.73390069
+   },
+   "50/50": {
+    "sharpe": 0.016175238,
+    "cagr": -0.1476396,
+    "maxDD": -0.8859177
+   },
+   "corrPortfolio": 0.37880936,
+   "corrBtcSleeve": 0.39084339,
+   "corrEthSleeve": 0.37807883
+  }
+ ],
+ "sensitivities": {
+  "S1": {
+   "model": "S1 grid",
+   "series": "portfolio",
+   "n": 2952,
+   "alphaAnn": 0.40691318,
+   "t": 4.7317674,
+   "ir": 1.822127,
+   "r2": 0.34298814,
+   "r2adj": 0.33873056,
+   "meanAnn": 0.51728731,
+   "unexplained": 0.78662897,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": -0.032418335,
+     "t": -1.4479673
+    },
+    {
+     "name": "BH ETH",
+     "beta": 0.080710247,
+     "t": 3.9458743
+    },
+    {
+     "name": "TSMOM10",
+     "beta": 0.052150055,
+     "t": 2.5247766
+    },
+    {
+     "name": "TSMOM20",
+     "beta": -0.02256308,
+     "t": -0.64195824
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.036973709,
+     "t": 1.2868363
+    },
+    {
+     "name": "TSMOM60",
+     "beta": 0.046888997,
+     "t": 1.1272212
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.0040291993,
+     "t": 0.11519333
+    },
+    {
+     "name": "TSMOM120",
+     "beta": -0.037057437,
+     "t": -1.1815502
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.070719985,
+     "t": -1.6990653
+    },
+    {
+     "name": "TSMOM250",
+     "beta": -0.056429497,
+     "t": -1.6884483
+    },
+    {
+     "name": "DONCH20/10",
+     "beta": 0.037395677,
+     "t": 0.97627633
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": -0.0073439028,
+     "t": -0.11233909
+    },
+    {
+     "name": "DONCH100/50",
+     "beta": 0.016603514,
+     "t": 0.29241273
+    },
+    {
+     "name": "EMA10/50",
+     "beta": 0.027175942,
+     "t": 0.61740012
+    },
+    {
+     "name": "EMA20/100",
+     "beta": 0.01102737,
+     "t": 0.2971328
+    },
+    {
+     "name": "EMA50/200",
+     "beta": 0.10897613,
+     "t": 2.3675272
+    },
+    {
+     "name": "DONCH15 48/24",
+     "beta": 0.093064862,
+     "t": 4.1760489
+    },
+    {
+     "name": "DONCH15 96/48",
+     "beta": -0.0499713,
+     "t": -1.8171164
+    },
+    {
+     "name": "DONCH15 192/96",
+     "beta": 0.17733882,
+     "t": 5.5237431
+    }
+   ]
+  },
+  "S2 first": {
+   "from": "2018-09-01",
+   "to": "2022-09-15",
+   "model": "S2 first",
+   "series": "portfolio",
+   "n": 1476,
+   "alphaAnn": 0.46159085,
+   "t": 3.2082929,
+   "ir": 1.7498227,
+   "r2": 0.21945068,
+   "r2adj": 0.2151941,
+   "meanAnn": 0.60737131,
+   "unexplained": 0.75998131,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": -0.044687252,
+     "t": -1.7580216
+    },
+    {
+     "name": "BH ETH",
+     "beta": 0.067533563,
+     "t": 2.6236183
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.044115511,
+     "t": 1.1824153
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.050016908,
+     "t": 1.2241316
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.08702114,
+     "t": -2.5015805
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.027634447,
+     "t": 0.51949145
+    },
+    {
+     "name": "EMA20/100",
+     "beta": 0.080040494,
+     "t": 2.3978392
+    },
+    {
+     "name": "DONCH15 96/48",
+     "beta": 0.12826629,
+     "t": 4.7232702
+    }
+   ]
+  },
+  "S2 second": {
+   "from": "2022-09-16",
+   "to": "2026-09-30",
+   "model": "S2 second",
+   "series": "portfolio",
+   "n": 1476,
+   "alphaAnn": 0.3813356,
+   "t": 3.8982681,
+   "ir": 2.0061545,
+   "r2": 0.42296282,
+   "r2adj": 0.41981606,
+   "meanAnn": 0.4272033,
+   "unexplained": 0.89263261,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": -0.018122146,
+     "t": -0.52764354
+    },
+    {
+     "name": "BH ETH",
+     "beta": 0.089464911,
+     "t": 2.8230472
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.10479095,
+     "t": 3.0623191
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.02626256,
+     "t": 0.69046664
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.010753125,
+     "t": -0.29237415
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.13050896,
+     "t": 2.9949266
+    },
+    {
+     "name": "EMA20/100",
+     "beta": -0.053000776,
+     "t": -1.2583626
+    },
+    {
+     "name": "DONCH15 96/48",
+     "beta": 0.25512895,
+     "t": 8.7641452
+    }
+   ]
+  },
+  "S3": {
+   "weeks": 423,
+   "lag": 5,
+   "alphaAnn": 0.42576677,
+   "t": 4.3652922,
+   "r2": 0.34576236,
+   "ir": 1.6553881,
+   "names": [
+    "BH BTC",
+    "BH ETH",
+    "TSMOM30",
+    "TSMOM90",
+    "TSMOM180",
+    "DONCH55/20",
+    "EMA20/100",
+    "DONCH15 96/48"
+   ]
+  },
+  "S4": {
+   "model": "S4 frictionless",
+   "series": "portfolio",
+   "n": 2952,
+   "alphaAnn": 0.35982697,
+   "t": 4.1715206,
+   "ir": 1.524859,
+   "r2": 0.26640724,
+   "r2adj": 0.26441311,
+   "meanAnn": 0.51728731,
+   "unexplained": 0.69560372,
+   "betas": [
+    {
+     "name": "BH BTC",
+     "beta": -0.035630614,
+     "t": -1.5464818
+    },
+    {
+     "name": "BH ETH",
+     "beta": 0.077118124,
+     "t": 3.4984484
+    },
+    {
+     "name": "TSMOM30",
+     "beta": 0.065520181,
+     "t": 2.3837611
+    },
+    {
+     "name": "TSMOM90",
+     "beta": 0.05077648,
+     "t": 1.4593397
+    },
+    {
+     "name": "TSMOM180",
+     "beta": -0.06305343,
+     "t": -2.1847593
+    },
+    {
+     "name": "DONCH55/20",
+     "beta": 0.051296677,
+     "t": 1.3525011
+    },
+    {
+     "name": "EMA20/100",
+     "beta": 0.031218517,
+     "t": 1.0912689
+    },
+    {
+     "name": "DONCH15 96/48",
+     "beta": 0.162786,
+     "t": 5.8425886
+    }
+   ]
+  }
+ }
+}
