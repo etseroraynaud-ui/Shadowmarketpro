@@ -1,0 +1,529 @@
+{
+ "prespec": "research/preregistration/e2-diagnostics.md",
+ "commit": "315a3c8903e38216729bef9e93bbd21680490f36",
+ "sourcesClean": true,
+ "generatedAt": "2026-10-09T00:12:41.474Z",
+ "eliminated": false,
+ "elim": {
+  "random": false,
+  "shift": false,
+  "funding": false
+ },
+ "sample": {
+  "n": 794,
+  "e2": {
+   "btc": 143,
+   "ethusdt": 108
+  },
+  "dE2": 0.4227704794
+ },
+ "portfolio": {
+  "v1": 1.726052721,
+  "selectionE2": 1.885479319,
+  "challengerE2": 1.877566513
+ },
+ "random": {
+  "p1": 0.0016,
+  "p1y": 0.0316,
+  "p1pf": 0.012,
+  "trade": {
+   "mean": 0.002973511209,
+   "p5": -0.2261828279,
+   "p50": -0.0006574651186,
+   "p95": 0.2455402403,
+   "max": 0.4946589848
+  },
+  "tradeYear": {
+   "mean": 0.1813151126,
+   "p5": -0.0275417724,
+   "p50": 0.1780604818,
+   "p95": 0.397494954,
+   "max": 0.6820005686
+  },
+  "pf": {
+   "mean": 1.616159245,
+   "p5": 1.441352016,
+   "p50": 1.620478965,
+   "p95": 1.790486328,
+   "max": 2.020840568
+  },
+  "executed": {
+   "e2": 251,
+   "mean": 251
+  }
+ },
+ "shift": {
+  "p2": 0.005399151562,
+  "p2pf": 0.0125,
+  "shifts": 2593,
+  "trade": {
+   "mean": -0.01068593679,
+   "p5": -0.281193376,
+   "p50": -0.009039109762,
+   "p95": 0.2663697796,
+   "max": 0.5299764309
+  },
+  "pf": {
+   "mean": 1.6042739,
+   "p5": 1.382622706,
+   "p50": 1.610996623,
+   "p95": 1.796755533,
+   "max": 1.98585435
+  },
+  "n1Range": [
+   202,
+   339
+  ]
+ },
+ "funding": [
+  {
+   "scenario": "binance",
+   "d": 0.4206210293,
+   "fundE2": 0.0556440015,
+   "fundOther": 0.1457402818,
+   "v1": {
+    "sharpe": 1.698353057,
+    "cagr": 0.6258918033,
+    "maxDD": -0.2347387226
+   },
+   "e2": {
+    "sharpe": 1.813446195,
+    "cagr": 0.5837928552,
+    "maxDD": -0.1918652942
+   },
+   "byYear": [
+    {
+     "year": 2017,
+     "d": null
+    },
+    {
+     "year": 2018,
+     "d": 1.341449464
+    },
+    {
+     "year": 2019,
+     "d": -0.3712219398
+    },
+    {
+     "year": 2020,
+     "d": -0.3195407513
+    },
+    {
+     "year": 2021,
+     "d": 0.1186105886
+    },
+    {
+     "year": 2022,
+     "d": 0.168175216
+    },
+    {
+     "year": 2023,
+     "d": 0.2461649572
+    },
+    {
+     "year": 2024,
+     "d": 0.538742187
+    },
+    {
+     "year": 2025,
+     "d": -0.07157041093
+    },
+    {
+     "year": 2026,
+     "d": 1.992650312
+    }
+   ]
+  },
+  {
+   "scenario": "hyperliquid",
+   "d": 0.4189493755,
+   "fundE2": 0.06101278147,
+   "fundOther": 0.1754423973,
+   "v1": {
+    "sharpe": 1.689456862,
+    "cagr": 0.6209420116,
+    "maxDD": -0.2335881328
+   },
+   "e2": {
+    "sharpe": 1.797277246,
+    "cagr": 0.5764147777,
+    "maxDD": -0.1918652942
+   },
+   "byYear": [
+    {
+     "year": 2017,
+     "d": null
+    },
+    {
+     "year": 2018,
+     "d": 1.341449464
+    },
+    {
+     "year": 2019,
+     "d": -0.3712219398
+    },
+    {
+     "year": 2020,
+     "d": -0.3195407513
+    },
+    {
+     "year": 2021,
+     "d": 0.1186105886
+    },
+    {
+     "year": 2022,
+     "d": 0.168175216
+    },
+    {
+     "year": 2023,
+     "d": 0.2455806026
+    },
+    {
+     "year": 2024,
+     "d": 0.5204746913
+    },
+    {
+     "year": 2025,
+     "d": -0.0774418583
+    },
+    {
+     "year": 2026,
+     "d": 1.999364731
+    }
+   ]
+  },
+  {
+   "scenario": "shortsPay",
+   "d": 0.420767867,
+   "fundE2": -0.1063875324,
+   "fundOther": -0.1900244038,
+   "v1": {
+    "sharpe": 1.674028913,
+    "cagr": 0.6178792873,
+    "maxDD": -0.2407077465
+   },
+   "e2": {
+    "sharpe": 1.85595224,
+    "cagr": 0.6066415517,
+    "maxDD": -0.192353896
+   },
+   "byYear": [
+    {
+     "year": 2017,
+     "d": null
+    },
+    {
+     "year": 2018,
+     "d": 1.327318432
+    },
+    {
+     "year": 2019,
+     "d": -0.3615868987
+    },
+    {
+     "year": 2020,
+     "d": -0.3024313283
+    },
+    {
+     "year": 2021,
+     "d": 0.1398997411
+    },
+    {
+     "year": 2022,
+     "d": 0.1590197576
+    },
+    {
+     "year": 2023,
+     "d": 0.2425001536
+    },
+    {
+     "year": 2024,
+     "d": 0.5341062733
+    },
+    {
+     "year": 2025,
+     "d": -0.06649114897
+    },
+    {
+     "year": 2026,
+     "d": 1.980849505
+    }
+   ]
+  }
+ ],
+ "slippage": [
+  {
+   "slip": 0,
+   "d": 0.4227704794,
+   "v1": 1.726052721,
+   "e2": 1.877566513
+  },
+  {
+   "slip": 0.01,
+   "d": 0.4234183648,
+   "v1": 1.656069577,
+   "e2": 1.819588965
+  },
+  {
+   "slip": 0.02,
+   "d": 0.4240662503,
+   "v1": 1.586102308,
+   "e2": 1.761575202
+  },
+  {
+   "slip": 0.05,
+   "d": 0.4260099068,
+   "v1": 1.372458747,
+   "e2": 1.581793727
+  }
+ ],
+ "years": [
+  {
+   "year": 2017,
+   "n1": 0,
+   "n0": 7,
+   "d": null,
+   "sharpeV0": null,
+   "sharpeE2": null,
+   "partial": true
+  },
+  {
+   "year": 2018,
+   "n1": 40,
+   "n0": 35,
+   "d": 1.334383948,
+   "sharpeV0": 4.809937894,
+   "sharpeE2": 4.971419841,
+   "partial": true
+  },
+  {
+   "year": 2019,
+   "n1": 37,
+   "n0": 35,
+   "d": -0.3664044192,
+   "sharpeV0": 1.156623976,
+   "sharpeE2": 0.427315139,
+   "partial": false
+  },
+  {
+   "year": 2020,
+   "n1": 8,
+   "n0": 58,
+   "d": -0.3034562599,
+   "sharpeV0": 1.416170442,
+   "sharpeE2": 1.661285878,
+   "partial": false
+  },
+  {
+   "year": 2021,
+   "n1": 9,
+   "n0": 47,
+   "d": 0.1399043658,
+   "sharpeV0": 1.790565126,
+   "sharpeE2": 1.844192731,
+   "partial": false
+  },
+  {
+   "year": 2022,
+   "n1": 71,
+   "n0": 60,
+   "d": 0.1597383886,
+   "sharpeV0": 1.969679831,
+   "sharpeE2": 1.751813165,
+   "partial": false
+  },
+  {
+   "year": 2023,
+   "n1": 34,
+   "n0": 115,
+   "d": 0.2500678754,
+   "sharpeV0": 0.1896374732,
+   "sharpeE2": 1.091977453,
+   "partial": false
+  },
+  {
+   "year": 2024,
+   "n1": 6,
+   "n0": 62,
+   "d": 0.536122481,
+   "sharpeV0": 2.657171107,
+   "sharpeE2": 3.06890768,
+   "partial": false
+  },
+  {
+   "year": 2025,
+   "n1": 34,
+   "n0": 62,
+   "d": -0.06987068757,
+   "sharpeV0": 1.783542653,
+   "sharpeE2": 1.911769072,
+   "partial": false
+  },
+  {
+   "year": 2026,
+   "n1": 12,
+   "n0": 62,
+   "d": 1.997039092,
+   "sharpeV0": 1.170093444,
+   "sharpeE2": 1.775364474,
+   "partial": true
+  }
+ ],
+ "rolling": [
+  {
+   "months": 12,
+   "n": 86,
+   "sharePos": 0.6046511628,
+   "diff": {
+    "mean": 0.1278102507,
+    "p5": -0.7213705768,
+    "p50": 0.1814094334,
+    "p95": 0.9043356486,
+    "max": 1.083947657
+   },
+   "min": -1.003160859,
+   "shareDPos": 0.7674418605,
+   "d": {
+    "mean": 0.1617996643,
+    "p5": -0.7283262157,
+    "p50": 0.2175943666,
+    "p95": 0.765564838,
+    "max": 1.553166693
+   }
+  },
+  {
+   "months": 24,
+   "n": 74,
+   "sharePos": 0.7162162162,
+   "diff": {
+    "mean": 0.1419690707,
+    "p5": -0.2346675009,
+    "p50": 0.1592980456,
+    "p95": 0.4941048395,
+    "max": 0.6557236935
+   },
+   "min": -0.3073693566,
+   "shareDPos": 0.8108108108,
+   "d": {
+    "mean": 0.1962686615,
+    "p5": -0.2719452755,
+    "p50": 0.2365006636,
+    "p95": 0.5147722485,
+    "max": 0.5809055678
+   }
+  }
+ ],
+ "fragile": false,
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "b69ad8f8f89a4ded"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "fafb22d6373b19bf"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "bad42836b9d61569"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "15211a3e185b1214"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/params.ts",
+   "ok": true,
+   "detail": "5f7cd0c941d70273"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/presets.ts",
+   "ok": true,
+   "detail": "f97449733ec945bb"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/regimes.ts",
+   "ok": true,
+   "detail": "d72f79d1d97c214d"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/live.ts",
+   "ok": true,
+   "detail": "05caf82ece9ad7f8"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "be445aa726433c3e"
+  },
+  {
+   "name": "BTC : régime recalculé = régime du moteur",
+   "ok": true,
+   "detail": "0 écart(s)"
+  },
+  {
+   "name": "ETH : régime recalculé = régime du moteur",
+   "ok": true,
+   "detail": "0 écart(s)"
+  },
+  {
+   "name": "BTC : v1 = rapport validé",
+   "ok": true,
+   "detail": "écart relatif 0.0e+0"
+  },
+  {
+   "name": "BTC : chaque short v1 entre sur une barre de signal short",
+   "ok": true,
+   "detail": "entryIdx = barre du signal"
+  },
+  {
+   "name": "ETH : v1 = rapport validé",
+   "ok": true,
+   "detail": "écart relatif 0.0e+0"
+  },
+  {
+   "name": "ETH : chaque short v1 entre sur une barre de signal short",
+   "ok": true,
+   "detail": "entryIdx = barre du signal"
+  },
+  {
+   "name": "portefeuille 50/50 v1 = Sharpe publié",
+   "ok": true,
+   "detail": "1.726052721 vs 1.726052721"
+  },
+  {
+   "name": "échantillon = référence historique du forward",
+   "ok": true,
+   "detail": "794 shorts, 251 en régime E2 (BTC 143, ETH 108), D = 0.4228"
+  },
+  {
+   "name": "sélection de tous les shorts v1 = v1 exactement",
+   "ok": true,
+   "detail": "equity identique barre par barre sur les deux sleeves"
+  },
+  {
+   "name": "décalage nul = E2",
+   "ok": true,
+   "detail": "mêmes drapeaux pour les 794 shorts"
+  },
+  {
+   "name": "BTC : funding croissant, sans trou de plus de 8 h (Binance) ni 1 h (Hyperliquid, après 2023-06)",
+   "ok": false,
+   "detail": "Binance 7395 versements du 2020-01-01 au 2026-09-30, Hyperliquid 29142 depuis le 2023-05-12"
+  },
+  {
+   "name": "ETH : funding croissant, sans trou de plus de 8 h (Binance) ni 1 h (Hyperliquid, après 2023-06)",
+   "ok": false,
+   "detail": "Binance 7395 versements du 2020-01-01 au 2026-09-30, Hyperliquid 29142 depuis le 2023-05-12"
+  },
+  {
+   "name": "glissement nul = runs de référence",
+   "ok": true,
+   "detail": "mêmes Sharpe et D"
+  }
+ ]
+}
