@@ -6,7 +6,7 @@ import HeroChart from '../_site/HeroChart'
 import { CountUp, SeriesPanel, SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table } from '../_site/ui'
 import { COLORS, DOWNLOADS, P, SIM, longestDrawdown, sample, sampleStart, series, verdictOf } from '../_site/data'
-import { int, num, pct } from '../_site/format'
+import { int, month, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
   title: 'Shock Engine — ShadowMarketPro™',
@@ -88,7 +88,6 @@ export default function ShockEnginePage() {
             { label: 'Volatility', value: pct(F.m.vol), sub: 'annualized' },
             { label: 'Trades', value: int(F.trades.trades), sub: `${int(P.headline.trades.btc)} BTC · ${int(P.headline.trades.eth)} ETH` },
             { label: 'Profit factor', value: num(F.trades.profitFactor), sub: `win rate ${pct(F.trades.winRate, 0)}` },
-            { label: 'BTC/ETH correlation', value: num(P.correlation.dailyPearson), sub: 'strategy returns, daily' },
           ]} />
         </Section>
 
@@ -149,11 +148,11 @@ export default function ShockEnginePage() {
                 { name: 'ETH', color: COLORS.eth, values: S(P.chart.ddEth) },
               ]} />
             </div>
-            <div className="s-grid2 s-reveal" style={{ alignContent: 'start' }}>
+            <div className="s-metrics s-reveal" style={{ alignContent: 'start', margin: 0 }}>
               <div className="s-metric"><div className="s-metric-l">Max drawdown</div><div className="s-metric-v">{pct(F.m.maxDD)}</div><div className="s-metric-s">{P.drawdowns.top10.portfolio[0].start} → {P.drawdowns.top10.portfolio[0].recovery ?? 'not recovered'}</div></div>
               <div className="s-metric"><div className="s-metric-l">Longest drawdown</div><div className="s-metric-v">{int(LD.days)} days</div><div className="s-metric-s">from {LD.start}{LD.recovery ? '' : ', not recovered'}</div></div>
-              <div className="s-metric"><div className="s-metric-l">Worst month</div><div className="s-metric-v">{pct(F.m.worstMonth.ret)}</div><div className="s-metric-s">{P.headline.worstMonth.month}</div></div>
-              <div className="s-metric"><div className="s-metric-l">Rolling 12-month Sharpe</div><div className="s-metric-v">{pct(P.stability.rolling12.portfolio.positive, 0)}</div><div className="s-metric-s">of windows positive · {pct(P.stability.rolling12.portfolio.aboveOne, 0)} above 1</div></div>
+              <div className="s-metric"><div className="s-metric-l">Worst month</div><div className="s-metric-v">{pct(F.m.worstMonth.ret)}</div><div className="s-metric-s">{month(P.headline.worstMonth.month)}</div></div>
+              <div className="s-metric"><div className="s-metric-l">Positive 12-month windows</div><div className="s-metric-v">{pct(P.stability.rolling12.portfolio.positive, 0)}</div><div className="s-metric-s">{pct(P.stability.rolling12.portfolio.aboveOne, 0)} with Sharpe above 1</div></div>
             </div>
           </div>
           <div className="s-gap" />
@@ -187,7 +186,7 @@ export default function ShockEnginePage() {
               </div>
               <p className="s-small">Daily correlation, {CP.start} → {CP.end}.</p>
             </div>
-            <div className="s-grid2 s-reveal" style={{ alignContent: 'start' }}>
+            <div className="s-metrics s-reveal" style={{ alignContent: 'start', margin: 0 }}>
               <div className="s-metric"><div className="s-metric-l">Portfolio Sharpe</div><div className="s-metric-v">{num(F.m.sharpe)}</div><div className="s-metric-s">BTC {num(P.headline.btcSharpe)} · ETH {num(P.headline.ethSharpe)}</div></div>
               <div className="s-metric"><div className="s-metric-l">Max drawdown</div><div className="s-metric-v">{pct(F.m.maxDD)}</div><div className="s-metric-s">BTC {pct(P.series.btc.m.maxDD)} · ETH {pct(P.series.eth.m.maxDD)}</div></div>
             </div>
@@ -201,14 +200,14 @@ export default function ShockEnginePage() {
             { label: 'Modeled transaction costs', state: 'ok', note: 'commission 0.045 % per order; cost stress published' },
             { label: 'BTC / ETH evidence', state: 'ok', note: 'event study, placebo entries, delayed entries, two ETH data sources' },
             { label: 'Robustness testing', state: 'ok', note: 'parameter neighborhoods, cost stress, resampled histories' },
-            { label: 'Forward validation', state: 'wait', note: `pre-registered; running since ${P.forward.start}` },
+            { label: 'Forward validation', state: 'wait', note: `pre-registered; observation starts ${P.forward.start}` },
             { label: 'Live track record', state: 'no', note: 'not available' },
             { label: 'Capacity / market impact', state: 'no', note: 'not yet modeled' },
           ]} />
-          <p className="s-small">The daily-trend condition on short entries was specified in October 2026, after this historical period had been studied: the figures above are in-sample for it, which is why it is being validated forward. Slippage and perpetual funding are not in the headline figures.</p>
+          <p className="s-small">The daily-trend condition on short entries was specified in October 2026, after this historical period had been studied: the figures above are in-sample for it, which is why a forward validation has been pre-registered. Slippage and perpetual funding are not in the headline figures.</p>
         </Section>
 
-        <CtaBand title="Explore the research behind Shock Engine" actions={<>
+        <CtaBand title="Explore the research" actions={<>
           <Link href="/research" className="s-btn s-btn-primary">View Research <Arrow /></Link>
           <a href={`${DOWNLOADS}/btc-eth-portfolio.html`} className="s-btn s-btn-ghost">Download Research Report</a>
           <Link href="/institutional" className="s-btn s-btn-ghost">Institutional Access</Link>

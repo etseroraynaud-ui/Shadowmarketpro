@@ -18,7 +18,7 @@ export default function TradingToolsPage() {
     <>
       <div className="rel s-tools">
         <SiteHeader />
-
+        <main>
         <section className="s-hero s-hero-simple">
           <div className="s-main">
             <p className="s-eyebrow">Trading Tools · TradingView indicators</p>
@@ -279,6 +279,7 @@ export default function TradingToolsPage() {
             <div className="gl fbox" id="fb"></div>
           </div>
         </section>
+        </main>
 
         <SiteFooter />
       </div>

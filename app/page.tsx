@@ -110,7 +110,7 @@ export default function HomePage() {
             <StatusList items={[
               { label: 'Historical simulation', state: 'ok', note: `${CP.start.slice(0, 4)} → ${CP.end.slice(0, 4)}, ${int(F.trades.trades)} trades` },
               { label: 'Robustness testing', state: 'ok', note: 'placebo, delay, costs, parameters' },
-              { label: 'Forward validation', state: 'wait', note: `pre-registered, from ${P.forward.start}` },
+              { label: 'Forward validation', state: 'wait', note: `pre-registered; observation starts ${P.forward.start}` },
               { label: 'Live track record', state: 'no', note: 'not available' },
             ]} />
             <div className="s-card s-card-glow s-reveal">
@@ -130,7 +130,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <CtaBand title="Read the research behind Shock Engine" actions={<>
+        <CtaBand title="Read the research" actions={<>
           <Link href="/research" className="s-btn s-btn-primary">View Research <Arrow /></Link>
           <a href={`${DOWNLOADS}/btc-eth-portfolio.html`} className="s-btn s-btn-ghost">Download Research Report</a>
         </>}>Methods, verdicts, failed markets, and every file needed to check the figures.</CtaBand>

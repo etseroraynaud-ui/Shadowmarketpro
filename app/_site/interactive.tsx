@@ -39,9 +39,11 @@ export function SeriesPanel({ title, sub, series, start, step, fmt, log, area, h
     <div className="s-panel">
       <div className="s-panel-head">
         <div><h3 className="s-panel-t">{title}</h3>{sub && <p className="s-panel-s">{sub}</p>}</div>
-        <div className="s-seg" role="group" aria-label="Series">
-          {['all', ...series.map(s => s.name)].map(x => <button key={x} type="button" aria-pressed={k === x} onClick={() => setK(x)}>{x === 'all' ? 'All' : x}</button>)}
-        </div>
+        {series.length > 1 && (
+          <div className="s-seg" role="group" aria-label="Series">
+            {['all', ...series.map(s => s.name)].map(x => <button key={x} type="button" aria-pressed={k === x} onClick={() => setK(x)}>{x === 'all' ? 'All' : x}</button>)}
+          </div>
+        )}
       </div>
       <LineChart title={title} start={start} step={step} fmt={fmt} log={log} area={area && shown.length === 1} height={height} yMax={yMax} yMin={yMin} series={shown} endLabels={endLabels} refs={refs} />
     </div>

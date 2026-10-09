@@ -129,7 +129,7 @@
 .s-herochart { position: relative; border: 1px solid var(--s-border); border-radius: 22px; background: linear-gradient(180deg, rgba(18, 24, 33, .9), rgba(10, 13, 18, .9)); padding: 18px 18px 12px; box-shadow: 0 30px 80px -40px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .04) }
 .s-herochart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 6px }
 .s-herochart-t { font-size: 12.5px; color: var(--s-muted); letter-spacing: .04em }
-.s-herochart-v { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums }
+.s-herochart-v { white-space: nowrap; font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums }
 .s-herochart-v small { font-size: 12.5px; color: var(--s-muted); font-weight: 400; margin-left: 6px }
 .s-herochart svg { display: block; width: 100%; height: auto }
 .s-herochart-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--s-muted); margin-top: 6px }
@@ -138,6 +138,7 @@
 .s-hc-dd { opacity: .9 }
 .s-hc-grid { stroke: var(--s-grid) }
 .s-hc-tick { fill: var(--s-muted); font-size: 11px; font-family: 'DM Sans', sans-serif }
+@media (max-width: 560px) { .s-hc-tick { display: none } .s-herochart { padding: 14px 14px 10px } .s-herochart-head { flex-wrap: wrap; row-gap: 2px } .s-herochart-t { font-size: 11.5px } }
 .s-hc-end { fill: #fff; font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif }
 @media (prefers-reduced-motion: no-preference) {
   .s-hc-draw { stroke-dasharray: 2400; stroke-dashoffset: 2400; animation: s-draw 2.2s var(--s-ease) .15s forwards }
@@ -158,6 +159,7 @@
   .s-kpi:nth-child(-n+2) { border-top: none }
   .s-kpi:nth-child(even) { border-left: 1px solid var(--s-border) }
 }
+@media (max-width: 560px) { .s-kpi { padding: 16px 14px } .s-kpi-v { font-size: clamp(1.55rem, 7.4vw, 2rem) } .s-kpi-l { font-size: 11px; letter-spacing: .08em } }
 
 /* ---------------------------------------------------------------- sections */
 .s-section { padding: 96px 0 0 }
@@ -186,7 +188,8 @@
 .s-card-glow { background: radial-gradient(120% 120% at 100% 0%, rgba(79, 224, 176, .08), transparent 55%), linear-gradient(180deg, var(--s-surface2), var(--s-surface)) }
 
 /* métriques compactes */
-.s-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin: 20px 0 }
+.s-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0 }
+@media (max-width: 560px) { .s-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px } .s-metric { padding: 14px 14px 13px } .s-metric-v { font-size: 22px } .s-metric-l { font-size: 11px; letter-spacing: .06em } }
 .s-metric { background: var(--s-surface); border: 1px solid var(--s-border); border-radius: 14px; padding: 16px 18px; transition: border-color .2s }
 .s-metric:hover { border-color: var(--s-border2) }
 .s-metric-l { font-size: 12px; color: var(--s-muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600 }
@@ -343,7 +346,7 @@
 
 /* ---------------------------------------------------------------- accueil : deux univers */
 .s-worlds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px }
-.s-world { position: relative; overflow: hidden; border-radius: 24px; border: 1px solid var(--s-border); padding: 32px; background: linear-gradient(180deg, var(--s-surface2), var(--s-surface)); transition: border-color .25s, transform .25s var(--s-ease) }
+.s-world { display: block; text-decoration: none; color: inherit; position: relative; overflow: hidden; border-radius: 24px; border: 1px solid var(--s-border); padding: 32px; background: linear-gradient(180deg, var(--s-surface2), var(--s-surface)); transition: border-color .25s, transform .25s var(--s-ease) }
 .s-world:hover { border-color: var(--s-border2); transform: translateY(-2px) }
 .s-world-research { background: radial-gradient(100% 100% at 100% 0%, rgba(79, 224, 176, .1), transparent 55%), linear-gradient(180deg, var(--s-surface2), var(--s-surface)) }
 .s-world h3 { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 650; color: #fff; margin: 0 0 10px; letter-spacing: -.015em }
@@ -358,21 +361,21 @@
 
 /* ---------------------------------------------------------------- pied de page */
 .s-footer { border-top: 1px solid var(--s-border); padding: 56px 24px 32px; background: var(--s-bg); color: var(--s-ink); margin-top: 96px }
-.s-footer-in { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px }
+.s-footer-in { max-width: 1152px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px }
 .s-footer-brand p { color: var(--s-muted); font-size: 14px; margin-top: 12px; max-width: 320px }
-.s-footer h4 { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 13px; color: #fff; margin: 0 0 12px; letter-spacing: .02em }
+.s-footer h3 { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 13px; color: #fff; margin: 0 0 12px; letter-spacing: .02em }
 .s-footer ul { list-style: none; padding: 0; margin: 0 }
 .s-footer li { margin-bottom: 9px }
 .s-footer li a { font-size: 14px; color: var(--s-muted); text-decoration: none; transition: color .2s }
 .s-footer li a:hover { color: #fff }
-.s-footer-legal { max-width: 1200px; margin: 36px auto 0; padding-top: 20px; border-top: 1px solid var(--s-border); display: flex; justify-content: space-between; gap: 24px; font-size: 12.5px; color: var(--s-muted) }
+.s-footer-legal { max-width: 1152px; margin: 36px auto 0; padding-top: 20px; border-top: 1px solid var(--s-border); display: flex; justify-content: space-between; gap: 24px; font-size: 12.5px; color: var(--s-muted) }
 .s-footer-legal p { margin: 0; max-width: 760px }
 @media (max-width: 860px) { .s-footer-in { grid-template-columns: 1fr 1fr } .s-footer-brand { grid-column: 1 / -1 } .s-footer-legal { flex-direction: column } }
 
 /* ---------------------------------------------------------------- apparition au scroll (CSS seul) */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .s-reveal { animation: s-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 40% }
+    .s-reveal { animation: s-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 140px }
     @keyframes s-rise { from { opacity: 0; transform: translateY(18px) } to { opacity: 1; transform: none } }
   }
 }
@@ -407,7 +410,7 @@
 
 /* ---------------------------------------------------------------- études (page Research) */
 .s-studies { display: grid; gap: 10px }
-.s-study { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 2fr) auto; gap: 22px; align-items: start; padding: 18px 22px; border: 1px solid var(--s-border); border-radius: 16px; background: var(--s-surface); transition: border-color .2s var(--s-ease) }
+.s-study { display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr) 160px; gap: 22px; align-items: start; padding: 18px 22px; border: 1px solid var(--s-border); border-radius: 16px; background: var(--s-surface); transition: border-color .2s var(--s-ease) }
 .s-study:hover { border-color: var(--s-border2) }
 .s-study h3 { font-family: 'DM Sans', sans-serif; font-size: 15.5px; line-height: 1.4; margin: 0 0 4px; color: #fff; font-weight: 600 }
 .s-study-p { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--s-muted) }

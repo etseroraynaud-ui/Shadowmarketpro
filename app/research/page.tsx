@@ -104,10 +104,10 @@ export default function ResearchPage() {
           <div className="s-split">
             <StatusList items={[
               { label: 'Hypothesis', state: 'ok', note: 'shorts taken in a bearish daily regime earn more, risk-adjusted, than shorts taken outside it' },
-              { label: 'Start', state: 'ok', note: P.forward.start },
+              { label: 'Observation starts', state: 'wait', note: P.forward.start },
               { label: 'Interim looks', state: 'wait', note: 'after 25, 50 and 75 closed shorts in the bearish regime, at p < 0.001' },
               { label: 'Final look', state: 'wait', note: 'when both groups reach 100 closed shorts, at p < 0.047; at the latest 2031-10-01' },
-              { label: 'Closed shorts so far', state: 'wait', note: int(P.forward.closedShorts) },
+              
             ]} />
             <div className="s-card s-card-glow s-reveal">
               <div className="s-card-k">Why it takes time</div>

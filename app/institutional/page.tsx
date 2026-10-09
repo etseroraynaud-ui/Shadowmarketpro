@@ -66,7 +66,7 @@ export default function InstitutionalPage() {
         <Section id="not-done" eyebrow="Limits" title="What is not done yet" intro={<p>Stated plainly, so that it can be weighed.</p>}>
           <StatusList items={[
             { label: 'Live track record', state: 'no', note: 'not available; live results will be reported separately from the simulation, from their own start date' },
-            { label: 'Forward validation', state: 'wait', note: `of the short-entry condition, pre-registered, from ${P.forward.start}` },
+            { label: 'Forward validation', state: 'wait', note: `of the short-entry condition; pre-registered, observation starts ${P.forward.start}` },
             { label: 'Capacity and market impact', state: 'no', note: `not modeled; turnover about ${Math.round(F.cost.turnoverOneWay)}× the capital a year` },
             { label: 'Slippage and funding', state: 'no', note: `not in the headline figures; with commissions doubled the Sharpe is ${num(P.costs.stress[2].portfolio.sharpe)}, with historical funding ${num(P.stress.funding[0].sharpe)}` },
             { label: 'Independent verification', state: 'no', note: 'no third-party audit of the research or of results' },

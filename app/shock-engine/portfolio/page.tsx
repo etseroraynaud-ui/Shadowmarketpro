@@ -103,12 +103,11 @@ export default function PerformancePage() {
             { label: 'Volatility', value: pct(F.m.vol), sub: 'annualized' },
             { label: 'Calmar', value: num(F.m.calmar), sub: 'CAGR / max drawdown' },
             { label: 'Trades', value: int(F.trades.trades), sub: `${int(F.trades.long)} long · ${int(F.trades.short)} short` },
-            { label: 'Profit factor', value: num(F.trades.profitFactor), sub: `payoff ${num(F.trades.payoff)}` },
-            { label: 'Winning trades', value: pct(F.trades.winRate, 0), sub: 'few large winners, many small losses' },
+            { label: 'Profit factor', value: num(F.trades.profitFactor), sub: `win rate ${pct(F.trades.winRate, 0)} · payoff ${num(F.trades.payoff)}` },
             { label: 'Time in market', value: pct(F.expo.timeInMarket, 0), sub: `average exposure ${pct(F.expo.avgGross, 0)}` },
           ]} />
           <div className="s-gap" />
-          <Table stack head={['', 'BTC', 'ETH', 'Portfolio 50/50']} rows={perf.map(([l, f]) => [l, f(B), f(E), <strong key="p">{f(F)}</strong>])} />
+          <Table compact head={['', 'BTC', 'ETH', 'Portfolio']} rows={perf.map(([l, f]) => [l, f(B), f(E), <strong key="p">{f(F)}</strong>])} />
           <p className="s-small">Portfolio trades are the {int(F.trades.trades)} trades of both markets pooled; the payoff ratio uses their contribution to portfolio equity. The first and last years are partial ({P.annual[0].from} → {P.annual[0].to} and {P.annual[P.annual.length - 1].from} → {P.annual[P.annual.length - 1].to}).</p>
         </Section>
 
@@ -144,7 +143,7 @@ export default function PerformancePage() {
         <Section id="calendar" eyebrow="Calendar" title="Years and months">
           <div className="s-panel s-reveal">
             <div className="s-panel-head"><div><h3 className="s-panel-t">Annual returns</h3><p className="s-panel-s">*partial years</p></div></div>
-            <GroupedBars title="Annual returns" cats={P.annual.map(a => `${a.year}${partial(a.year) ? '*' : ''}`)} series={[
+            <GroupedBars height={230} title="Annual returns" cats={P.annual.map(a => `${a.year}${partial(a.year) ? '*' : ''}`)} series={[
               { name: 'Portfolio', color: COLORS.portfolio, values: P.annual.map(a => a.portfolio) },
               { name: 'BTC', color: COLORS.btc, values: P.annual.map(a => a.btc) },
               { name: 'ETH', color: COLORS.eth, values: P.annual.map(a => a.eth) },
@@ -156,7 +155,7 @@ export default function PerformancePage() {
             <Heatmap title="Monthly returns of the 50/50 portfolio" rows={years} cols={[...MN, 'Year']} values={heat} cap={0.2} />
           </div>
           <div className="s-gap" />
-          <Table stack head={['Year', 'BTC', 'ETH', 'Portfolio', 'Portfolio Sharpe', 'Portfolio max DD']}
+          <Table compact head={['Year', 'BTC', 'ETH', 'Portfolio', 'Portfolio Sharpe', 'Portfolio max DD']}
             rows={P.annual.map(a => [`${a.year}${partial(a.year) ? '*' : ''}`, spct(a.btc), spct(a.eth), <strong key="p">{spct(a.portfolio)}</strong>, num(a.portfolioSharpe), pct(a.portfolioDD)])} />
         </Section>
 
@@ -239,7 +238,7 @@ export default function PerformancePage() {
           </div>
           <p className="s-small">Turnover is about {times(F.cost.turnoverOneWay)} the capital a year (entries only), so commissions take about {pct(P.costs.cagrDrag.portfolio, 0)} of CAGR. Funding uses the historical rates of the perpetual market, with the correct sign for long and short positions.</p>
           <h3 className="s-h3 s-mt">Concentration</h3>
-          <p className="s-p">The result depends on the right tail: the best 5 % of trades account for {pct(P.concentration.tradesPortfolio.top5, 0)} of the portfolio&apos;s log growth, and without them the CAGR would be {pct(P.concentration.tradesPortfolio.cagrWithoutTop5)}. This is the profile of a trend-following engine: many small losses, few large gains.</p>
+          <p className="s-p">The result depends on the right tail: the best 5 % of trades account for {pct(P.concentration.tradesPortfolio.top5, 0)} of the portfolio&apos;s log growth, and without them the CAGR would be {pct(P.concentration.tradesPortfolio.cagrWithoutTop5)}. This is the profile of a momentum strategy: many small losses, few large gains.</p>
           <h3 className="s-h3 s-mt">Rebalancing</h3>
           <p className="s-p">The portfolio has no rebalancing; this was decided before any result. As a diagnostic only, monthly rebalancing to 50/50 gave a Sharpe of {num(P.variants.B.m.sharpe)} (against {num(P.variants.A.m.sharpe)}). It is recorded as a hypothesis for forward testing, not adopted.</p>
         </Section>

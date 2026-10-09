@@ -16,8 +16,11 @@ export const DOWNLOADS = '/research/btc-eth-portfolio'
 export const MANIFEST = 'shock-engine-manifest.json'
 if (!P.downloads.some(d => d.file === MANIFEST)) throw new Error('manifeste absent des téléchargements publiés')
 
-/** Série du graphique : jours sans valeur (fenêtres glissantes incomplètes) en NaN. */
-export const series = (values: (number | null)[]) => values.map(v => (v === null ? NaN : v))
+/**
+ * Série du graphique : jours sans valeur (fenêtres glissantes incomplètes) en NaN, valeurs arrondies à
+ * 5 chiffres significatifs (affichage seulement : allège la page, les infobulles en montrent moins).
+ */
+export const series = (values: (number | null)[]) => values.map(v => (v === null ? NaN : +v.toPrecision(5)))
 
 /** Un point tous les `step` jours, aligné sur le dernier jour (gardé). */
 export const sample = (values: number[], step: number) => values.filter((_, i) => (values.length - 1 - i) % step === 0)

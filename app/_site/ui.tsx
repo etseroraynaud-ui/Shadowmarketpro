@@ -155,7 +155,7 @@ export function SiteFooter() {
           <p>Systematic trading research and quantitative trading tools.</p>
         </div>
         <div>
-          <h4>Shock Engine</h4>
+          <h3>Shock Engine</h3>
           <ul>
             <li><Link href="/shock-engine">Overview</Link></li>
             <li><Link href="/shock-engine/portfolio">Performance</Link></li>
@@ -164,7 +164,7 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <h4>Trading Tools</h4>
+          <h3>Trading Tools</h3>
           <ul>
             <li><Link href="/trading-tools">TradingView indicators</Link></li>
             <li><Link href="/trading-tools#pricing">Pricing</Link></li>
@@ -173,7 +173,7 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <h4>Company</h4>
+          <h3>Company</h3>
           <ul>
             <li><Link href="/institutional">Institutional</Link></li>
             <li><Link href="/research#versions">Versions and manifest</Link></li>
