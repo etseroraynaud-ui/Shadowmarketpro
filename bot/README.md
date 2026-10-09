@@ -143,7 +143,9 @@ lorsque le régime de tendance journalier est baissier : clôture journalière s
 - le moteur figé (`lib/strategies/shock/*`) n'est pas modifié : la condition passe par la liste
   d'entrées de `ShockStrategy`, recalculée à chaque bougie close ; seules les entrées short
   changent, les longs, les sorties et le flip sur choc opposé restent ceux du moteur ;
-- désactivée par défaut : sans la variable, le bot se comporte exactement comme avant ;
+- désactivée par défaut dans le code : sans la variable, le bot se comporte exactement comme
+  avant ; `smp-bot configure` l'écrit dans `live.env`, `smp-bot version public|v1` la change sur
+  le serveur (shadow mode et bot réel) ;
 - à activer seulement compte à plat, avec `BOT_RESET_STATE=1` : l'état sauvegardé a été construit
   sans la condition ;
 - `npm run parity` et `npm run paper-replay` lisent la même variable et comparent au backtest
