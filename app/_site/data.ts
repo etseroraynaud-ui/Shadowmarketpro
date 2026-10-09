@@ -31,7 +31,9 @@ export const sampleStart = (start: string, n: number, step: number) => new Date(
 /** Adresse de contact institutionnelle (variable d'environnement publique, lue au build). */
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_INSTITUTIONAL_EMAIL ?? ''
 
-export const COLORS = { btc: 'var(--s-btc)', eth: 'var(--s-eth)', portfolio: 'var(--s-pf)' }
+export const COLORS = { btc: 'var(--s-btc)', eth: 'var(--s-eth)', portfolio: 'var(--s-pf)', buyHold: 'var(--s-bh)' }
+/** Nom de la référence buy & hold dans les graphiques. */
+export const BH_NAME = 'Buy & hold'
 
 type Zs = typeof data.evidence.btc
 /**
@@ -74,3 +76,6 @@ export const raVerdict = (): { kind: 'pass' | 'partial' | 'fail'; label: string 
 /** Bot testnet suivi sur /live (argent fictif) : début du suivi, version publique. */
 export const TESTNET = LIVE_ACCOUNTS.find(a => a.network === 'testnet' && a.version !== 'v1')
 export const TESTNET_SINCE = TESTNET?.since?.slice(0, 10)
+
+/** Phrase de comparaison avec le buy & hold BTC/ETH 50/50 (même période, sans rebalancement ni frais). */
+export const BH = P.buyHold

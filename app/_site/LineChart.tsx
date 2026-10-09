@@ -9,7 +9,11 @@ export interface LineSeries {
   name: string
   color: string
   values: number[]
+  /** Trait pointillé (référence, par exemple le buy & hold). */
+  dash?: boolean
 }
+
+const keyBg = (s: LineSeries) => (s.dash ? `repeating-linear-gradient(90deg, ${s.color} 0 4px, transparent 4px 7px)` : s.color)
 
 const DAY = 864e5
 const MINUS = '−'
@@ -99,7 +103,7 @@ export default function LineChart(o: {
   return (
     <div className="s-chart" ref={box}>
       {o.series.length > 1 && (
-        <div className="s-legend">{o.series.map(s => <span key={s.name}><i className="s-key s-key-line" style={{ background: s.color }} />{s.name}</span>)}</div>
+        <div className="s-legend">{o.series.map(s => <span key={s.name}><i className="s-key s-key-line" style={{ background: keyBg(s) }} />{s.name}</span>)}</div>
       )}
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={o.title} onPointerMove={onMove} onPointerLeave={() => setHover(null)}>
         {ticks.map(v => (
@@ -121,7 +125,7 @@ export default function LineChart(o: {
           </g>
         ))}
         {o.area && <path className="s-area" style={{ fill: last.color }} d={`${path(last.values)}L${x(n - 1).toFixed(1)} ${y(0).toFixed(1)}L${x(0).toFixed(1)} ${y(0).toFixed(1)}Z`} />}
-        {o.series.map(s => <path key={s.name} className="s-line" style={{ stroke: s.color }} d={path(s.values)} />)}
+        {o.series.map(s => <path key={s.name} className="s-line" style={{ stroke: s.color, strokeDasharray: s.dash ? '5 4' : undefined }} d={path(s.values)} />)}
         {showEnd && ends.map(e => (
           <g key={`e${e.s.name}`}>
             <circle className="s-dot" cx={m.l + pw} cy={e.py} r={4} style={{ fill: e.s.color }} />
@@ -136,7 +140,7 @@ export default function LineChart(o: {
           <div className="s-tip-date">{dateOf(hover.k)}</div>
           {o.series.map(s => (
             <div className="s-tip-row" key={s.name}>
-              <span className="s-tip-name"><i className="s-key s-key-line" style={{ background: s.color }} />{s.name}</span>
+              <span className="s-tip-name"><i className="s-key s-key-line" style={{ background: keyBg(s) }} />{s.name}</span>
               <span className="s-tip-val">{format(s.values[hover.k], o.fmt)}</span>
             </div>
           ))}

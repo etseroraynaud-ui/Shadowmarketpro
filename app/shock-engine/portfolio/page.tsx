@@ -5,7 +5,7 @@ import SiteHeader from '../../_site/SiteHeader'
 import { GroupedBars, Heatmap } from '../../_site/charts'
 import { CountUp, SeriesPanel, SubNav } from '../../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, Kpis, Metrics, Section, SimNote, SiteFooter, Table } from '../../_site/ui'
-import { COLORS, DOWNLOADS, P, longestDrawdown, sample, sampleStart, series } from '../../_site/data'
+import { BH, BH_NAME, COLORS, DOWNLOADS, P, longestDrawdown, sample, sampleStart, series } from '../../_site/data'
 import { int, month, monthKey, num, pct, spct, times } from '../../_site/format'
 
 export const metadata: Metadata = {
@@ -92,8 +92,10 @@ export default function PerformancePage() {
               { name: 'Portfolio', color: COLORS.portfolio, values: S(P.chart.eqPortfolio) },
               { name: 'BTC', color: COLORS.btc, values: S(P.chart.eqBtc) },
               { name: 'ETH', color: COLORS.eth, values: S(P.chart.eqEth) },
+              { name: BH_NAME, color: COLORS.buyHold, values: S(P.chart.eqBuyHold), dash: true },
             ]} />
           </div>
+          <p className="s-small">Dashed line: buy &amp; hold BTC/ETH 50/50 over the same period (half in each coin on {BH.from}, no rebalancing, no costs): 100 → {int(100 + BH.totalReturn * 100)}, CAGR {pct(BH.cagr)}, max drawdown {pct(BH.maxDD)}, Sharpe {num(BH.sharpe)}.</p>
         </Section>
 
         {/* ---------------------------------------------------------------- métriques */}
@@ -118,6 +120,7 @@ export default function PerformancePage() {
               { name: 'Portfolio', color: COLORS.portfolio, values: S(P.chart.ddPortfolio) },
               { name: 'BTC', color: COLORS.btc, values: S(P.chart.ddBtc) },
               { name: 'ETH', color: COLORS.eth, values: S(P.chart.ddEth) },
+                { name: BH_NAME, color: COLORS.buyHold, values: S(P.chart.ddBuyHold), dash: true },
             ]} />
           </div>
           <Metrics items={[

@@ -14,6 +14,8 @@
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { loadSleeve } from '../lib/frozen-shock.ts'
+import * as PL from '../lib/portfolio.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SRC = join(ROOT, 'research/reports/btc-eth-portfolio-e2')
@@ -58,6 +60,28 @@ for (const [k, key] of [['btc', 'btc'], ['eth', 'eth'], ['portfolio', 'portfolio
   const f = (RS[k].filter(x => x !== null) as number[]).sort((x, y) => x - y)
   const pos = (f.length - 1) * 0.5, lo = Math.floor(pos), med = lo + 1 < f.length ? f[lo] + (pos - lo) * (f[lo + 1] - f[lo]) : f[lo]
   if (Math.abs(med - summary.stability.rolling12[key].median) > 1e-6) throw new Error(`Sharpe glissant ${k} : médiane ${med} ≠ résumé ${summary.stability.rolling12[key].median}`)
+}
+
+// Référence buy & hold BTC/ETH 50/50 : 50 dans chaque actif au début du premier jour, sans
+// rebalancement (même construction que le portefeuille), sur les mêmes barres et les mêmes clôtures
+// journalières. Contrôle : les rendements journaliers au comptant redonnent la corrélation publiée.
+const DAYMS = 864e5
+const bhDays = daily.map(r => Math.round(Date.parse(String(r.date) + 'T00:00:00Z') / DAYMS))
+const spotIndex = (key: 'btc' | 'ethusdt') => {
+  const b = loadSleeve(key).bars
+  const at = (ms: number) => { let lo = 0, hi = b.n; while (lo < hi) { const m = (lo + hi) >> 1; if (b.t[m] < ms) lo = m + 1; else hi = m } return lo }
+  const a = at(bhDays[0] * DAYMS), z = at((bhDays[bhDays.length - 1] + 1) * DAYMS) - 1
+  const { eq, missing } = PL.dayCloses(b.t, b.c, a, z, bhDays, b.c[a - 1])
+  if (missing) throw new Error(`buy & hold ${key} : ${missing} jour(s) sans barre`)
+  return { eq: eq.map(x => x / b.c[a - 1]), ret: PL.returnsOf(eq, b.c[a - 1]) }
+}
+const spotB = spotIndex('btc'), spotE = spotIndex('ethusdt')
+if (Math.abs(PL.pearson(spotB.ret, spotE.ret) - summary.correlation.underlyingDaily) > 1e-9) throw new Error('buy & hold : rendements au comptant différents de ceux du portefeuille publié')
+const bhEq = spotB.eq.map((x, i) => 50 * x + 50 * spotE.eq[i])
+const bhM = PL.dailyMetrics(PL.returnsOf(bhEq.map(x => x / 100), 1), bhDays)
+const buyHold = {
+  label: 'Buy & hold BTC/ETH 50/50', rebalancing: 'none', from: daily[0].date, to: daily[daily.length - 1].date,
+  totalReturn: bhM.totalReturn, cagr: bhM.cagr, vol: bhM.vol, sharpe: bhM.sharpe, maxDD: bhM.maxDD, calmar: bhM.calmar,
 }
 
 // Tests de falsification de la condition de tendance (données historiques déjà vues) et état de la
@@ -109,7 +133,10 @@ const out = {
     ddBtc: col(daily, 'btc_drawdown'), ddEth: col(daily, 'eth_drawdown'), ddPortfolio: col(daily, 'portfolio_drawdown'),
     corr90: col(rolling, 'rolling_90d'),
     sharpe365: { btc: RS.btc.map(r4), eth: RS.eth.map(r4), portfolio: RS.portfolio.map(r4) },
+    eqBuyHold: bhEq.map(r4),
+    ddBuyHold: PL.underwater(bhEq, 100).map(r4),
   },
+  buyHold,
   falsification, forward, residualAlpha,
   downloads: [
     { file: 'btc-eth-portfolio.html', label: 'Full research report (HTML)' },
