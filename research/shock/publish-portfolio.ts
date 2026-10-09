@@ -42,6 +42,38 @@ const last = daily[daily.length - 1]
 const endEq = summary.series.portfolio.m.totalReturn * 100 + 100
 if (Math.abs((last.portfolio_equity as number) - endEq) / endEq > 1e-6) throw new Error('equity finale du CSV différente du résumé')
 
+// Sharpe glissant sur 365 jours (même définition que portfolio.ts : moyenne / écart type population des
+// rendements journaliers × √365.25), dérivé des rendements journaliers publiés ; contrôlé contre les
+// médianes du résumé avant publication.
+const ret = (k: string) => daily.map(r => r[k] as number)
+const rollSharpe = (r: number[], w = 365) => r.map((_, k) => {
+  if (k + 1 < w) return null
+  let s = 0, s2 = 0
+  for (let j = k + 1 - w; j <= k; j++) { s += r[j]; s2 += r[j] * r[j] }
+  const m = s / w, sd = Math.sqrt(Math.max(s2 / w - m * m, 0))
+  return sd > 0 ? (m / sd) * Math.sqrt(365.25) : null
+})
+const RS = { btc: rollSharpe(ret('btc_return')), eth: rollSharpe(ret('eth_return')), portfolio: rollSharpe(ret('portfolio_return')) }
+for (const [k, key] of [['btc', 'btc'], ['eth', 'eth'], ['portfolio', 'portfolio']] as const) {
+  const f = (RS[k].filter(x => x !== null) as number[]).sort((x, y) => x - y)
+  const pos = (f.length - 1) * 0.5, lo = Math.floor(pos), med = lo + 1 < f.length ? f[lo] + (pos - lo) * (f[lo + 1] - f[lo]) : f[lo]
+  if (Math.abs(med - summary.stability.rolling12[key].median) > 1e-6) throw new Error(`Sharpe glissant ${k} : médiane ${med} ≠ résumé ${summary.stability.rolling12[key].median}`)
+}
+
+// Tests de falsification de la condition de tendance (données historiques déjà vues) et état de la
+// validation forward : repris tels quels des rapports de recherche.
+const RR = (f: string) => JSON.parse(readFileSync(join(ROOT, 'research/reports', f), 'utf8'))
+const ab = RR('e2-falsification/tests-ab.json')
+if (ab.checks.some((c: { ok: boolean }) => !c.ok)) throw new Error('tests de falsification : contrôle en échec')
+const fwd = RR('e2-forward/latest.json')
+if (fwd.checks.some((c: { ok: boolean }) => !c.ok)) throw new Error('validation forward : contrôle en échec')
+const falsification = {
+  source: 'research/reports/e2-falsification/tests-ab.json', prespec: 'research/preregistration/e2-falsification.md',
+  randomSelection: { draws: ab.testA.assetYear.EV.n, ev: ab.e2.EV, evPercentile: ab.testA.assetYear.EV.percentile, evP: ab.testA.assetYear.EV.p, sharpePercentile: ab.testA.assetYear.sharpe5050.percentile, sharpeP: ab.testA.assetYear.sharpe5050.p },
+  regimeShift: { shifts: ab.testB[0].eq.n, minShiftDays: ab.testB[0].kmin, d: ab.e2D.eq, percentile: ab.testB[0].eq.percentile, p: ab.testB[0].eq.p },
+}
+const forward = { prespec: 'research/preregistration/e2-forward.md', start: fwd.start, cutoff: fwd.cutoff, status: fwd.status, closedShorts: fwd.forward.n1 + fwd.forward.n0 }
+
 const { reconciliation, sanity, ...rest } = summary
 const out = {
   ...rest,
@@ -57,7 +89,9 @@ const out = {
     eqBtc: col(daily, 'btc_equity'), eqEth: col(daily, 'eth_equity'), eqPortfolio: col(daily, 'portfolio_equity'),
     ddBtc: col(daily, 'btc_drawdown'), ddEth: col(daily, 'eth_drawdown'), ddPortfolio: col(daily, 'portfolio_drawdown'),
     corr90: col(rolling, 'rolling_90d'),
+    sharpe365: { btc: RS.btc.map(r4), eth: RS.eth.map(r4), portfolio: RS.portfolio.map(r4) },
   },
+  falsification, forward,
   downloads: [
     { file: 'btc-eth-portfolio.html', label: 'Full research report (HTML)' },
     { file: 'portfolio_daily_returns.csv', label: 'Daily returns and equity (CSV)' },
