@@ -4,7 +4,7 @@ import SiteHeader from './_site/SiteHeader'
 import HeroChart from './_site/HeroChart'
 import { CountUp, SeriesPanel } from './_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Section, SimNote, SiteFooter, StatusList } from './_site/ui'
-import { COLORS, DOWNLOADS, P, SIM, TESTNET_SINCE, sample, sampleStart, series, verdictOf } from './_site/data'
+import { BH, BH_NAME, COLORS, DOWNLOADS, P, SIM, TESTNET_SINCE, sample, sampleStart, series, verdictOf } from './_site/data'
 import { int, num, pct } from './_site/format'
 
 const STEP = 3
@@ -83,8 +83,10 @@ export default function HomePage() {
               { name: 'Portfolio', color: COLORS.portfolio, values: S(P.chart.eqPortfolio) },
               { name: 'BTC', color: COLORS.btc, values: S(P.chart.eqBtc) },
               { name: 'ETH', color: COLORS.eth, values: S(P.chart.eqEth) },
+              { name: BH_NAME, color: COLORS.buyHold, values: S(P.chart.eqBuyHold), dash: true },
             ]} />
           </div>
+          <p className="s-small">Dashed line: buy &amp; hold BTC/ETH 50/50 over the same period (half in each coin on {BH.from}, no rebalancing, no costs): 100 → {int(100 + BH.totalReturn * 100)}, CAGR {pct(BH.cagr)}, max drawdown {pct(BH.maxDD)}, Sharpe {num(BH.sharpe)}.</p>
           <SimNote>{SIM} Commission 0.045 % per order; slippage and funding are not in these figures.</SimNote>
         </Section>
 

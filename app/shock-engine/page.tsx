@@ -5,7 +5,7 @@ import SiteHeader from '../_site/SiteHeader'
 import HeroChart from '../_site/HeroChart'
 import { CountUp, SeriesPanel, SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table, Verdict } from '../_site/ui'
-import { COLORS, DOWNLOADS, P, RA, SIM, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
+import { BH, BH_NAME, COLORS, DOWNLOADS, P, RA, SIM, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
 import { int, month, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -79,8 +79,10 @@ export default function ShockEnginePage() {
               { name: 'Portfolio', color: COLORS.portfolio, values: S(P.chart.eqPortfolio) },
               { name: 'BTC', color: COLORS.btc, values: S(P.chart.eqBtc) },
               { name: 'ETH', color: COLORS.eth, values: S(P.chart.eqEth) },
+              { name: BH_NAME, color: COLORS.buyHold, values: S(P.chart.eqBuyHold), dash: true },
             ]} />
           </div>
+          <p className="s-small">Dashed line: buy &amp; hold BTC/ETH 50/50 over the same period (half in each coin on {BH.from}, no rebalancing, no costs): 100 → {int(100 + BH.totalReturn * 100)}, CAGR {pct(BH.cagr)}, max drawdown {pct(BH.maxDD)}, Sharpe {num(BH.sharpe)}.</p>
           <Metrics items={[
             { label: 'Sharpe', value: num(F.m.sharpe), sub: `Sortino ${num(F.m.sortino)}` },
             { label: 'CAGR', value: pct(F.m.cagr), sub: 'after commissions' },
@@ -157,6 +159,7 @@ export default function ShockEnginePage() {
                 { name: 'Portfolio', color: COLORS.portfolio, values: S(P.chart.ddPortfolio) },
                 { name: 'BTC', color: COLORS.btc, values: S(P.chart.ddBtc) },
                 { name: 'ETH', color: COLORS.eth, values: S(P.chart.ddEth) },
+                { name: BH_NAME, color: COLORS.buyHold, values: S(P.chart.ddBuyHold), dash: true },
               ]} />
             </div>
             <div className="s-metrics s-reveal" style={{ alignContent: 'start', margin: 0 }}>
