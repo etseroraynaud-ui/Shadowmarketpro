@@ -1,0 +1,443 @@
+{
+ "prespec": "research/preregistration/e2-falsification.md",
+ "commit": "966e41522cd2cfeee1486800d0dff198e20a5d20",
+ "sourcesClean": true,
+ "generatedAt": "2026-10-09T00:21:48.433Z",
+ "n": 794,
+ "e2": {
+  "EV": 0.5025722157,
+  "PF": 2.652422156,
+  "payoff": 6.107551017,
+  "D": 0.4227704794,
+  "sharpeBTC": 1.486631429,
+  "ddBTC": -0.2229044467,
+  "sharpeETH": 1.736798011,
+  "ddETH": -0.2946150682,
+  "sharpe5050": 1.885276842,
+  "dd5050": -0.1907502717
+ },
+ "e2D": {
+  "btc": 0.3072441632,
+  "eth": 0.5645055989,
+  "eq": 0.435874881,
+  "pooled": 0.4227704794
+ },
+ "testA": {
+  "assetYear": {
+   "EV": {
+    "p5": 0.1931373492,
+    "p50": 0.3332307736,
+    "p95": 0.4837390883,
+    "n": 50000,
+    "percentile": 96.806,
+    "p": 0.03195936081
+   },
+   "PF": {
+    "p5": 1.717802722,
+    "p50": 2.133244159,
+    "p95": 2.614206761,
+    "n": 50000,
+    "percentile": 96.13,
+    "p": 0.03871922562
+   },
+   "payoff": {
+    "p5": 4.328392485,
+    "p50": 5.037420525,
+    "p95": 5.807685675,
+    "n": 50000,
+    "percentile": 98.768,
+    "p": 0.0123397532
+   },
+   "D": {
+    "p5": -0.02969965683,
+    "p50": 0.1751515014,
+    "p95": 0.3952317996,
+    "n": 50000,
+    "percentile": 96.806,
+    "p": 0.03195936081
+   },
+   "sharpeBTC": {
+    "p5": 1.209130919,
+    "p50": 1.41808856,
+    "p95": 1.617939515,
+    "n": 50000,
+    "percentile": 70.98,
+    "p": 0.2902141957
+   },
+   "ddBTC": {
+    "p5": -0.295778801,
+    "p50": -0.2261147458,
+    "p95": -0.2003865317,
+    "n": 50000,
+    "percentile": 54.078,
+    "p": 0.4592308154
+   },
+   "sharpeETH": {
+    "p5": 1.386010958,
+    "p50": 1.553758883,
+    "p95": 1.72287115,
+    "n": 50000,
+    "percentile": 96.278,
+    "p": 0.03723925521
+   },
+   "ddETH": {
+    "p5": -0.3390250751,
+    "p50": -0.2569228585,
+    "p95": -0.19887209,
+    "n": 50000,
+    "percentile": 21.918,
+    "p": 0.7808243835
+   },
+   "sharpe5050": {
+    "p5": 1.581471888,
+    "p50": 1.735001147,
+    "p95": 1.890865417,
+    "n": 50000,
+    "percentile": 94.456,
+    "p": 0.05545889082
+   },
+   "dd5050": {
+    "p5": -0.2309110145,
+    "p50": -0.1863056342,
+    "p95": -0.1470050836,
+    "n": 50000,
+    "percentile": 43.778,
+    "p": 0.5622287554
+   }
+  },
+  "asset": {
+   "EV": {
+    "p5": 0.05921531453,
+    "p50": 0.2120410311,
+    "p95": 0.3790379214,
+    "n": 50000,
+    "percentile": 99.782,
+    "p": 0.002199956001
+   },
+   "PF": {
+    "p5": 1.193387367,
+    "p50": 1.625993998,
+    "p95": 2.128619209,
+    "n": 50000,
+    "percentile": 99.914,
+    "p": 0.0008799824004
+   },
+   "payoff": {
+    "p5": 3.506258113,
+    "p50": 4.386729357,
+    "p95": 5.350502204,
+    "n": 50000,
+    "percentile": 99.748,
+    "p": 0.002539949201
+   },
+   "D": {
+    "p5": -0.2255267204,
+    "p50": -0.00205780889,
+    "p95": 0.2421328557,
+    "n": 50000,
+    "percentile": 99.782,
+    "p": 0.002199956001
+   },
+   "sharpeBTC": {
+    "p5": 1.143420268,
+    "p50": 1.359228264,
+    "p95": 1.575908334,
+    "n": 50000,
+    "percentile": 83.07,
+    "p": 0.1693166137
+   },
+   "ddBTC": {
+    "p5": -0.3138768878,
+    "p50": -0.2428449433,
+    "p95": -0.210076144,
+    "n": 50000,
+    "percentile": 79.776,
+    "p": 0.2022559549
+   },
+   "sharpeETH": {
+    "p5": 1.120897053,
+    "p50": 1.327828875,
+    "p95": 1.542270007,
+    "n": 50000,
+    "percentile": 99.944,
+    "p": 0.0005799884002
+   },
+   "ddETH": {
+    "p5": -0.3553154225,
+    "p50": -0.2762760292,
+    "p95": -0.2127105721,
+    "n": 50000,
+    "percentile": 33.606,
+    "p": 0.6639467211
+   },
+   "sharpe5050": {
+    "p5": 1.435820306,
+    "p50": 1.621624567,
+    "p95": 1.804539655,
+    "n": 50000,
+    "percentile": 99.148,
+    "p": 0.008539829203
+   },
+   "dd5050": {
+    "p5": -0.2319750844,
+    "p50": -0.1874579051,
+    "p95": -0.1444598892,
+    "n": 50000,
+    "percentile": 45.19,
+    "p": 0.5481090378
+   }
+  }
+ },
+ "additive": {
+  "meanAbsErr": 0.0003585024132,
+  "maxAbsErr": 0.001374775897,
+  "retained": true,
+  "exactE2": {
+   "sharpe": 1.885479319,
+   "maxDD": -0.1908599555
+  },
+  "exactSharpe": {
+   "p5": 1.585697175,
+   "p50": 1.737104459,
+   "p95": 1.906652281,
+   "n": 1000,
+   "percentile": 92.7,
+   "p": 0.07392607393
+  },
+  "exactDD": {
+   "p5": -0.2297578217,
+   "p50": -0.1847220914,
+   "p95": -0.1475360118,
+   "n": 1000,
+   "percentile": 41.6,
+   "p": 0.5844155844
+  }
+ },
+ "testB": [
+  {
+   "kmin": 180,
+   "btc": {
+    "p5": -0.3305473746,
+    "p50": -0.02889501239,
+    "p95": 0.3738874619,
+    "n": 3201,
+    "percentile": 90.69040925,
+    "p": 0.09337913804
+   },
+   "eth": {
+    "p5": -0.3277679068,
+    "p50": -0.01978150407,
+    "p95": 0.3529084004,
+    "n": 2593,
+    "percentile": 99.92286926,
+    "p": 0.001156515035
+   },
+   "eq": {
+    "p5": -0.2808757285,
+    "p50": -0.005864189975,
+    "p95": 0.2685575883,
+    "n": 2593,
+    "percentile": 99.57578095,
+    "p": 0.004626060139
+   },
+   "pooled": {
+    "p5": -0.281193376,
+    "p50": -0.009039109762,
+    "p95": 0.2663697796,
+    "n": 2593,
+    "percentile": 99.46008484,
+    "p": 0.005782575173
+   },
+   "sharpe": {
+    "p5": 1.37762255,
+    "p50": 1.611377339,
+    "p95": 1.810014753,
+    "n": 2593,
+    "percentile": 98.95873506,
+    "p": 0.01079414032
+   }
+  },
+  {
+   "kmin": 90,
+   "btc": {
+    "p5": -0.3283863525,
+    "p50": -0.0314427887,
+    "p95": 0.3693731576,
+    "n": 3381,
+    "percentile": 91.18603963,
+    "p": 0.08840922531
+   },
+   "eth": {
+    "p5": -0.3296365917,
+    "p50": -0.02184202495,
+    "p95": 0.3482364156,
+    "n": 2773,
+    "percentile": 99.92787595,
+    "p": 0.0010814708
+   },
+   "eq": {
+    "p5": -0.2759666456,
+    "p50": -0.0157873537,
+    "p95": 0.262182656,
+    "n": 2773,
+    "percentile": 99.60331771,
+    "p": 0.004325883201
+   },
+   "pooled": {
+    "p5": -0.2749751427,
+    "p50": -0.01889315621,
+    "p95": 0.2600716355,
+    "n": 2773,
+    "percentile": 99.49513163,
+    "p": 0.005407354001
+   },
+   "sharpe": null
+  },
+  {
+   "kmin": 365,
+   "btc": {
+    "p5": -0.3330760615,
+    "p50": -0.02290850673,
+    "p95": 0.3866869555,
+    "n": 2831,
+    "percentile": 89.47368421,
+    "p": 0.105579096
+   },
+   "eth": {
+    "p5": -0.3406947811,
+    "p50": -0.02712758491,
+    "p95": 0.3537952314,
+    "n": 2223,
+    "percentile": 99.91003149,
+    "p": 0.001348920863
+   },
+   "eq": {
+    "p5": -0.2890952058,
+    "p50": -0.007477013606,
+    "p95": 0.279435968,
+    "n": 2223,
+    "percentile": 99.50517319,
+    "p": 0.005395683453
+   },
+   "pooled": {
+    "p5": -0.2859320673,
+    "p50": -0.01016249738,
+    "p95": 0.2777843516,
+    "n": 2223,
+    "percentile": 99.37022042,
+    "p": 0.006744604317
+   },
+   "sharpe": null
+  }
+ ],
+ "regime": {
+  "BTC": {
+   "days": 3560,
+   "shareBear": 0.331741573,
+   "runsBear": 66,
+   "runsOther": 67,
+   "meanBear": 17.89393939,
+   "medianBear": 8.5,
+   "meanOther": 35.50746269,
+   "medianOther": 6,
+   "ac90": 0.06752215822,
+   "ac180": -0.01224396207,
+   "ac365": -0.03830766639
+  },
+  "ETH": {
+   "days": 2952,
+   "shareBear": 0.3536585366,
+   "runsBear": 47,
+   "runsOther": 47,
+   "meanBear": 22.21276596,
+   "medianBear": 11,
+   "meanOther": 40.59574468,
+   "medianOther": 12,
+   "ac90": -0.05421905553,
+   "ac180": -0.06202735417,
+   "ac365": 0.0004612952766
+  }
+ },
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "b69ad8f8f89a4ded"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "fafb22d6373b19bf"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "bad42836b9d61569"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "15211a3e185b1214"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/params.ts",
+   "ok": true,
+   "detail": "5f7cd0c941d70273"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/presets.ts",
+   "ok": true,
+   "detail": "f97449733ec945bb"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/regimes.ts",
+   "ok": true,
+   "detail": "d72f79d1d97c214d"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/live.ts",
+   "ok": true,
+   "detail": "05caf82ece9ad7f8"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "be445aa726433c3e"
+  },
+  {
+   "name": "BTC : régime recalculé = régime du moteur",
+   "ok": true,
+   "detail": "0 écart(s)"
+  },
+  {
+   "name": "ETH : régime recalculé = régime du moteur",
+   "ok": true,
+   "detail": "0 écart(s)"
+  },
+  {
+   "name": "BTC : décomposition des rendements journaliers par position = rendements de la v1",
+   "ok": true,
+   "detail": "écart max 4.1e-16 sur 2792 jours (160 jours avec un long à TP1 partiel exclus) ; frais = 0,045 % × (entrée + sortie) à 3.7e-16 près ; shorts à TP1 : 0"
+  },
+  {
+   "name": "ETH : décomposition des rendements journaliers par position = rendements de la v1",
+   "ok": true,
+   "detail": "écart max 5.2e-16 sur 2780 jours (172 jours avec un long à TP1 partiel exclus) ; frais = 0,045 % × (entrée + sortie) à 3.1e-16 près ; shorts à TP1 : 0"
+  },
+  {
+   "name": "échantillon = référence historique du forward",
+   "ok": true,
+   "detail": "794 shorts, 251 en régime E2, D = 0.4228"
+  },
+  {
+   "name": "mesure de la v1 complète = portefeuille publié",
+   "ok": true,
+   "detail": "Sharpe 1.726053 vs 1.726053, drawdown -0.2346"
+  },
+  {
+   "name": "décalage nul = E2",
+   "ok": true,
+   "detail": "794 shorts"
+  }
+ ]
+}
