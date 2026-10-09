@@ -10,11 +10,14 @@
 #   smp-bot live-start             démarre le bot réel (bot/deploy/live.env)
 #   smp-bot live-stop              arrête le bot réel
 #   smp-bot live-reset             après un HALT, compte remis à plat : repart de zéro
+#   smp-bot version [public|v1]    version de la stratégie (sans argument : celle en cours) ;
+#                                  public : shorts seulement en régime de tendance journalier baissier
 #   smp-bot update                 récupère la dernière version et redémarre
 set -euo pipefail
 
 DIR=${SMP_DIR:-/opt/shadowmarketpro}
 ENV_FILE=$DIR/bot/deploy/live.env
+SHADOW_FILE=$DIR/bot/deploy/shadow.env
 # Le service live n'existe que si live.env existe (il contient le mode et la clé).
 compose() {
   if [ -f "$ENV_FILE" ]; then docker compose -f "$DIR/bot/deploy/compose.yml" --profile live "$@"
@@ -37,6 +40,22 @@ ask_secret() { local v; printf '%s' "$1" >&2; IFS= read -rs v < "$TTY" || true; 
 is_address() { [[ "$1" =~ ^0x[0-9a-fA-F]{40}$ ]]; }
 # Ce qu'un copier-coller ajoute souvent : espaces, retours à la ligne, marqueurs de collage du terminal.
 clean() { local v=${1//$'\e[200~'/}; v=${v//$'\e[201~'/}; printf '%s' "$v" | tr -d '[:space:]'; }
+
+# Variable KEY=VAL dans un fichier d'environnement : remplacée si elle existe, ajoutée sinon (droits conservés).
+set_var() {
+  local file=$1 key=$2 val=$3
+  [ -f "$file" ] || { ( umask 077; : > "$file" ); }
+  if grep -q "^$key=" "$file"; then sed -i "s/^$key=.*/$key=$val/" "$file"; else echo "$key=$val" >> "$file"; fi
+}
+version_of() { if [ -f "$1" ] && grep -q '^BOT_SHORT_TREND_FILTER=1$' "$1"; then echo public; else echo v1; fi; }
+
+# L'état du bot réel est mis de côté (pas effacé) : au démarrage, le bot vérifie que le compte est à
+# plat, rejoue l'historique et reprend la main dès que le backtest est à plat.
+live_reset() {
+  compose stop live
+  compose run --rm --no-deps --entrypoint sh live -c 'for f in /data/state/live-*.json; do [ -e "$f" ] && mv "$f" "$f.$(date +%s).bak"; done; true'
+  compose up -d live
+}
 
 configure() {
   echo "Configuration du bot réel. Les réponses vont seulement dans $ENV_FILE, lisible par root seul."
@@ -88,6 +107,8 @@ configure() {
       echo "BOT_EQUITY_PCT=100"
       echo "BOT_LEVERAGE=1"
       echo "BOT_MAX_NOTIONAL_USD=$notional"
+      echo "# Version publique du Shock Engine : shorts seulement en régime de tendance journalier baissier."
+      echo "BOT_SHORT_TREND_FILTER=1"
     } > "$ENV_FILE.new" )
   key=""
   local was_running=0
@@ -133,12 +154,34 @@ case "${1:-help}" in
     ;;
   live-reset)
     check_env
-    compose stop live
-    # L'état est mis de côté (pas effacé) : au démarrage, le bot vérifie que le compte est à plat,
-    # rejoue l'historique et reprend la main dès que le backtest est à plat.
-    compose run --rm --no-deps --entrypoint sh live -c 'for f in /data/state/live-*.json; do [ -e "$f" ] && mv "$f" "$f.$(date +%s).bak"; done; true'
-    compose up -d live
+    live_reset
     echo "Bot réel relancé sans état. Suivre : smp-bot logs live"
+    ;;
+  version)
+    if [ -z "${2:-}" ]; then
+      echo "shadow : $(version_of "$SHADOW_FILE")"
+      [ -f "$ENV_FILE" ] && echo "bot réel : $(version_of "$ENV_FILE")"
+      exit 0
+    fi
+    case "$2" in public) val=1 ;; v1) val=0 ;; *) echo "smp-bot version public|v1" >&2; exit 1 ;; esac
+    set_var "$SHADOW_FILE" BOT_SHORT_TREND_FILTER "$val"
+    compose up -d --force-recreate shadow
+    echo "Shadow mode : version $2 (historique rejoué avec cette version)."
+    if [ -f "$ENV_FILE" ]; then
+      check_env
+      set_var "$ENV_FILE" BOT_SHORT_TREND_FILTER "$val"
+      if running live; then
+        # L'état sauvegardé a été construit avec l'autre version : repartir de zéro, compte à plat.
+        echo "Bot réel : le compte doit être à plat (sinon le bot s'arrête sans rien faire, HALT)." >&2
+        confirm=$(ask "Relancer le bot réel sans état avec la version $2 ? [o/N] : ")
+        case "$confirm" in
+          o|O|oui|y|Y) live_reset; echo "Bot réel relancé sans état, version $2. Suivre : smp-bot logs live" ;;
+          *) echo "Bot réel inchangé jusqu'au prochain smp-bot live-reset (la nouvelle version est enregistrée dans live.env)." ;;
+        esac
+      else
+        echo "Bot réel : version $2 enregistrée ; elle s'applique au prochain smp-bot live-start."
+      fi
+    fi
     ;;
   update)
     git -C "$DIR" pull --ff-only

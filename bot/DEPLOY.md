@@ -73,6 +73,22 @@ Au bout de quelques secondes :
 puis une ligne `bar …` après chaque clôture de 15 minutes (`Ctrl+C` pour quitter l'affichage ; le
 bot continue de tourner).
 
+## 3 bis. Version de la stratégie
+
+Depuis octobre 2026, la version publique du Shock Engine n'autorise une entrée short qu'en régime
+de tendance journalier baissier (clôture journalière sous sa moyenne 50 jours, moyenne en baisse
+sur 10 jours). `smp-bot configure` l'écrit pour le bot réel ; pour un serveur déjà installé :
+
+```
+smp-bot update            dernière version du code
+smp-bot version public    shadow mode et bot réel sur la version publique
+smp-bot version           version en cours de chaque service
+```
+
+Le shadow mode rejoue son historique avec la nouvelle version. Si le bot réel tourne, la commande
+propose de le relancer sans état : à faire **compte à plat** (sinon il s'arrête sans rien faire,
+`HALT`). Retour à l'ancienne version : `smp-bot version v1`.
+
 ## 4. Testnet : le vrai bot, avec de l'argent fictif
 
 Le testnet vérifie la mécanique (ordres, stops, TP1, stop suiveur, reprise après redémarrage), pas
@@ -110,7 +126,10 @@ la stratégie : son marché est trop différent du vrai.
    `access … kind=sous-compte`). Il rejoue l'historique, attend que le backtest soit à plat
    (`handoff`), compare l'état de Hyperliquid au sien (`reconciled`), puis trade à chaque signal.
 6. **Suivre sur le site** :
-   `https://shadowmarketpro.vercel.app/live?address=ADRESSE_DU_SOUS_COMPTE&net=testnet`
+   `https://www.shadowmarketpro.com/live?address=ADRESSE_DU_SOUS_COMPTE&net=testnet`
+   (le backtest de comparaison applique la version publique ; ajouter `&version=v1` pour un bot
+   lancé sans elle). Pour l'afficher par défaut sur `/live`, ajouter l'adresse du sous-compte dans
+   `app/live/accounts.ts`.
 
 **La clé de l'agent ne va que dans `bot/deploy/live.env` sur le serveur** (écrit par
 `smp-bot configure`, lisible par root seul) : jamais dans le code, jamais dans git (le fichier est
@@ -142,6 +161,7 @@ smp-bot trades [live]   trades fermés (CSV : entrée, sortie, régime, ATR, z-s
 smp-bot pause           plus de nouvelle entrée (la position en cours reste gérée jusqu'à sa sortie)
 smp-bot resume          entrées de nouveau permises
 smp-bot live-stop       arrête le bot réel
+smp-bot version [public|v1]  version de la stratégie (sans argument : celle en cours)
 smp-bot update          dernière version du code, puis redémarrage
 ```
 

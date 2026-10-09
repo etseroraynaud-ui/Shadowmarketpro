@@ -14,6 +14,7 @@ import { fmtDate, fmtMoney, fmtNum, fmtPct, fmtPrice, tone } from '../backtest/f
 import { HL_MARKETS, loadHyperliquid } from '../backtest/datasets'
 import { adaptivePreset, marketFor, selectFor } from '../../lib/strategies/shock/live.ts'
 import { simulate } from '../../lib/strategies/shock/engine.ts'
+import { shortTrendEntries } from '../../lib/strategies/short-trend.ts'
 import { cloidKind } from '../../lib/hyperliquid/cloid.ts'
 import { backtestTrips, compareTrips, performance, roundTrips } from '../../lib/hyperliquid/track.ts'
 import type { BacktestTrip, ExitKind, MatchRow, Performance, RoundTrip } from '../../lib/hyperliquid/track.ts'
@@ -47,7 +48,7 @@ function targetFromUrl(): LiveAccount | null {
   const q = new URLSearchParams(window.location.search)
   const address = q.get('address')?.trim()
   if (address && ADDRESS.test(address)) {
-    return { address, coin: q.get('coin') || 'BTC', network: q.get('net') === 'testnet' ? 'testnet' : 'mainnet', label: '', since: q.get('since') ?? undefined }
+    return { address, coin: q.get('coin') || 'BTC', network: q.get('net') === 'testnet' ? 'testnet' : 'mainnet', label: '', since: q.get('since') ?? undefined, version: q.get('version') === 'v1' ? 'v1' : 'public' }
   }
   return LIVE_ACCOUNTS[0] ?? null
 }
@@ -63,7 +64,10 @@ async function load(target: LiveAccount): Promise<Loaded> {
   const bars = data.bars
   const m = marketFor(bars, 15, shock.mintick)
   const costs = { capital: 10000, qtyPct: 100, commissionPct: 0.045, slippageTicks: 0, slippagePct: 0, mintick: shock.mintick, leverage: 1, maintenancePct: 0.5, fundingPct: 0 }
-  const res = simulate(m, shock.sets, costs, 0, bars.n - 1, selectFor(shock, m, data.daily).select)
+  const select = selectFor(shock, m, data.daily).select
+  // Version publique : shorts seulement en régime de tendance journalier baissier, comme le bot.
+  const override = target.version === 'v1' ? undefined : shortTrendEntries(m, shock.sets, select, 15, data.daily)
+  const res = simulate(m, shock.sets, costs, 0, bars.n - 1, select, override)
   return { account, backtest: { trips: backtestTrips(bars, res.positions, null, M15), bars: bars.n, from: bars.t[0], to: bars.t[bars.n - 1] + M15 } }
 }
 
@@ -106,7 +110,7 @@ export default function LiveApp() {
   }, [target, refresh])
 
   const choose = (tg: LiveAccount) => {
-    const q = new URLSearchParams({ address: tg.address, coin: tg.coin, ...(tg.network === 'testnet' ? { net: 'testnet' } : {}) })
+    const q = new URLSearchParams({ address: tg.address, coin: tg.coin, ...(tg.network === 'testnet' ? { net: 'testnet' } : {}), ...(tg.version === 'v1' ? { version: 'v1' } : {}) })
     history.replaceState(null, '', `?${q}`)
     setTarget(tg)
   }
@@ -143,6 +147,7 @@ export default function LiveApp() {
           <>
             <AccountBar t={t} lang={lang} target={target} data={data} loading={loading} onRefresh={() => void refresh(target)} onChange={() => { history.replaceState(null, '', location.pathname); setTarget(null); setData(null) }} />
             {target.network === 'testnet' && <div className="lv-note lv-note-warn">{t.testnetNote}</div>}
+            <div className="lv-note">{target.version === 'v1' ? t.versionV1 : t.versionPublic}</div>
             {error && <div className="bt-error">{t.error} : {error}</div>}
             {!data && !error && <div className="bt-card bt-muted">{t.loading}</div>}
             {data && <Dashboard t={t} lang={lang} target={target} data={data} />}

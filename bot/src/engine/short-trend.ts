@@ -1,7 +1,5 @@
-// Condition de la version publique du Shock Engine sur les shorts : une entrée short n'est autorisée
-// que si le régime de tendance journalier est baissier, soit clôture journalière sous sa moyenne
-// 50 jours et moyenne en baisse sur 10 jours, au dernier jour clos avant la clôture de la bougie
-// (classify, lib/strategies/shock/regimes.ts). Même définition que la recherche (research/lib/e2.ts).
+// Condition de la version publique du Shock Engine sur les shorts (définition et calcul :
+// lib/strategies/short-trend.ts, partagés avec la page /live), posée sur le runner du bot.
 //
 // Le moteur figé (lib/strategies/shock/*) n'est pas modifié : la condition passe par la liste
 // d'entrées de ShockStrategy (EntryOverride), recalculée après chaque bougie. Seules les entrées
@@ -12,41 +10,14 @@
 import type { Bars } from '../../../lib/backtest/types.ts'
 import { ShockRunner, ShockSession } from '../../../lib/strategies/shock/live.ts'
 import type { Bar, SessionStep, ShockConfig } from '../../../lib/strategies/shock/live.ts'
-import type { Market } from '../../../lib/strategies/shock/market.ts'
-import { prepare } from '../../../lib/strategies/shock/market.ts'
-import type { Prepared } from '../../../lib/strategies/shock/market.ts'
-import type { Costs, ShockParams } from '../../../lib/strategies/shock/params.ts'
+import type { Costs } from '../../../lib/strategies/shock/params.ts'
 import { ShockStrategy } from '../../../lib/strategies/shock/strategy.ts'
 import type { EntryOverride } from '../../../lib/strategies/shock/strategy.ts'
 import type { StrategyState } from '../../../lib/strategies/shock/strategy.ts'
 import { SimBroker } from '../../../lib/strategies/shock/broker.ts'
-import { classify } from '../../../lib/strategies/shock/regimes.ts'
+import { entriesWithShortTrend, shortTrendEntries, shortTrendMask } from '../../../lib/strategies/short-trend.ts'
 
-/** 1 quand le régime de tendance journalier (dernier jour clos) est baissier. */
-export function shortTrendMask(bars: Bars, tfMin: number, regimeBars: Bars): Uint8Array {
-  const reg = classify(bars, tfMin, regimeBars)
-  const out = new Uint8Array(bars.n)
-  for (let i = 0; i < bars.n; i++) out[i] = reg.id[i] >= 0 && reg.id[i] >> 1 === 2 ? 1 : 0
-  return out
-}
-
-/** Entrées que le moteur prend de lui-même (impulse ou fade du jeu actif), shorts limités au masque. */
-function entriesOf(prs: Prepared[], select: Int8Array | null, n: number, trend: Uint8Array): EntryOverride {
-  const long = new Uint8Array(n), short = new Uint8Array(n)
-  for (let i = 0; i < n; i++) {
-    const e = select ? select[i] : 0
-    if (e < 0) continue
-    const R = prs[e]
-    if (R.impulseEntryLong[i] || R.fadeEntryLong[i]) long[i] = 1
-    if ((R.impulseEntryShort[i] || R.fadeEntryShort[i]) && trend[i]) short[i] = 1
-  }
-  return { long, short }
-}
-
-/** Liste d'entrées du backtest en bloc (simulate) avec la condition sur les shorts. */
-export function shortTrendEntries(m: Market, sets: ShockParams[], select: Int8Array | null, tfMin: number, regimeBars: Bars | undefined): EntryOverride {
-  return entriesOf(sets.map(p => prepare(m, p)), select, m.bars.n, shortTrendMask(m.bars, tfMin, regimeBars ?? m.htf))
-}
+export { shortTrendEntries, shortTrendMask }
 
 const FILTERED = new WeakSet<ShockRunner>()
 export const isFiltered = (r: ShockRunner) => FILTERED.has(r)
@@ -59,7 +30,7 @@ export function withShortTrendFilter(runner: ShockRunner): ShockRunner {
   if (FILTERED.has(runner)) return runner
   const ov: EntryOverride = { long: new Uint8Array(0), short: new Uint8Array(0) }
   const refresh = () => {
-    const e = entriesOf(runner.strategy.prs, runner.select, runner.n, shortTrendMask(runner.m.bars, runner.cfg.tfMin, runner.regimeBars ?? runner.m.htf))
+    const e = entriesWithShortTrend(runner.strategy.prs, runner.select, runner.n, shortTrendMask(runner.m.bars, runner.cfg.tfMin, runner.regimeBars ?? runner.m.htf))
     ov.long = e.long
     ov.short = e.short
   }
