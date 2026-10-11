@@ -6,10 +6,6 @@ import type { Bars, Metrics, Settings, Trade } from '../../lib/backtest/types.ts
 import { periodReturns } from '../../lib/backtest/metrics.ts'
 import { randomEntryTest, tradeBootstrap } from '../../lib/backtest/robustness.ts'
 import type { Bootstrap, RandomTest } from '../../lib/backtest/robustness.ts'
-import { DEFAULT_PARAMS } from '../../lib/strategies/shock/params.ts'
-import type { ShockParams } from '../../lib/strategies/shock/params.ts'
-import { SHOCK_INPUTS } from '../../lib/strategies/shock/adapter.ts'
-import type { ShockInput } from '../../lib/strategies/shock/adapter.ts'
 import type { AppOutput, AppSource } from './types.ts'
 import type { Dict, Lang } from './i18n.ts'
 import { fmtMoney, fmtNum, fmtPct } from './format.ts'
@@ -18,9 +14,6 @@ export interface ReportMeta {
   /** Marché et source des données, tels qu'affichés dans la page. */
   market: string
   timeframe: string
-  /** Préréglage du Shock Engine choisi, et s'il a été modifié depuis. */
-  preset: string | null
-  presetEdited: boolean
   /** Heure de l'export, ms UTC. */
   now: number
 }
@@ -60,30 +53,13 @@ const TXT = {
     none: 'aucune',
     strategy: 'Stratégie',
     kind: 'Type',
-    shockKind: 'Shock Engine, recodage de la stratégie Pine « Shock Engine Intraday 15/day », exécutée comme dans TradingView',
-    engineRules: 'Règles d\'exécution du moteur :',
     scriptKind: 'Script (langage de Backtest Lab, proche de Pine Script)',
     signalsKind: 'Signaux importés depuis un fichier CSV',
-    preset: 'Préréglage',
-    edited: 'modifié depuis',
-    adaptive: 'Mode adaptatif',
-    adaptiveValue: 'les réglages changent selon la volatilité journalière (calme ou agitée) ; chaque position garde jusqu\'à sa sortie les réglages qui l\'ont ouverte',
-    shockRules: [
-      'Entrées, flip et sortie VWAP exécutés à la clôture de la barre du signal (process_orders_on_close).',
-      'Stop, TP1 partiel et stop suiveur posés à la clôture de la barre qui suit l\'entrée, puis testés dans chaque barre en suivant le trajet de TradingView (ouverture, extrême le plus proche, autre extrême, clôture).',
-      'Filtre de tendance HTF calculé sans lecture du futur : chaque barre ne voit que les barres HTF closes.',
-    ],
     params: 'Paramètres',
     param: 'Paramètre',
-    group: 'Groupe',
     value: 'Valeur',
     def: 'Défaut du script',
     changedNote: 'En gras : valeur différente du défaut du script.',
-    calm: 'Volatilité calme',
-    agitated: 'Volatilité agitée',
-    noSet: 'pas de nouvelle entrée',
-    yes: 'oui',
-    no: 'non',
     scriptName: 'Nom du script',
     code: 'Code',
     inputName: 'Variable',
@@ -107,7 +83,6 @@ const TXT = {
     slippage: 'Glissement',
     feeFixed: 'Frais fixes',
     fill: 'Exécution des ordres',
-    shockFill: 'à la clôture du signal ; sorties gérées par les réglages du script',
     exits: 'Sorties automatiques',
     noExits: 'aucune',
     stop: 'stop', target: 'objectif', trailing: 'stop suiveur', maxBars: (n: number) => `sortie après ${n} barres`,
@@ -158,30 +133,13 @@ const TXT = {
     none: 'none',
     strategy: 'Strategy',
     kind: 'Type',
-    shockKind: 'Shock Engine, a port of the Pine strategy "Shock Engine Intraday 15/day", executed as in TradingView',
-    engineRules: 'Engine execution rules:',
     scriptKind: 'Script (Backtest Lab language, close to Pine Script)',
     signalsKind: 'Signals imported from a CSV file',
-    preset: 'Preset',
-    edited: 'edited since',
-    adaptive: 'Adaptive mode',
-    adaptiveValue: 'settings switch with daily volatility (calm or agitated); each position keeps the settings that opened it until it exits',
-    shockRules: [
-      'Entries, flip and VWAP exit executed at the close of the signal bar (process_orders_on_close).',
-      'Stop, partial TP1 and trailing stop placed at the close of the bar after entry, then tested in each bar along the TradingView path (open, nearest extreme, other extreme, close).',
-      'HTF trend filter computed without lookahead: each bar only sees closed HTF bars.',
-    ],
     params: 'Parameters',
     param: 'Parameter',
-    group: 'Group',
     value: 'Value',
     def: 'Script default',
     changedNote: 'In bold: value different from the script default.',
-    calm: 'Calm volatility',
-    agitated: 'Agitated volatility',
-    noSet: 'no new entry',
-    yes: 'yes',
-    no: 'no',
     scriptName: 'Script name',
     code: 'Code',
     inputName: 'Variable',
@@ -205,7 +163,6 @@ const TXT = {
     slippage: 'Slippage',
     feeFixed: 'Fixed fees',
     fill: 'Order execution',
-    shockFill: 'at the signal close; exits handled by the script settings',
     exits: 'Automatic exits',
     noExits: 'none',
     stop: 'stop', target: 'target', trailing: 'trailing stop', maxBars: (n: number) => `exit after ${n} bars`,
@@ -326,7 +283,6 @@ export function equityCsv(bars: Bars, out: AppOutput): string {
 export const approxTokens = (text: string) => Math.round(text.length / 3.5)
 
 export function strategyName(out: AppOutput, source: AppSource): string {
-  if (source.kind === 'shock') return 'Shock Engine'
   if (source.kind === 'signals') return 'CSV signals'
   return out.name ?? 'Script'
 }
@@ -390,31 +346,7 @@ export function buildReport(o: {
 
   // Stratégie
   h(2, X.strategy)
-  if (source.kind === 'shock') {
-    const rows: string[][] = [[X.kind, X.shockKind]]
-    if (meta.preset) rows.push([X.preset, meta.presetEdited ? `${meta.preset} (${X.edited})` : meta.preset])
-    if (source.adaptive) rows.push([X.adaptive, X.adaptiveValue])
-    L.push(kv(rows, lang), '', X.engineRules, '')
-    for (const rule of X.shockRules) L.push(`- ${rule}`)
-    h(3, X.params)
-    const fmtParam = (inp: ShockInput, p: ShockParams | null) => {
-      if (!p) return X.noSet
-      const v = p[inp.key]
-      if (typeof v === 'boolean') return v ? X.yes : X.no
-      if (inp.kind === 'select') return inp.options?.find(op => op.value === v)?.label ?? String(v)
-      return typeof v === 'number' ? String(+v.toFixed(6)) : String(v)
-    }
-    const bold = (txt: string, changed: boolean) => (changed ? `**${txt}**` : txt)
-    const sets: [string, ShockParams | null][] = source.adaptive
-      ? [[X.calm, source.adaptive.calm], [X.agitated, source.adaptive.agitated]]
-      : [[X.value, source.params]]
-    const rows2 = SHOCK_INPUTS.map(inp => [
-      inp.group, inp.title,
-      ...sets.map(([, p]) => bold(fmtParam(inp, p), !!p && p[inp.key] !== DEFAULT_PARAMS[inp.key])),
-      fmtParam(inp, DEFAULT_PARAMS),
-    ])
-    L.push(table([X.group, X.param, ...sets.map(x => x[0]), X.def], rows2), '', X.changedNote)
-  } else if (source.kind === 'script') {
+  if (source.kind === 'script') {
     L.push(kv([[X.kind, X.scriptKind], [X.scriptName, out.name ?? '—']], lang))
     if (out.inputs.length) {
       h(3, X.params)
@@ -435,25 +367,22 @@ export function buildReport(o: {
   // Exécution
   h(2, X.exec)
   const execRows: string[][] = [[X.capital, money(s.capital)]]
-  const native = source.kind === 'shock'
-  const sizing = native ? 'percent' : s.sizing
-  execRows.push([X.size, sizing === 'percent' ? X.sizePercent(rawPct(native && s.sizing !== 'percent' ? 100 : s.sizeValue)) : sizing === 'fixed' ? X.sizeFixed(money(s.sizeValue)) : X.sizeRisk(rawPct(s.sizeValue))])
+  const sizing = s.sizing
+  execRows.push([X.size, sizing === 'percent' ? X.sizePercent(rawPct(s.sizeValue)) : sizing === 'fixed' ? X.sizeFixed(money(s.sizeValue)) : X.sizeRisk(rawPct(s.sizeValue))])
   const lev = num(s.leverage > 0 ? s.leverage : 1)
   if (sizing === 'risk') execRows.push([X.leverage, X.leverageCap(lev)])
   else execRows.push([X.leverage, s.leverage > 1 || s.fundingPct !== 0 ? X.leverageValue(lev, rawPct(s.maintenancePct), rawPct(s.fundingPct)) : X.noLeverage])
   execRows.push([X.direction, t[`dir_${s.direction}` as const]])
   execRows.push([X.commission, `${rawPct(s.feePct)} ${X.perOrder}`])
   execRows.push([X.slippage, rawPct(s.slippagePct)])
-  if (!native && s.feeFixed > 0) execRows.push([X.feeFixed, money(s.feeFixed)])
-  execRows.push([X.fill, native ? X.shockFill : t[`fill_${s.fill}` as const]])
-  if (!native) {
-    const ex: string[] = []
-    if (s.stopLossPct) ex.push(`${X.stop} ${rawPct(s.stopLossPct)}`)
-    if (s.takeProfitPct) ex.push(`${X.target} ${rawPct(s.takeProfitPct)}`)
-    if (s.trailingPct) ex.push(`${X.trailing} ${rawPct(s.trailingPct)}`)
-    if (s.maxBars) ex.push(X.maxBars(s.maxBars))
-    execRows.push([X.exits, ex.length ? ex.join(', ') : X.noExits])
-  }
+  if (s.feeFixed > 0) execRows.push([X.feeFixed, money(s.feeFixed)])
+  execRows.push([X.fill, t[`fill_${s.fill}` as const]])
+  const ex: string[] = []
+  if (s.stopLossPct) ex.push(`${X.stop} ${rawPct(s.stopLossPct)}`)
+  if (s.takeProfitPct) ex.push(`${X.target} ${rawPct(s.takeProfitPct)}`)
+  if (s.trailingPct) ex.push(`${X.trailing} ${rawPct(s.trailingPct)}`)
+  if (s.maxBars) ex.push(X.maxBars(s.maxBars))
+  execRows.push([X.exits, ex.length ? ex.join(', ') : X.noExits])
   L.push(kv(execRows, lang))
 
   // Résultats

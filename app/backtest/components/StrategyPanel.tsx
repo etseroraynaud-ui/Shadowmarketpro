@@ -13,7 +13,7 @@ import { DOCS } from '../docs'
 import { download, fmtDate } from '../format'
 import CodeEditor from './CodeEditor'
 
-export type StrategyMode = 'shock' | 'templates' | 'script' | 'pine' | 'signals'
+export type StrategyMode = 'templates' | 'script' | 'pine' | 'signals'
 
 export interface ScriptErr {
   text: string
@@ -24,7 +24,7 @@ const looksLikePine = (s: string) => /\/\/\s*@version|^\s*strategy\s*\(|strategy
 
 export default function StrategyPanel({
   t, lang, mode, setMode, code, setCode, inputs, overrides, setOverrides, error,
-  signalFile, setSignalFile, signalOpts, setSignalOpts, onApplySettings, onDirection, shockSlot,
+  signalFile, setSignalFile, signalOpts, setSignalOpts, onApplySettings, onDirection,
 }: {
   t: Dict
   lang: Lang
@@ -42,8 +42,6 @@ export default function StrategyPanel({
   setSignalOpts: (o: SignalOptions) => void
   onApplySettings: (s: Partial<Settings>) => void
   onDirection: (d: Settings['direction']) => void
-  /** Panneau du Shock Engine, rendu quand l'onglet est actif. */
-  shockSlot: React.ReactNode
 }) {
   const [help, setHelp] = useState(false)
   const [pineSrc, setPineSrc] = useState('')
@@ -75,7 +73,7 @@ export default function StrategyPanel({
     }
   }
 
-  const tabs: [StrategyMode, string][] = [['shock', t.shock], ['templates', t.templates], ['script', t.script], ['pine', t.pine], ['signals', t.signalsCsv]]
+  const tabs: [StrategyMode, string][] = [['templates', t.templates], ['script', t.script], ['pine', t.pine], ['signals', t.signalsCsv]]
   const docs = DOCS[lang]
 
   return (
@@ -96,7 +94,6 @@ export default function StrategyPanel({
         ))}
       </div>
 
-      {mode === 'shock' && shockSlot}
 
       {mode === 'templates' && (
         <div className="bt-templates">

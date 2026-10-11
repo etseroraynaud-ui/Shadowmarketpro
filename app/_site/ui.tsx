@@ -24,7 +24,7 @@ export function Arrow() {
   return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
 }
 
-export function Section({ id, eyebrow, title, intro, children, head }: { id?: string; eyebrow?: string; title: string; intro?: ReactNode; children: ReactNode; head?: ReactNode }) {
+export function Section({ id, eyebrow, title, intro, children, head }: { id?: string; eyebrow?: string; title: string; intro?: ReactNode; children?: ReactNode; head?: ReactNode }) {
   return (
     <section className="s-section s-anchor" id={id}>
       <div className="s-section-head s-reveal">

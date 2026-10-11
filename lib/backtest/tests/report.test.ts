@@ -7,14 +7,12 @@ import { buildReport, equityCsv, robustOf, worstDrawdowns, TRADES_CSV_HEAD } fro
 import type { ReportMeta } from '../../../app/backtest/report.ts'
 import { DICTS } from '../../../app/backtest/i18n.ts'
 import type { StrategySource } from '../index.ts'
-import { runShockBacktest } from '../../strategies/shock/adapter.ts'
-import { DEFAULT_PARAMS } from '../../strategies/shock/params.ts'
 
 const bars = randomBars(1500, 3)
 const source: StrategySource = { kind: 'script', code: TEMPLATES[0].script, overrides: {} }
 const s = settings({ feePct: 0.1, splitTime: bars.t[1100] })
 const out = runStrategy(bars, source, s)
-const meta: ReportMeta = { market: 'TEST/USD', timeframe: '1D', preset: null, presetEdited: false, now: Date.UTC(2026, 9, 4) }
+const meta: ReportMeta = { market: 'TEST/USD', timeframe: '1D', now: Date.UTC(2026, 9, 4) }
 const report = (trades: 0 | 100 | 500 | 'all', lang: 'fr' | 'en' = 'fr') =>
   buildReport({ out, bars, settings: s, source, meta, lang, t: DICTS[lang], trades, robust: robustOf(bars, out, s) })
 
@@ -60,17 +58,4 @@ test('capital jour par jour : une ligne par jour, même en données intraday', (
   const lines = equityCsv(hourly, o).trim().split('\n')
   assert.equal(lines.length - 1, 10)
   assert.match(lines[1], /^2024-01-01,/)
-})
-
-test('rapport Shock Engine : paramètres modifiés en gras, défaut du script à côté', () => {
-  const hourly = randomBars(24 * 60, 9, 30000)
-  const t0 = Date.UTC(2024, 0, 1)
-  for (let i = 0; i < hourly.n; i++) hourly.t[i] = t0 + i * 3600000
-  const spec = { kind: 'shock' as const, params: { ...DEFAULT_PARAMS, kMain: 2.6 }, adaptive: null }
-  const st = settings({ feePct: 0.02, direction: 'both' })
-  const o = runShockBacktest(hourly, spec, st)
-  const md = buildReport({ out: o, bars: hourly, settings: st, source: spec, meta: { ...meta, preset: 'Script tel quel', presetEdited: true }, lang: 'fr', t: DICTS.fr, trades: 'all', robust: null })
-  assert.match(md, /\| Main Shock Z \| \*\*2\.6\*\* \| 2\.2 \|/)
-  assert.match(md, /Script tel quel \(modifié depuis\)/)
-  assert.doesNotMatch(md, /undefined|NaN/)
 })

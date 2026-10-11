@@ -22,7 +22,7 @@ export default function Results({
 }: {
   out: AppOutput
   bars: Bars
-  /** Marché, timeframe et préréglage, pour le rapport exporté. */
+  /** Marché et timeframe, pour le rapport exporté. */
   meta: Omit<ReportMeta, 'now'>
   lang: Lang
   t: Dict

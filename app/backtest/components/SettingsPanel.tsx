@@ -58,7 +58,7 @@ function LeverageHint({ t, lang, s }: { t: Dict; lang: Lang; s: UiSettings }) {
   return <p className={`bt-small ${exposure >= 5 ? 'bt-lev-warn' : 'bt-muted'}`}>{t.leverageHint(x(exposure), fmtPct(Math.max(0, move), lang, 1, false))}</p>
 }
 
-export default function SettingsPanel({ t, lang, s, set, native = false }: { t: Dict; lang: Lang; s: UiSettings; set: (p: Partial<UiSettings>) => void; native?: boolean }) {
+export default function SettingsPanel({ t, lang, s, set }: { t: Dict; lang: Lang; s: UiSettings; set: (p: Partial<UiSettings>) => void }) {
   const pos = (v: number | null) => (v != null && v > 0 ? v : null)
   return (
     <div className="bt-step-body">
@@ -74,13 +74,7 @@ export default function SettingsPanel({ t, lang, s, set, native = false }: { t: 
         </label>
       </div>
 
-      {native && <p className="bt-note">{t.shockSettingsNote}</p>}
       <div className="bt-sub">{t.sizing}</div>
-      {native ? (
-        <div className="bt-form-grid">
-          <NumField label={t.sizing_percent} value={s.sizing === 'percent' ? s.sizeValue : 100} min={1} suffix="%" onChange={v => set({ sizing: 'percent', sizeValue: v ?? 100 })} />
-        </div>
-      ) : (
       <div className="bt-form-grid">
         <label className="bt-field">
           <span>{t.sizing}</span>
@@ -96,11 +90,10 @@ export default function SettingsPanel({ t, lang, s, set, native = false }: { t: 
         <NumField label={s.sizing === 'fixed' ? t.sizing_fixed : '%'} value={s.sizeValue} min={0} suffix={s.sizing === 'fixed' ? undefined : '%'} onChange={v => set({ sizeValue: v ?? 0 })} />
         <p className="bt-muted bt-small bt-span2">{t[`sizingHint_${s.sizing}` as const]}</p>
       </div>
-      )}
 
       <div className="bt-sub">{t.leverageSection}</div>
       <div className="bt-form-grid bt-grid-3">
-        <NumField label={s.sizing === 'risk' && !native ? t.maxLeverage : t.leverage} value={s.leverage} min={1} max={125} step={0.5} suffix="×" onChange={v => set({ leverage: v != null && v >= 1 ? Math.min(v, 125) : 1 })} />
+        <NumField label={s.sizing === 'risk' ? t.maxLeverage : t.leverage} value={s.leverage} min={1} max={125} step={0.5} suffix="×" onChange={v => set({ leverage: v != null && v >= 1 ? Math.min(v, 125) : 1 })} />
         <NumField label={t.maintenancePct} value={s.maintenancePct} min={0} step={0.1} suffix="%" onChange={v => set({ maintenancePct: v != null && v >= 0 ? v : 0.5 })} />
         <NumField label={t.fundingPct} value={s.fundingPct} step={0.005} suffix="%" onChange={v => set({ fundingPct: v ?? 0 })} />
       </div>
@@ -109,16 +102,15 @@ export default function SettingsPanel({ t, lang, s, set, native = false }: { t: 
           <button key={v} className={s.leverage === v ? 'on' : ''} onClick={() => set({ leverage: v })}>×{v}</button>
         ))}
       </div>
-      <LeverageHint t={t} lang={lang} s={native ? { ...s, sizing: 'percent' } : s} />
+      <LeverageHint t={t} lang={lang} s={s} />
       <p className="bt-muted bt-small">{t.fundingHint}</p>
 
       <div className="bt-sub">{t.costs}</div>
       <div className="bt-form-grid bt-grid-3">
         <NumField label={t.feePct} value={s.feePct} min={0} step={0.01} suffix="%" onChange={v => set({ feePct: v ?? 0 })} />
         <NumField label={t.slippage} value={s.slippagePct} min={0} step={0.01} suffix="%" onChange={v => set({ slippagePct: v ?? 0 })} />
-        {!native && <NumField label={t.feeFixed} value={s.feeFixed} min={0} step={0.5} onChange={v => set({ feeFixed: v ?? 0 })} />}
+        <NumField label={t.feeFixed} value={s.feeFixed} min={0} step={0.5} onChange={v => set({ feeFixed: v ?? 0 })} />
       </div>
-      {!native && (<>
       <label className="bt-field">
         <span>{t.fill}</span>
         <div className="bt-seg bt-seg-sm">
@@ -136,7 +128,6 @@ export default function SettingsPanel({ t, lang, s, set, native = false }: { t: 
         <NumField label={t.trailing} value={s.trailingPct} min={0} step={0.5} suffix="%" placeholder={t.off} onChange={v => set({ trailingPct: pos(v) })} />
         <NumField label={t.maxBars} value={s.maxBars} min={1} step={1} placeholder={t.off} onChange={v => set({ maxBars: v != null && v >= 1 ? Math.round(v) : null })} />
       </div>
-      </>)}
 
       <div className="bt-sub">{t.validation}</div>
       <div className="bt-seg bt-seg-sm">

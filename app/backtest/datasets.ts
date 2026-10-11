@@ -3,8 +3,8 @@
 //
 // Chaque jeu de données a un identifiant qui permet de le recharger à la visite suivante :
 // « btc15m » (exemple), « hl:xyz:NVDA:15m » (Hyperliquid), « bn:BTCUSDT:15m » (Binance).
-// Pour Hyperliquid et Binance, les bougies journalières de la même source sont chargées aussi :
-// elles donnent le régime de volatilité du Shock Engine même quand l'historique intraday est court.
+// Pour Hyperliquid, les bougies journalières de la même source sont chargées aussi : la page /live
+// en tire le régime de volatilité même quand l'historique intraday est court.
 
 import { loadBarsFromCsv, barsFromRecords } from '../../lib/backtest/data.ts'
 import type { Bars, Msg } from '../../lib/backtest/types.ts'
@@ -17,7 +17,7 @@ export interface Dataset {
   warnings: Msg[]
   /** Identifiant du jeu de données, pour le recharger à la prochaine visite. */
   sample?: string
-  /** Bougies journalières de la même source (régime de volatilité du Shock Engine). */
+  /** Bougies journalières de la même source (régime de volatilité, page /live). */
   daily?: Bars
 }
 
@@ -202,16 +202,12 @@ export async function loadBinance(symbol: string, interval: string, since: numbe
   const now = Date.now()
   // Trop de barres depuis la date demandée : on garde les plus récentes.
   const start = Math.max(since, now - BN_MAX_BARS * step)
-  const [recs, days] = await Promise.all([
-    bnKlines(symbol, interval, start, now),
-    step < INTERVAL_MS['1d'] ? bnKlines(symbol, '1d', Date.UTC(2017, 0, 1), now) : null,
-  ])
+  const recs = await bnKlines(symbol, interval, start, now)
   if (recs.length < 2) throw new Error('no data')
   const d = barsFromRecords(recs)
-  const daily = step === INTERVAL_MS['1d'] ? d.bars : days && days.length ? barsFromRecords(days).bars : undefined
   const sinceDay = new Date(since).toISOString().slice(0, 10)
   return {
-    bars: d.bars, name: `${symbol} · Binance`, timeframe: d.timeframe, barMs: d.barMs, sample: `bn:${symbol}:${interval}:${sinceDay}`, daily,
+    bars: d.bars, name: `${symbol} · Binance`, timeframe: d.timeframe, barMs: d.barMs, sample: `bn:${symbol}:${interval}:${sinceDay}`,
     warnings: [
       ...d.warnings,
       ...(start > since ? [{
@@ -234,16 +230,4 @@ export async function loadDataset(id: string): Promise<Dataset> {
     return loadBinance(symbol, interval, Date.parse(`${since}T00:00:00Z`) || Date.UTC(2020, 0, 1))
   }
   return loadSampleFile(id)
-}
-
-/** Même marché, autre timeframe (en minutes) ; null si la source ne l'a pas. */
-export function withTimeframe(id: string | undefined, tfMin: number): string | null {
-  const iv = tfMin < 60 ? `${tfMin}m` : tfMin < 1440 ? `${tfMin / 60}h` : '1d'
-  if (id?.startsWith('hl:')) return (HL_INTERVALS as readonly string[]).includes(iv) ? `${id.slice(0, id.lastIndexOf(':'))}:${iv}` : null
-  if (id?.startsWith('bn:')) {
-    const [, symbol, , since] = id.split(':')
-    return (BINANCE_INTERVALS as readonly string[]).includes(iv) ? `bn:${symbol}:${iv}:${since}` : null
-  }
-  const s = SAMPLES.find(x => x.id === `btc${tfMin}m`)
-  return s ? s.id : null
 }

@@ -111,16 +111,17 @@ L'adresse du bouton de contact de `/institutional` vient de la variable d'enviro
 
 Les rapports sont écrits dans `research/reports/`.
 
-Pour mettre à jour le site (onglet Shock Engine de Backtest Lab et page `/backtest/recherche`) :
+Pour mettre à jour les données d'exemple du site et les préréglages du bot :
 
 ```
 npm run research:publish
 ```
 
 Cette commande copie les données 5, 15 et 30 min dans `public/backtest/data`, régénère les
-préréglages issus de la recherche (`lib/strategies/shock/presets.ts`), publie les rapports
-dans `public/backtest/reports` et régénère le code Pine des préréglages adaptatifs, pour un usage
-privé (`research/private/pine/`, exclu de git et du site ; aussi seul avec `npm run research:pine`).
+préréglages issus de la recherche (`lib/strategies/shock/presets.ts`) et régénère le code Pine
+des préréglages adaptatifs, pour un usage privé (`research/private/pine/`, exclu de git et du
+site ; aussi seul avec `npm run research:pine`). Les rapports de recherche ne sont plus publiés
+sur le site.
 
 ## Méthode contre le surajustement
 

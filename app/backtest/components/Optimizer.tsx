@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Bars, InputDef, Settings } from '../../../lib/backtest/types.ts'
 import type { AppSource } from '../types'
-import { optimizeShock } from '../../../lib/strategies/shock/optimize.ts'
 import { optimize, axisValues, MAX_RUNS } from '../../../lib/backtest/optimize.ts'
 import type { Objective, OptParam, OptResult, OptCell } from '../../../lib/backtest/optimize.ts'
 import { windowIndices } from '../../../lib/backtest/engine.ts'
@@ -77,15 +76,10 @@ export default function Optimizer({
     setError(null)
     setRes(null)
     setProgress({ done: 0, total })
-    const shock = source.kind === 'shock'
-    const job = shock
-      ? { bars, spec: { ...source, adaptive: null }, params, settings, objective, minTrades }
-      : { bars, script: source.kind === 'script' ? source.code : '', overrides, params, settings, objective, minTrades }
+    const job = { bars, script: source.kind === 'script' ? source.code : '', overrides, params, settings, objective, minTrades }
     try {
       worker.current?.terminate()
-      const w = shock
-        ? new Worker(new URL('../../../lib/strategies/shock/optimizer.worker.ts', import.meta.url), { type: 'module' })
-        : new Worker(new URL('../../../lib/backtest/optimizer.worker.ts', import.meta.url), { type: 'module' })
+      const w = new Worker(new URL('../../../lib/backtest/optimizer.worker.ts', import.meta.url), { type: 'module' })
       worker.current = w
       w.onmessage = (e: MessageEvent) => {
         const m = e.data
@@ -106,8 +100,7 @@ export default function Optimizer({
   const runInline = () => {
     setTimeout(() => {
       try {
-        if (source.kind === 'shock') setRes(optimizeShock(bars, { ...source, adaptive: null }, params, settings, objective, minTrades))
-        else if (source.kind === 'script') setRes(optimize(bars, source.code, overrides, params, settings, objective, minTrades))
+        if (source.kind === 'script') setRes(optimize(bars, source.code, overrides, params, settings, objective, minTrades))
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
       }

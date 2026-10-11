@@ -141,9 +141,7 @@ export default function ResearchPage() {
           </div>
         </Section>
 
-        <Section id="archive" eyebrow="History" title="Earlier work" intro={<p>Shock Engine started as a TradingView script whose original settings lost money on Bitcoin after costs. The first research passes diagnosed why, showed that re-optimizing many parameters chases noise, and that among regime-based selections only a calm/agitated volatility split was worth pursuing: it became the basis of the current rules. Those working reports (in French) remain available.</p>}>
-          <p className="s-p"><Link className="s-arrow" href="/backtest/recherche">Research archive (working reports)</Link></p>
-        </Section>
+        <Section id="archive" eyebrow="History" title="Earlier work" intro={<p>Shock Engine started as a TradingView script whose original settings lost money on Bitcoin after costs. The first research passes diagnosed why, showed that re-optimizing many parameters chases noise, and that among regime-based selections only a calm/agitated volatility split was worth pursuing: it became the basis of the current rules.</p>} />
 
         <Section id="versions" eyebrow="Reproducibility" title="Current version">
           <Table text head={['', '']} rows={[
