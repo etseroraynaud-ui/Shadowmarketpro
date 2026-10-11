@@ -3,7 +3,8 @@
 //
 //   node research/shock/export-pine.ts
 //
-// Écrit public/backtest/strategies/shock-engine-adaptive-{15,30}m.pine.
+// Écrit research/private/pine/shock-engine-adaptive-{15,30}m.pine. Usage privé : ce dossier est exclu
+// de git (.gitignore) et du site ; le code Pine n'est plus publié (il contient tous les réglages).
 
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { DEFAULT_PARAMS } from '../../lib/strategies/shock/params.ts'
@@ -11,7 +12,7 @@ import type { ShockParams } from '../../lib/strategies/shock/params.ts'
 import { SHOCK_INPUTS, SHOCK_PRESETS } from '../../lib/strategies/shock/adapter.ts'
 import type { ShockInput } from '../../lib/strategies/shock/adapter.ts'
 
-const OUT = 'public/backtest/strategies'
+const OUT = 'research/private/pine'
 
 /** Paramètres de shockSignals(), dans l'ordre de sa déclaration. */
 const SIGNAL_KEYS: (keyof ShockParams)[] = [
