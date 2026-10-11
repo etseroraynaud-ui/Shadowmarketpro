@@ -1,0 +1,35 @@
+# Collecteur Market Flow sur le serveur du bot, avec Docker (commandes : smp-bot flow …). Depuis la
+# racine du dépôt :
+#
+#   docker compose -f flow/deploy/compose.yml up -d --build
+#
+# Projet séparé du bot (shock-engine) : arrêter, mettre à jour ou planter le collecteur ne touche
+# jamais au bot. Mémoire et processeur plafonnés pour la même raison.
+
+name: market-flow
+
+services:
+  flow:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: market-flow-collector
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    # Jeton d'envoi vers le site et budget Hyperliquid : fichier lisible par root seul.
+    env_file:
+      - path: flow.env
+        required: true
+    volumes:
+      - flow-data:/data
+    mem_limit: 768m
+    cpus: 1.0
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "5"
+
+volumes:
+  flow-data:

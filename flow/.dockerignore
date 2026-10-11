@@ -1,0 +1,4 @@
+# Image du collecteur (flow/Dockerfile) : seulement le programme et ses dépendances.
+*
+!collector.py
+!requirements.txt

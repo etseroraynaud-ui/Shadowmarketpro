@@ -27,3 +27,6 @@ bot/logs/
 # bot : secrets du serveur (clé de l'agent)
 bot/deploy/*.env
 research/data/.dukascopy-cache/
+# Market Flow : secret du serveur (jeton d'envoi) et fichiers locaux
+flow/deploy/*.env
+flow/**/__pycache__/
