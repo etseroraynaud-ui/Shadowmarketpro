@@ -28,16 +28,22 @@ export async function POST(req: NextRequest) {
   // Envoi vide (smp-bot flow check) : vérifie seulement que les tables et fonctions sont en place.
   if (!bars.length && !whales.length && !status) {
     const t = await supabaseAdmin.from('flow_status').select('coin', { head: true, count: 'exact' })
-    const f = t.error ? t : await supabaseAdmin.rpc('flow_bars_agg', { p_coin: coin, p_since: 4_000_000_000, p_bucket: 60 })
+    // Colonnes spot : présentes seulement si la dernière version de flow/supabase.sql a été exécutée.
+    const c = t.error ? t : await supabaseAdmin.from('flow_bars').select('spot_delta, spot_vol', { head: true, count: 'exact' })
+    const f = c.error ? c : await supabaseAdmin.rpc('flow_bars_agg', { p_coin: coin, p_since: 4_000_000_000, p_bucket: 60 })
     if (f.error) {
       console.error('[market-flow/ingest] contrôle :', f.error.message)
-      return NextResponse.json({ error: 'tables Market Flow absentes : exécuter flow/supabase.sql dans Supabase' }, { status: 502 })
+      return NextResponse.json({ error: 'tables Market Flow absentes ou anciennes : exécuter flow/supabase.sql dans Supabase' }, { status: 502 })
     }
     return NextResponse.json({ ok: true, check: true })
   }
   try {
-    for (let i = 0; i < bars.length; i += CHUNK) {
-      const { error } = await supabaseAdmin.from('flow_bars').upsert(bars.slice(i, i + CHUNK).map(b => ({ coin, ...b })), { onConflict: 'coin,minute' })
+    // Sans aucune donnée spot dans l'envoi (collecteur d'avant le spot), les colonnes spot ne sont pas
+    // écrites : l'envoi passe aussi sur une base où flow/supabase.sql n'a pas encore été mis à jour.
+    const withSpot = bars.some(b => b.spot_delta)
+    const rows = bars.map(({ spot_delta, spot_vol, ...b }) => (withSpot ? { coin, ...b, spot_delta, spot_vol } : { coin, ...b }))
+    for (let i = 0; i < rows.length; i += CHUNK) {
+      const { error } = await supabaseAdmin.from('flow_bars').upsert(rows.slice(i, i + CHUNK), { onConflict: 'coin,minute' })
       if (error) throw new Error(`flow_bars : ${error.message}`)
     }
     for (let i = 0; i < whales.length; i += CHUNK) {

@@ -76,7 +76,7 @@ flow_check() {
     200) echo "OK : le site accepte le jeton et les tables Supabase sont en place." ;;
     401) echo "Jeton refusé : la valeur de FLOW_INGEST_TOKEN dans Vercel n'est pas celle du serveur (smp-bot flow token l'affiche). Corrige-la dans Vercel, puis Redeploy." ;;
     503) echo "Le site n'a pas encore le jeton : ajoute FLOW_INGEST_TOKEN dans Vercel (Production), puis Redeploy, et réessaie dans 2 minutes." ;;
-    502) echo "Le jeton est bon, mais les tables manquent dans Supabase : SQL Editor, coller flow/supabase.sql, Run." ;;
+    502) echo "Le jeton est bon, mais Supabase n'est pas à jour : SQL Editor, coller la dernière version de flow/supabase.sql, Run." ;;
     404) echo "Le site n'a pas encore l'API Market Flow (déploiement en cours ?) : réessaie dans quelques minutes." ;;
     000|"") echo "Site injoignable depuis le serveur ($url)." ;;
     *) echo "Réponse inattendue du site (HTTP $code) : $(head -c 200 "$body")" ;;

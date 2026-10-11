@@ -17,8 +17,11 @@ export type RangeKey = keyof typeof RANGES
 /** Tailles d'ordre agresseur (USD) : [retail, 10–100 k$, 100 k–1 M$, ≥ 1 M$]. */
 export const BUCKETS = ['Retail < $10k', '$10k–100k', '$100k–1M', '≥ $1M'] as const
 
-/** Minute close telle que publiée (table flow_bars). */
-export interface BarRow { minute: number; px: number | null; delta: number[]; vol: number[]; liq_long: number; liq_short: number }
+/** Minute close telle que publiée (table flow_bars). spot_* : même chose sur le spot, null sans flux spot. */
+export interface BarRow {
+  minute: number; px: number | null; delta: number[]; vol: number[]; liq_long: number; liq_short: number
+  spot_delta?: number[] | null; spot_vol?: number[] | null
+}
 /** Échantillon whales tel que publié (table flow_whales). */
 export interface WhaleRow {
   ts: number; px: number | null; whale_long: number | null; whale_short: number | null
@@ -27,8 +30,13 @@ export interface WhaleRow {
   giant_long: number | null; giant_short: number | null; giant_n_long: number | null; giant_n_short: number | null
   giant_chg_net: number | null; giant_chg_long: number | null; giant_chg_short: number | null
 }
-/** Tranche de barres (fonction SQL flow_bars_agg). */
-export interface BarAgg { t: number; px: number | null; d0: number; d1: number; d2: number; d3: number; v0: number; v1: number; v2: number; v3: number; liq_long: number; liq_short: number; n: number }
+/** Tranche de barres (fonction SQL flow_bars_agg). s*, sv* : spot ; sn : minutes avec du spot (absents
+ * avec la fonction d'avant le spot : traités comme « pas de spot »). */
+export interface BarAgg {
+  t: number; px: number | null; d0: number; d1: number; d2: number; d3: number; v0: number; v1: number; v2: number; v3: number
+  liq_long: number; liq_short: number; n: number
+  s0?: number; s1?: number; s2?: number; s3?: number; sv0?: number; sv1?: number; sv2?: number; sv3?: number; sn?: number
+}
 /** Tranche d'échantillons whales (fonction SQL flow_whales_agg). */
 export interface WhaleAgg {
   t: number; px: number | null; whale_long: number | null; whale_short: number | null
@@ -69,6 +77,11 @@ export function aggBars(rows: BarRow[], since: number, bucket: number): BarAgg[]
       d0: sum(rs.map(r => r.delta[0])), d1: sum(rs.map(r => r.delta[1])), d2: sum(rs.map(r => r.delta[2])), d3: sum(rs.map(r => r.delta[3])),
       v0: sum(rs.map(r => r.vol[0])), v1: sum(rs.map(r => r.vol[1])), v2: sum(rs.map(r => r.vol[2])), v3: sum(rs.map(r => r.vol[3])),
       liq_long: sum(rs.map(r => r.liq_long)), liq_short: sum(rs.map(r => r.liq_short)), n: rs.length,
+      s0: sum(rs.map(r => r.spot_delta?.[0] ?? null)), s1: sum(rs.map(r => r.spot_delta?.[1] ?? null)),
+      s2: sum(rs.map(r => r.spot_delta?.[2] ?? null)), s3: sum(rs.map(r => r.spot_delta?.[3] ?? null)),
+      sv0: sum(rs.map(r => r.spot_vol?.[0] ?? null)), sv1: sum(rs.map(r => r.spot_vol?.[1] ?? null)),
+      sv2: sum(rs.map(r => r.spot_vol?.[2] ?? null)), sv3: sum(rs.map(r => r.spot_vol?.[3] ?? null)),
+      sn: rs.filter(r => r.spot_delta).length,
     }
   })
 }
@@ -105,12 +118,8 @@ const R = {
 export type Tone = 'pos' | 'neg' | 'neutral' | 'muted'
 export interface Stance { label: string; tone: Tone }
 
-export interface WindowSummary {
-  key: '1h' | '4h' | '24h'
-  minutes: number
-  /** Minutes de barres présentes dans la fenêtre (couverture des données). */
-  barMinutes: number
-  priceChg: number | null
+/** Flux agresseur d'un marché (perpétuels ou spot) sur une fenêtre, par taille d'ordre. */
+export interface FlowSide {
   cvd: { retail: number; mid: number; large: number; mega: number; big: number }
   vol: { retail: number; mid: number; large: number; mega: number; big: number }
   imb: { retail: number | null; big: number | null; mega: number | null }
@@ -119,6 +128,16 @@ export interface WindowSummary {
   verdict: Stance
   big: Stance
   retail: Stance
+}
+
+export interface WindowSummary extends FlowSide {
+  key: '1h' | '4h' | '24h'
+  minutes: number
+  /** Minutes de barres présentes dans la fenêtre (couverture des données). */
+  barMinutes: number
+  priceChg: number | null
+  /** Spot (Binance, Coinbase, OKX), compté à part ; minutes = minutes avec du spot dans la fenêtre. */
+  spot: FlowSide & { minutes: number }
   liq: { long: number; short: number; stance: Stance }
   whales: { net: number; long: number; short: number; ok: boolean; spanMin: number; stance: Stance }
   giants: { net: number; long: number; short: number; ok: boolean }
@@ -134,6 +153,9 @@ export interface FlowView {
   series: {
     t: number[]; px: (number | null)[]
     cvdRetail: (number | null)[]; cvdBig: (number | null)[]; cvdMega: (number | null)[]; cvdMid: (number | null)[]; cvdLarge: (number | null)[]
+    spotRetail: (number | null)[]; spotBig: (number | null)[]; spotMega: (number | null)[]
+    /** CVD toutes tailles : perpétuels et spot. */
+    perpTotal: (number | null)[]; spotTotal: (number | null)[]
     whaleLong: (number | null)[]; whaleShort: (number | null)[]; whaleNet: (number | null)[]
     giantNet: (number | null)[]; giantBias: (number | null)[]
     liqLong: (number | null)[]; liqShort: (number | null)[]
@@ -162,11 +184,8 @@ const side = (imb: number | null, vol: number, min: number): Stance =>
   vol < min || imb === null ? { label: 'Low volume', tone: 'muted' }
     : imb >= R.imbThr ? { label: 'Buying', tone: 'pos' } : imb <= -R.imbThr ? { label: 'Selling', tone: 'neg' } : { label: 'Balanced', tone: 'neutral' }
 
-function windowSummary(key: WindowSummary['key'], minutes: number, end: number, bars5: BarAgg[], whales5: WhaleAgg[], whaleStock: number, coverage: number | null): WindowSummary {
-  const from = end - minutes * 60
-  const bs = bars5.filter(b => b.t >= from && b.t < end)
-  const s = (k: keyof BarAgg) => bs.reduce((a, b) => a + (b[k] as number), 0)
-  const d = [s('d0'), s('d1'), s('d2'), s('d3')], v = [s('v0'), s('v1'), s('v2'), s('v3')]
+/** Déséquilibres, divergence et verdict d'un marché, à partir des sommes par taille [retail, 10–100 k$, 100 k–1 M$, ≥ 1 M$]. */
+function flowOf(d: number[], v: number[]): FlowSide {
   const bigD = d[2] + d[3], bigV = v[2] + v[3]
   const imb = { retail: imbOf(d[0], v[0]), big: imbOf(bigD, bigV), mega: imbOf(d[3], v[3]) }
   const enough = bigV >= R.minBigVol && v[0] >= R.minSmallVol
@@ -176,6 +195,22 @@ function windowSummary(key: WindowSummary['key'], minutes: number, end: number, 
   else if (divergence >= R.divThr) verdict = imb.big! > 0 && imb.retail! < 0 ? { label: 'Large orders buying, retail selling', tone: 'pos' } : { label: 'Large orders buying more than retail', tone: 'pos' }
   else if (divergence <= -R.divThr) verdict = imb.big! < 0 && imb.retail! > 0 ? { label: 'Large orders selling, retail buying', tone: 'neg' } : { label: 'Large orders selling more than retail', tone: 'neg' }
   else verdict = { label: 'No clear divergence', tone: 'neutral' }
+  return {
+    cvd: { retail: d[0], mid: d[1], large: d[2], mega: d[3], big: bigD },
+    vol: { retail: v[0], mid: v[1], large: v[2], mega: v[3], big: bigV },
+    imb, divergence, verdict,
+    big: side(imb.big, bigV, R.minBigVol), retail: side(imb.retail, v[0], R.minSmallVol),
+  }
+}
+
+function windowSummary(key: WindowSummary['key'], minutes: number, end: number, bars5: BarAgg[], whales5: WhaleAgg[], whaleStock: number, coverage: number | null): WindowSummary {
+  const from = end - minutes * 60
+  const bs = bars5.filter(b => b.t >= from && b.t < end)
+  const s = (k: keyof BarAgg) => bs.reduce((a, b) => a + ((b[k] as number | undefined) ?? 0), 0)
+  const perps = flowOf([s('d0'), s('d1'), s('d2'), s('d3')], [s('v0'), s('v1'), s('v2'), s('v3')])
+  const spotMinutes = s('sn')
+  const spot = { ...flowOf([s('s0'), s('s1'), s('s2'), s('s3')], [s('sv0'), s('sv1'), s('sv2'), s('sv3')]), minutes: spotMinutes }
+  if (!spotMinutes) { spot.verdict = spot.big = spot.retail = { label: 'No spot data yet', tone: 'muted' } }
   const withPx = bs.filter(b => b.px !== null)
   const before = bars5.filter(b => b.t < from && b.px !== null).pop()
   const p0 = (before ?? withPx[0])?.px ?? null, p1 = withPx.length ? withPx[withPx.length - 1].px : null
@@ -194,10 +229,7 @@ function windowSummary(key: WindowSummary['key'], minutes: number, end: number, 
   return {
     key, minutes, barMinutes: bs.reduce((a, b) => a + b.n, 0),
     priceChg: p0 && p1 ? p1 / p0 - 1 : null,
-    cvd: { retail: d[0], mid: d[1], large: d[2], mega: d[3], big: bigD },
-    vol: { retail: v[0], mid: v[1], large: v[2], mega: v[3], big: bigV },
-    imb, divergence, verdict,
-    big: side(imb.big, bigV, R.minBigVol), retail: side(imb.retail, v[0], R.minSmallVol),
+    ...perps, spot,
     liq: { long: liqL, short: liqS, stance: liqStance },
     whales: { net, long: ws.reduce((a, w) => a + (w.chg_long ?? 0), 0), short: ws.reduce((a, w) => a + (w.chg_short ?? 0), 0), ok, spanMin, stance: wStance },
     giants: { net: ws.reduce((a, w) => a + (w.giant_chg_net ?? 0), 0), long: ws.reduce((a, w) => a + (w.giant_chg_long ?? 0), 0), short: ws.reduce((a, w) => a + (w.giant_chg_short ?? 0), 0), ok },
@@ -208,9 +240,14 @@ function reading(w: WindowSummary, now: FlowView['now'], coin: Coin): string[] {
   const out: string[] = []
   const pc = w.priceChg !== null ? ` while the price moved ${w.priceChg >= 0 ? '+' : '−'}${Math.abs(w.priceChg * 100).toFixed(2)}%` : ''
   if (w.verdict.tone !== 'muted') {
-    out.push(`Over the last hour on ${coin}, orders of $100k and more were ${w.big.label.toLowerCase()} (net ${usd(w.cvd.big, true)}) and retail orders under $10k were ${w.retail.label.toLowerCase()} (net ${usd(w.cvd.retail, true)})${pc}: ${w.verdict.label.toLowerCase()}.`)
+    out.push(`Over the last hour on ${coin} perpetuals, orders of $100k and more were ${w.big.label.toLowerCase()} (net ${usd(w.cvd.big, true)}) and retail orders under $10k were ${w.retail.label.toLowerCase()} (net ${usd(w.cvd.retail, true)})${pc}: ${w.verdict.label.toLowerCase()}.`)
   } else {
-    out.push(`Over the last hour on ${coin}, there was not enough volume in both size groups to compare large orders with retail.`)
+    out.push(`Over the last hour on ${coin} perpetuals, there was not enough volume in both size groups to compare large orders with retail.`)
+  }
+  if (w.spot.minutes > 0) {
+    out.push(w.spot.verdict.tone !== 'muted'
+      ? `On spot (Binance, Coinbase, OKX), large orders were ${w.spot.big.label.toLowerCase()} (net ${usd(w.spot.cvd.big, true)}) and retail was ${w.spot.retail.label.toLowerCase()} (net ${usd(w.spot.cvd.retail, true)}): ${w.spot.verdict.label.toLowerCase()}. All sizes together, spot net flow was ${usd(w.spot.cvd.big + w.spot.cvd.mid + w.spot.cvd.retail, true)} against ${usd(w.cvd.big + w.cvd.mid + w.cvd.retail, true)} on perpetuals.`
+      : `On spot (Binance, Coinbase, OKX), there was not enough volume in both size groups to compare large orders with retail.`)
   }
   if (now.whaleLong !== null && now.whaleShort !== null) {
     const net = now.whaleLong - now.whaleShort
@@ -257,19 +294,22 @@ export function buildView(o: {
     giantLong: gl, giantShort: gs, giantBias: gl !== null && gs !== null && gl + gs > 0 ? ((gl - gs) / (gl + gs)) * 100 : null,
     nGiantLong: st?.giants?.n_long ?? lastW?.giant_n_long ?? null, nGiantShort: st?.giants?.n_short ?? lastW?.giant_n_short ?? null,
     coverage, oi: st?.oi ?? lastW?.oi ?? null, known: st?.known ?? null, inspected: st?.inspected ?? null,
-    feeds: ['Binance', 'Bybit', 'OKX', 'Hyperliquid'].map(v => { const f = o.status?.feeds?.[v]; return { venue: v, ok: !!f && f.age_s !== null && f.age_s < 120, ageS: f?.age_s ?? null } }),
+    feeds: ['Binance', 'Bybit', 'OKX', 'Binance spot', 'Coinbase', 'OKX spot', 'Hyperliquid'].map(v => { const f = o.status?.feeds?.[v]; return { venue: v, ok: !!f && f.age_s !== null && f.age_s < 120, ageS: f?.age_s ?? null } }),
     top: (st?.top ?? []).slice(0, 15),
   }
 
   // Séries sur une grille régulière : une tranche manquante reste vide (trou dans la courbe).
   const t: number[] = []
-  const series: FlowView['series'] = { t, px: [], cvdRetail: [], cvdBig: [], cvdMega: [], cvdMid: [], cvdLarge: [], whaleLong: [], whaleShort: [], whaleNet: [], giantNet: [], giantBias: [], liqLong: [], liqShort: [] }
+  const series: FlowView['series'] = {
+    t, px: [], cvdRetail: [], cvdBig: [], cvdMega: [], cvdMid: [], cvdLarge: [], spotRetail: [], spotBig: [], spotMega: [], perpTotal: [], spotTotal: [],
+    whaleLong: [], whaleShort: [], whaleNet: [], giantNet: [], giantBias: [], liqLong: [], liqShort: [],
+  }
   if (end !== null) {
     const stop = Math.ceil(end / bucket) * bucket
     const start = stop - span
     const bm = new Map(o.barsR.map(b => [b.t, b]))
     const wm = new Map(o.whalesR.map(w => [w.t, w]))
-    let cR = 0, cB = 0, cM = 0, cMid = 0, cL = 0
+    let cR = 0, cB = 0, cM = 0, cMid = 0, cL = 0, sR = 0, sB = 0, sM = 0, sT = 0
     for (let x = start; x < stop; x += bucket) {
       const b = bm.get(x), w = wm.get(x)
       t.push(x)
@@ -278,6 +318,10 @@ export function buildView(o: {
       series.px.push(b?.px ?? w?.px ?? null)
       series.cvdRetail.push(has ? cR : null); series.cvdBig.push(has ? cB : null); series.cvdMega.push(has ? cM : null)
       series.cvdMid.push(has ? cMid : null); series.cvdLarge.push(has ? cL : null)
+      series.perpTotal.push(has ? cR + cMid + cB : null)
+      const sp = !!b && (b.sn ?? 0) > 0
+      if (sp) { sR += b!.s0 ?? 0; sB += (b!.s2 ?? 0) + (b!.s3 ?? 0); sM += b!.s3 ?? 0; sT += (b!.s0 ?? 0) + (b!.s1 ?? 0) + (b!.s2 ?? 0) + (b!.s3 ?? 0) }
+      series.spotRetail.push(sp ? sR : null); series.spotBig.push(sp ? sB : null); series.spotMega.push(sp ? sM : null); series.spotTotal.push(sp ? sT : null)
       series.whaleLong.push(w?.whale_long ?? null); series.whaleShort.push(w?.whale_short ?? null)
       series.whaleNet.push(w && w.whale_long !== null && w.whale_short !== null ? w.whale_long - w.whale_short : null)
       series.giantNet.push(w && w.giant_long !== null && w.giant_short !== null ? w.giant_long - w.giant_short : null)

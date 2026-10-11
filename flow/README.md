@@ -1,7 +1,8 @@
 # Market Flow
 
-Page publique [/market-flow](https://www.shadowmarketpro.com/market-flow) : CVD par taille d'ordre
-(Binance, Bybit, OKX), whales Hyperliquid contre retail, sur BTC et ETH.
+Page publique [/market-flow](https://www.shadowmarketpro.com/market-flow) : CVD par taille d'ordre sur
+les perpétuels (Binance, Bybit, OKX) et, à part, sur le spot (Binance, Coinbase, OKX), whales
+Hyperliquid contre retail, sur BTC et ETH.
 
 ```
 serveur du bot (VPS)                     site (Vercel)                         Supabase
@@ -19,6 +20,25 @@ flow/collector.py ── chaque minute ──▶  POST /api/market-flow/ingest  
   qui ne sert qu'à ça. Le site vérifie chaque envoi (forme, bornes, taille) avant d'écrire avec sa clé
   service. Les tables ne sont pas lisibles avec la clé publique.
 - **Rétention** : 35 jours en base (plages 4H, 24H, 7D, 30D) ; 7 jours dans la base locale du collecteur.
+- **Mises à jour du schéma** : `flow/supabase.sql` se rejoue tel quel (les données restent). Après une
+  mise à jour qui le modifie, l'exécuter dans Supabase **avant** `smp-bot update` ; `smp-bot flow check`
+  signale une base pas à jour.
+
+## Sources du CVD
+
+| marché | plateforme | flux | côté de l'agresseur | quantité |
+|---|---|---|---|---|
+| perpétuel | Binance (BTCUSDT, ETHUSDT) | `aggTrade` | `m` = true → vente | `q`, en actif |
+| perpétuel | Bybit (BTCUSDT, ETHUSDT) | `publicTrade` | `S` | `v`, en actif |
+| perpétuel | OKX (BTC-USDT-SWAP, ETH-USDT-SWAP) | `trades` | `side` | `sz` × taille du contrat |
+| spot | Binance (BTCUSDT, ETHUSDT) | `aggTrade` | `m` = true → vente | `q`, en actif |
+| spot | Coinbase (BTC-USD, ETH-USD) | `matches` (public) | **inverse** de `side` (côté du maker) | `size`, en actif |
+| spot | OKX (BTC-USDT, ETH-USDT) | `trades` | `side` | `sz`, en actif |
+
+Les fills d'un même ordre agresseur sont recollés (même instant et même côté ; sur Coinbase, même
+`taker_order_id`), puis classés par montant : < 10 k$, 10–100 k$, 100 k–1 M$, ≥ 1 M$. Perpétuels et
+spot sont additionnés par minute dans des colonnes séparées, jamais ensemble. Hyperliquid n'entre pas
+dans le CVD (ses échanges servent au suivi des positions).
 
 ## Mise en service (une fois)
 

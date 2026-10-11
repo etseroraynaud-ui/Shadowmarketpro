@@ -5,8 +5,9 @@ MARKET FLOW: headless collector (server)
 =======================================
 
 Tourne en continu sur le serveur et publie chaque minute, pour BTC et ETH, ce que la page
-/market-flow de shadowmarketpro.com affiche : CVD par taille d'ordre (Binance, Bybit, OKX),
-positionnement des whales Hyperliquid, liquidations.
+/market-flow de shadowmarketpro.com affiche : CVD par taille d'ordre sur les perpétuels (Binance,
+Bybit, OKX) et, séparément, sur le spot (Binance, Coinbase, OKX), positionnement des whales
+Hyperliquid, liquidations.
 
 Repris du dashboard local whale_dashboard.py v2 (même logique, mêmes contrôles), sans l'interface
 Dash, avec trois différences :
@@ -24,7 +25,8 @@ Concepts (voir whale_dashboard.py pour le détail) :
   - FLUX : variation de position observée APRÈS le premier relevé de la session (une adresse
     nouvellement découverte entre dans le stock, jamais dans le flux).
   - AGRESSION CEX : ordres taker reconstitués, classés par taille (<10 k$, 10–100 k$, 100 k–1 M$,
-    ≥ 1 M$). Un gros ordre n'est pas forcément une whale directionnelle.
+    ≥ 1 M$). Un gros ordre n'est pas forcément une whale directionnelle. Perpétuels et spot sont
+    comptés à part (colonnes delta/vol et sdelta/svol) : jamais additionnés.
   - RETAIL : ordres agresseurs < 10 k$ (proxy).
   - COUVERTURE : Σ positions observées / (2 × OI Hyperliquid), qualité de l'échantillon.
 
@@ -44,6 +46,7 @@ import statistics
 import threading
 import time
 from collections import defaultdict, deque
+from datetime import datetime
 
 import aiohttp
 import websockets
@@ -99,6 +102,8 @@ class Cfg:
     hl_leaderboard = "https://stats-data.hyperliquid.xyz/Mainnet/leaderboard"
     bybit_ws = "wss://stream.bybit.com/v5/public/linear"
     okx_ws = "wss://ws.okx.com:8443/ws/v5/public"
+    # Coinbase Exchange, canal public « matches » (pas d'authentification pour ce canal).
+    coinbase_ws = "wss://ws-feed.exchange.coinbase.com"
 
 
 class CoinCfg:
@@ -112,10 +117,15 @@ class CoinCfg:
         self.binance_ws = f"wss://fstream.binance.com/market/stream?streams={s}@aggTrade/{s}@forceOrder"
         self.okx_instruments = f"https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId={self.okx_inst}"
         self.okx_ctval = {"BTC": 0.01, "ETH": 0.1}.get(coin, 1.0)
+        # Spot : quantités en unités de l'actif (pas de contrats).
+        self.binance_spot_ws = f"wss://stream.binance.com:9443/stream?streams={s}@aggTrade"
+        self.okx_spot_inst = f"{coin}-USDT"
+        self.coinbase_product = f"{coin}-USD"
 
 
-CEX_VENUES = ["Binance", "Bybit", "OKX"]
-VENUES = CEX_VENUES + ["Hyperliquid"]
+CEX_VENUES = ["Binance", "Bybit", "OKX"]                 # perpétuels : CVD « perps »
+SPOT_VENUES = ["Binance spot", "Coinbase", "OKX spot"]   # spot : CVD « spot », compté à part
+VENUES = CEX_VENUES + SPOT_VENUES + ["Hyperliquid"]
 HOT, WARM, CANDIDATE, COLD = "HOT", "WARM", "CANDIDATE", "COLD"
 
 
@@ -662,6 +672,7 @@ class CoinState:
         if b is None:
             n = len(Cfg.buckets)
             b = {"px": self.last_price, "delta": [0.0] * n, "vol": [0.0] * n,
+                 "sdelta": [0.0] * n, "svol": [0.0] * n, "spot_n": 0,
                  "liq_long": defaultdict(float), "liq_short": defaultdict(float)}
             self.bars[minute] = b
             cutoff = minute - Cfg.history_min * 60
@@ -682,15 +693,19 @@ class CoinState:
             self.last_price, self.price_src = px, venue
 
     def add_order(self, venue, ts_ms, side, usd, px):
-        """Ordre agresseur reconstitué (side +1 achat taker, −1 vente). Seuls les CEX font le CVD."""
+        """Ordre agresseur reconstitué (side +1 achat taker, −1 vente). Perpétuels CEX → delta/vol,
+        spot → sdelta/svol ; Hyperliquid n'entre pas dans le CVD."""
         with self.lock:
             self._touch(venue, px)
-            if venue in CEX_VENUES:
+            if venue in CEX_VENUES or venue in SPOT_VENUES:
+                spot = venue in SPOT_VENUES
                 i = bucket_index(usd)
                 b = self._bar(minute_of(ts_ms))
                 b["px"] = self.last_price
-                b["delta"][i] += side * usd
-                b["vol"][i] += usd
+                b["sdelta" if spot else "delta"][i] += side * usd
+                b["svol" if spot else "vol"][i] += usd
+                if spot:
+                    b["spot_n"] += 1
 
     def add_liq(self, venue, ts_ms, pos_side, usd, px):
         """pos_side = côté de la POSITION liquidée ('long' ou 'short')."""
@@ -702,9 +717,11 @@ class CoinState:
             (b["liq_long"] if pos_side == "long" else b["liq_short"])[venue] += usd
 
     def bars_since(self, since_minute, until_minute):
-        """Minutes [since, until[ : (minute, px, delta, vol, liq_long, liq_short)."""
+        """Minutes [since, until[ : (minute, px, delta, vol, liq_long, liq_short, sdelta | None, svol | None).
+        Le spot est None pour une minute sans aucun ordre spot reçu (flux spot coupé)."""
         with self.lock:
-            return [(k, b["px"], list(b["delta"]), list(b["vol"]), sum(b["liq_long"].values()), sum(b["liq_short"].values()))
+            return [(k, b["px"], list(b["delta"]), list(b["vol"]), sum(b["liq_long"].values()), sum(b["liq_short"].values()),
+                     list(b["sdelta"]) if b["spot_n"] else None, list(b["svol"]) if b["spot_n"] else None)
                     for k, b in sorted(self.bars.items()) if since_minute <= k < until_minute]
 
 
@@ -759,6 +776,11 @@ class Store:
                     open_interest REAL, coverage_whale_long REAL, coverage_whale_short REAL);
                 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value REAL);
             """)
+            # Bases d'avant le spot (dashboard local, première version du collecteur) : colonnes ajoutées.
+            cols = {r[1] for r in self.con.execute("PRAGMA table_info(bars)")}
+            for c in ("sdelta", "svol"):
+                if c not in cols:
+                    self.con.execute(f"ALTER TABLE bars ADD COLUMN {c} TEXT")
             self.con.commit()
 
     def get_meta(self, key):
@@ -776,7 +798,8 @@ class Store:
         n = len(Cfg.buckets)
         hl = cs.hl
         with self.lock:
-            rows = self.con.execute("SELECT * FROM bars WHERE minute >= ? ORDER BY minute", (cutoff,)).fetchall()
+            rows = self.con.execute("SELECT minute, px, delta, vol, liq_long, liq_short, sdelta, svol FROM bars "
+                                    "WHERE minute >= ? ORDER BY minute", (cutoff,)).fetchall()
             accts = self.con.execute(f"SELECT {','.join(ACCT_COLS)} FROM hl_accounts").fetchall()
             hist = self.con.execute(f"SELECT {','.join(HIST_COLS)} FROM hl_hist WHERE ts >= ? ORDER BY ts", (cutoff,)).fetchall()
             ghist = self.con.execute(f"SELECT {','.join(GIANT_COLS)} FROM hl_giant_hist WHERE ts >= ? ORDER BY ts", (cutoff,)).fetchall()
@@ -784,11 +807,14 @@ class Store:
             if self.con.execute("SELECT name FROM sqlite_master WHERE name='hl_addr'").fetchone():
                 legacy = [r[0] for r in self.con.execute("SELECT addr FROM hl_addr").fetchall()]
         with cs.lock:
-            for minute, px, delta, vol, ll, ls in rows:
+            for minute, px, delta, vol, ll, ls, sd, sv in rows:
                 d, v = json.loads(delta), json.loads(vol)
                 if len(d) != n:
                     continue
+                sd, sv = (json.loads(sd), json.loads(sv)) if sd and sv else (None, None)
+                spot = sd is not None and len(sd) == n and len(sv) == n
                 cs.bars[minute] = {"px": px, "delta": d, "vol": v,
+                                   "sdelta": sd if spot else [0.0] * n, "svol": sv if spot else [0.0] * n, "spot_n": 1 if spot else 0,
                                    "liq_long": defaultdict(float, {"hist": ll or 0.0}),
                                    "liq_short": defaultdict(float, {"hist": ls or 0.0})}
                 if px:
@@ -833,7 +859,8 @@ class Store:
         hl = cs.hl
         with cs.lock:
             bars = [(k, b["px"], json.dumps(b["delta"]), json.dumps(b["vol"]),
-                     sum(b["liq_long"].values()), sum(b["liq_short"].values()))
+                     sum(b["liq_long"].values()), sum(b["liq_short"].values()),
+                     json.dumps(b["sdelta"]) if b["spot_n"] else None, json.dumps(b["svol"]) if b["spot_n"] else None)
                     for k, b in cs.bars.items() if k >= since_minute]
         with hl.lock:
             dirty = [a for a in hl.accounts.values() if a.dirty]
@@ -847,7 +874,8 @@ class Store:
             ghist = [h for h in hl.giant_history if h[0] >= since_minute]
         ph = ",".join("?" * len(ACCT_COLS))
         with self.lock:
-            self.con.executemany("INSERT OR REPLACE INTO bars VALUES (?,?,?,?,?,?)", bars)
+            self.con.executemany("INSERT OR REPLACE INTO bars (minute, px, delta, vol, liq_long, liq_short, sdelta, svol) "
+                                 "VALUES (?,?,?,?,?,?,?,?)", bars)
             self.con.executemany(f"INSERT OR REPLACE INTO hl_accounts ({','.join(ACCT_COLS)}) VALUES ({ph})", acct_rows)
             self.con.executemany(f"INSERT OR REPLACE INTO hl_hist ({','.join(HIST_COLS)}) VALUES ({','.join('?' * len(HIST_COLS))})", hist)
             self.con.executemany(f"INSERT OR REPLACE INTO hl_giant_hist ({','.join(GIANT_COLS)}) VALUES ({','.join('?' * len(GIANT_COLS))})", ghist)
@@ -881,8 +909,10 @@ class OrderMerger:
         self.venue, self.cs = venue, cs
         self.key, self.usd, self.px, self.ts, self.side = None, 0.0, None, None, 0
 
-    def add(self, ts_ms, side, qty, px, taker=None):
-        key = (ts_ms, side, taker)
+    def add(self, ts_ms, side, qty, px, taker=None, key=None):
+        """Fill consécutif du même ordre : même instant, même côté (et même taker si connu). key
+        remplace cette règle quand la plateforme donne l'identifiant de l'ordre agresseur (Coinbase)."""
+        key = key if key is not None else (ts_ms, side, taker)
         if key != self.key:
             self.flush()
             self.key, self.ts, self.side, self.usd = key, ts_ms, side, 0.0
@@ -976,17 +1006,21 @@ async def bybit_feed(cs):
 
 
 async def okx_feed(cs):
+    """Perpétuel et spot OKX sur la même connexion, comptés à part."""
     merger = OrderMerger("OKX", cs)
+    spot_merger = OrderMerger("OKX spot", cs)
 
     async def on_open(ws):
         await ws.send(json.dumps({"op": "subscribe", "args": [
             {"channel": "trades", "instId": cs.cfg.okx_inst},
+            {"channel": "trades", "instId": cs.cfg.okx_spot_inst},
             {"channel": "liquidation-orders", "instType": "SWAP"},
         ]}))
 
     def on_message(raw):
         if raw is None:
             merger.flush()
+            spot_merger.flush()
             return
         if raw == "pong":
             return
@@ -994,7 +1028,8 @@ async def okx_feed(cs):
         ch = msg.get("arg", {}).get("channel")
         if ch == "trades":
             for t in msg.get("data", []):
-                merger.add(int(t["ts"]), 1 if t["side"] == "buy" else -1, float(t["sz"]) * cs.cfg.okx_ctval, float(t["px"]))
+                spot, ts, side, qty, px = parse_okx_trade(t, cs.cfg.okx_spot_inst, cs.cfg.okx_ctval)
+                (spot_merger if spot else merger).add(ts, side, qty, px)
         elif ch == "liquidation-orders":
             for item in msg.get("data", []):
                 if item.get("instId") != cs.cfg.okx_inst:
@@ -1008,6 +1043,65 @@ async def okx_feed(cs):
                     cs.add_liq("OKX", int(dt["ts"]), ps, px * qty, px)
 
     await run_ws("OKX", Cfg.okx_ws, cs, on_open, on_message, ping_msg="ping", ping_every=25)
+
+
+def parse_coinbase_match(m):
+    """Message du canal « matches » de Coinbase Exchange → (ts_ms, côté agresseur, qté, prix, clé d'ordre)
+    ou None. Le champ side est le côté de l'ordre en attente (maker) : l'agresseur est de l'autre côté.
+    last_match (dernier échange d'avant l'abonnement) est ignoré : il serait compté deux fois au
+    redémarrage."""
+    if m.get("type") != "match":
+        return None
+    side = 1 if m["side"] == "sell" else -1
+    ts = int(datetime.fromisoformat(m["time"].replace("Z", "+00:00")).timestamp() * 1000)
+    return ts, side, float(m["size"]), float(m["price"]), ("coinbase", m.get("taker_order_id") or m.get("trade_id"), side)
+
+
+def parse_okx_trade(t, spot_inst, ctval):
+    """Échange du canal « trades » d'OKX → (spot ?, ts_ms, côté agresseur, qté en actif, prix).
+    side est le côté de l'agresseur ; sz est en actif sur le spot, en contrats sur le perpétuel."""
+    spot = t.get("instId") == spot_inst
+    qty = float(t["sz"]) * (1.0 if spot else ctval)
+    return spot, int(t["ts"]), 1 if t["side"] == "buy" else -1, qty, float(t["px"])
+
+
+async def binance_spot_feed(cs):
+    merger = OrderMerger("Binance spot", cs)
+
+    async def on_open(ws):
+        pass
+
+    def on_message(raw):
+        if raw is None:
+            merger.flush()
+            return
+        d = json.loads(raw).get("data", {})
+        if d.get("e") == "aggTrade":
+            merger.add(int(d["T"]), -1 if d["m"] else 1, float(d["q"]), float(d["p"]))   # m=true → taker VEND
+
+    await run_ws("Binance spot", cs.cfg.binance_spot_ws, cs, on_open, on_message)
+
+
+async def coinbase_feed(cs):
+    merger = OrderMerger("Coinbase", cs)
+
+    async def on_open(ws):
+        await ws.send(json.dumps({"type": "subscribe", "product_ids": [cs.cfg.coinbase_product], "channels": ["matches"]}))
+
+    def on_message(raw):
+        if raw is None:
+            merger.flush()
+            return
+        m = json.loads(raw)
+        if m.get("type") == "error":
+            cs.set_status("Coinbase", f"erreur : {m.get('message')} {m.get('reason') or ''}".strip())
+            return
+        p = parse_coinbase_match(m)
+        if p:
+            ts, side, qty, px, key = p
+            merger.add(ts, side, qty, px, key=key)
+
+    await run_ws("Coinbase", Cfg.coinbase_ws, cs, on_open, on_message)
 
 
 async def hyperliquid_feed(cs):
@@ -1261,7 +1355,8 @@ def build_payload(hub, cs, since_bar, since_ts, now):
         "minute": k, "px": _num(px, 2),
         "delta": [_num(x, 2) for x in d], "vol": [_num(x, 2) for x in v],
         "liq_long": _num(ll, 2), "liq_short": _num(ls, 2),
-    } for k, px, d, v, ll, ls in cs.bars_since(since_bar, until)][:MAX_ROWS]
+        "spot_delta": [_num(x, 2) for x in sd] if sd else None, "spot_vol": [_num(x, 2) for x in sv] if sv else None,
+    } for k, px, d, v, ll, ls, sd, sv in cs.bars_since(since_bar, until)][:MAX_ROWS]
     with cs.hl.lock:
         hist = [h for h in cs.hl.history if h[0] > since_ts]
         ghist = {round(g[0], 3): g for g in cs.hl.giant_history if g[0] > since_ts}
@@ -1342,10 +1437,13 @@ async def report_loop(hub):
         for coin, cs in hub.coins.items():
             st = cs.hl.status()
             cov = st["coverage"]["gross_all"]
-            feeds = " ".join(f"{v}:{cs.feed[v]['n']}" for v in VENUES)
+            feeds = " ".join(f"{v.replace(' ', '-')}:{cs.feed[v]['n']}" for v in VENUES)
+            # Flux muet : son dernier état (reconnexion, erreur d'abonnement) aide au diagnostic.
+            silent = [f"{v} ({cs.status.get(v)})" for v in VENUES if cs.feed[v]["n"] == 0 and cs.status.get(v) not in (None, "connecté", "en attente")]
             log(f"[{coin}] prix {cs.last_price} · couverture {cov:.0%} · whales {st['whales']['n_long']}L/{st['whales']['n_short']}S"
                 if cov is not None else f"[{coin}] prix {cs.last_price} · couverture n/d", f"· inspectés {st['inspected']}/{st['known']}",
-                f"· trades {feeds} · REST {hub.rest_status} · publication {hub.publish_status}")
+                f"· trades {feeds} · REST {hub.rest_status} · publication {hub.publish_status}"
+                + (f" · muets : {', '.join(silent)}" if silent else ""))
 
 
 # =============================================================================
@@ -1394,7 +1492,8 @@ async def main_async(dry_run):
         tasks = [asyncio.create_task(guarded("leaderboard", hl_seed, hub, session))]
         for coin, cs in hub.coins.items():
             await okx_fetch_ctval(session, cs)
-            for name, fn in (("Binance", binance_feed), ("Bybit", bybit_feed), ("OKX", okx_feed), ("Hyperliquid", hyperliquid_feed)):
+            for name, fn in (("Binance", binance_feed), ("Bybit", bybit_feed), ("OKX", okx_feed), ("Hyperliquid", hyperliquid_feed),
+                             ("Binance spot", binance_spot_feed), ("Coinbase", coinbase_feed)):
                 tasks.append(asyncio.create_task(guarded(f"{coin} {name}", fn, cs)))
         for name, fn, args in (("HL scheduler", hl_scheduler, (hub, client)), ("HL OI", hl_oi_loop, (hub, client)),
                                ("HL liquidations", hl_liq_loop, (hub, client)), ("HL échantillons", hl_sampler_loop, (hub,)),

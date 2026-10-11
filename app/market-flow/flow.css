@@ -24,7 +24,7 @@
 .mf-neutral span { color: var(--s-muted) }
 .mf-muted { color: var(--s-muted) }
 .mf-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 28px }
-.mf-charts > .s-panel:first-child { grid-column: 1 / -1 }
+.mf-charts > .mf-wide { grid-column: 1 / -1 }
 @media (max-width: 900px) { .mf-charts { grid-template-columns: 1fr } }
 .s-chart-empty { color: var(--s-muted); font-size: 14px; padding: 40px 0; text-align: center }
 .s-key-bar { width: 10px; height: 10px; border-radius: 2px }

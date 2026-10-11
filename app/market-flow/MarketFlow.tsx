@@ -8,11 +8,12 @@ import TimeChart, { fmtValue } from '../_site/TimeChart'
 import { COINS, RANGES, usd, type Coin, type FlowView, type RangeKey, type Stance, type WindowSummary } from '../../lib/flow/aggregate'
 
 // Couleurs validées (contraste et daltonisme) sur la surface des graphiques du site.
-const C = { big: '#3987e5', retail: '#d95926', long: '#199e70', short: '#e66767', net: '#eef2f6', giant: '#9085e9', price: '#c8d1dc' }
+const C = { big: '#3987e5', retail: '#d95926', long: '#199e70', short: '#e66767', net: '#eef2f6', giant: '#9085e9', price: '#c8d1dc', perp: '#9085e9', spot: '#c98500' }
 const REFRESH_MS = 60_000
 
 const pctTxt = (x: number | null, d = 1) => (x === null || !Number.isFinite(x) ? '—' : `${x < 0 ? '−' : x > 0 ? '+' : ''}${Math.abs(x * 100).toFixed(d)}%`)
 const ICON: Record<Stance['tone'], string> = { pos: '▲', neg: '▼', neutral: '●', muted: '○' }
+const pts = (x: number | null) => (x === null ? '—' : `${x >= 0 ? '+' : '−'}${Math.abs(x).toFixed(1)} pts`)
 
 function Tone({ s }: { s: Stance }) {
   return <span className={`mf-tone mf-${s.tone}`}><span aria-hidden="true">{ICON[s.tone]}</span>{s.label}</span>
@@ -32,10 +33,10 @@ function Seg<T extends string>({ label, value, options, onChange }: { label: str
   )
 }
 
-function Panel({ title, sub, children }: { title: string; sub?: string; children: React.ReactNode }) {
+function Panel({ title, sub, children, head, wide }: { title: string; sub?: string; children: React.ReactNode; head?: React.ReactNode; wide?: boolean }) {
   return (
-    <div className="s-panel">
-      <div className="s-panel-head"><div><h3 className="s-panel-t">{title}</h3>{sub && <p className="s-panel-s">{sub}</p>}</div></div>
+    <div className={`s-panel${wide ? ' mf-wide' : ''}`}>
+      <div className="s-panel-head"><div><h3 className="s-panel-t">{title}</h3>{sub && <p className="s-panel-s">{sub}</p>}</div>{head}</div>
       {children}
     </div>
   )
@@ -45,9 +46,12 @@ function WindowTable({ ws }: { ws: WindowSummary[] }) {
   const cell = (w: WindowSummary, f: (w: WindowSummary) => React.ReactNode) => <td key={w.key} data-label={w.key.toUpperCase()}>{f(w)}</td>
   const rows: [string, (w: WindowSummary) => React.ReactNode][] = [
     ['Price', w => pctTxt(w.priceChg, 2)],
-    ['Large orders ≥ $100k', w => <><b className="mf-num">{usd(w.cvd.big, true)}</b><span className="mf-sub">{pctTxt(w.imb.big)} of {usd(w.vol.big)}</span><Tone s={w.big} /></>],
-    ['Retail < $10k', w => <><b className="mf-num">{usd(w.cvd.retail, true)}</b><span className="mf-sub">{pctTxt(w.imb.retail)} of {usd(w.vol.retail)}</span><Tone s={w.retail} /></>],
-    ['Divergence', w => <><b className="mf-num">{w.divergence === null ? '—' : `${w.divergence >= 0 ? '+' : '−'}${Math.abs(w.divergence).toFixed(1)} pts`}</b><Tone s={w.verdict} /></>],
+    ['Perps · large orders ≥ $100k', w => <><b className="mf-num">{usd(w.cvd.big, true)}</b><span className="mf-sub">{pctTxt(w.imb.big)} of {usd(w.vol.big)}</span><Tone s={w.big} /></>],
+    ['Perps · retail < $10k', w => <><b className="mf-num">{usd(w.cvd.retail, true)}</b><span className="mf-sub">{pctTxt(w.imb.retail)} of {usd(w.vol.retail)}</span><Tone s={w.retail} /></>],
+    ['Perps · divergence', w => <><b className="mf-num">{pts(w.divergence)}</b><Tone s={w.verdict} /></>],
+    ['Spot · large orders ≥ $100k', w => (w.spot.minutes ? <><b className="mf-num">{usd(w.spot.cvd.big, true)}</b><span className="mf-sub">{pctTxt(w.spot.imb.big)} of {usd(w.spot.vol.big)}</span><Tone s={w.spot.big} /></> : <Tone s={w.spot.big} />)],
+    ['Spot · retail < $10k', w => (w.spot.minutes ? <><b className="mf-num">{usd(w.spot.cvd.retail, true)}</b><span className="mf-sub">{pctTxt(w.spot.imb.retail)} of {usd(w.spot.vol.retail)}</span><Tone s={w.spot.retail} /></> : <Tone s={w.spot.retail} />)],
+    ['Spot · divergence', w => (w.spot.minutes ? <><b className="mf-num">{pts(w.spot.divergence)}</b><Tone s={w.spot.verdict} /></> : <Tone s={w.spot.verdict} />)],
     ['Hyperliquid whales', w => <><b className="mf-num">{w.whales.ok ? usd(w.whales.net, true) : '—'}</b><span className="mf-sub">{w.whales.ok ? `longs ${usd(w.whales.long, true)} · shorts ${usd(w.whales.short, true)}` : ''}</span><Tone s={w.whales.stance} /></>],
     ['Liquidations', w => <><span className="mf-sub">longs {usd(w.liq.long)} · shorts {usd(w.liq.short)}</span><Tone s={w.liq.stance} /></>],
   ]
@@ -67,6 +71,7 @@ export default function MarketFlow({ initial }: { initial: FlowView }) {
   const [view, setView] = useState<FlowView>(initial)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
+  const [market, setMarket] = useState<'perps' | 'spot'>('perps')
   const [clock, setClock] = useState(() => Date.now())
 
   const load = useCallback(async (c: Coin, r: RangeKey) => {
@@ -119,7 +124,7 @@ export default function MarketFlow({ initial }: { initial: FlowView }) {
         <>
           <div className="s-kpis mf-kpis">
             <div className="s-kpi"><div className="s-kpi-l">{v.coin} price</div><div className="s-kpi-v">{fmtValue(v.now.price, 'price')}</div><div className="s-kpi-s">{pctTxt(h1?.priceChg ?? null, 2)} over 1 hour</div></div>
-            <div className="s-kpi"><div className="s-kpi-l">Large vs retail · 1H</div><div className="s-kpi-v">{h1?.divergence == null ? '—' : `${h1.divergence >= 0 ? '+' : '−'}${Math.abs(h1.divergence).toFixed(1)}`}<small> pts</small></div><div className="s-kpi-s">{h1 ? <Tone s={h1.verdict} /> : '—'}</div></div>
+            <div className="s-kpi"><div className="s-kpi-l">Large vs retail · perps 1H</div><div className="s-kpi-v">{h1?.divergence == null ? '—' : `${h1.divergence >= 0 ? '+' : '−'}${Math.abs(h1.divergence).toFixed(1)}`}<small> pts</small></div><div className="s-kpi-s">{h1 ? <Tone s={h1.verdict} /> : '—'}</div></div>
             <div className="s-kpi"><div className="s-kpi-l">Hyperliquid whales</div><div className="s-kpi-v">{net === null ? '—' : usd(net, true)}</div><div className="s-kpi-s">net {net === null ? '' : net >= 0 ? 'long' : 'short'} · {v.now.nLong ?? 0} long / {v.now.nShort ?? 0} short accounts</div></div>
             <div className="s-kpi"><div className="s-kpi-l">Giant positions ≥ $5M</div><div className="s-kpi-v">{v.now.giantBias === null ? '—' : `${v.now.giantBias >= 0 ? '+' : '−'}${Math.abs(v.now.giantBias).toFixed(0)}%`}</div><div className="s-kpi-s">net bias · {v.now.nGiantLong ?? 0} long / {v.now.nGiantShort ?? 0} short</div></div>
           </div>
@@ -131,11 +136,23 @@ export default function MarketFlow({ initial }: { initial: FlowView }) {
           {v.windows.length > 0 && <WindowTable ws={v.windows} />}
 
           <div className="mf-charts">
-            <Panel title="Cumulative volume delta by order size" sub={`Since the start of the ${RANGES[v.range].label} window · Binance, Bybit, OKX perpetuals`}>
-              <TimeChart title="Cumulative volume delta" t={s.t} step={step} fmt="usd" signed zero height={300} series={[
+            <Panel title="Cumulative volume delta by order size" wide
+              sub={`Since the start of the ${RANGES[v.range].label} window · ${market === 'perps' ? 'Binance, Bybit, OKX perpetuals' : 'Binance, Coinbase, OKX spot'}`}
+              head={<Seg<'perps' | 'spot'> label="Market" value={market} options={[{ v: 'perps', t: 'Perpetuals' }, { v: 'spot', t: 'Spot' }]} onChange={setMarket} />}>
+              <TimeChart key={market} title={`Cumulative volume delta, ${market}`} t={s.t} step={step} fmt="usd" signed zero height={300} series={market === 'perps' ? [
                 { name: 'Large orders ≥ $100k', color: C.big, values: s.cvdBig },
                 { name: 'of which ≥ $1M', color: C.big, values: s.cvdMega, dash: true },
                 { name: 'Retail < $10k', color: C.retail, values: s.cvdRetail },
+              ] : [
+                { name: 'Large orders ≥ $100k', color: C.big, values: s.spotBig },
+                { name: 'of which ≥ $1M', color: C.big, values: s.spotMega, dash: true },
+                { name: 'Retail < $10k', color: C.retail, values: s.spotRetail },
+              ]} />
+            </Panel>
+            <Panel title="Spot vs perpetuals" sub="Cumulative volume delta, all order sizes · spot buying is cash demand, perpetual buying is mostly leveraged positioning">
+              <TimeChart title="Spot vs perpetuals" t={s.t} step={step} fmt="usd" signed zero height={260} series={[
+                { name: 'Perpetuals', color: C.perp, values: s.perpTotal },
+                { name: 'Spot', color: C.spot, values: s.spotTotal },
               ]} />
             </Panel>
             <Panel title={`${v.coin} price`} sub="Last trade price per interval (Binance perpetual when available)">
@@ -151,7 +168,7 @@ export default function MarketFlow({ initial }: { initial: FlowView }) {
             <Panel title="Giant positions: net bias" sub="(longs − shorts) / (longs + shorts) across positions of $5M or more">
               <TimeChart title="Giant net bias" t={s.t} step={step} fmt="pct" signed zero height={220} endLabels={false} series={[{ name: 'Net bias', color: C.giant, values: s.giantBias }]} />
             </Panel>
-            <Panel title="Liquidations" sub="Binance, Bybit, OKX and tracked Hyperliquid accounts · shorts above zero, longs below">
+            <Panel wide title="Liquidations" sub="Binance, Bybit, OKX and tracked Hyperliquid accounts · shorts above zero, longs below">
               <TimeChart title="Liquidations" t={s.t} step={step} fmt="usd" zero height={240} endLabels={false} series={[
                 { name: 'Shorts liquidated', color: C.long, values: s.liqShort, bar: true },
                 { name: 'Longs liquidated', color: C.short, values: s.liqLong.map(x => (x === null ? null : -x)), bar: true, label: x => fmtValue(Math.abs(x), 'usd') },

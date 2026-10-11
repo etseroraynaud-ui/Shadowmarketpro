@@ -1,5 +1,6 @@
--- Market Flow : tables et fonctions de lecture (à exécuter une fois : Supabase → SQL Editor → Run).
--- Rejouable sans risque (create if not exists / create or replace).
+-- Market Flow : tables et fonctions de lecture (Supabase → SQL Editor → Run).
+-- Rejouable sans risque, et à rejouer après chaque mise à jour de ce fichier (if not exists,
+-- fonctions recréées) : les données déjà enregistrées ne sont jamais touchées.
 --
 -- Le collecteur du serveur n'écrit jamais ici directement : il envoie ses données à
 -- /api/market-flow/ingest (jeton FLOW_INGEST_TOKEN), qui écrit avec la clé service du site. La page
@@ -9,6 +10,8 @@
 -- Une ligne par actif et par minute UTC close : ordres agresseurs (taker) des perpétuels Binance,
 -- Bybit et OKX, en dollars, par taille d'ordre [retail < 10 k$, 10–100 k$, 100 k–1 M$, ≥ 1 M$] ;
 -- delta = achats − ventes, vol = achats + ventes ; liquidations par côté de la position liquidée.
+-- spot_delta / spot_vol : la même chose sur le spot (Binance, Coinbase, OKX), à part ; null pour une
+-- minute sans flux spot (avant octobre 2026, ou flux coupé).
 create table if not exists public.flow_bars (
   coin text not null check (coin in ('BTC', 'ETH')),
   minute bigint not null,
@@ -19,6 +22,11 @@ create table if not exists public.flow_bars (
   liq_short double precision not null default 0,
   primary key (coin, minute)
 );
+
+alter table public.flow_bars add column if not exists spot_delta double precision[]
+  check (spot_delta is null or array_length(spot_delta, 1) = 4);
+alter table public.flow_bars add column if not exists spot_vol double precision[]
+  check (spot_vol is null or array_length(spot_vol, 1) = 4);
 
 -- Un échantillon par actif et par minute : stock des positions whales Hyperliquid observées
 -- (≥ 500 k$ ; giants ≥ 5 M$), flux depuis l'échantillon précédent (chg_*), couverture de l'OI.
@@ -57,13 +65,17 @@ alter table public.flow_bars enable row level security;
 alter table public.flow_whales enable row level security;
 alter table public.flow_status enable row level security;
 
--- Barres regroupées par tranches de p_bucket secondes (prix : dernier de la tranche).
-create or replace function public.flow_bars_agg(p_coin text, p_since bigint, p_bucket integer)
+-- Barres regroupées par tranches de p_bucket secondes (prix : dernier de la tranche). s*/sv* : spot,
+-- sn = minutes avec du spot dans la tranche. Recréée (et non remplacée) car ses colonnes ont changé.
+drop function if exists public.flow_bars_agg(text, bigint, integer);
+create function public.flow_bars_agg(p_coin text, p_since bigint, p_bucket integer)
 returns table (
   t bigint, px double precision,
   d0 double precision, d1 double precision, d2 double precision, d3 double precision,
   v0 double precision, v1 double precision, v2 double precision, v3 double precision,
-  liq_long double precision, liq_short double precision, n integer
+  liq_long double precision, liq_short double precision, n integer,
+  s0 double precision, s1 double precision, s2 double precision, s3 double precision,
+  sv0 double precision, sv1 double precision, sv2 double precision, sv3 double precision, sn integer
 )
 language sql stable
 set search_path = public
@@ -72,7 +84,12 @@ as $$
          (array_agg(b.px order by b.minute desc) filter (where b.px is not null))[1],
          sum(b.delta[1]), sum(b.delta[2]), sum(b.delta[3]), sum(b.delta[4]),
          sum(b.vol[1]), sum(b.vol[2]), sum(b.vol[3]), sum(b.vol[4]),
-         sum(b.liq_long), sum(b.liq_short), count(*)::integer
+         sum(b.liq_long), sum(b.liq_short), count(*)::integer,
+         coalesce(sum(b.spot_delta[1]), 0), coalesce(sum(b.spot_delta[2]), 0),
+         coalesce(sum(b.spot_delta[3]), 0), coalesce(sum(b.spot_delta[4]), 0),
+         coalesce(sum(b.spot_vol[1]), 0), coalesce(sum(b.spot_vol[2]), 0),
+         coalesce(sum(b.spot_vol[3]), 0), coalesce(sum(b.spot_vol[4]), 0),
+         count(b.spot_delta)::integer
   from public.flow_bars b
   where b.coin = p_coin and b.minute >= p_since
   group by 1
