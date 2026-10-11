@@ -1,6 +1,6 @@
 'use client'
 
-// En-tête commun : logo, quatre entrées (le Shock Engine d'abord), menu sur mobile.
+// En-tête commun : logo, cinq entrées (le Shock Engine d'abord), menu sur mobile.
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -12,6 +12,7 @@ import { LogoSVG } from '../components/Logo'
 const LINKS: { href: string; label: string; match?: (p: string) => boolean }[] = [
   { href: '/shock-engine', label: 'Shock Engine', match: p => p.startsWith('/shock-engine') || p.startsWith('/research') },
   { href: '/backtest', label: 'Backtest' },
+  { href: '/market-flow', label: 'Market Flow' },
   { href: '/trading-tools', label: 'Trading Tools' },
   { href: '/institutional', label: 'Institutional' },
 ]

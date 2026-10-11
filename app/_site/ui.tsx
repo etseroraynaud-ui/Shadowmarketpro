@@ -165,6 +165,7 @@ export function SiteFooter() {
         <div>
           <h3>Trading Tools</h3>
           <ul>
+            <li><Link href="/market-flow">Market Flow</Link></li>
             <li><Link href="/trading-tools">TradingView indicators</Link></li>
             <li><Link href="/trading-tools#pricing">Pricing</Link></li>
             <li><Link href="/payment">Pay with crypto</Link></li>
