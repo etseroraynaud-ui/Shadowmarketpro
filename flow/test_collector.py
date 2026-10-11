@@ -120,6 +120,70 @@ class MultiCoin(unittest.TestCase):
             self.assertEqual(store.get_meta("published_bar"), 123.0)
 
 
+class Spot(unittest.TestCase):
+    def test_coinbase_side_is_the_maker_side(self):
+        base = {"type": "match", "taker_order_id": "t1", "size": "0.5", "price": "100000", "time": "2026-10-11T17:23:31.667123Z"}
+        ts, side, qty, px, key = C.parse_coinbase_match({**base, "side": "sell"})   # maker vendeur → agresseur acheteur
+        self.assertEqual((side, qty, px), (1, 0.5, 100000.0))
+        self.assertEqual(ts, 1791739411667)
+        self.assertEqual(C.parse_coinbase_match({**base, "side": "buy"})[1], -1)
+        self.assertIsNone(C.parse_coinbase_match({**base, "type": "last_match", "side": "sell"}))
+        self.assertIsNone(C.parse_coinbase_match({"type": "subscriptions"}))
+        # Les fills d'un même ordre agresseur ont la même clé, quel que soit leur horodatage
+        k2 = C.parse_coinbase_match({**base, "side": "sell", "time": "2026-10-11T17:23:31.668000Z"})[4]
+        self.assertEqual(key, k2)
+
+    def test_okx_spot_in_coins_swap_in_contracts(self):
+        spot = C.parse_okx_trade({"instId": "BTC-USDT", "ts": "1", "side": "sell", "sz": "0.2", "px": "100000"}, "BTC-USDT", 0.01)
+        swap = C.parse_okx_trade({"instId": "BTC-USDT-SWAP", "ts": "1", "side": "buy", "sz": "20", "px": "100000"}, "BTC-USDT", 0.01)
+        self.assertEqual(spot, (True, 1, -1, 0.2, 100000.0))
+        self.assertEqual(swap, (False, 1, 1, 0.2, 100000.0))
+
+    def test_spot_counted_apart_and_null_without_spot(self):
+        hub = C.Hub(["BTC"], 600)
+        cs = hub.coins["BTC"]
+        cs.last_price = 100_000.0
+        now = time.time()
+        cur = C.minute_of(now * 1000)
+        cs.add_order("Bybit", (cur - 120) * 1000, 1, 50_000, 100_000)            # perp seulement
+        cs.add_order("Coinbase", (cur - 60) * 1000, -1, 2_000_000, 100_000)       # spot méga vente
+        cs.add_order("Binance", (cur - 60) * 1000, 1, 5_000, 100_000)             # perp retail
+        m = C.OrderMerger("Coinbase", cs)                                          # un ordre en 2 fills
+        m.add((cur - 60) * 1000, 1, 0.1, 100_000, key=("coinbase", "o1", 1))
+        m.add((cur - 60) * 1000 + 3, 1, 0.1, 100_000, key=("coinbase", "o1", 1))
+        m.flush()
+        p = C.build_payload(hub, cs, cur - 600, 0.0, now)
+        b0, b1 = p["bars"]
+        self.assertEqual(b0["delta"], [0.0, 50000.0, 0.0, 0.0])
+        self.assertIsNone(b0["spot_delta"])                                        # pas de flux spot : null, pas 0
+        self.assertEqual(b1["delta"], [5000.0, 0.0, 0.0, 0.0])
+        self.assertEqual(b1["spot_delta"], [0.0, 20000.0, 0.0, -2000000.0])       # 2 fills recollés en un ordre de 20 k$
+        self.assertEqual(b1["spot_vol"], [0.0, 20000.0, 0.0, 2000000.0])
+        json.dumps(p, allow_nan=False)
+
+    def test_old_database_gets_spot_columns(self):
+        import sqlite3
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "whale_BTC.db")
+            con = sqlite3.connect(path)
+            con.execute("CREATE TABLE bars (minute INTEGER PRIMARY KEY, px REAL, delta TEXT, vol TEXT, liq_long REAL, liq_short REAL)")
+            now = time.time()
+            m0 = C.minute_of(now * 1000) - 120
+            con.execute("INSERT INTO bars VALUES (?, 1, '[1,0,0,0]', '[1,0,0,0]', 0, 0)", (m0,))
+            con.commit(); con.close()
+            store = C.Store(path)
+            cs = C.Hub(["BTC"], 600).coins["BTC"]
+            nb, _, _, _ = store.load(cs)
+            self.assertEqual(nb, 1)
+            self.assertEqual(cs.bars[m0]["spot_n"], 0)
+            cs.add_order("Binance spot", (m0 + 60) * 1000, 1, 300_000, 100_000)
+            store.save(cs, 0)
+            fresh = C.Hub(["BTC"], 600).coins["BTC"]
+            C.Store(path).load(fresh)
+            self.assertEqual(fresh.bars[m0 + 60]["sdelta"], [0.0, 0.0, 300000.0, 0.0])
+            self.assertEqual(fresh.bars[m0]["spot_n"], 0)
+
+
 @unittest.skipUnless(os.environ.get("FLOW_TEST_DB"), "FLOW_TEST_DB non défini")
 class LegacyDatabase(unittest.TestCase):
     def test_loads_dashboard_database(self):

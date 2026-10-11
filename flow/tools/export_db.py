@@ -40,9 +40,13 @@ def r2(x, nd=2):
 
 def read(path):
     con = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    # Spot (colonnes sdelta/svol) : seulement dans les bases du collecteur depuis octobre 2026.
+    spot = {"sdelta", "svol"} <= {r[1] for r in con.execute("PRAGMA table_info(bars)")}
+    cols = "minute, px, delta, vol, liq_long, liq_short" + (", sdelta, svol" if spot else ", NULL, NULL")
     bars = [{"minute": int(m), "px": r2(px), "delta": [r2(x) for x in json.loads(d)], "vol": [r2(x) for x in json.loads(v)],
-             "liq_long": r2(ll or 0.0), "liq_short": r2(ls or 0.0)}
-            for m, px, d, v, ll, ls in con.execute("SELECT minute, px, delta, vol, liq_long, liq_short FROM bars ORDER BY minute")]
+             "liq_long": r2(ll or 0.0), "liq_short": r2(ls or 0.0),
+             "spot_delta": [r2(x) for x in json.loads(sd)] if sd else None, "spot_vol": [r2(x) for x in json.loads(sv)] if sv else None}
+            for m, px, d, v, ll, ls, sd, sv in con.execute(f"SELECT {cols} FROM bars ORDER BY minute")]
     bars = [b for b in bars if len(b["delta"]) == 4 and len(b["vol"]) == 4]
     giants = {round(r[0], 3): r for r in con.execute(
         "SELECT ts, giant_long, giant_short, n_giant_long, n_giant_short, giant_net_change, giant_long_change, giant_short_change FROM hl_giant_hist")}

@@ -51,10 +51,19 @@ export function parseIngest(body: unknown, nowS = Date.now() / 1000): Ingest {
       if (!Array.isArray(a) || a.length !== 4) fail(`bars[${i}].${k} : 4 nombres attendus`)
       return (a as unknown[]).map((v, j) => num(v, `bars[${i}].${k}[${j}]`, k === 'vol' ? { min: 0 } : {})!)
     }
+    // Spot : les deux tableaux ensemble, ou aucun (minute sans flux spot, ou collecteur d'avant le spot).
+    const spotIn = x.spot_delta ?? null, spotVolIn = x.spot_vol ?? null
+    if ((spotIn === null) !== (spotVolIn === null)) fail(`bars[${i}] : spot_delta et spot_vol vont ensemble`)
+    const spotArr = (k: 'spot_delta' | 'spot_vol') => {
+      const a = x[k]
+      if (!Array.isArray(a) || a.length !== 4) fail(`bars[${i}].${k} : 4 nombres attendus`)
+      return (a as unknown[]).map((v, j) => num(v, `bars[${i}].${k}[${j}]`, k === 'spot_vol' ? { min: 0 } : {})!)
+    }
     return {
       minute, px: num(x.px, `bars[${i}].px`, { min: 0, nullable: true }),
       delta: arr('delta'), vol: arr('vol'),
       liq_long: num(x.liq_long ?? 0, `bars[${i}].liq_long`, { min: 0 })!, liq_short: num(x.liq_short ?? 0, `bars[${i}].liq_short`, { min: 0 })!,
+      spot_delta: spotIn === null ? null : spotArr('spot_delta'), spot_vol: spotVolIn === null ? null : spotArr('spot_vol'),
     }
   })
   const whales = (whalesIn as unknown[]).map((r, i): WhaleRow => {

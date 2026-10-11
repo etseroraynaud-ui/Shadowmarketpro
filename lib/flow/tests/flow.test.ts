@@ -88,6 +88,45 @@ test('lecture : gros acheteurs et retail vendeur sur la dernière heure', () => 
   assert.match(v.reading[0], /large orders buying, retail selling/)
 })
 
+test('ingestion : spot facultatif, mais les deux tableaux ensemble', () => {
+  const b = { minute: T0, px: 1, delta: [0, 0, 0, 0], vol: [0, 0, 0, 0], liq_long: 0, liq_short: 0 }
+  const p = parseIngest({ coin: 'BTC', bars: [{ ...b, spot_delta: [1, 0, -2, 0], spot_vol: [1, 0, 2, 0] }, b] }, T0 + 60)
+  assert.deepEqual(p.bars[0].spot_delta, [1, 0, -2, 0])
+  assert.equal(p.bars[1].spot_delta, null)
+  assert.throws(() => parseIngest({ coin: 'BTC', bars: [{ ...b, spot_delta: [1, 0, 0, 0] }] }, T0 + 60), /vont ensemble/)
+  assert.throws(() => parseIngest({ coin: 'BTC', bars: [{ ...b, spot_delta: [1, 0, 0, 0], spot_vol: [1, -1, 0, 0] }] }, T0 + 60), /spot_vol/)
+})
+
+test('spot : compté à part, absent ≠ zéro', () => {
+  const bars: BarRow[] = []
+  for (let k = 0; k < 60; k++) {
+    // perps : gros vendeurs ; spot (une minute sur deux) : gros acheteurs 60 %, retail acheteur 60 %
+    const spot = k % 2 === 0
+    bars.push({ ...bar(T0 + k * 60, [0, 0, -100_000, 0], [20_000, 0, 500_000, 0]),
+      spot_delta: spot ? [8_000, 0, 200_000, 0] : null, spot_vol: spot ? [40_000, 0, 1_000_000, 0] : null })
+  }
+  const a = aggBars(bars, 0, 300)
+  assert.equal(a[0].sn, 3)
+  assert.equal(a[0].s2, 600_000)
+  const v = buildView({ coin: 'BTC', range: '4h', barsR: aggBars(bars, 0, 60), whalesR: [], bars5: a, whales5: [], status: null, updatedAt: null, now: T0 + 3600 })
+  const h = v.windows[0]
+  assert.equal(h.big.label, 'Selling')
+  assert.equal(h.spot.minutes, 30)
+  assert.ok(Math.abs(h.spot.imb.big! - 0.2) < 1e-12)
+  assert.equal(h.spot.verdict.label, 'No clear divergence')       // gros et retail spot achètent autant (20 %)
+  const spotPts = v.series.spotBig.filter(x => x !== null)
+  assert.equal(spotPts.length, 30)                                  // une minute sur deux : trous, pas de zéros
+  assert.equal(spotPts[spotPts.length - 1], 200_000 * 30)
+  assert.equal(v.series.perpTotal.filter(x => x !== null).pop(), -100_000 * 60)
+  assert.match(v.reading.join(' '), /On spot \(Binance, Coinbase, OKX\)/)
+  // Fonction SQL d'avant le spot (pas de colonnes s*) : aucune donnée spot, sans erreur
+  const old = a.map(({ s0, s1, s2, s3, sv0, sv1, sv2, sv3, sn, ...rest }) => rest)
+  const v2 = buildView({ coin: 'BTC', range: '4h', barsR: old, whalesR: [], bars5: old, whales5: [], status: null, updatedAt: null, now: T0 + 3600 })
+  assert.equal(v2.windows[0].spot.minutes, 0)
+  assert.equal(v2.windows[0].spot.verdict.label, 'No spot data yet')
+  assert.equal(v2.series.spotBig.filter(x => x !== null).length, 0)
+})
+
 test('lecture : aucune donnée → vue vide, sans erreur', () => {
   const v = buildView({ coin: 'ETH', range: '24h', barsR: [], whalesR: [], bars5: [], whales5: [], status: null, updatedAt: null, now: T0 })
   assert.equal(v.end, null)

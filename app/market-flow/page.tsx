@@ -8,7 +8,7 @@ import { getFlow } from '../../lib/flow/source'
 
 export const metadata: Metadata = {
   title: 'Market Flow: whales vs retail on Bitcoin and Ether — ShadowMarketPro™',
-  description: 'Live cumulative volume delta by order size on Binance, Bybit and OKX, and the positions of the largest Hyperliquid accounts on BTC and ETH, compared with retail flow.',
+  description: 'Live cumulative volume delta by order size on perpetuals (Binance, Bybit, OKX) and spot (Binance, Coinbase, OKX), and the positions of the largest Hyperliquid accounts on BTC and ETH, compared with retail flow.',
 }
 
 // Premier rendu côté serveur, renouvelé chaque minute ; la page se met ensuite à jour seule.
@@ -23,7 +23,7 @@ export default async function MarketFlowPage() {
         <section className="s-hero s-hero-simple">
           <p className="s-eyebrow">Market Flow</p>
           <h1 className="s-h1">Whales vs retail</h1>
-          <p className="s-sub">Who is pushing Bitcoin and Ether right now. Aggressive buying and selling by order size on the main perpetual exchanges, next to the positions held by the largest accounts on Hyperliquid.</p>
+          <p className="s-sub">Who is pushing Bitcoin and Ether right now. Aggressive buying and selling by order size on the main perpetual and spot exchanges, next to the positions held by the largest accounts on Hyperliquid.</p>
         </section>
 
         <section className="s-section mf-section">
@@ -35,7 +35,8 @@ export default async function MarketFlowPage() {
             <div className="s-card">
               <div className="s-card-k">Order flow</div>
               <h3>Cumulative volume delta (CVD)</h3>
-              <p>Every trade on the Binance, Bybit and OKX perpetual markets has an aggressor: the side that crossed the spread with a market order. Fills of the same market order are merged, then sorted by size. CVD adds aggressive buys and subtracts aggressive sells over the window.</p>
+              <p>Every trade has an aggressor: the side that crossed the spread with a market order. Fills of the same market order are merged, then sorted by size. CVD adds aggressive buys and subtracts aggressive sells over the window.</p>
+              <p><strong>Perpetuals</strong> (Binance, Bybit, OKX) and <strong>spot</strong> (Binance, Coinbase, OKX) are counted separately and never added together: spot buying is cash demand for the coin, perpetual buying is mostly leveraged positioning. Spot data starts in October 2026.</p>
               <p><strong>Retail</strong> means market orders under $10,000. <strong>Large orders</strong> are $100,000 and more, with $1M and more shown separately. A large order is not necessarily a whale with a view on direction: it can be market making, hedging or arbitrage.</p>
             </div>
             <div className="s-card">
