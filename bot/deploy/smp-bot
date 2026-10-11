@@ -16,6 +16,8 @@
 #
 #   Market Flow (collecteur CVD + whales de la page /market-flow, indépendant du bot) :
 #   smp-bot flow configure         crée le jeton d'envoi vers le site (à copier dans Vercel)
+#   smp-bot flow token             réaffiche le jeton
+#   smp-bot flow check             vérifie que le site accepte le jeton et que Supabase est prêt
 #   smp-bot flow start|stop        démarre / arrête le collecteur
 #   smp-bot flow logs|status       journal en direct / état
 #   smp-bot flow import FICHIER    reprend une base whale_BTC.db ou whale_ETH.db du dashboard local
@@ -59,6 +61,30 @@ flow_compose() { docker compose -f "$DIR/flow/deploy/compose.yml" "$@"; }
 flow_running() { [ -n "$(flow_compose ps -q --status running flow 2>/dev/null)" ]; }
 new_token() { openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; }
 
+flow_token() { grep -E '^FLOW_INGEST_TOKEN=' "$FLOW_ENV" 2>/dev/null | cut -d= -f2-; }
+
+# Envoi vide au site : il ne fait que vérifier le jeton, puis les tables et fonctions Supabase.
+flow_check() {
+  [ -f "$FLOW_ENV" ] || { echo "Collecteur pas encore configuré : smp-bot flow configure" >&2; return 1; }
+  local url code body
+  url=$(grep -E '^FLOW_INGEST_URL=' "$FLOW_ENV" | cut -d= -f2-)
+  url=${url:-https://www.shadowmarketpro.com/api/market-flow/ingest}
+  body=$(mktemp)
+  code=$(curl -s -m 20 -o "$body" -w '%{http_code}' -X POST "$url" -H "Authorization: Bearer $(flow_token)" \
+    -H 'Content-Type: application/json' -d '{"coin":"BTC","bars":[],"whales":[],"status":null}' || true)
+  case "$code" in
+    200) echo "OK : le site accepte le jeton et les tables Supabase sont en place." ;;
+    401) echo "Jeton refusé : la valeur de FLOW_INGEST_TOKEN dans Vercel n'est pas celle du serveur (smp-bot flow token l'affiche). Corrige-la dans Vercel, puis Redeploy." ;;
+    503) echo "Le site n'a pas encore le jeton : ajoute FLOW_INGEST_TOKEN dans Vercel (Production), puis Redeploy, et réessaie dans 2 minutes." ;;
+    502) echo "Le jeton est bon, mais les tables manquent dans Supabase : SQL Editor, coller flow/supabase.sql, Run." ;;
+    404) echo "Le site n'a pas encore l'API Market Flow (déploiement en cours ?) : réessaie dans quelques minutes." ;;
+    000|"") echo "Site injoignable depuis le serveur ($url)." ;;
+    *) echo "Réponse inattendue du site (HTTP $code) : $(head -c 200 "$body")" ;;
+  esac
+  rm -f "$body"
+  [ "$code" = 200 ]
+}
+
 flow_cmd() {
   case "${1:-status}" in
     configure)
@@ -78,10 +104,16 @@ flow_cmd() {
       echo "  environnement : Production, puis Deployments → Redeploy."
       echo
       echo "Ne le partage avec personne : il permet d'écrire les données de la page Market Flow."
-      echo "Ensuite : smp-bot flow start"
+      echo "Ensuite, une fois le jeton enregistré dans Vercel : smp-bot flow check, puis smp-bot flow start"
       ;;
+    token)
+      [ -n "$(flow_token)" ] || { echo "Pas encore de jeton : smp-bot flow configure" >&2; exit 1; }
+      flow_token
+      ;;
+    check) flow_check ;;
     start)
       [ -f "$FLOW_ENV" ] || { echo "Collecteur pas encore configuré : smp-bot flow configure" >&2; exit 1; }
+      flow_check || echo "(Le collecteur démarre quand même : il garde 24 h de données et les enverra dès que le site les accepte.)"
       flow_compose up -d --build flow
       echo "Collecteur démarré. Suivre : smp-bot flow logs (une ligne d'état toutes les 5 minutes)"
       ;;
@@ -107,7 +139,7 @@ flow_cmd() {
       [ "$was" = 1 ] && flow_compose up -d flow
       echo "Base $name reprise par le collecteur."
       ;;
-    *) echo "smp-bot flow configure|start|stop|logs|status|import FICHIER" >&2; exit 1 ;;
+    *) echo "smp-bot flow configure|token|check|start|stop|logs|status|import FICHIER" >&2; exit 1 ;;
   esac
 }
 
@@ -256,5 +288,5 @@ case "${1:-help}" in
     if flow_running; then flow_compose up -d --build flow; fi
     ;;
   flow) shift; flow_cmd "$@" ;;
-  *) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

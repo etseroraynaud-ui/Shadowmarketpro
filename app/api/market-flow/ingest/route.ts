@@ -25,6 +25,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: isInvalid(e) ? e.message : 'JSON invalide' }, { status: 400 })
   }
   const { coin, bars, whales, status } = data
+  // Envoi vide (smp-bot flow check) : vérifie seulement que les tables et fonctions sont en place.
+  if (!bars.length && !whales.length && !status) {
+    const t = await supabaseAdmin.from('flow_status').select('coin', { head: true, count: 'exact' })
+    const f = t.error ? t : await supabaseAdmin.rpc('flow_bars_agg', { p_coin: coin, p_since: 4_000_000_000, p_bucket: 60 })
+    if (f.error) {
+      console.error('[market-flow/ingest] contrôle :', f.error.message)
+      return NextResponse.json({ error: 'tables Market Flow absentes : exécuter flow/supabase.sql dans Supabase' }, { status: 502 })
+    }
+    return NextResponse.json({ ok: true, check: true })
+  }
   try {
     for (let i = 0; i < bars.length; i += CHUNK) {
       const { error } = await supabaseAdmin.from('flow_bars').upsert(bars.slice(i, i + CHUNK).map(b => ({ coin, ...b })), { onConflict: 'coin,minute' })
