@@ -119,9 +119,8 @@ npm run research:publish
 
 Cette commande copie les données 5, 15 et 30 min dans `public/backtest/data`, régénère les
 préréglages issus de la recherche (`lib/strategies/shock/presets.ts`), publie les rapports
-dans `public/backtest/reports` et régénère le code Pine des préréglages adaptatifs
-(`public/backtest/strategies/shock-engine-adaptive-{15,30}m.pine`, aussi seul avec
-`npm run research:pine`).
+dans `public/backtest/reports` et régénère le code Pine des préréglages adaptatifs, pour un usage
+privé (`research/private/pine/`, exclu de git et du site ; aussi seul avec `npm run research:pine`).
 
 ## Méthode contre le surajustement
 

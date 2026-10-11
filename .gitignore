@@ -27,6 +27,8 @@ bot/logs/
 # bot : secrets du serveur (clé de l'agent)
 bot/deploy/*.env
 research/data/.dukascopy-cache/
+# Recherche : sorties privées, jamais publiées (code Pine des stratégies)
+research/private/
 # Market Flow : secret du serveur (jeton d'envoi) et fichiers locaux
 flow/deploy/*.env
 flow/**/__pycache__/
