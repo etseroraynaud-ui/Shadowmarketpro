@@ -27,7 +27,8 @@ flow/collector.py ── chaque minute ──▶  POST /api/market-flow/ingest  
    La commande affiche un jeton.
 3. **Vercel** → projet → Settings → Environment Variables : `FLOW_INGEST_TOKEN` = le jeton,
    environnement Production → Deployments → Redeploy.
-4. **Serveur** : `smp-bot flow start`, puis `smp-bot flow logs`. Toutes les 5 minutes, une ligne par
+4. **Serveur** : `smp-bot flow check` doit répondre « OK » (sinon le message dit quoi corriger), puis
+   `smp-bot flow start` et `smp-bot flow logs`. Toutes les 5 minutes, une ligne par
    actif donne le prix, la couverture, les flux reçus et `publication ok`.
 5. La page se remplit dans les minutes qui suivent ; l'historique s'allonge ensuite.
 
@@ -43,6 +44,8 @@ ordinateur qui l'a : `FLOW_INGEST_TOKEN=… python flow/tools/export_db.py whale
 | commande | effet |
 |---|---|
 | `smp-bot flow configure` | crée le jeton (et `flow/deploy/flow.env`, lisible par root seul) |
+| `smp-bot flow token` | réaffiche le jeton |
+| `smp-bot flow check` | vérifie le jeton côté site et les tables Supabase |
 | `smp-bot flow start` / `stop` | démarre / arrête le collecteur (le bot n'est pas touché) |
 | `smp-bot flow logs` / `status` | journal en direct / état et santé du conteneur |
 | `smp-bot flow import FICHIER` | reprend une base `whale_BTC.db` ou `whale_ETH.db` |
