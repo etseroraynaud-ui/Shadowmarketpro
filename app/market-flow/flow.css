@@ -1,0 +1,39 @@
+/* Market Flow : compléments du système de design du site (site.css). */
+.mf-section { padding-top: 8px; padding-bottom: 8px }
+.mf-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px }
+.mf-live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--s-ink2); margin-left: auto }
+.mf-live i { width: 8px; height: 8px; border-radius: 50%; background: var(--s-accent); box-shadow: 0 0 0 4px var(--s-accent-dim); animation: mf-pulse 2s ease-in-out infinite }
+.mf-live-off i { background: var(--s-amber); box-shadow: 0 0 0 4px var(--s-amber-bg); animation: none }
+@keyframes mf-pulse { 50% { opacity: .45 } }
+@media (prefers-reduced-motion: reduce) { .mf-live i { animation: none } }
+.mf-banner { border: 1px solid rgba(232, 183, 90, .32); background: var(--s-amber-bg); color: #f1d28e; border-radius: 12px; padding: 10px 14px; font-size: 14px; margin: 0 0 16px }
+.mf-kpis { margin-top: 0 }
+.mf-kpis .s-kpi-v small { font-size: .45em; color: var(--s-muted); font-weight: 500; margin-left: 2px }
+.mf-reading { max-width: none }
+.mf-reading p { margin: 0 0 6px }
+.mf-reading p:last-child { margin-bottom: 0 }
+.mf-h3 { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 600; color: #fff; margin: 36px 0 4px; letter-spacing: -.01em }
+.mf-table td { white-space: normal; min-width: 150px }
+.mf-table td > * { display: block }
+.mf-num { color: #fff; font-weight: 600; font-variant-numeric: tabular-nums }
+.mf-sub { color: var(--s-muted); font-size: 12.5px; margin: 1px 0 3px }
+.mf-tone { display: inline-flex !important; align-items: center; gap: 6px; font-size: 13px; color: var(--s-ink2) }
+.mf-tone span { font-size: 10px; line-height: 1 }
+.mf-pos span { color: #2fbf93 }
+.mf-neg span { color: var(--s-neg) }
+.mf-neutral span { color: var(--s-muted) }
+.mf-muted { color: var(--s-muted) }
+.mf-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 28px }
+.mf-charts > .s-panel:first-child { grid-column: 1 / -1 }
+@media (max-width: 900px) { .mf-charts { grid-template-columns: 1fr } }
+.s-chart-empty { color: var(--s-muted); font-size: 14px; padding: 40px 0; text-align: center }
+.s-key-bar { width: 10px; height: 10px; border-radius: 2px }
+.mf-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px }
+.mf-quality { list-style: none; padding: 0; margin: 8px 0 0; color: var(--s-ink2); font-size: 14px; display: grid; gap: 8px }
+.mf-quality b { color: #fff; font-variant-numeric: tabular-nums }
+.mf-feed { display: inline-flex; align-items: center; gap: 5px; margin-left: 12px }
+.mf-feed span { color: #2fbf93; font-size: 10px }
+.mf-feed-off { color: var(--s-amber) }
+.mf-feed-off span { color: var(--s-amber) }
+@media (max-width: 640px) { .mf-live { margin-left: 0; width: 100% } .mf-table td { min-width: 0 } }
+.mf-section + .s-section { padding-top: 64px }

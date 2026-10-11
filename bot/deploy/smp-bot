@@ -13,6 +13,12 @@
 #   smp-bot version [public|v1]    version de la stratégie (sans argument : celle en cours) ;
 #                                  public : shorts seulement en régime de tendance journalier baissier
 #   smp-bot update                 récupère la dernière version et redémarre
+#
+#   Market Flow (collecteur CVD + whales de la page /market-flow, indépendant du bot) :
+#   smp-bot flow configure         crée le jeton d'envoi vers le site (à copier dans Vercel)
+#   smp-bot flow start|stop        démarre / arrête le collecteur
+#   smp-bot flow logs|status       journal en direct / état
+#   smp-bot flow import FICHIER    reprend une base whale_BTC.db ou whale_ETH.db du dashboard local
 set -euo pipefail
 
 DIR=${SMP_DIR:-/opt/shadowmarketpro}
@@ -47,6 +53,64 @@ set_var() {
   [ -f "$file" ] || { ( umask 077; : > "$file" ); }
   if grep -q "^$key=" "$file"; then sed -i "s/^$key=.*/$key=$val/" "$file"; else echo "$key=$val" >> "$file"; fi
 }
+# Market Flow : projet docker séparé (flow/deploy/compose.yml), secret dans flow.env (root seul).
+FLOW_ENV=$DIR/flow/deploy/flow.env
+flow_compose() { docker compose -f "$DIR/flow/deploy/compose.yml" "$@"; }
+flow_running() { [ -n "$(flow_compose ps -q --status running flow 2>/dev/null)" ]; }
+new_token() { openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; }
+
+flow_cmd() {
+  case "${1:-status}" in
+    configure)
+      if [ -f "$FLOW_ENV" ] && grep -Eq '^FLOW_INGEST_TOKEN=.+' "$FLOW_ENV"; then
+        local again; again=$(ask "Un jeton existe déjà. En créer un nouveau (l'ancien ne marchera plus) ? [o/N] : ")
+        case "$again" in o|O|oui|y|Y) ;; *) echo "Jeton inchangé."; return ;; esac
+      fi
+      [ -f "$FLOW_ENV" ] || { ( umask 077; cp "$DIR/flow/deploy/flow.env.example" "$FLOW_ENV" ); }
+      chmod 600 "$FLOW_ENV"
+      local token; token=$(new_token)
+      set_var "$FLOW_ENV" FLOW_INGEST_TOKEN "$token"
+      echo "Jeton enregistré dans $FLOW_ENV (lisible par root seul)."
+      echo
+      echo "À copier dans Vercel → projet → Settings → Environment Variables :"
+      echo "  nom    : FLOW_INGEST_TOKEN"
+      echo "  valeur : $token"
+      echo "  environnement : Production, puis Deployments → Redeploy."
+      echo
+      echo "Ne le partage avec personne : il permet d'écrire les données de la page Market Flow."
+      echo "Ensuite : smp-bot flow start"
+      ;;
+    start)
+      [ -f "$FLOW_ENV" ] || { echo "Collecteur pas encore configuré : smp-bot flow configure" >&2; exit 1; }
+      flow_compose up -d --build flow
+      echo "Collecteur démarré. Suivre : smp-bot flow logs (une ligne d'état toutes les 5 minutes)"
+      ;;
+    stop) flow_compose stop flow ;;
+    logs) flow_compose logs -f --tail 100 flow ;;
+    status) flow_compose ps ;;
+    import)
+      local src=${2:-} name
+      [ -f "$src" ] || { echo "smp-bot flow import /chemin/whale_BTC.db" >&2; exit 1; }
+      name=$(basename "$src")
+      case "$name" in whale_BTC.db|whale_ETH.db) ;; *) echo "Nom attendu : whale_BTC.db ou whale_ETH.db" >&2; exit 1 ;; esac
+      [ -f "$FLOW_ENV" ] || { echo "Collecteur pas encore configuré : smp-bot flow configure" >&2; exit 1; }
+      # Copie dans un dossier temporaire (avec les fichiers -wal / -shm s'ils sont là), puis sauvegarde
+      # SQLite cohérente vers le volume du collecteur, collecteur arrêté.
+      local tmp; tmp=$(mktemp -d); chmod 777 "$tmp"
+      cp "$src" "$tmp/"; for x in wal shm; do [ -f "$src-$x" ] && cp "$src-$x" "$tmp/"; done
+      chmod 666 "$tmp"/*
+      local was=0; flow_running && was=1
+      flow_compose stop flow
+      flow_compose run --rm --no-deps -v "$tmp:/import" --entrypoint python flow -c \
+        "import sqlite3; s=sqlite3.connect('/import/$name'); d=sqlite3.connect('/data/$name'); s.backup(d); d.close(); print('importé :', s.execute('select count(*) from hl_accounts').fetchone()[0], 'comptes')"
+      rm -rf "$tmp"
+      [ "$was" = 1 ] && flow_compose up -d flow
+      echo "Base $name reprise par le collecteur."
+      ;;
+    *) echo "smp-bot flow configure|start|stop|logs|status|import FICHIER" >&2; exit 1 ;;
+  esac
+}
+
 version_of() { if [ -f "$1" ] && grep -q '^BOT_SHORT_TREND_FILTER=1$' "$1"; then echo public; else echo v1; fi; }
 
 # L'état du bot réel est mis de côté (pas effacé) : au démarrage, le bot vérifie que le compte est à
@@ -189,6 +253,8 @@ case "${1:-help}" in
     if running live; then check_env; services="shadow live"; fi
     # shellcheck disable=SC2086
     compose up -d --build $services
+    if flow_running; then flow_compose up -d --build flow; fi
     ;;
-  *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
+  flow) shift; flow_cmd "$@" ;;
+  *) sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac
