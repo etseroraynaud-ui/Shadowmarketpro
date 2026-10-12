@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadSleeve } from '../lib/frozen-shock.ts'
 import * as PL from '../lib/portfolio.ts'
+import { DEFAULT_PARAMS } from '../../lib/strategies/shock/params.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SRC = join(ROOT, 'research/reports/btc-eth-portfolio-e2')
@@ -193,6 +194,22 @@ mkdirSync(LIB, { recursive: true })
 // Le dossier public ne garde que les fichiers publiés ici (les copies retirées restent dans research/reports).
 const keep = new Set(DOWNLOADS.map(d => d.file))
 for (const f of readdirSync(PUB)) if (!keep.has(f)) { unlinkSync(join(PUB, f)); process.stderr.write(`retiré du dossier public : ${f}\n`) }
-for (const d of DOWNLOADS) copyFileSync(join(d.from ? join(ROOT, d.from) : SRC, d.file), join(PUB, d.file))
+for (const d of DOWNLOADS) {
+  if (d.file === 'shock-engine-manifest.json') continue
+  copyFileSync(join(d.from ? join(ROOT, d.from) : SRC, d.file), join(PUB, d.file))
+}
+// Manifeste public : les réglages de la stratégie sont propriétaires. Seule leur empreinte SHA-256
+// est publiée (elle identifie le jeu exact sans le révéler) ; le manifeste complet reste privé.
+const { parameters: _parameters, source: _source, ...strategyPublic } = manifest.strategy
+writeFileSync(join(PUB, 'shock-engine-manifest.json'), JSON.stringify({
+  ...manifest,
+  strategy: { ...strategyPublic, parameters: 'withheld: proprietary; parametersSha256 identifies the exact set' },
+}, null, 2) + '\n')
+// Refus de publier un fichier qui contiendrait un nom de réglage de la stratégie.
+const PARAM_NAMES = new RegExp(`\\b(${Object.keys(DEFAULT_PARAMS).join('|')})\\b`)
+for (const f of readdirSync(PUB).filter(f => /\.(json|html|csv)$/.test(f))) {
+  const hit = readFileSync(join(PUB, f), 'utf8').match(PARAM_NAMES)
+  if (hit) { unlinkSync(join(PUB, f)); throw new Error(`réglage « ${hit[1]} » dans le fichier public ${f} : publication refusée`) }
+}
 writeFileSync(join(LIB, 'btc-eth-portfolio.json'), JSON.stringify(out))
 process.stderr.write(`écrit lib/research/btc-eth-portfolio.json et ${out.downloads.length} fichiers dans public/research/btc-eth-portfolio\n`)

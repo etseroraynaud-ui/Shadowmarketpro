@@ -11,15 +11,13 @@ import type { UTCTimestamp } from 'lightweight-charts'
 import { LogoSVGSmall } from '../components/Logo'
 import type { Lang } from '../backtest/i18n'
 import { fmtDate, fmtMoney, fmtNum, fmtPct, fmtPrice, tone } from '../backtest/format'
-import { HL_MARKETS, loadHyperliquid } from '../backtest/datasets'
-import { adaptivePreset, marketFor, selectFor } from '../../lib/strategies/shock/live.ts'
-import { simulate } from '../../lib/strategies/shock/engine.ts'
-import { shortTrendEntries } from '../../lib/strategies/short-trend.ts'
+import { HL_MARKETS } from '../backtest/datasets'
 import { cloidKind } from '../../lib/hyperliquid/cloid.ts'
-import { backtestTrips, compareTrips, performance, roundTrips } from '../../lib/hyperliquid/track.ts'
-import type { BacktestTrip, ExitKind, MatchRow, Performance, RoundTrip } from '../../lib/hyperliquid/track.ts'
+import { compareTrips, performance, roundTrips } from '../../lib/hyperliquid/track.ts'
+import type { ExitKind, MatchRow, Performance, RoundTrip } from '../../lib/hyperliquid/track.ts'
 import { EXPLORER, loadAccount } from './hl'
 import type { AccountData, Network } from './hl'
+import type { LiveBacktest } from './backtest'
 import { LIVE_ACCOUNTS } from './accounts'
 import type { LiveAccount } from './accounts'
 import { LIVE_DICTS } from './i18n'
@@ -34,16 +32,9 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/
 /** Début du suivi : date (AAAA-MM-JJ, minuit UTC) ou instant ISO complet. */
 const sinceMs = (s: string | undefined) => (s ? Date.parse(s.length > 10 ? s : s + 'T00:00:00Z') : NaN)
 
-interface Backtest {
-  trips: BacktestTrip[]
-  bars: number
-  from: number
-  to: number
-}
-
 interface Loaded {
   account: AccountData
-  backtest: Backtest
+  backtest: LiveBacktest
 }
 
 function targetFromUrl(): LiveAccount | null {
@@ -57,20 +48,13 @@ function targetFromUrl(): LiveAccount | null {
 
 async function load(target: LiveAccount): Promise<Loaded> {
   const since = target.since ? sinceMs(target.since) : 0
-  const [account, data] = await Promise.all([
-    loadAccount(target.network, target.address, target.coin, Number.isFinite(since) ? since : 0),
-    loadHyperliquid(target.coin, '15m', target.network === 'testnet'),
-  ])
-  // Le backtest du bot : même préréglage, même pas de cotation, mêmes bougies (15 min et journalier).
-  const shock = adaptivePreset(15, account.tick)
-  const bars = data.bars
-  const m = marketFor(bars, 15, shock.mintick)
-  const costs = { capital: 10000, qtyPct: 100, commissionPct: 0.045, slippageTicks: 0, slippagePct: 0, mintick: shock.mintick, leverage: 1, maintenancePct: 0.5, fundingPct: 0 }
-  const select = selectFor(shock, m, data.daily).select
-  // Version publique : shorts seulement en régime de tendance journalier baissier, comme le bot.
-  const override = target.version === 'v1' ? undefined : shortTrendEntries(m, shock.sets, select, 15, data.daily)
-  const res = simulate(m, shock.sets, costs, 0, bars.n - 1, select, override)
-  return { account, backtest: { trips: backtestTrips(bars, res.positions, null, M15), bars: bars.n, from: bars.t[0], to: bars.t[bars.n - 1] + M15 } }
+  const account = await loadAccount(target.network, target.address, target.coin, Number.isFinite(since) ? since : 0)
+  // Le backtest du bot est calculé sur le serveur : les réglages de la stratégie restent privés.
+  const q = new URLSearchParams({ coin: target.coin, tick: String(account.tick), ...(target.network === 'testnet' ? { net: 'testnet' } : {}), ...(target.version === 'v1' ? { version: 'v1' } : {}) })
+  const res = await fetch(`/api/live/backtest?${q}`)
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`)
+  return { account, backtest: body as LiveBacktest }
 }
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`
@@ -350,7 +334,7 @@ function statusClass(s: MatchRow['status']): string {
   return s === 'match' ? 'bt-badge-good' : s === 'open' ? 'bt-badge-ok' : 'bt-badge-bad'
 }
 
-function CompareCard({ t, lang, rows, backtest, from }: { t: LiveDict; lang: Lang; rows: MatchRow[]; backtest: Backtest; from: number }) {
+function CompareCard({ t, lang, rows, backtest, from }: { t: LiveDict; lang: Lang; rows: MatchRow[]; backtest: LiveBacktest; from: number }) {
   const settled = rows.filter(r => r.status !== 'open')
   const ok = settled.filter(r => r.status === 'match').length
   const time = (x: number | null | undefined) => (x == null ? '—' : fmtDate(x, lang, true))
