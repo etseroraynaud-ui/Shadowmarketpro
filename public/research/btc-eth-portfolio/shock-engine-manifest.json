@@ -1,10 +1,10 @@
 {
   "version": "shock-engine-2026.10",
   "variant": "e2",
-  "generatedAt": "2026-10-09T01:10:40.427Z",
+  "generatedAt": "2026-10-12T19:40:41.745Z",
   "status": "HISTORICAL SIMULATION",
   "git": {
-    "commit": "0aac2d8efc44824820f01e628133f6233d2b8438",
+    "commit": "73bfb321181389158170c69c18f585213d40455b",
     "branch": "claude/shock-engine-portfolio-g79j1v",
     "sourcesClean": true,
     "dirtyFiles": []
@@ -103,11 +103,11 @@
   "scripts": [
     {
       "path": "research/shock/portfolio.ts",
-      "sha256": "ef4f371382f6f2b7201e317795310ffc811563b05e61561acd3c773587cb10da"
+      "sha256": "dadf7f42b8ee83921363e74a9260123a9d9b65bf1592e58dbae8423c820d3112"
     },
     {
       "path": "research/shock/portfolio-html.ts",
-      "sha256": "fca1f90fc562dcc4f64bfac578b3c39a185d22fa456ca947d9c527e2d1cb498f"
+      "sha256": "48c45c3203774afcd616c6fffc51dd7dbf0c21bc6b96096a1b5fa0f325f2bf28"
     },
     {
       "path": "research/lib/portfolio.ts",
@@ -205,11 +205,11 @@
     },
     {
       "path": "research/reports/btc-eth-portfolio-e2/portfolio_summary.json",
-      "sha256": "7fc6c9df3abe809328a72d2f29dcf9100e248b26101b61294574a0cb4ca2bfba"
+      "sha256": "d5da7b5fbb392b2032270c75786800383a049799baad25becf78293f4598a340"
     },
     {
       "path": "research/reports/btc-eth-portfolio-e2/btc-eth-portfolio.html",
-      "sha256": "6a8e2df9a918f3cad3c981bc39ea3b919a4edacc871dde8e52bbf2b6324ecd68"
+      "sha256": "fb2e0fc4ab9e0c4c59105db2c6ea36598d90074eca742b4c293c130975c5482a"
     }
   ],
   "sanityChecks": {
