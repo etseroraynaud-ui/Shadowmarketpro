@@ -5,7 +5,7 @@ import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import { SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Section, SiteFooter, StatusList, Table, Verdict, type VerdictKind } from '../_site/ui'
-import { DOSSIER, DOWNLOADS, FACTOR_NAMES, MANIFEST, P, PAPER, RA, raVerdict, verdictOf } from '../_site/data'
+import { CAPACITY_FINDING, DOSSIER, DOWNLOADS, FACTOR_NAMES, MANIFEST, P, PAPER, RA, raVerdict, verdictOf } from '../_site/data'
 import { int, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -40,7 +40,7 @@ export default function ResearchPage() {
     { name: 'ETH: transfer of the BTC rules', period: yrs(EV.eth.period), finding: `No ETH calibration. Every pre-set criterion met: continuation, random entries (${pct(EV.eth.randomBeaten, 0)}), delay (${pct(EV.eth.delay1Share, 0)}). Sharpe ${num(EV.eth.sharpe)}, ${int(EV.eth.trades)} trades.`, verdict: verdictOf(EV.eth) },
     { name: 'ETH: independent price feed (Dukascopy)', period: yrs(EV.ethDukascopy.period), finding: `Same verdict on a different data source: Sharpe ${num(EV.ethDukascopy.sharpe)}, ${int(EV.ethDukascopy.trades)} trades.`, verdict: verdictOf(EV.ethDukascopy) },
     { name: 'ETH: parameter neighborhood (1,810 runs)', period: yrs(EV.robEth.period), finding: `At ±20 %, median Sharpe ${num(rob('robEth').medianSharpe)} against ${num(rob('robEth').preset)}; ${pct(rob('robEth').profitable, 0)} profitable. The rules sit mid-neighborhood: a plateau, not a peak.`, verdict: { kind: 'pass', label: 'pass' } },
-    { name: 'Capacity and market impact', period: '—', finding: 'Not yet modeled. No capacity figure is claimed.', verdict: { kind: 'na', label: 'to do' } },
+    { name: <a className="s-link" href={DOSSIER} download>Execution costs and capacity</a>, period: '2020–2026', finding: CAPACITY_FINDING, verdict: { kind: 'partial', label: 'Binance measured' } },
   ]
   const passed = studies.filter(s => s.verdict.kind === 'pass').length
   const failed = studies.filter(s => s.verdict.kind === 'fail').length

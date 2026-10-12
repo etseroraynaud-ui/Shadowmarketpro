@@ -5,7 +5,7 @@ import SiteHeader from '../_site/SiteHeader'
 import HeroChart from '../_site/HeroChart'
 import { CountUp, SeriesPanel, SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table, Verdict } from '../_site/ui'
-import { BH, BH_NAME, COLORS, DOWNLOADS, P, PAPER, RA, SIM, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
+import { BH, BH_NAME, COLORS, DOSSIER, DOWNLOADS, P, PAPER, RA, SIM, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
 import { int, month, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -216,7 +216,7 @@ export default function ShockEnginePage() {
             { label: 'Forward validation', state: 'wait', note: `pre-registered; observation starts ${P.forward.start}` },
             ...(TESTNET_SINCE ? [{ label: 'Testnet bot', state: 'wait' as const, note: <>public version, play money, since {TESTNET_SINCE} · <Link className="s-link" href="/live">live page</Link></> }] : []),
             { label: 'Live track record', state: 'no', note: 'not available' },
-            { label: 'Capacity / market impact', state: 'no', note: 'not yet modeled' },
+            { label: 'Capacity / market impact', state: 'wait', note: <>execution costs measured on Binance for all 2,474 executions · <a className="s-link" href={DOSSIER} download>dossier</a>; Hyperliquid and own impact need live trading</> },
           ]} />
           <p className="s-small">Slippage and perpetual funding are not in the headline figures.</p>
         </Section>

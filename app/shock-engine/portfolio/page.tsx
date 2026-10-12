@@ -5,7 +5,7 @@ import SiteHeader from '../../_site/SiteHeader'
 import { GroupedBars, Heatmap } from '../../_site/charts'
 import { CountUp, SeriesPanel, SubNav } from '../../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, Kpis, Metrics, Section, SimNote, SiteFooter, Table } from '../../_site/ui'
-import { BH, BH_NAME, COLORS, DOWNLOADS, P, longestDrawdown, sample, sampleStart, series } from '../../_site/data'
+import { BH, BH_NAME, CAPACITY_FINDING, COLORS, DOSSIER, DOWNLOADS, P, longestDrawdown, sample, sampleStart, series } from '../../_site/data'
 import { int, month, monthKey, num, pct, spct, times } from '../../_site/format'
 
 export const metadata: Metadata = {
@@ -254,7 +254,7 @@ export default function PerformancePage() {
             <li><strong>Short entries.</strong> Opened only when the daily trend regime is bearish.</li>
             <li><strong>Data.</strong> {P.manifest.datasets.btc}; {P.manifest.datasets.eth}; 15-minute bars, UTC.</li>
             <li><strong>Capital.</strong> 50/50 at the start; each half trades 100 % of its own equity, one position at a time, without leverage. Average gross exposure {pct(F.expo.avgGross, 0)} of the portfolio, maximum {pct(F.expo.maxGross, 0)}.</li>
-            <li><strong>Costs.</strong> Commission 0.045 % per order on every fill. {P.disclaimers[3]} {P.disclaimers[4]}</li>
+            <li><strong>Costs.</strong> Commission 0.045 % per order on every fill. {P.disclaimers[3]} {CAPACITY_FINDING} <a className="s-link" href={DOSSIER} download>Institutional dossier (PDF)</a>.</li>
             <li><strong>In-sample for BTC.</strong> The rules, short-entry condition included, were chosen on BTC data from 2017 to 2026, which contains the whole period. ETH is a transfer across markets, not across time.</li>
             <li><strong>Venues.</strong> The data venues (Bitstamp, Binance spot) differ from a perpetual-futures execution venue: prices, fees, funding and stop mechanics differ.</li>
           </ul>
