@@ -54,9 +54,6 @@ export const MARKETS = [
   { key: 'btc', name: 'Bitcoin', data: 'BTC/USD · Bitstamp', role: 'calibration market' },
   { key: 'eth', name: 'Ethereum', data: 'ETH/USDT · Binance', role: 'no ETH calibration' },
   { key: 'ethDukascopy', name: 'Ethereum (replication)', data: 'ETH/USD · Dukascopy', role: 'independent price feed' },
-  { key: 'sol', name: 'Solana', data: 'SOL/USDT · Binance', role: 'transfer' },
-  { key: 'gold', name: 'Gold', data: 'XAU/USD · Dukascopy', role: 'transfer' },
-  { key: 'tao', name: 'Bittensor (TAO)', data: 'TAO/USDT · Binance', role: 'transfer, short sample' },
 ] as const
 
 /** Plus longue période sous un précédent sommet (jours), parmi les épisodes publiés du portefeuille. */

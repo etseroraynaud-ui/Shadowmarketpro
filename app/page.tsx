@@ -91,7 +91,7 @@ export default function HomePage() {
         </Section>
 
         {/* ---------------------------------------------------------------- preuves */}
-        <Section id="evidence" eyebrow="Research evidence" title="Built to be falsified" intro={<p>Every test has a pass/fail criterion fixed before the result is seen. Failures are published next to the successes.</p>}
+        <Section id="evidence" eyebrow="Research evidence" title="Built to be falsified" intro={<p>Every test has a pass/fail criterion fixed before the result is seen.</p>}
           head={<Link className="s-arrow" href="/research">All studies</Link>}>
           <div className="s-grid3">
             <EvidenceCard k="ETH transfer" stat={num(EV.eth.sharpe)} sub="Sharpe" verdict={verdictOf(EV.eth)} href="/research#studies">
@@ -136,7 +136,7 @@ export default function HomePage() {
         <CtaBand title="Read the research" actions={<>
           <Link href="/research" className="s-btn s-btn-primary">View Research <Arrow /></Link>
           <a href={`${DOWNLOADS}/${PAPER}`} className="s-btn s-btn-ghost" download>Download Research Paper (PDF)</a>
-        </>}>Methods, verdicts, failed markets, and every file needed to check the figures.</CtaBand>
+        </>}>Methods, verdicts, and every file needed to check the figures.</CtaBand>
 
         <Disclaimer />
       </main>

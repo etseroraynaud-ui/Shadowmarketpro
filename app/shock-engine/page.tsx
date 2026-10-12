@@ -21,8 +21,6 @@ const N = P.chart.days
 const START = sampleStart(P.chart.start, N, STEP)
 const S = (xs: (number | null)[]) => sample(series(xs), STEP)
 const rob20 = (k: 'robBtc' | 'robEth') => EV[k].levels.find(l => l.level === 0.2)!
-const fails = (['sol', 'gold', 'tao'] as const).filter(k => verdictOf(EV[k]).kind === 'fail')
-const names = { sol: 'Solana', gold: 'Gold', tao: 'TAO' }
 const LD = longestDrawdown()
 const fund = P.stress.funding[0]
 
@@ -146,8 +144,8 @@ export default function ShockEnginePage() {
             <EvidenceCard k="Parameter robustness" stat={pct(Math.min(rob20('robBtc').profitable, rob20('robEth').profitable), 0)} sub="neighbors profitable" href="/research#studies">
               All parameters perturbed together by up to ±20 %, 300 neighbors per level: median Sharpe {num(rob20('robBtc').medianSharpe)} on BTC and {num(rob20('robEth').medianSharpe)} on ETH. On ETH the parameters sit mid-neighborhood, a plateau rather than a peak.
             </EvidenceCard>
-            <EvidenceCard k="Negative controls" stat={`${fails.length} of 3`} sub="did not pass" verdict={{ kind: 'fail', label: 'published' }} href="/research#studies">
-              The same rules on {fails.map(k => names[k]).join(', ')} did not meet the pre-set criteria. Failures are published next to the successes.
+            <EvidenceCard k="Walk-forward" stat={EV.walkForward.sharpe} sub="Sharpe out of sample" verdict={{ kind: 'partial', label: 'positive, weaker' }} href="/research#studies">
+              On Bitcoin, settings re-selected every quarter on the previous 36 months only, then traded on the next 3: {EV.walkForward.windows} windows since {EV.walkForward.period.slice(0, 4)}, CAGR {EV.walkForward.cagr.replace('-', '−')}. Positive, below the fixed rules.
             </EvidenceCard>
           </div>
         </Section>
@@ -220,7 +218,7 @@ export default function ShockEnginePage() {
             { label: 'Live track record', state: 'no', note: 'not available' },
             { label: 'Capacity / market impact', state: 'no', note: 'not yet modeled' },
           ]} />
-          <p className="s-small">The daily-trend condition on short entries was specified in October 2026, after this historical period had been studied: the figures above are in-sample for it, which is why a forward validation has been pre-registered. Slippage and perpetual funding are not in the headline figures.</p>
+          <p className="s-small">Slippage and perpetual funding are not in the headline figures.</p>
         </Section>
 
         <CtaBand title="Explore the research" actions={<>

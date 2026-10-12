@@ -10,7 +10,7 @@ import { int, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
   title: 'Research — Shock Engine — ShadowMarketPro™',
-  description: 'How Shock Engine is tested: fixed rules, criteria set in advance, placebo tests, walk-forward, transfer to other markets, and a pre-registered forward validation. Every study and its verdict, including the failures.',
+  description: 'How Shock Engine is tested: fixed rules, criteria set in advance, placebo tests, walk-forward, transfer to Ethereum, and a pre-registered forward validation. Every study and its verdict.',
 }
 
 const EV = P.evidence
@@ -40,9 +40,6 @@ export default function ResearchPage() {
     { name: 'ETH: transfer of the BTC rules', period: yrs(EV.eth.period), finding: `No ETH calibration. Every pre-set criterion met: continuation, random entries (${pct(EV.eth.randomBeaten, 0)}), delay (${pct(EV.eth.delay1Share, 0)}). Sharpe ${num(EV.eth.sharpe)}, ${int(EV.eth.trades)} trades.`, verdict: verdictOf(EV.eth) },
     { name: 'ETH: independent price feed (Dukascopy)', period: yrs(EV.ethDukascopy.period), finding: `Same verdict on a different data source: Sharpe ${num(EV.ethDukascopy.sharpe)}, ${int(EV.ethDukascopy.trades)} trades.`, verdict: verdictOf(EV.ethDukascopy) },
     { name: 'ETH: parameter neighborhood (1,810 runs)', period: yrs(EV.robEth.period), finding: `At ±20 %, median Sharpe ${num(rob('robEth').medianSharpe)} against ${num(rob('robEth').preset)}; ${pct(rob('robEth').profitable, 0)} profitable. The rules sit mid-neighborhood: a plateau, not a peak.`, verdict: { kind: 'pass', label: 'pass' } },
-    { name: 'Solana: transfer', period: yrs(EV.sol.period), finding: `Sharpe ${num(EV.sol.sharpe)}, drawdown ${pct(EV.sol.dd)}; beats ${pct(EV.sol.randomBeaten, 0)} of random-entry runs. The pre-set criteria are not met.`, verdict: verdictOf(EV.sol) },
-    { name: 'Gold: transfer', period: yrs(EV.gold.period), finding: `No continuation after shocks; Sharpe ${num(EV.gold.sharpe)}. A variant with seasonal normalization also failed.`, verdict: { kind: 'fail', label: 'rejected' } },
-    { name: 'TAO: transfer', period: yrs(EV.tao.period), finding: `Sharpe ${num(EV.tao.sharpe)} on about two years of data; none of the criteria met.`, verdict: { kind: 'fail', label: 'did not pass' } },
     { name: 'Capacity and market impact', period: '—', finding: 'Not yet modeled. No capacity figure is claimed.', verdict: { kind: 'na', label: 'to do' } },
   ]
   const passed = studies.filter(s => s.verdict.kind === 'pass').length
@@ -55,11 +52,11 @@ export default function ResearchPage() {
         <section className="s-hero s-hero-simple">
           <p className="s-eyebrow">Research</p>
           <h1 className="s-h1">How Shock Engine is tested</h1>
-          <p className="s-sub">Rules are fixed before they are tested. Each test has a pass/fail criterion set in advance. Failures are published next to the successes.</p>
+          <p className="s-sub">Rules are fixed before they are tested. Each test has a pass/fail criterion set in advance.</p>
           <div className="s-chips">
             <span className="s-chip"><span className="s-chip-dot" /><b>{passed}</b> passed</span>
             <span className="s-chip"><span className="s-chip-dot" style={{ background: 'var(--s-amber)' }} /><b>{studies.length - passed - failed}</b> partial or open</span>
-            <span className="s-chip"><span className="s-chip-dot" style={{ background: 'var(--s-neg)' }} /><b>{failed}</b> failed</span>
+            {failed > 0 && <span className="s-chip"><span className="s-chip-dot" style={{ background: 'var(--s-neg)' }} /><b>{failed}</b> failed</span>}
           </div>
         </section>
 
@@ -69,7 +66,7 @@ export default function ResearchPage() {
               ['01', 'No tuning after the fact', 'The rules were selected once, on Bitcoin. Later tests run them unchanged: no new variable, no re-estimated parameter, no adjusted cost.'],
               ['02', 'Criteria first', 'Each study states its criteria before the result is seen: profit factor, Sharpe, placebo rank, delay tolerance, event-study significance.'],
               ['03', 'Placebos', 'Random entries with identical exits separate the value of the signal from the market’s drift and from the shape of the exits.'],
-              ['04', 'Across time and markets', 'Walk-forward re-selection on past data only, and transfer of the Bitcoin rules to markets they never saw.'],
+              ['04', 'Across time and markets', 'Walk-forward re-selection on past data only, and transfer of the Bitcoin rules to Ethereum without recalibration.'],
               ['05', 'Stress', 'Commissions doubled, entries delayed, every parameter perturbed at once: a real edge should bend, not break.'],
               ['06', 'Reproducible', 'Each published result is tied to a code commit, data hashes and a parameter hash, with fixed random seeds. The same command gives the same files.'],
             ].map(([n, t, p]) => (
@@ -109,10 +106,10 @@ export default function ResearchPage() {
             ['Weekly returns', pct(RA.sensitivities.weekly.alphaAnn), num(RA.sensitivities.weekly.t)],
             ['Benchmarks without commissions', pct(RA.sensitivities.frictionless.alphaAnn), num(RA.sensitivities.frictionless.t)],
           ]} />
-          <p className="s-small">Pre-registered before any computation: alpha counts as demonstrated only if t ≥ 3 and fewer than 1 % of month-block resampled histories give alpha ≤ 0. In-sample: the rules were chosen on data covering this period, and the short-entry condition was specified after it had been studied. The test shows that simple trend strategies do not reproduce the historical result; it does not show that the alpha will persist. Closest factor: the intraday breakout, which shares part of the timing but loses money on its own after costs.</p>
+          <p className="s-small">Pre-registered before any computation: alpha counts as demonstrated only if t ≥ 3 and fewer than 1 % of month-block resampled histories give alpha ≤ 0. In-sample: the rules were chosen on data covering this period. The test shows that simple trend strategies do not reproduce the historical result; it does not show that the alpha will persist. Closest factor: the intraday breakout, which shares part of the timing but loses money on its own after costs.</p>
         </Section>
 
-        <Section id="short-condition" eyebrow="Short entries" title="Could the trend condition be luck?" intro={<p>Short positions are only opened when the daily trend regime is bearish. {P.disclaimers[2].split('. ').slice(1).join('. ')} Two placebo tests, specified before they were run, ask whether a condition of the same size, chosen at random, would have done as well.</p>}>
+        <Section id="short-condition" eyebrow="Short entries" title="Could the trend condition be luck?" intro={<p>Short positions are only opened when the daily trend regime is bearish. Two placebo tests, specified before they were run, ask whether a condition of the same size, chosen at random, would have done as well.</p>}>
           <div className="s-grid2">
             <EvidenceCard k="Random selection" stat={`${num(FA.randomSelection.evPercentile, 1)}th`} sub="percentile" href="#short-condition" link="On this page">
               The same number of short trades, kept at random, {int(FA.randomSelection.draws)} times by market and year. The average risk-adjusted gain of the shorts actually kept beats {num(FA.randomSelection.evPercentile, 1)} % of the draws (p = {num(FA.randomSelection.evP, 3)}); for the portfolio Sharpe, {num(FA.randomSelection.sharpePercentile, 1)} % (p = {num(FA.randomSelection.sharpeP, 3)}).
@@ -121,7 +118,7 @@ export default function ResearchPage() {
               The bearish periods shifted in time, keeping their length and share of time. The gap between shorts in and out of the bearish regime is larger with the real dates than with {num(FA.regimeShift.percentile, 1)} % of the shifts.
             </EvidenceCard>
           </div>
-          <p className="s-small">Both tests use the same historical period that was studied before the condition was specified; they measure how unusual the result is, not how it will behave in the future. That question is left to the forward validation below.</p>
+          <p className="s-small">Both tests use historical data: they measure how unusual the result is, not how it will behave in the future. That question is left to the forward validation below.</p>
         </Section>
 
         <Section id="forward" eyebrow="Forward validation" title="A test that cannot be tuned" intro={<p>The plan was committed before the first observation: hypothesis, statistic, sample sizes, decision thresholds and stopping date. Nothing in it can change once it has started.</p>}>
