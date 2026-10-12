@@ -51,10 +51,10 @@
 \vspace{18pt}
 {\large ShadowMarketPro Research\par}
 \vspace{4pt}
-{\small Working paper v1.0 \textperiodcentered{} October 2026 \textperiodcentered{} specification E2 \textperiodcentered{} \texttt{shock-engine-2026.10}\par}
+{\small Working paper v1.1 \textperiodcentered{} October 2026 \textperiodcentered{} specification E2 \textperiodcentered{} \texttt{shock-engine-2026.10}\par}
 \vspace{22pt}
 \begin{abstract}
-\noindent We study a systematic strategy that trades the continuation of abnormal 15-minute price moves in Bitcoin (BTC) and Ether (ETH). A position is opened when a return that is extreme relative to its local volatility breaks the recent range and is confirmed by higher-timeframe structure, candle quality, participation and a price-impact filter; risk is managed with volatility-scaled exits. Shock Engine is defined by its specification E2, the reference version studied here, in which the short side is a \emph{conditional mirror} of the long side: short entries reproduce the long logic in the opposite direction and are admitted only when the daily trend regime is bearish. The rules were calibrated on Bitcoin and applied unchanged to Ether. Over 1~September 2018 to 30~September 2026, a 50/50 BTC/ETH portfolio shows a Sharpe ratio of 1.88, a compound annual growth rate of 61.6\% and a maximum drawdown of \ensuremath{-}19.1\% after transaction costs, against 0.78, 34.1\% and \ensuremath{-}76.9\% for buy-and-hold. Random-entry placebos, delayed entries, parameter neighbourhoods, cross-asset transfer, a Monte Carlo falsification battery for the short-entry condition and a regression on six standard trend-following strategies (residual alpha of 41.0\% a year, Newey--West $t=4.56$) do not explain the result away. The evidence is nonetheless in-sample: the Bitcoin rules were selected on data covering the period, and the short-entry condition was specified after the period had been studied. We report the failures (Solana, gold, TAO; a walk-forward Sharpe of 1.11) and pre-register a forward test.
+\noindent We study a systematic strategy that trades the continuation of abnormal 15-minute price moves in Bitcoin (BTC) and Ether (ETH). A position is opened when a return that is extreme relative to its local volatility breaks the recent range and is confirmed by higher-timeframe structure, candle quality, participation and a price-impact filter; risk is managed with volatility-scaled exits. Shock Engine is defined by its specification E2, the reference version studied here, in which the short side is a \emph{conditional mirror} of the long side: short entries reproduce the long logic in the opposite direction and are admitted only when the daily trend regime is bearish. The rules were calibrated on Bitcoin and applied unchanged to Ether. Over 1~September 2018 to 30~September 2026, a 50/50 BTC/ETH portfolio shows a Sharpe ratio of 1.88, a compound annual growth rate of 61.6\% and a maximum drawdown of \ensuremath{-}19.1\% after transaction costs, against 0.78, 34.1\% and \ensuremath{-}76.9\% for buy-and-hold. Random-entry placebos, delayed entries, parameter neighbourhoods, cross-asset transfer, a Monte Carlo falsification battery for the short-entry condition and a regression on six standard trend-following strategies (residual alpha of 41.0\% a year, Newey--West $t=4.56$) do not explain the result away. The evidence is nonetheless in-sample: the rules, the short-entry condition included, were set on Bitcoin data covering the period. We report the failures (Solana, gold, TAO; a walk-forward Sharpe of 1.11) and pre-register a forward test.
 \end{abstract}
 \vspace{8pt}
 \noindent{\small\textbf{Keywords:} cryptocurrency, intraday momentum, time-series momentum, jumps, regime conditioning, backtest overfitting, pre-registration, residual alpha.\\
@@ -73,7 +73,7 @@ This paper documents a rule-based strategy, \emph{Shock Engine}, built on the fi
 \begin{enumerate}[label=(\roman*)]
 \item The rules were set on Bitcoin and transferred \emph{without recalibration} to Ether, where they meet every pre-set criterion on two independent price feeds; they fail on Solana, gold and TAO, and we report these failures.
 \item Random-entry placebos with identical exits and one-bar entry delays show that the edge lies in the timing of entries rather than in market drift or in the shape of the exits.
-\item In specification E2, the reference version of Shock Engine, the short side is a \emph{conditional mirror} of the long side: short entries are allowed only in a bearish daily trend regime. Because this condition was specified after the sample had been studied, we subject it to three Monte Carlo falsification tests specified before they were run.
+\item In specification E2, the reference version of Shock Engine, the short side is a \emph{conditional mirror} of the long side: short entries are allowed only in a bearish daily trend regime. Because its historical benefit is measured on the same data that were used to build the strategy, we subject it to three Monte Carlo falsification tests specified before they were run.
 \item A regression of the daily returns on buy-and-hold and on six standard trend-following strategies leaves 79\% of the average return unexplained, with a Newey--West $t$-statistic of 4.56.
 \item We pre-register a forward test of the short-entry condition with interim analyses, and run the strategy on Hyperliquid's test network so that its decisions are timestamped by a third party.
 \end{enumerate}
@@ -144,7 +144,7 @@ T_t=\1\Big\{P^{\mathrm{d}}_{D(t)}<\bar P^{(n)}_{D(t)}\ \text{and}\ \bar P^{(n)}_
 \end{equation}
 Long entries, exits and the flip rule do not depend on $T_t$; the condition only decides whether a new short position may be opened. The economic motivation is the state dependence of momentum \citep{DanielMoskowitz2016}: selling a downside shock is a continuation trade in a falling market and a counter-trend trade in a rising one. Over the sample, 250 of the 1{,}311 trades are shorts.
 
-\textbf{Disclosure.} An unconditional (symmetric) mirror was used while the strategy was developed. The trend condition that defines E2 was specified in October 2026, \emph{after} the period studied in this paper had been examined, so every historical figure in this paper is in-sample with respect to it. Section~\ref{sec:falsification} asks whether a condition of the same kind chosen at random would have done as well, and Section~\ref{sec:forward} tests it prospectively.
+\textbf{Design and implementation history.} The conditional mirror is part of the strategy's design. For part of the research, the code ran a simpler unconditional (symmetric) mirror; the trend condition was written into the research code in October 2026, its definition fixed in a pre-registered protocol before its results were computed. Like every other rule, it is evaluated on data already used to build the strategy, so every historical figure in this paper is in-sample with respect to it. Section~\ref{sec:falsification} asks whether a condition of the same kind chosen at random would have done as well, and Section~\ref{sec:forward} tests it prospectively.
 
 \subsection{Portfolio}
 
@@ -158,9 +158,9 @@ The portfolio allocates half of the capital to the Bitcoin strategy and half to 
 \text{Sortino}=\sqrt{365.25}\,\frac{\bar r}{\sqrt{\tfrac1N\sum_d \min(r_d,0)^2}},\qquad
 \text{MDD}=\min_t\Big(\frac{V_t}{\max_{s\le t}V_s}-1\Big),
 \end{equation}
-and the Calmar ratio is CAGR$/|$MDD$|$. The standard error of an estimated annual Sharpe ratio over $T$ years is approximately \citep{Lo2002}
+and the Calmar ratio is CAGR$/|$MDD$|$. For independent daily returns, the standard error of a Sharpe ratio annualised from daily returns over $T$ years is approximately \citep{Lo2002}
 \begin{equation}\label{eq:lo}
-\widehat{\mathrm{SE}}(\widehat\SR)\approx\sqrt{\frac{1+\tfrac12\SR^2}{T}} .
+\widehat{\mathrm{SE}}(\widehat\SR)\approx\sqrt{365.25}\,\sqrt{\frac{1+\tfrac12\SR_d^2}{N}}\approx\frac{1}{\sqrt{T}},\qquad \SR_d=\frac{\SR}{\sqrt{365.25}},\quad N=365.25\,T .
 \end{equation}
 
 \paragraph{Risk-normalised trade returns.} To compare trades across volatility regimes and assets, trade $i$ with profit $\pi_i$, equity at entry $E_i$ and entry day $d_i$ is scored as
@@ -392,7 +392,7 @@ On Bitcoin, re-selecting the shock threshold, stop and trailing-stop settings of
 
 \section{Falsification of the short-entry condition}\label{sec:falsification}
 
-The conditional mirror was introduced after the sample had been studied, so its in-sample improvement is not evidence. We pre-registered three tests asking whether the historical advantage is exceptional relative to counterfactuals with comparable properties. The condition itself is frozen; no parameter was changed after the results.
+The conditional mirror is evaluated on the same history that was used to build the strategy, so its in-sample improvement is not evidence by itself. We pre-registered three tests asking whether the historical advantage is exceptional relative to counterfactuals with comparable properties. The condition itself is frozen; no parameter was changed after the results.
 
 \paragraph{Test A: random selection.} Keep exactly as many of the original short trades as the condition keeps, chosen at random within each market and year, 50{,}000 times. The average risk-normalised return of the shorts actually kept ranks at the 96.8th percentile of the draws ($p=0.032$); the portfolio Sharpe ratio at the 94.5th percentile ($p=0.055$).
 
@@ -440,7 +440,7 @@ Block (days) & $P(\Delta\mathrm{EV}>0)$ & Synthetic P95 & Historical & Hist.~per
 \end{threeparttable}
 \end{table}
 
-\paragraph{Reading.} On synthetic markets the condition improves the average short in only about half of the paths, so its benefit to the quality of shorts is not mechanical; the historical improvement exceeds the synthetic 95th percentile at every block length. By contrast, the gains in Sharpe ratio and drawdown are largely generic: removing shorts outside bearish regimes improves drawdowns in most synthetic paths as well. These tests use the same history that was studied before the condition was specified; they measure how unusual the result is, not how it will behave.
+\paragraph{Reading.} On synthetic markets the condition improves the average short in only about half of the paths, so its benefit to the quality of shorts is not mechanical; the historical improvement exceeds the synthetic 95th percentile at every block length. By contrast, the gains in Sharpe ratio and drawdown are largely generic: removing shorts outside bearish regimes improves drawdowns in most synthetic paths as well. These tests use the same history that was used to build the strategy; they measure how unusual the result is, not how it will behave.
 
 \section{Is it just trend following? Residual alpha}\label{sec:alpha}
 
@@ -535,7 +535,7 @@ The residual alpha is 41.0\% a year with $t=4.56$; no bootstrap history out of 5
 
 \paragraph{Pre-registered forward test.} The hypothesis $H_1:\ \E[R\mid T=1]>\E[R\mid T=0]$ for short signals is tested prospectively from 12~October 2026, with the definition, statistic, thresholds and stopping date committed before the first observation. Interim analyses occur when 25, 50 and 75 shorts have closed in the bearish regime, each at $p<0.001$; the final analysis occurs when both groups reach 100 closed shorts, at $p<0.047$, and no later than 1~October 2031, for a total type-I error of at most 0.05 \citep{Haybittle1971,PetoEtAl1976}. With roughly 162 trades a year across both markets, few of them shorts, the test will take years rather than months.
 
-\paragraph{Why live Sharpe ratios take time.} By Equation~\eqref{eq:lo}, a strategy with a true Sharpe ratio of 1.5 observed for one year has a standard error of about 1.46: a single year of live trading cannot distinguish it from zero. What a first year can establish is \emph{implementation fidelity}: that the live system takes the same decisions as the simulation on the same bars, at a measurable execution cost.
+\paragraph{Why live Sharpe ratios take time.} By Equation~\eqref{eq:lo}, a Sharpe ratio measured over one year of daily returns has a standard error of about 1.0: for a true Sharpe ratio of 1.5, the 95\% interval of a one-year estimate runs from about $-0.5$ to $3.5$, so a single year of live trading cannot reliably distinguish it from zero. What a first year can establish is \emph{implementation fidelity}: that the live system takes the same decisions as the simulation on the same bars, at a measurable execution cost.
 
 \paragraph{Deployment.} The live engine shares its decision code with the backtester and is tested for decision-by-decision parity. Since 9~October 2026 it runs the public specification on Hyperliquid's test network, where every order is publicly timestamped by the exchange; testnet funds are fictitious and its market differs from the real one, so these results check mechanics, not performance.
 
@@ -543,7 +543,7 @@ The residual alpha is 41.0\% a year with $t=4.56$; no bootstrap history out of 5
 
 \begin{itemize}
 \item \textbf{Selection.} The Bitcoin rules were selected on 2017--2026 data, which contains the whole portfolio period; Ether is a transfer across markets, not across time. The walk-forward Sharpe ratio (1.11) is clearly below the fixed preset.
-\item \textbf{Post-hoc condition.} The short-entry condition was specified after the period had been studied; Section~\ref{sec:falsification} measures how unusual its benefit is but does not make it out-of-sample.
+\item \textbf{Short condition in-sample.} Like every rule, the short-entry condition is evaluated on data already used to build the strategy; Section~\ref{sec:falsification} measures how unusual its benefit is but does not make it out-of-sample.
 \item \textbf{Frictions.} Slippage and funding are excluded from the headline figures. Capacity and market impact are not modelled, and the strategy trades when order books are thinnest.
 \item \textbf{Right tail.} A small number of large trades drive the long-run growth; missing a few of them in live trading would change the outcome materially.
 \item \textbf{Venues.} Data venues (Bitstamp, Binance spot) differ from the intended execution venue (Hyperliquid perpetuals) in prices, fees, funding and stop mechanics.

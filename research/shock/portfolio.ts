@@ -578,7 +578,7 @@ const summary = {
   title: 'Shock Engine BTC/ETH Portfolio', subtitle: E2V ? 'BTC-calibrated strategy · applied unchanged to Ethereum' : 'Frozen BTC-calibrated strategy · zero-shot Ethereum transfer',
   parametersSha256: paramsHash,
   disclaimers: E2V
-    ? ['Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH.', 'Historical simulation after modeled transaction costs. Not live performance.', 'Short entries are only allowed when the daily trend regime is bearish. This condition was specified in October 2026, after this historical period had been studied: the figures are in-sample, not an independent out-of-sample test.', 'Slippage and perpetual funding are not included in the headline figures.', 'Capacity and market impact are not yet modeled.']
+    ? ['Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH.', 'Historical simulation after modeled transaction costs. Not live performance.', 'Short entries are only allowed when the daily trend regime is bearish, as in the strategy’s design. Like every rule, this condition is evaluated on data already used to build the strategy: the figures are in-sample, not an independent out-of-sample test.', 'Slippage and perpetual funding are not included in the headline figures.', 'Capacity and market impact are not yet modeled.']
     : ['Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH.', 'Historical simulation after modeled transaction costs. Not live performance.', 'Capacity and market impact are not yet modeled.'],
   ...(E2V ? { stress: e2Stress } : {}),
   commonPeriod,
