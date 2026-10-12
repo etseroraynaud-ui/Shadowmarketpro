@@ -106,6 +106,18 @@ Newey–West et bootstrap par mois :
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/residual-alpha.ts
 ```
 
+Couche probabiliste (plan : `research/preregistration/probabilistic-layer.md`, commité avant tout
+calcul ; module indépendant `research/proba/`, désactivé pour toute décision de trading ; rapport dans
+`research/reports/proba/`). Probabilité de gain, espérance en R, P(R ≥ 2) et continuation à 15 min,
+1 h, 4 h, 16 h des 1 311 trades E2, walk-forward trimestriel purgé contre une prévision naïve ; modèle
+figé et journal prospectif. Résultat : aucun apport démontré hors entraînement. Détails et commandes :
+[`proba/README.md`](proba/README.md).
+
+```
+npm run research:proba
+npm run research:proba:score -- --asset btc --at 2026-09-21T20:30:00Z
+```
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 

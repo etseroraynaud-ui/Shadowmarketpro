@@ -1,0 +1,55 @@
+SHOCK ENGINE — PROBABILISTIC SIGNAL REPORT
+  BTC · LONG · 2026-09-21T08:30:00.000Z · BTC-20260921T0830-L · rétrospectif
+  Régime de volatilité agité · tendance journalière haussière · source walk-forward, pli 23 (hors entraînement)
+  (intervalles 90 % : incertitude des paramètres seulement)
+  P(gain)                   30,3 %  [non estimé]             naïf    31,3 %  apport non démontré
+  P(R ≥ +2)                 14,8 %  [non estimé]             naïf    17,2 %  apport non démontré
+  E[R]                     +0,17 R  [non estimé]             naïf   +0,54 R  apport non démontré
+  Continuation 15 min       46,5 %  [non estimé]             naïf    48,6 %  apport non démontré
+  Continuation 1 h          46,9 %  [non estimé]             naïf    49,3 %  apport non démontré
+  Continuation 4 h          46,6 %  [non estimé]             naïf    48,3 %  apport non démontré
+  Continuation 16 h         49,3 %  [non estimé]             naïf    50,8 %  apport non démontré
+  Résultat observé : R = +7,93 R (TP1+TRAIL)
+  Modèle shock-proba-1.0.0 · pli 23 · 14a1ccb04796 · Modèle du pli 23 du walk-forward, estimé avec les labels connus au 2026-06-30 ; prévision hors entraînement.
+
+SHOCK ENGINE — PROBABILISTIC SIGNAL REPORT
+  BTC · LONG · 2026-09-21T15:15:00.000Z · BTC-20260921T1515-L · rétrospectif
+  Régime de volatilité agité · tendance journalière haussière · source walk-forward, pli 23 (hors entraînement)
+  (intervalles 90 % : incertitude des paramètres seulement)
+  P(gain)                   30,0 %  [non estimé]             naïf    31,3 %  apport non démontré
+  P(R ≥ +2)                 12,4 %  [non estimé]             naïf    17,2 %  apport non démontré
+  E[R]                     +0,05 R  [non estimé]             naïf   +0,54 R  apport non démontré
+  Continuation 15 min       43,3 %  [non estimé]             naïf    48,6 %  apport non démontré
+  Continuation 1 h          43,8 %  [non estimé]             naïf    49,3 %  apport non démontré
+  Continuation 4 h          45,2 %  [non estimé]             naïf    48,3 %  apport non démontré
+  Continuation 16 h         49,6 %  [non estimé]             naïf    50,8 %  apport non démontré
+  Résultat observé : R = −1,22 R (SL)
+  Modèle shock-proba-1.0.0 · pli 23 · 14a1ccb04796 · Modèle du pli 23 du walk-forward, estimé avec les labels connus au 2026-06-30 ; prévision hors entraînement.
+
+SHOCK ENGINE — PROBABILISTIC SIGNAL REPORT
+  BTC · LONG · 2026-09-21T20:30:00.000Z · BTC-20260921T2030-L · rétrospectif
+  Régime de volatilité agité · tendance journalière haussière · source walk-forward, pli 23 (hors entraînement)
+  (intervalles 90 % : incertitude des paramètres seulement)
+  P(gain)                   30,2 %  [non estimé]             naïf    31,3 %  apport non démontré
+  P(R ≥ +2)                 14,1 %  [non estimé]             naïf    17,2 %  apport non démontré
+  E[R]                     +0,11 R  [non estimé]             naïf   +0,54 R  apport non démontré
+  Continuation 15 min       43,3 %  [non estimé]             naïf    48,6 %  apport non démontré
+  Continuation 1 h          43,1 %  [non estimé]             naïf    49,3 %  apport non démontré
+  Continuation 4 h          46,4 %  [non estimé]             naïf    48,3 %  apport non démontré
+  Continuation 16 h         50,0 %  [non estimé]             naïf    50,8 %  apport non démontré
+  Résultat observé : R = −1,22 R (SL)
+  Modèle shock-proba-1.0.0 · pli 23 · 14a1ccb04796 · Modèle du pli 23 du walk-forward, estimé avec les labels connus au 2026-06-30 ; prévision hors entraînement.
+
+SHOCK ENGINE — PROBABILISTIC SIGNAL REPORT
+  BTC · LONG · 2026-09-21T20:30:00.000Z · BTC-20260921T2030-L · rétrospectif
+  Régime de volatilité agité · tendance journalière haussière · source modèle figé (trade de l'échantillon d'entraînement : valeur dans l'échantillon)
+  (intervalles 90 % : incertitude des paramètres seulement)
+  P(gain)                   28,5 %  [25,2 % ; 32,3 %]        naïf    31,0 %  apport non démontré
+  P(R ≥ +2)                 14,0 %  [12,1 % ; 16,2 %]        naïf    16,9 %  apport non démontré
+  E[R]                     +0,05 R  [−0,23 R ; +0,36 R]      naïf   +0,56 R  apport non démontré
+  Continuation 15 min       42,7 %  [36,2 % ; 49,2 %]        naïf    48,3 %  apport non démontré
+  Continuation 1 h          45,9 %  [43,1 % ; 49,4 %]        naïf    48,8 %  apport non démontré
+  Continuation 4 h          46,2 %  [43,5 % ; 49,2 %]        naïf    48,1 %  apport non démontré
+  Continuation 16 h         49,8 %  [46,9 % ; 52,7 %]        naïf    50,3 %  apport non démontré
+  Résultat observé : R = −1,22 R (SL)
+  Modèle shock-proba-1.0.0 · e1da2cda9e78 · Validé par walk-forward sur l'historique de développement (hors entraînement de la couche, pas hors échantillon de la stratégie). Aucun test prospectif. Désactivé pour toute décision de trading.

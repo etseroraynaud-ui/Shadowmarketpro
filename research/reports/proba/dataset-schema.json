@@ -1,0 +1,410 @@
+{
+ "version": "shock-proba-1.0.0",
+ "prereg": "research/preregistration/probabilistic-layer.md",
+ "rows": 1311,
+ "excluded": [],
+ "columns": [
+  {
+   "name": "trade_id",
+   "role": "id",
+   "availableAtEntry": true,
+   "description": "ACTIF-AAAAMMJJTHHMM-L|S, heure = clôture de la bougie de signal (UTC)"
+  },
+  {
+   "name": "asset",
+   "role": "id",
+   "availableAtEntry": true,
+   "description": "BTC (Bitstamp BTC/USD) ou ETH (Binance ETH/USDT)"
+  },
+  {
+   "name": "direction",
+   "role": "id",
+   "availableAtEntry": true,
+   "description": "long ou short"
+  },
+  {
+   "name": "entry_time",
+   "role": "id",
+   "availableAtEntry": true,
+   "description": "clôture de la bougie de signal, ISO UTC (exécution de l'entrée)"
+  },
+  {
+   "name": "exit_time",
+   "role": "trade",
+   "availableAtEntry": false,
+   "description": "clôture de la bougie de sortie, ISO UTC"
+  },
+  {
+   "name": "vol_regime",
+   "role": "id",
+   "availableAtEntry": true,
+   "description": "régime de volatilité du moteur (calme / agité), jours clos"
+  },
+  {
+   "name": "trend_regime",
+   "role": "id",
+   "availableAtEntry": true,
+   "description": "tendance journalière de classify, dernier jour clos"
+  },
+  {
+   "name": "entry_tag",
+   "role": "id",
+   "availableAtEntry": true,
+   "description": "IMP (choc principal) ou μIMP (choc micro)"
+  },
+  {
+   "name": "set",
+   "role": "id",
+   "availableAtEntry": true,
+   "description": "jeu de réglages qui décide (0 calme, 1 agité)"
+  },
+  {
+   "name": "f_absZ",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "|z| du rendement log de la bougie de signal, standardisé sur volWin bougies (jeu qui décide)"
+  },
+  {
+   "name": "f_volZ",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "volume standardisé sur volZWin bougies"
+  },
+  {
+   "name": "f_breakAtr",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "d·(clôture − niveau cassé)/ATR ; niveau = plus haut (long) ou plus bas (short) des rangeWin bougies jusqu'à i−1"
+  },
+  {
+   "name": "f_closeQ",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "position de la clôture dans la bougie dans le sens du trade, 0–1"
+  },
+  {
+   "name": "f_lamPct",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "percentile (0–1) de l'EMA de l'indicatrice de choc : intensité de clustering (λ du moteur)"
+  },
+  {
+   "name": "f_rv",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "écart type des rendements log 15 min sur volWin bougies (sans annualisation)"
+  },
+  {
+   "name": "f_volPct",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "percentile (0–1) de la volatilité journalière 20 j parmi les 365 jours précédents, dernier jour clos"
+  },
+  {
+   "name": "f_htfDist",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "d·(clôture − moyenne 60 min du filtre HTF)/ATR"
+  },
+  {
+   "name": "f_isShort",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "1 si short"
+  },
+  {
+   "name": "f_isEth",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "1 si ETH"
+  },
+  {
+   "name": "f_agitated",
+   "role": "feature",
+   "availableAtEntry": true,
+   "description": "1 si régime de volatilité agité (jeu de réglages 1)"
+  },
+  {
+   "name": "f_z",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "z signé du choc"
+  },
+  {
+   "name": "f_wickAgainst",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "mèche opposée au sens du trade / amplitude de la bougie"
+  },
+  {
+   "name": "f_wickWith",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "mèche du côté favorable / amplitude de la bougie"
+  },
+  {
+   "name": "f_bodyShare",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "|clôture − ouverture| / amplitude de la bougie"
+  },
+  {
+   "name": "f_atrZ",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "z-score de l'ATR sur atrZWin bougies (compression)"
+  },
+  {
+   "name": "f_atrPct",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "ATR / clôture"
+  },
+  {
+   "name": "f_micro",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "1 si choc micro (|z| ≤ kMain, entrée μIMP)"
+  },
+  {
+   "name": "f_trend",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "tendance journalière de classify au dernier jour clos : 0 haussière, 1 neutre, 2 baissière"
+  },
+  {
+   "name": "f_trendDist",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "d·ln(clôture / moyenne journalière 50 j) / écart type journalier 20 j"
+  },
+  {
+   "name": "f_trendSlope",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "d·(moyenne 50 j / moyenne 50 j dix jours plus tôt − 1)"
+  },
+  {
+   "name": "f_dailyVol",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "écart type des rendements log journaliers sur 20 jours, dernier jour clos"
+  },
+  {
+   "name": "f_atr",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "ATR du jeu qui décide (atrLen), en prix"
+  },
+  {
+   "name": "f_close",
+   "role": "descriptive",
+   "availableAtEntry": true,
+   "description": "clôture de la bougie de signal = prix d'entrée"
+  },
+  {
+   "name": "entry_price",
+   "role": "trade",
+   "availableAtEntry": true,
+   "description": "prix d'exécution de l'entrée (= clôture de signal, glissement nul)"
+  },
+  {
+   "name": "stop_mult",
+   "role": "trade",
+   "availableAtEntry": true,
+   "description": "atrStopMult du jeu qui décide"
+  },
+  {
+   "name": "stop_dist",
+   "role": "trade",
+   "availableAtEntry": true,
+   "description": "distance du stop initial, en prix = stop_mult × ATR d'entrée"
+  },
+  {
+   "name": "qty",
+   "role": "trade",
+   "availableAtEntry": true,
+   "description": "quantité (100 % de l'equity, sans levier)"
+  },
+  {
+   "name": "risk",
+   "role": "trade",
+   "availableAtEntry": true,
+   "description": "risque initial en monnaie = qty × stop_dist"
+  },
+  {
+   "name": "equity_at_entry",
+   "role": "trade",
+   "availableAtEntry": true,
+   "description": "equity de la sleeve à l'entrée"
+  },
+  {
+   "name": "exit_price",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "prix de sortie moyen pondéré"
+  },
+  {
+   "name": "exits",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "sorties exécutées (SL, TP1, TRAIL, FLIP…)"
+  },
+  {
+   "name": "pnl_net",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "PnL après commissions d'entrée et de sortie"
+  },
+  {
+   "name": "fees",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "commissions du trade (0,045 % par exécution)"
+  },
+  {
+   "name": "ret",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "pnl_net / equity_at_entry"
+  },
+  {
+   "name": "R",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "pnl_net / risk"
+  },
+  {
+   "name": "R_gross",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "(pnl_net + fees) / risk"
+  },
+  {
+   "name": "fees_R",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "fees / risk (R = R_gross − fees_R)"
+  },
+  {
+   "name": "ambiguous_R",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "fees_R > 0.5"
+  },
+  {
+   "name": "y_win",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "1(R > 0)"
+  },
+  {
+   "name": "y_r1",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "1(R ≥ 1)"
+  },
+  {
+   "name": "y_r2",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "1(R ≥ 2)"
+  },
+  {
+   "name": "y_r3",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "1(R ≥ 3)"
+  },
+  {
+   "name": "ret_h1",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "d·ln(P_{t+1}/P_t), dernière clôture connue à la clôture prévue de la bougie i+1"
+  },
+  {
+   "name": "y_h1",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "1(ret_h1 > 0)"
+  },
+  {
+   "name": "gap_h1",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "clôture de remplissage antérieure à l'heure prévue (trou de données)"
+  },
+  {
+   "name": "ret_h4",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "d·ln(P_{t+4}/P_t), dernière clôture connue à la clôture prévue de la bougie i+4"
+  },
+  {
+   "name": "y_h4",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "1(ret_h4 > 0)"
+  },
+  {
+   "name": "gap_h4",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "clôture de remplissage antérieure à l'heure prévue (trou de données)"
+  },
+  {
+   "name": "ret_h16",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "d·ln(P_{t+16}/P_t), dernière clôture connue à la clôture prévue de la bougie i+16"
+  },
+  {
+   "name": "y_h16",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "1(ret_h16 > 0)"
+  },
+  {
+   "name": "gap_h16",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "clôture de remplissage antérieure à l'heure prévue (trou de données)"
+  },
+  {
+   "name": "ret_h64",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "d·ln(P_{t+64}/P_t), dernière clôture connue à la clôture prévue de la bougie i+64"
+  },
+  {
+   "name": "y_h64",
+   "role": "target",
+   "availableAtEntry": false,
+   "description": "1(ret_h64 > 0)"
+  },
+  {
+   "name": "gap_h64",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "clôture de remplissage antérieure à l'heure prévue (trou de données)"
+  },
+  {
+   "name": "mfe_R",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "excursion favorable maximale / risque initial (résultat futur)"
+  },
+  {
+   "name": "mae_R",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "excursion défavorable maximale / risque initial (résultat futur, ≤ 0)"
+  },
+  {
+   "name": "hold_bars",
+   "role": "outcome",
+   "availableAtEntry": false,
+   "description": "bougies de 15 min entre entrée et sortie"
+  }
+ ]
+}

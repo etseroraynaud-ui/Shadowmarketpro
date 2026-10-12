@@ -155,6 +155,11 @@ graine 20261012, intervalle percentile à 95 %, p unilatéral = (1 + #{Δ* ≤ 0
   bootstrap par mois (300 tirages, graine 20261013, λ fixé) pour l'incertitude des paramètres
   (intervalle 90 % affiché sur la fiche du signal). Fichier `research/reports/proba/model.json` avec
   empreinte, configuration, données et statut de validation.
+- Fiche du signal (précision ajoutée le 2026-10-12, avant tout calcul de prévision) : P(gain) du
+  modèle complet, P(R ≥ 2) du modèle affiché (§ 5), E[R] du modèle `ridge`, continuations du modèle
+  complet ; chaque valeur à côté de la valeur naïve et du verdict du walk-forward pour cette cible.
+  Bootstrap du modèle figé : transformation des variables fixée sur l'échantillon complet,
+  coefficients ré-estimés à λ fixé sur chaque tirage de mois.
 - Journal prospectif : chaque signal noté par le modèle figé est ajouté à un fichier JSONL avec
   l'empreinte du modèle. Seuls les signaux dont la bougie d'entrée est postérieure à la date de gel
   du modèle sont « prospectifs » ; les autres sont marqués « rétrospectifs ».

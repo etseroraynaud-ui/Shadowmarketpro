@@ -1,0 +1,117 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fiches de signaux — exemples</title><style>
+:root{color-scheme:light;--page:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#6f6d68;--grid:#e1e0d9;--axis:#c3c2b7;--border:rgba(11,11,11,.10);--s1:#2a78d6;--mid:#f0efec;--ok:#006300}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--page:#0d0d0d;--surface:#1a1a19;--ink:#fff;--ink2:#c3c2b7;--muted:#9a988f;--grid:#2c2c2a;--axis:#383835;--border:rgba(255,255,255,.10);--s1:#3987e5;--mid:#383835;--ok:#0ca30c}}
+:root[data-theme="dark"]{color-scheme:dark;--page:#0d0d0d;--surface:#1a1a19;--ink:#fff;--ink2:#c3c2b7;--muted:#9a988f;--grid:#2c2c2a;--axis:#383835;--border:rgba(255,255,255,.10);--s1:#3987e5;--mid:#383835;--ok:#0ca30c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+
+.card{border:1px solid var(--border);border-radius:12px;padding:16px 18px;background:var(--surface);margin:12px 0}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ct{margin:0;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink2)}
+.mode{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--axis);border-radius:999px;padding:2px 8px;color:var(--ink2)}
+.mode.pro{border-color:var(--s1);color:var(--ink)}
+.cid{font-size:20px;margin:8px 0 2px}
+.cs{font-size:12px;color:var(--muted);font-weight:400}
+.ctiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.ctile{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--page)}
+.cl{font-size:12px;color:var(--ink2)}
+.cv{font-size:26px;font-weight:620;margin:2px 0}
+.chip{display:inline-block;margin-top:6px;font-size:11.5px;color:var(--ink2);border:1px solid var(--grid);border-radius:999px;padding:1px 8px}
+.chip.ok{color:var(--ok);border-color:var(--ok)}
+.csub{font-size:13px;margin:14px 0 6px;color:var(--ink2);font-weight:600}
+.crow{display:grid;grid-template-columns:52px minmax(80px,1fr) 64px;gap:4px 10px;align-items:center;margin:6px 0}
+.csub2{grid-column:2 / span 2;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.csub2 .chip{margin:0}
+.cn{font-size:13px;color:var(--ink2)}
+.cval{font-size:14px;font-weight:620;text-align:right;font-variant-numeric:tabular-nums}
+.meter{position:relative;height:10px;border-radius:5px;background:color-mix(in oklab,var(--s1) 14%,var(--mid))}
+.meter .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--s1)}
+.meter .band{position:absolute;top:-3px;bottom:-3px;border-radius:3px;background:color-mix(in oklab,var(--s1) 22%,transparent)}
+.meter .tick{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--ink2)}
+.cf{font-size:11.5px;color:var(--muted);margin-top:12px;border-top:1px solid var(--grid);padding-top:8px}
+@media (max-width:720px){.ctiles{grid-template-columns:1fr}}
+</style></head><body><main><article class="card" aria-label="Fiche du signal BTC-20260921T0830-L">
+<header class="ch"><p class="ct">SHOCK ENGINE — PROBABILISTIC SIGNAL REPORT</p><span class="mode ">rétrospectif</span></header>
+<h3 class="cid">BTC · LONG <span class="cs">2026-09-21 08:30 UTC · BTC-20260921T0830-L</span></h3>
+<p class="cs">Régime de volatilité <b>agité</b> · tendance journalière <b>haussière</b> · source : walk-forward, pli 23 (hors entraînement)</p>
+<div class="ctiles"><div class="ctile"><div class="cl">P(gain)</div><div class="cv">30,3 %</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf 31,3 % · modèle complet</div><span class="chip" title="P(R &gt; 0) : complet contre naïf, Δ log-loss : Δ log-loss -0.0006 [-0.0031 ; 0.0018], p = 0.679">○ apport non démontré</span></div><div class="ctile"><div class="cl">P(R ≥ +2)</div><div class="cv">14,8 %</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf 17,2 % · modèle réduit</div><span class="chip" title="P(R ≥ 2) reduced contre naïf : Δ log-loss 0.0002 [-0.0057 ; 0.0059], p = 1.000">○ apport non démontré</span></div><div class="ctile"><div class="cl">E[R]</div><div class="cv">+0,17 R</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf +0,54 R · modèle ridge</div><span class="chip" title="E[R] ridge contre naïf : Δ erreur quadratique 0.1704 [-0.0854 ; 0.4944], p = 0.745">○ apport non démontré</span></div></div>
+<h4 class="csub">Probabilité que le prix continue dans le sens du signal (sans les règles de sortie)</h4>
+<div class="crow"><span class="cn">15 min</span>
+<span class="meter" role="img" aria-label="Continuation 15 min 46,5 %, naïf 48,6 %"><span class="fill" style="width:46.5%"></span><span class="tick" style="left:48.6%" title="naïf 48,6 %"></span></span>
+<span class="cval">46,5 %</span><span class="csub2"><span class="cs">naïf 48,6 % · intervalle non estimé</span><span class="chip" title="continuation 1 bougie : complet contre naïf : Δ log-loss 0.0014 [-0.0024 ; 0.0052], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">1 h</span>
+<span class="meter" role="img" aria-label="Continuation 1 h 46,9 %, naïf 49,3 %"><span class="fill" style="width:46.9%"></span><span class="tick" style="left:49.3%" title="naïf 49,3 %"></span></span>
+<span class="cval">46,9 %</span><span class="csub2"><span class="cs">naïf 49,3 % · intervalle non estimé</span><span class="chip" title="continuation 4 bougies : complet contre naïf : Δ log-loss -0.0015 [-0.0060 ; 0.0024], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">4 h</span>
+<span class="meter" role="img" aria-label="Continuation 4 h 46,6 %, naïf 48,3 %"><span class="fill" style="width:46.6%"></span><span class="tick" style="left:48.3%" title="naïf 48,3 %"></span></span>
+<span class="cval">46,6 %</span><span class="csub2"><span class="cs">naïf 48,3 % · intervalle non estimé</span><span class="chip" title="continuation 16 bougies : complet contre naïf : Δ log-loss -0.0005 [-0.0049 ; 0.0040], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">16 h</span>
+<span class="meter" role="img" aria-label="Continuation 16 h 49,3 %, naïf 50,8 %"><span class="fill" style="width:49.3%"></span><span class="tick" style="left:50.8%" title="naïf 50,8 %"></span></span>
+<span class="cval">49,3 %</span><span class="csub2"><span class="cs">naïf 50,8 % · intervalle non estimé</span><span class="chip" title="continuation 64 bougies : complet contre naïf : Δ log-loss -0.0013 [-0.0048 ; 0.0019], p = 1.000">○ apport non démontré</span></span></div>
+<p class="cs">Résultat observé (après coup) : R = +7,93 R · gagnant · sorties TP1+TRAIL</p>
+<footer class="cf">Modèle shock-proba-1.0.0 · pli 23 · empreinte 14a1ccb04796 · Modèle du pli 23 du walk-forward, estimé avec les labels connus au 2026-06-30 ; prévision hors entraînement. Intervalles : incertitude des paramètres seulement (bootstrap par mois). Repère gris : valeur naïve (taux de l'entraînement). Aucune valeur de cette fiche ne modifie une décision de trading.</footer>
+</article>
+<article class="card" aria-label="Fiche du signal BTC-20260921T1515-L">
+<header class="ch"><p class="ct">SHOCK ENGINE — PROBABILISTIC SIGNAL REPORT</p><span class="mode ">rétrospectif</span></header>
+<h3 class="cid">BTC · LONG <span class="cs">2026-09-21 15:15 UTC · BTC-20260921T1515-L</span></h3>
+<p class="cs">Régime de volatilité <b>agité</b> · tendance journalière <b>haussière</b> · source : walk-forward, pli 23 (hors entraînement)</p>
+<div class="ctiles"><div class="ctile"><div class="cl">P(gain)</div><div class="cv">30,0 %</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf 31,3 % · modèle complet</div><span class="chip" title="P(R &gt; 0) : complet contre naïf, Δ log-loss : Δ log-loss -0.0006 [-0.0031 ; 0.0018], p = 0.679">○ apport non démontré</span></div><div class="ctile"><div class="cl">P(R ≥ +2)</div><div class="cv">12,4 %</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf 17,2 % · modèle réduit</div><span class="chip" title="P(R ≥ 2) reduced contre naïf : Δ log-loss 0.0002 [-0.0057 ; 0.0059], p = 1.000">○ apport non démontré</span></div><div class="ctile"><div class="cl">E[R]</div><div class="cv">+0,05 R</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf +0,54 R · modèle ridge</div><span class="chip" title="E[R] ridge contre naïf : Δ erreur quadratique 0.1704 [-0.0854 ; 0.4944], p = 0.745">○ apport non démontré</span></div></div>
+<h4 class="csub">Probabilité que le prix continue dans le sens du signal (sans les règles de sortie)</h4>
+<div class="crow"><span class="cn">15 min</span>
+<span class="meter" role="img" aria-label="Continuation 15 min 43,3 %, naïf 48,6 %"><span class="fill" style="width:43.3%"></span><span class="tick" style="left:48.6%" title="naïf 48,6 %"></span></span>
+<span class="cval">43,3 %</span><span class="csub2"><span class="cs">naïf 48,6 % · intervalle non estimé</span><span class="chip" title="continuation 1 bougie : complet contre naïf : Δ log-loss 0.0014 [-0.0024 ; 0.0052], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">1 h</span>
+<span class="meter" role="img" aria-label="Continuation 1 h 43,8 %, naïf 49,3 %"><span class="fill" style="width:43.8%"></span><span class="tick" style="left:49.3%" title="naïf 49,3 %"></span></span>
+<span class="cval">43,8 %</span><span class="csub2"><span class="cs">naïf 49,3 % · intervalle non estimé</span><span class="chip" title="continuation 4 bougies : complet contre naïf : Δ log-loss -0.0015 [-0.0060 ; 0.0024], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">4 h</span>
+<span class="meter" role="img" aria-label="Continuation 4 h 45,2 %, naïf 48,3 %"><span class="fill" style="width:45.2%"></span><span class="tick" style="left:48.3%" title="naïf 48,3 %"></span></span>
+<span class="cval">45,2 %</span><span class="csub2"><span class="cs">naïf 48,3 % · intervalle non estimé</span><span class="chip" title="continuation 16 bougies : complet contre naïf : Δ log-loss -0.0005 [-0.0049 ; 0.0040], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">16 h</span>
+<span class="meter" role="img" aria-label="Continuation 16 h 49,6 %, naïf 50,8 %"><span class="fill" style="width:49.6%"></span><span class="tick" style="left:50.8%" title="naïf 50,8 %"></span></span>
+<span class="cval">49,6 %</span><span class="csub2"><span class="cs">naïf 50,8 % · intervalle non estimé</span><span class="chip" title="continuation 64 bougies : complet contre naïf : Δ log-loss -0.0013 [-0.0048 ; 0.0019], p = 1.000">○ apport non démontré</span></span></div>
+<p class="cs">Résultat observé (après coup) : R = −1,22 R · perdant · sorties SL</p>
+<footer class="cf">Modèle shock-proba-1.0.0 · pli 23 · empreinte 14a1ccb04796 · Modèle du pli 23 du walk-forward, estimé avec les labels connus au 2026-06-30 ; prévision hors entraînement. Intervalles : incertitude des paramètres seulement (bootstrap par mois). Repère gris : valeur naïve (taux de l'entraînement). Aucune valeur de cette fiche ne modifie une décision de trading.</footer>
+</article>
+<article class="card" aria-label="Fiche du signal BTC-20260921T2030-L">
+<header class="ch"><p class="ct">SHOCK ENGINE — PROBABILISTIC SIGNAL REPORT</p><span class="mode ">rétrospectif</span></header>
+<h3 class="cid">BTC · LONG <span class="cs">2026-09-21 20:30 UTC · BTC-20260921T2030-L</span></h3>
+<p class="cs">Régime de volatilité <b>agité</b> · tendance journalière <b>haussière</b> · source : walk-forward, pli 23 (hors entraînement)</p>
+<div class="ctiles"><div class="ctile"><div class="cl">P(gain)</div><div class="cv">30,2 %</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf 31,3 % · modèle complet</div><span class="chip" title="P(R &gt; 0) : complet contre naïf, Δ log-loss : Δ log-loss -0.0006 [-0.0031 ; 0.0018], p = 0.679">○ apport non démontré</span></div><div class="ctile"><div class="cl">P(R ≥ +2)</div><div class="cv">14,1 %</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf 17,2 % · modèle réduit</div><span class="chip" title="P(R ≥ 2) reduced contre naïf : Δ log-loss 0.0002 [-0.0057 ; 0.0059], p = 1.000">○ apport non démontré</span></div><div class="ctile"><div class="cl">E[R]</div><div class="cv">+0,11 R</div>
+<div class="cs">intervalle non estimé</div><div class="cs">naïf +0,54 R · modèle ridge</div><span class="chip" title="E[R] ridge contre naïf : Δ erreur quadratique 0.1704 [-0.0854 ; 0.4944], p = 0.745">○ apport non démontré</span></div></div>
+<h4 class="csub">Probabilité que le prix continue dans le sens du signal (sans les règles de sortie)</h4>
+<div class="crow"><span class="cn">15 min</span>
+<span class="meter" role="img" aria-label="Continuation 15 min 43,3 %, naïf 48,6 %"><span class="fill" style="width:43.3%"></span><span class="tick" style="left:48.6%" title="naïf 48,6 %"></span></span>
+<span class="cval">43,3 %</span><span class="csub2"><span class="cs">naïf 48,6 % · intervalle non estimé</span><span class="chip" title="continuation 1 bougie : complet contre naïf : Δ log-loss 0.0014 [-0.0024 ; 0.0052], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">1 h</span>
+<span class="meter" role="img" aria-label="Continuation 1 h 43,1 %, naïf 49,3 %"><span class="fill" style="width:43.1%"></span><span class="tick" style="left:49.3%" title="naïf 49,3 %"></span></span>
+<span class="cval">43,1 %</span><span class="csub2"><span class="cs">naïf 49,3 % · intervalle non estimé</span><span class="chip" title="continuation 4 bougies : complet contre naïf : Δ log-loss -0.0015 [-0.0060 ; 0.0024], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">4 h</span>
+<span class="meter" role="img" aria-label="Continuation 4 h 46,4 %, naïf 48,3 %"><span class="fill" style="width:46.4%"></span><span class="tick" style="left:48.3%" title="naïf 48,3 %"></span></span>
+<span class="cval">46,4 %</span><span class="csub2"><span class="cs">naïf 48,3 % · intervalle non estimé</span><span class="chip" title="continuation 16 bougies : complet contre naïf : Δ log-loss -0.0005 [-0.0049 ; 0.0040], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">16 h</span>
+<span class="meter" role="img" aria-label="Continuation 16 h 50,0 %, naïf 50,8 %"><span class="fill" style="width:50.0%"></span><span class="tick" style="left:50.8%" title="naïf 50,8 %"></span></span>
+<span class="cval">50,0 %</span><span class="csub2"><span class="cs">naïf 50,8 % · intervalle non estimé</span><span class="chip" title="continuation 64 bougies : complet contre naïf : Δ log-loss -0.0013 [-0.0048 ; 0.0019], p = 1.000">○ apport non démontré</span></span></div>
+<p class="cs">Résultat observé (après coup) : R = −1,22 R · perdant · sorties SL</p>
+<footer class="cf">Modèle shock-proba-1.0.0 · pli 23 · empreinte 14a1ccb04796 · Modèle du pli 23 du walk-forward, estimé avec les labels connus au 2026-06-30 ; prévision hors entraînement. Intervalles : incertitude des paramètres seulement (bootstrap par mois). Repère gris : valeur naïve (taux de l'entraînement). Aucune valeur de cette fiche ne modifie une décision de trading.</footer>
+</article>
+<article class="card" aria-label="Fiche du signal BTC-20260921T2030-L">
+<header class="ch"><p class="ct">SHOCK ENGINE — PROBABILISTIC SIGNAL REPORT</p><span class="mode ">rétrospectif</span></header>
+<h3 class="cid">BTC · LONG <span class="cs">2026-09-21 20:30 UTC · BTC-20260921T2030-L</span></h3>
+<p class="cs">Régime de volatilité <b>agité</b> · tendance journalière <b>haussière</b> · source : modèle figé (trade de l'échantillon d'entraînement : valeur dans l'échantillon)</p>
+<div class="ctiles"><div class="ctile"><div class="cl">P(gain)</div><div class="cv">28,5 %</div>
+<div class="cs">90 % : 25,2 % → 32,3 %</div><div class="cs">naïf 31,0 % · modèle complet</div><span class="chip" title="P(R &gt; 0) : complet contre naïf, Δ log-loss : Δ log-loss -0.0006 [-0.0031 ; 0.0018], p = 0.679">○ apport non démontré</span></div><div class="ctile"><div class="cl">P(R ≥ +2)</div><div class="cv">14,0 %</div>
+<div class="cs">90 % : 12,1 % → 16,2 %</div><div class="cs">naïf 16,9 % · modèle réduit</div><span class="chip" title="P(R ≥ 2) reduced contre naïf : Δ log-loss 0.0002 [-0.0057 ; 0.0059], p = 1.000">○ apport non démontré</span></div><div class="ctile"><div class="cl">E[R]</div><div class="cv">+0,05 R</div>
+<div class="cs">90 % : −0,23 R → +0,36 R</div><div class="cs">naïf +0,56 R · modèle ridge</div><span class="chip" title="E[R] ridge contre naïf : Δ erreur quadratique 0.1704 [-0.0854 ; 0.4944], p = 0.745">○ apport non démontré</span></div></div>
+<h4 class="csub">Probabilité que le prix continue dans le sens du signal (sans les règles de sortie)</h4>
+<div class="crow"><span class="cn">15 min</span>
+<span class="meter" role="img" aria-label="Continuation 15 min 42,7 %, naïf 48,3 %"><span class="band" style="left:36.2%;width:13.0%"></span><span class="fill" style="width:42.7%"></span><span class="tick" style="left:48.3%" title="naïf 48,3 %"></span></span>
+<span class="cval">42,7 %</span><span class="csub2"><span class="cs">naïf 48,3 % · 90 % : 36,2 % → 49,2 %</span><span class="chip" title="continuation 1 bougie : complet contre naïf : Δ log-loss 0.0014 [-0.0024 ; 0.0052], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">1 h</span>
+<span class="meter" role="img" aria-label="Continuation 1 h 45,9 %, naïf 48,8 %"><span class="band" style="left:43.1%;width:6.3%"></span><span class="fill" style="width:45.9%"></span><span class="tick" style="left:48.8%" title="naïf 48,8 %"></span></span>
+<span class="cval">45,9 %</span><span class="csub2"><span class="cs">naïf 48,8 % · 90 % : 43,1 % → 49,4 %</span><span class="chip" title="continuation 4 bougies : complet contre naïf : Δ log-loss -0.0015 [-0.0060 ; 0.0024], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">4 h</span>
+<span class="meter" role="img" aria-label="Continuation 4 h 46,2 %, naïf 48,1 %"><span class="band" style="left:43.5%;width:5.7%"></span><span class="fill" style="width:46.2%"></span><span class="tick" style="left:48.1%" title="naïf 48,1 %"></span></span>
+<span class="cval">46,2 %</span><span class="csub2"><span class="cs">naïf 48,1 % · 90 % : 43,5 % → 49,2 %</span><span class="chip" title="continuation 16 bougies : complet contre naïf : Δ log-loss -0.0005 [-0.0049 ; 0.0040], p = 1.000">○ apport non démontré</span></span></div><div class="crow"><span class="cn">16 h</span>
+<span class="meter" role="img" aria-label="Continuation 16 h 49,8 %, naïf 50,3 %"><span class="band" style="left:46.9%;width:5.9%"></span><span class="fill" style="width:49.8%"></span><span class="tick" style="left:50.3%" title="naïf 50,3 %"></span></span>
+<span class="cval">49,8 %</span><span class="csub2"><span class="cs">naïf 50,3 % · 90 % : 46,9 % → 52,7 %</span><span class="chip" title="continuation 64 bougies : complet contre naïf : Δ log-loss -0.0013 [-0.0048 ; 0.0019], p = 1.000">○ apport non démontré</span></span></div>
+<p class="cs">Résultat observé (après coup) : R = −1,22 R · perdant · sorties SL</p>
+<footer class="cf">Modèle shock-proba-1.0.0 · empreinte e1da2cda9e78 · Validé par walk-forward sur l'historique de développement (hors entraînement de la couche, pas hors échantillon de la stratégie). Aucun test prospectif. Désactivé pour toute décision de trading. Intervalles : incertitude des paramètres seulement (bootstrap par mois). Repère gris : valeur naïve (taux de l'entraînement). Aucune valeur de cette fiche ne modifie une décision de trading.</footer>
+</article></main></body></html>
