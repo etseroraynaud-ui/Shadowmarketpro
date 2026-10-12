@@ -105,14 +105,23 @@ programmée **5 s** plus tard (`runtime.ts:121`) : c'est ce délai qu'il faut ra
 si l'attente est supprimée. Les révisions éventuelles sont déjà détectées (`candle_revised`).
 
 **Quand calculer sans risque.** Dès que l'exchange a ouvert la bougie suivante, c'est-à-dire à la
-première transaction après T. Sonde indépendante (1re clôture enregistrée, 04:45 UTC, marché calme) :
+première transaction après T. Sonde indépendante (8 clôtures par actif, 04:45 → 06:30 UTC le
+2026-10-12, marché calme ; médiane, et P90 entre parenthèses) :
 
 | | BTC | ETH |
 |---|---|---|
-| première transaction après T (heure de l'exchange) | + 1,16 s | + 0,06 s |
-| premier message WebSocket de la nouvelle bougie | + 1,44 s | + 0,27 s |
-| REST confirme selon la règle du bot (réponse reçue) | + 1,72 s | + 0,84 s |
-| bougie reçue par le WebSocket juste avant = valeur REST définitive | oui | oui |
+| première transaction après T (heure de l'exchange) | + 0,49 s (max 2,7 s) | + 0,86 s (max 1,1 s) |
+| premier message WebSocket de la nouvelle bougie | + 1,22 s (2,01 s) | + 0,93 s (1,65 s) |
+| REST confirme selon la règle du bot (réponse reçue) | + 1,38 s (1,91 s) | + 0,89 s (1,69 s) |
+| bougie reçue par le WebSocket juste avant = valeur REST définitive | 8 / 8 | 8 / 8 |
+| lecture REST plus précoce différente de la valeur définitive | 0 | 0 |
+| coût immédiat (carnet visible, 500 k$ / 2,5 M$) | 0,36 / 0,99 pb | 0,78 / 1,89 pb |
+| profondeur à ± 10 pb | 25,6 M$ | 10,3 M$ |
+| écart prix mark − milieu à T + 5 s (médiane, max) | 0,06 / 1,85 pb | 0,58 / 4,1 pb |
+
+Les délais réseau de la sonde sont ceux de l'environnement de calcul (aller-retour REST médian ≈ 0,3 s),
+pas ceux du serveur du bot. Carnet à 20 niveaux envoyé ≈ toutes les 5 s, carnet rapide (5 niveaux)
+≈ toutes les 0,5 s.
 
 Aux instants de signal (chocs), l'activité est bien plus forte : médiane de 370 transactions
 Binance dans les 5 s qui suivent la clôture. La première transaction arrive donc en quelques
