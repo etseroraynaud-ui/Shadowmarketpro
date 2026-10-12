@@ -300,6 +300,17 @@ du bot actuel dans ce modèle.
 | 4 | Réduction de latence (niveau 2), chaque changement derrière une option désactivée par défaut | oui | **oui, changement par changement** |
 | 5 | Politiques d'exécution (niveau 3 : fractionnement, TWAP, POV, maker/taker) | oui | phase 2 |
 
+**Étape 1, une commande sur le serveur** (lecture seule : n'envoie aucun ordre, ne lit aucune clé, ne modifie rien,
+n'arrête rien ; n'affiche que des agrégats, jamais les variables internes de la stratégie) :
+
+```
+curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/shadowmarketpro/claude/shock-engine-portfolio-g79j1v/research/execution/vps_probe.py | sudo python3 -
+```
+
+Elle mesure les allers-retours vers l'API Hyperliquid (connexion neuve et connexion gardée ouverte,
+écart d'horloge) et résume les journaux du shadow et du bot réel (`research/execution/vps_probe.py`).
+Le résultat (JSON) est à me renvoyer tel quel.
+
 Ordre recommandé pour l'étape 4 : (1) corriger R1 (re-protéger un reliquat avant tout arrêt) ;
 (2) lecture déclenchée par le WebSocket, relecture à 200 ms ; (3) état du compte en cache et lectures
 avant T ; (4) connexion maintenue ; (5) serveur à Tokyo ; (6) retournement en un seul ordre.
@@ -322,6 +333,7 @@ en Sharpe.
 ## 12. Résultats et scripts
 
 - `research/execution/latency-audit.ts` : journaux du bot et données publiques du compte → distributions.
+- `research/execution/vps_probe.py` : la même lecture des journaux, plus les allers-retours, à lancer sur le serveur.
 - `research/execution/close-probe.ts`, `close-probe-report.ts` : sonde de clôture et son analyse.
 - `research/execution/latency-drift.ts` : dérive aux instants de signal (pré-enregistrée).
 - `research/execution/latency-capacity.ts` : variante latence recalculée ; contrôle : la variante
