@@ -1,0 +1,218 @@
+{
+ "generatedAt": "2026-10-12T04:40:31.320Z",
+ "measurementPoints": [
+  {
+   "point": "1. clôture théorique T",
+   "source": "calculée (grille 15 min)",
+   "status": "available"
+  },
+  {
+   "point": "2. message WebSocket de la nouvelle bougie",
+   "source": "non journalisé par le bot (BotLoop.onCandle) ; mesuré par la sonde indépendante",
+   "status": "missing"
+  },
+  {
+   "point": "3. bougie confirmée",
+   "source": "market_bar.time (écrit après la lecture REST, avant le moteur) ; motif ws_close / clock / retry",
+   "status": "approximate"
+  },
+  {
+   "point": "4. début et fin du calcul du signal",
+   "source": "aucun ; la fin est bornée par l'événement signal, écrit après 4 appels REST (fills, financement, compte, ordres ouverts) et le calcul",
+   "status": "missing"
+  },
+  {
+   "point": "5. début et fin de chaque appel API bloquant",
+   "source": "aucun (seulement les reprises après erreur : retry)",
+   "status": "missing"
+  },
+  {
+   "point": "6. décision d'exécution",
+   "source": "événement signal (seulement les bougies avec décision)",
+   "status": "approximate"
+  },
+  {
+   "point": "7. envoi de l'ordre",
+   "source": "aucun dans le journal (pending.at est écrit dans le fichier d'état puis effacé)",
+   "status": "missing"
+  },
+  {
+   "point": "8. accusé de réception de l'exchange",
+   "source": "heure de l'exchange : historique public des ordres (timestamp du bloc) ; réception locale : non journalisée (entry est écrit après un appel compte de plus)",
+   "status": "exchange_side_only"
+  },
+  {
+   "point": "9. premier remplissage",
+   "source": "fills publics (heure du bloc) ; non journalisé pour les entrées",
+   "status": "exchange_side_only"
+  },
+  {
+   "point": "10. remplissage final ou annulation du reliquat",
+   "source": "historique public des ordres (statusTimestamp) ; IOC : même bloc",
+   "status": "exchange_side_only"
+  }
+ ],
+ "exchange": {
+  "net": "testnet",
+  "coin": "BTC",
+  "address": "0xE29695f76908a8e8C0e70D38C99FE20103B2498A",
+  "since": "2026-10-06T00:00:00.000Z",
+  "orders": {
+   "bot": 2,
+   "manual": 1,
+   "byKind": {
+    "entry": 1,
+    "stop": 1
+   }
+  },
+  "closeToExchangeMs": {
+   "entry": {
+    "n": 1,
+    "p50": 5014,
+    "p90": 5014,
+    "p95": 5014,
+    "p99": 5014,
+    "max": 5014,
+    "indicative": true
+   },
+   "stop": {
+    "n": 1,
+    "p50": 4791,
+    "p90": 4791,
+    "p95": 4791,
+    "p99": 4791,
+    "max": 4791,
+    "indicative": true
+   }
+  },
+  "placedToFirstFillMs": {
+   "entry": {
+    "n": 1,
+    "p50": 0,
+    "p90": 0,
+    "p95": 0,
+    "p99": 0,
+    "max": 0,
+    "indicative": true
+   }
+  },
+  "fillRatio": {
+   "entry": {
+    "n": 1,
+    "p50": 1,
+    "p90": 1,
+    "p95": 1,
+    "p99": 1,
+    "max": 1,
+    "indicative": true
+   },
+   "stop": {
+    "n": 1,
+    "p50": 0,
+    "p90": 0,
+    "p95": 0,
+    "p99": 0,
+    "max": 0,
+    "indicative": true
+   }
+  },
+  "vsCloseBps": {
+   "entry": {
+    "n": 1,
+    "p50": 5.679263588821317,
+    "p90": 5.679263588821317,
+    "p95": 5.679263588821317,
+    "p99": 5.679263588821317,
+    "max": 5.679263588821317,
+    "indicative": true
+   }
+  },
+  "vsTriggerBps": {},
+  "feeBps": {
+   "entry": {
+    "n": 1,
+    "p50": 4.499990685426418,
+    "p90": 4.499990685426418,
+    "p95": 4.499990685426418,
+    "p99": 4.499990685426418,
+    "max": 4.499990685426418,
+    "indicative": true
+   }
+  },
+  "partial": [],
+  "unprotectedAfterEntryMs": [
+   {
+    "entryAt": "2026-10-07T02:00:05.014Z",
+    "ms": 899777
+   }
+  ],
+  "rows": [
+   {
+    "oid": 62033068641,
+    "kind": "entry",
+    "side": "sell",
+    "type": "Limit Ioc",
+    "placedAt": 1791338405014,
+    "T": 1791338400000,
+    "fromCloseMs": 5014,
+    "atClose": true,
+    "status": "filled",
+    "statusAt": 1791338405014,
+    "origSz": 0.01182,
+    "filledSz": 0.01182,
+    "fillRatio": 1,
+    "avgPx": 84470,
+    "firstFillMs": 0,
+    "lastFillMs": 0,
+    "taker": true,
+    "feeBps": 4.499990685426418,
+    "vsCloseBps": 5.679263588821317,
+    "vsTriggerBps": null
+   },
+   {
+    "oid": 62034605237,
+    "kind": "stop",
+    "side": "buy",
+    "type": "Stop Market",
+    "placedAt": 1791339304791,
+    "T": 1791339300000,
+    "fromCloseMs": 4791,
+    "atClose": true,
+    "status": "reduceOnlyCanceled",
+    "statusAt": 1791552300768,
+    "origSz": 0.01182,
+    "filledSz": 0,
+    "fillRatio": 0,
+    "avgPx": null,
+    "firstFillMs": null,
+    "lastFillMs": null,
+    "taker": null,
+    "feeBps": null,
+    "vsCloseBps": null,
+    "vsTriggerBps": null
+   },
+   {
+    "oid": 62261173001,
+    "kind": "manual",
+    "side": "buy",
+    "type": "Market FrontendMarket",
+    "placedAt": 1791552300768,
+    "T": 1791551700000,
+    "fromCloseMs": 600768,
+    "atClose": false,
+    "status": "filled",
+    "statusAt": 1791552300768,
+    "origSz": 0.01182,
+    "filledSz": 0.01182,
+    "fillRatio": 1,
+    "avgPx": 82632,
+    "firstFillMs": 0,
+    "lastFillMs": 0,
+    "taker": true,
+    "feeBps": 4.499993775021751,
+    "vsCloseBps": -8.947355693661887,
+    "vsTriggerBps": null
+   }
+  ]
+ }
+}

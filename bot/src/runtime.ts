@@ -1,7 +1,10 @@
 // Boucle du bot, séparée du programme principal pour être testée sans réseau :
-// - lecture des bougies closes par REST, une seule à la fois, à chaque clôture signalée par le
-//   WebSocket (nouvelle bougie ouverte) ou par l'horloge de secours, et après chaque reconnexion ;
-//   une bougie close pas encore confirmée par l'exchange est relue quelques secondes plus tard ;
+// - lecture des bougies closes par REST, une seule à la fois, dès que le WebSocket signale la
+//   clôture (l'exchange a ouvert la bougie suivante), ou par l'horloge de secours, et après chaque
+//   reconnexion ; une bougie close pas encore confirmée par l'API REST est relue très vite
+//   (150 ms, 300 ms, 600 ms…), puis toutes les quelques secondes ;
+// - au même moment, le moteur lance ses lectures de l'état du compte (prepareClose), en parallèle de
+//   celle des bougies : un seul aller-retour réseau avant la décision ;
 // - chaque bougie ajoutée est passée au moteur une seule fois, dans l'ordre ;
 // - contrôles journalisés à chaque bougie : spread pendant la bougie, bougie du WebSocket comparée à
 //   celle de l'API REST, bougies révisées après lecture.
@@ -21,6 +24,8 @@ export interface Engine {
   onBar(bar: Bar, daily?: Bars): void | Promise<void>
   onQuote?(q: Quote): void
   syncFills?(): Promise<void>
+  /** Clôture attendue (heure de clôture) : lectures de l'état lancées en parallèle des bougies. */
+  prepareClose?(close: number): void
 }
 
 export interface Feed {
@@ -35,12 +40,19 @@ export interface LoopOptions {
   journal: Journal
   now?: () => number
   sleep?: (ms: number) => Promise<void>
-  /** Délai après une clôture avant la lecture REST (le temps que l'exchange ouvre la suivante). */
+  /**
+   * Attente entre le signal de clôture du WebSocket et la lecture REST (0 par défaut : le message
+   * de la nouvelle bougie prouve déjà que l'exchange a clos la précédente).
+   */
   settleMs?: number
-  /** Relecture tant que la bougie close attendue n'est pas confirmée. */
+  /** Relectures rapides tant que la bougie close attendue n'est pas confirmée, puis toutes les retryMs. */
+  fastRetryMs?: number[]
   retryMs?: number
   retryFor?: number
 }
+
+/** Relectures rapides par défaut : la réponse REST suit le WebSocket de quelques dizaines de ms. */
+export const FAST_RETRY_MS = [150, 300, 600, 1200, 2500]
 
 const STEP = INTERVAL_MS['15m']
 
@@ -53,6 +65,9 @@ export class BotLoop {
   private busy: Promise<void> | null = null
   private again = false
   private retryTimer: NodeJS.Timeout | null = null
+  private retries = 0
+  /** Heure locale du premier message WebSocket de chaque bougie (= clôture de la précédente). */
+  private wsOpenAt = new Map<number, number>()
   stats = { ticks: 0, bars: 0, wsSame: 0, wsDiff: 0, wsMissing: 0, revisions: 0, reconnects: 0 }
 
   constructor(o: LoopOptions) {
@@ -86,26 +101,47 @@ export class BotLoop {
     return this.busy
   }
 
+  /** Bougie close attendue (ouverture) à l'heure `now`. */
+  private expected(now: number): number {
+    return Math.floor(now / STEP) * STEP - STEP
+  }
+
+  /** Lecture seulement si la bougie close attendue n'est pas encore passée (horloge de secours). */
+  tickIfMissing(reason: string): Promise<void> {
+    if (this.o.feed.chart.lastTime >= this.expected(this.now())) return Promise.resolve()
+    return this.tick(reason)
+  }
+
   private async run(reason: string): Promise<void> {
     const { feed, engine, journal } = this.o
     this.stats.ticks++
+    const tickAt = this.now()
+    const expected = this.expected(tickAt)
+    if (feed.chart.lastTime < expected) engine.prepareClose?.(expected + STEP)
     try {
       const { added, dailyChanged, revised } = await this.retry('candles', () => feed.sync(this.now()))
+      const readAt = this.now()
       for (const r of revised) {
         this.stats.revisions++
         journal.event('candle_revised', { interval: r.interval, bar: iso(r.t), diff: r.diff })
       }
       const daily = dailyChanged ? feed.dailyBars() : undefined
       for (const [k, b] of added.entries()) {
-        const spread = k === added.length - 1 ? this.spreads.roll() : null
+        const last = k === added.length - 1
+        const spread = last ? this.spreads.roll() : null
         const ws = this.compareWs(b)
-        journal.event('market_bar', { bar: iso(b.t + STEP), reason, close: b.c, volume: b.v, ws, spread })
+        // Délais depuis la clôture (ms) : message WebSocket de la nouvelle bougie, lecture lancée, bougie lue.
+        const close = b.t + STEP
+        const wsAt = this.wsOpenAt.get(close)
+        const timing = last ? { wsMs: wsAt != null ? wsAt - close : null, tickMs: tickAt - close, readMs: readAt - close } : null
+        journal.event('market_bar', { bar: iso(close), reason, close: b.c, volume: b.v, ws, spread, timing })
         this.stats.bars++
         await engine.onBar(b, k === 0 ? daily : undefined)
       }
       // La bougie close attendue n'est pas encore confirmée par l'exchange : relue un peu plus tard.
-      const expected = Math.floor(this.now() / STEP) * STEP - STEP
-      if (feed.chart.lastTime < expected) this.scheduleRetry(expected)
+      const exp = this.expected(this.now())
+      if (feed.chart.lastTime < exp) this.scheduleRetry(exp)
+      else this.retries = 0
     } catch (e) {
       journal.event('error', { where: 'tick', reason, error: e instanceof Error ? e.stack ?? e.message : String(e) })
     }
@@ -115,10 +151,13 @@ export class BotLoop {
     if (this.retryTimer) return
     const until = expected + STEP + (this.o.retryFor ?? 120000)
     if (this.now() > until) return
+    const fast = this.o.fastRetryMs ?? FAST_RETRY_MS
+    const wait = fast[this.retries] ?? this.o.retryMs ?? 5000
+    this.retries++
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null
       void this.tick('retry')
-    }, this.o.retryMs ?? 5000)
+    }, wait)
   }
 
   private async retry<T>(what: string, f: () => Promise<T>, tries = 6): Promise<T> {
@@ -156,7 +195,12 @@ export class BotLoop {
     if (c.t > this.openT) {
       const first = this.openT === -Infinity
       this.openT = c.t
-      if (!first) setTimeout(() => void this.tick('ws_close'), this.o.settleMs ?? 3000)
+      this.wsOpenAt.set(c.t, this.now())
+      for (const t of this.wsOpenAt.keys()) if (t < c.t - STEP) this.wsOpenAt.delete(t)
+      if (first) return
+      const settle = this.o.settleMs ?? 0
+      if (settle > 0) setTimeout(() => void this.tick('ws_close'), settle)
+      else void this.tick('ws_close')
     }
   }
 

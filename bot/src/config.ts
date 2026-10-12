@@ -37,6 +37,10 @@
 //   BOT_TRAIL_MIN_INTERVAL_MS  intervalle minimal entre deux déplacements (défaut 2000)
 //   BOT_WS_STALE_MS       aucune donnée du WebSocket depuis ce délai : reconnexion forcée
 //                         (défaut 60000 sur les données mainnet, 900000 sur le testnet, plus calme)
+//   BOT_SETTLE_MS         attente entre le signal de clôture du WebSocket et la lecture de la bougie
+//                         (défaut 0 : lecture immédiate ; l'ancienne valeur était 3000). La justesse
+//                         ne dépend pas de cette attente : une bougie n'est acceptée que si
+//                         l'exchange a déjà ouvert la suivante
 //
 // Shadow mode (broker simulé, mêmes coûts que le backtest du site par défaut) :
 //   BOT_SHADOW_CAPITAL    10000
@@ -73,6 +77,7 @@ export interface BotConfig {
   trailStepPct: number
   trailMinIntervalMs: number
   wsStaleMs: number
+  settleMs: number
   shadowCapital: number
   shadowFeePct: number
   shadowPaper: boolean
@@ -141,6 +146,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
     trailStepPct: num(env, 'BOT_TRAIL_STEP_PCT', 5, 0, 50),
     trailMinIntervalMs: num(env, 'BOT_TRAIL_MIN_INTERVAL_MS', 2000, 0, 60000),
     wsStaleMs: num(env, 'BOT_WS_STALE_MS', dataNetwork === 'testnet' ? 900000 : 60000, 10000, 3600000),
+    settleMs: num(env, 'BOT_SETTLE_MS', 0, 0, 10000),
     shadowCapital: num(env, 'BOT_SHADOW_CAPITAL', 10000, 10, 1e9),
     shadowFeePct: num(env, 'BOT_SHADOW_FEE_PCT', 0.045, 0, 1),
     shadowPaper: (env.BOT_SHADOW_PAPER ?? '1') !== '0',

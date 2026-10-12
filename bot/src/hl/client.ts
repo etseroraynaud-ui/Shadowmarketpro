@@ -193,6 +193,9 @@ export function equityOf(perpValue: number, mode: AccountMode, spotUsdc: number)
   return UNIFIED.has(mode) ? Math.max(perpValue, spotUsdc) : perpValue
 }
 
+/** Connexions ouvertes avant chaque clôture : lectures parallèles de la clôture, plus l'ordre. */
+export const WARM_CONNECTIONS = 6
+
 export class HyperliquidExchange implements Exchange {
   readonly asset: AssetInfo
   readonly data: HyperliquidData
@@ -279,6 +282,16 @@ export class HyperliquidExchange implements Exchange {
 
   orderStatus(cloid: string): Promise<OrderStatus> {
     return this.data.orderStatus(this.user, cloid)
+  }
+
+  /**
+   * Juste avant une clôture : autant de connexions HTTP ouvertes que de lectures parallèles de la
+   * clôture (bougies, fills, financement, compte, ordres ouverts). Le `fetch` de Node ferme une
+   * connexion inactive au bout de 4 s ; sans cela, chaque lecture de la clôture paierait TCP + TLS.
+   * Lectures du carnet seulement (poids 2 chacune).
+   */
+  async warm(): Promise<void> {
+    await Promise.all(Array.from({ length: WARM_CONNECTIONS }, () => this.data.info.l2Book({ coin: this.coin })))
   }
 
   async setLeverage(leverage: number): Promise<void> {

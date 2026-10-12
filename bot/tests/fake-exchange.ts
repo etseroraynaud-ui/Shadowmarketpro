@@ -12,10 +12,11 @@ import { cloidKind } from '../src/exec/exchange.ts'
 /**
  * lost-response : l'ordre est exécuté, la réponse se perd (erreur incertaine) ;
  * lost-request : la requête n'arrive pas (rien n'est fait, erreur incertaine) ;
- * crash : l'ordre est exécuté, puis le processus du bot s'arrête net (exception).
+ * crash : l'ordre est exécuté, puis le processus du bot s'arrête net (exception) ;
+ * partial : ordre au marché exécuté à moitié (carnet trop mince dans la limite), reliquat annulé.
  * skip : nombre d'ordres de ce type laissés passer avant la panne.
  */
-export type Fault = { kind: 'entry' | 'close' | 'stop' | 'tp1' | 'emergency'; mode: 'lost-response' | 'lost-request' | 'crash'; skip?: number }
+export type Fault = { kind: 'entry' | 'close' | 'stop' | 'tp1' | 'emergency'; mode: 'lost-response' | 'lost-request' | 'crash' | 'partial'; skip?: number }
 
 export class Crash extends Error {}
 
@@ -159,7 +160,8 @@ export class FakeExchange implements Exchange {
     if (fault === 'lost-request') return this.lost()
     this.calls.push(`market ${side} ${sz}${reduceOnly ? ' reduce' : ''}`)
     this.received.push({ cloid, kind: cloidKind(cloid), side, sz })
-    const q = reduceOnly ? this.reducible(side, sz) : sz
+    let q = reduceOnly ? this.reducible(side, sz) : sz
+    if (fault === 'partial') q = Math.floor(q / 2 * 1e5) / 1e5
     const oid = this.oid++
     if (q <= 0) {
       this.setStatus(cloid, 'rejected', oid, null, sz)

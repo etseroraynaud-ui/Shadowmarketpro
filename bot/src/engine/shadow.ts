@@ -124,6 +124,10 @@ export class ShadowRunner {
   async syncFills(): Promise<void> {
     await this.paper?.syncFills()
   }
+
+  prepareClose(close: number): void {
+    this.paper?.prepareClose(close)
+  }
 }
 
 export function iso(t: number): string {

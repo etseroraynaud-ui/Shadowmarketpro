@@ -125,6 +125,7 @@ compte principal, sinon il s'arrête. Plus tard, la même variable accepte l'adr
 | `BOT_TRAIL_STEP_PCT` | 5 | pas minimal du stop suiveur entre deux clôtures, en % de la distance de suivi |
 | `BOT_TRAIL_MIN_INTERVAL_MS` | 2000 | intervalle minimal entre deux déplacements du stop |
 | `BOT_WS_STALE_MS` | 60000 (testnet 900000) | aucune donnée du WebSocket depuis ce délai : reconnexion forcée |
+| `BOT_SETTLE_MS` | 0 | attente entre le signal de clôture du WebSocket et la lecture de la bougie (l'ancien comportement : 3000) |
 | `BOT_RESET_STATE` | | `1` : repart de zéro (le compte doit être à plat) |
 | `BOT_DATA_NETWORK` | réseau du mode (shadow : mainnet) | données mainnet ou testnet |
 | `BOT_ALLOW_MAINNET` | | `1` obligatoire pour `BOT_MODE=mainnet` |
@@ -222,8 +223,19 @@ Signal `SIGUSR2` : coupe et rétablit le WebSocket (test des reconnexions en con
   à chaque clôture, au tick près.
 - **Déclenchement des stops** : Hyperliquid déclenche ses stops sur son prix « mark » ; le backtest,
   sur les prix des bougies ; l'exchange papier, sur le milieu du BBO.
-- **Lecture des bougies** : sur le mainnet, la bougie close est lue environ 3 s après la clôture ; sur
-  le testnet, peu actif, elle attend la première transaction de la bougie suivante (au plus 60 s).
+- **Lecture des bougies** : la bougie close est lue dès le premier message WebSocket de la bougie
+  suivante (l'exchange a clos la précédente), relue à 150 ms, 300 ms… si l'API REST ne la confirme
+  pas encore ; horloge de secours à T + 2 s. Sur le testnet, peu actif, elle attend la première
+  transaction de la bougie suivante (au plus 60 s).
+- **Latence de la clôture** : fills, financement, compte et ordres ouverts sont lus en parallèle,
+  au même moment que la bougie (un aller-retour réseau au lieu de six) ; le compte de la clôture sert
+  à la taille de l'entrée ; les connexions HTTP sont ouvertes 1,5 s avant chaque clôture. Chaque
+  événement `market_bar` et `bar` porte sa chronologie (`timing`, en ms depuis la clôture : message
+  WebSocket, lecture, état lu, décision, envoi et réponse de chaque ordre). Ce qui reste est surtout
+  la distance au serveur de Hyperliquid : voir DEPLOY.md, « Où louer le serveur ».
+- **Fermeture incomplète** (carnet trop mince dans la limite) : second ordre au prix du moment ;
+  s'il reste un reliquat, il reçoit un stop (le stop du script, sinon `BOT_EMERGENCY_STOP_PCT`, à
+  défaut 10 %) avant l'arrêt des ordres : jamais de position laissée sans stop.
 - **Prix de référence** : les ordres au marché partent du meilleur prix d'en face (BBO), limités à
   `BOT_MAX_SLIPPAGE_PCT` ; le spread est journalisé à chaque entrée et sortie.
 - **Données** : le backtest de recherche utilise Bitstamp (spot), le bot Hyperliquid (perp). Sur la
