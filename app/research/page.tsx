@@ -5,7 +5,7 @@ import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import { SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Section, SiteFooter, StatusList, Table, Verdict, type VerdictKind } from '../_site/ui'
-import { DOWNLOADS, FACTOR_NAMES, MANIFEST, P, PAPER, RA, raVerdict, verdictOf } from '../_site/data'
+import { DOSSIER, DOWNLOADS, FACTOR_NAMES, MANIFEST, P, PAPER, RA, raVerdict, verdictOf } from '../_site/data'
 import { int, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -148,6 +148,7 @@ export default function ResearchPage() {
             ['Consistency checks', `${P.manifest.checksPassed} of ${P.manifest.checksTotal} pass`],
             ['Manifest', <a key="m" className="s-link" href={`${DOWNLOADS}/${MANIFEST}`}>{MANIFEST}</a>],
             ['Research paper', <a key="p" className="s-link" href={`${DOWNLOADS}/${PAPER}`} download>Shock Engine research paper (PDF)</a>],
+            ['Institutional dossier', <a key="d" className="s-link" href={DOSSIER} download>Strategy, execution and capacity (PDF)</a>],
             ['Full report', <a key="r" className="s-link" href={`${DOWNLOADS}/btc-eth-portfolio.html`}>BTC/ETH portfolio report (HTML)</a>],
           ]} />
         </Section>

@@ -2,6 +2,8 @@
 // research/shock/publish-portfolio.ts. À importer seulement depuis des composants serveur : le
 // fichier pèse ~300 Ko et ne doit pas partir dans le JavaScript du navigateur.
 
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import data from '../../lib/research/btc-eth-portfolio.json'
 import { LIVE_ACCOUNTS } from '../live/accounts'
 
@@ -18,6 +20,9 @@ export const MANIFEST = 'shock-engine-manifest.json'
 export const PAPER = 'shock-engine-research-paper.pdf'
 if (!P.downloads.some(d => d.file === MANIFEST)) throw new Error('manifeste absent des téléchargements publiés')
 if (!P.downloads.some(d => d.file === PAPER)) throw new Error('papier de recherche absent des téléchargements publiés')
+/** Dossier institutionnel (PDF), composé par research/dossier/build-dossier.ts. */
+export const DOSSIER = '/research/dossier/shock-engine-institutional-dossier.pdf'
+if (!existsSync(join(process.cwd(), 'public', DOSSIER))) throw new Error('dossier institutionnel absent de public/research/dossier')
 
 /**
  * Série du graphique : jours sans valeur (fenêtres glissantes incomplètes) en NaN, valeurs arrondies à

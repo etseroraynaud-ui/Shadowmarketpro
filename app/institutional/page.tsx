@@ -3,7 +3,7 @@ import Link from 'next/link'
 import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import { Arrow, Disclaimer, Metrics, Section, SimNote, SiteFooter, StatusList } from '../_site/ui'
-import { CONTACT_EMAIL, DOWNLOADS, MANIFEST, P, PAPER } from '../_site/data'
+import { CONTACT_EMAIL, DOSSIER, DOWNLOADS, MANIFEST, P, PAPER } from '../_site/data'
 import { num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -14,12 +14,12 @@ export const metadata: Metadata = {
 const F = P.series.portfolio
 const CP = P.commonPeriod
 const EV_PERIOD = `${P.evidence.walkForward.period.slice(0, 4)}–${P.evidence.walkForward.period.slice(-10, -6)}`
-const Doc = ({ k, title, children, href, label, download }: { k: string; title: string; children: string; href: string; label: string; download?: boolean }) => (
-  <div className="s-card s-card-hover s-reveal">
+const Doc = ({ k, title, children, href, label, download, wide }: { k: string; title: string; children: string; href: string; label: string; download?: boolean; wide?: boolean }) => (
+  <div className="s-card s-card-hover s-reveal" style={wide ? { gridColumn: '1 / -1' } : undefined}>
     <div className="s-card-k">{k}</div>
     <h3>{title}</h3>
     <p>{children}</p>
-    <div className="s-card-foot">{href.startsWith('/') && !href.startsWith(DOWNLOADS) ? <Link className="s-arrow" href={href}>{label}</Link> : <a className="s-arrow" href={href} download={download || undefined}>{label}</a>}</div>
+    <div className="s-card-foot">{href.startsWith('/') && !href.startsWith(DOWNLOADS) && !href.startsWith('/research/') ? <Link className="s-arrow" href={href}>{label}</Link> : <a className="s-arrow" href={href} download={download || undefined}>{label}</a>}</div>
   </div>
 )
 
@@ -37,6 +37,7 @@ export default function InstitutionalPage() {
             {CONTACT_EMAIL
               ? <a className="s-btn s-btn-primary" href={`mailto:${CONTACT_EMAIL}?subject=${subject}`}>Request the research pack <Arrow /></a>
               : <a className="s-btn s-btn-primary" href={`${DOWNLOADS}/${PAPER}`} download>Download the research paper <Arrow /></a>}
+            <a className="s-btn s-btn-ghost" href={DOSSIER} download>Institutional dossier (PDF)</a>
             <Link href="/shock-engine/portfolio" className="s-btn s-btn-ghost">Performance dashboard</Link>
           </div>
         </section>
@@ -55,6 +56,7 @@ export default function InstitutionalPage() {
 
         <Section id="materials" eyebrow="Materials" title="What is available">
           <div className="s-grid2">
+            <Doc k="Dossier" title="Institutional dossier" href={DOSSIER} label="Download the dossier (PDF)" download wide>Strategy and how it was tested; a framework for executing large notional drawn from the market-impact literature; all 2,474 historical executions replayed on real market data; execution costs, capacity and forward-looking estimates; what we got wrong along the way; risks and what remains to be proven.</Doc>
             <Doc k="Paper" title="Research paper" href={`${DOWNLOADS}/${PAPER}`} label="Download the paper (PDF)" download>Design, statistical framework, results, robustness, falsification of the short-entry condition, residual alpha against trend strategies, limitations and the pre-registered forward test, with references.</Doc>
             <Doc k="Data" title="Return series" href={`${DOWNLOADS}/portfolio_daily_returns.csv`} label="Daily returns (CSV)" download>Daily returns and equity of both markets and the portfolio, monthly and annual returns, drawdown episodes and rolling correlations, as CSV.</Doc>
             <Doc k="Manifest" title="Reproducibility manifest" href={`${DOWNLOADS}/${MANIFEST}`} label="Manifest (JSON)">Code commit, dataset hashes, parameter hash, cost assumptions and random seeds. The research code regenerates the same files from the same data.</Doc>
@@ -67,7 +69,7 @@ export default function InstitutionalPage() {
           <StatusList items={[
             { label: 'Live track record', state: 'no', note: 'not available; live results will be reported separately from the simulation, from their own start date' },
             { label: 'Forward validation', state: 'wait', note: `of the short-entry condition; pre-registered, observation starts ${P.forward.start}` },
-            { label: 'Capacity and market impact', state: 'no', note: `not modeled; turnover about ${Math.round(F.cost.turnoverOneWay)}× the capital a year` },
+            { label: 'Capacity and market impact', state: 'wait', note: `costs measured on Binance perpetuals for all 2,474 historical executions (see the institutional dossier); not yet measured on Hyperliquid, the intended venue, and our own impact needs live trading; turnover about ${Math.round(F.cost.turnoverOneWay)}× the capital a year` },
             { label: 'Slippage and funding', state: 'no', note: `not in the headline figures; with commissions doubled the Sharpe is ${num(P.costs.stress[2].portfolio.sharpe)}, with historical funding ${num(P.stress.funding[0].sharpe)}` },
             { label: 'Independent verification', state: 'no', note: 'no third-party audit of the research or of results' },
           ]} />
