@@ -1,0 +1,65 @@
+{
+ "generatedAt": "2026-10-12T04:48:14.030Z",
+ "note": "Backtest E2 complet. Excursion défavorable pendant la bougie qui suit l'entrée (aucun ordre de sortie posé), en % du prix d'entrée.",
+ "distancesPct": [
+  1,
+  2,
+  3,
+  5,
+  8,
+  10,
+  15
+ ],
+ "results": {
+  "BTC": {
+   "positions": 774,
+   "firstBarAdversePct": {
+    "p50": 0.24707478655859724,
+    "p90": 0.7604476407646746,
+    "p99": 2.480795771993951,
+    "p999": 5.168708343567507,
+    "max": 7.1939266664154315
+   },
+   "firstBarAdverseAtr": {
+    "p50": 0.746548964951897,
+    "p99": 4.6815998436094075,
+    "max": 6.40722486503847
+   },
+   "exitedAtFirstClose": 49,
+   "tradesTouchedByEmergencyStop": {
+    "1%": 41,
+    "2%": 14,
+    "3%": 4,
+    "5%": 1,
+    "8%": 0,
+    "10%": 0,
+    "15%": 0
+   }
+  },
+  "ETH": {
+   "positions": 667,
+   "firstBarAdversePct": {
+    "p50": 0.31789817166501044,
+    "p90": 0.8859524543507427,
+    "p99": 2.244089800102465,
+    "p999": 4.886057821847427,
+    "max": 6.765652951699461
+   },
+   "firstBarAdverseAtr": {
+    "p50": 0.7063509285375974,
+    "p99": 3.9596992272387452,
+    "max": 9.707668645838345
+   },
+   "exitedAtFirstClose": 28,
+   "tradesTouchedByEmergencyStop": {
+    "1%": 48,
+    "2%": 9,
+    "3%": 5,
+    "5%": 1,
+    "8%": 0,
+    "10%": 0,
+    "15%": 0
+   }
+  }
+ }
+}

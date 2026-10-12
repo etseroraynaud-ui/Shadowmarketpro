@@ -32,6 +32,7 @@ research/private/
 # Étude de capacité : données brutes Binance (archive publique), jamais versionnées
 research/data/binance/
 research/data/tardis/
+research/data/hl-probe/
 # Market Flow : secret du serveur (jeton d'envoi) et fichiers locaux
 flow/deploy/*.env
 flow/**/__pycache__/
