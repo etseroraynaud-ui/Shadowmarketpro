@@ -2,7 +2,9 @@
 //
 // À chaque bougie close, comme le broker simulé du backtest (broker.ts) :
 //   1. sorties survenues pendant la bougie (stop, TP1, stop suiveur, liquidation) : lues dans les
-//      fills de l'exchange ;
+//      fills de l'exchange ; fills, financement, compte et ordres ouverts sont lus en parallèle, dès
+//      le signal de clôture et en même temps que la bougie (prepareClose) : un seul aller-retour
+//      réseau avant la décision, et toujours des lectures faites après la clôture ;
 //   2. décision du script à la clôture (ShockStrategy.onClose), avec la position réelle ;
 //   3. exécution : niveaux des ordres de sortie (posés à la clôture qui suit l'entrée, comme le
 //      script), fermeture au marché (VWAP, flip), entrées et retournements.
@@ -33,7 +35,7 @@ import type { Decision, EntryOrder } from '../../../lib/strategies/shock/strateg
 import type { Costs } from '../../../lib/strategies/shock/params.ts'
 import type { BotConfig } from '../config.ts'
 import { tradedAccount } from '../config.ts'
-import type { Exchange, OrderKind, OrderResult, Side } from '../exec/exchange.ts'
+import type { AccountState, Exchange, Fill, FundingEvent, OpenOrder, OrderKind, OrderResult, Side } from '../exec/exchange.ts'
 import { cloidKind, newCloid } from '../exec/exchange.ts'
 import { midOf, spreadBps } from '../data/quotes.ts'
 import type { Journal } from '../journal.ts'
@@ -65,6 +67,12 @@ export function handoffCosts(cfg: BotConfig, shock: ShockConfig): Costs {
 
 const head = (b: Bars, k: number): Bars => ({ n: k, t: b.t.subarray(0, k), o: b.o.subarray(0, k), h: b.h.subarray(0, k), l: b.l.subarray(0, k), c: b.c.subarray(0, k), v: b.v.subarray(0, k) })
 
+/** État du compte lu en une fois (requêtes parallèles). */
+interface Snapshot { fills: Fill[]; funding: FundingEvent[]; acct: AccountState; orders: OpenOrder[] }
+
+/** Distance du stop de protection d'un reliquat sans stop du script (première bougie), en % du prix. */
+export const REMAINDER_STOP_PCT = 10
+
 export class LiveEngine {
   readonly o: LiveOptions
   readonly ex: Exchange
@@ -77,6 +85,14 @@ export class LiveEngine {
   state: BotState
   private queue: Promise<unknown> = Promise.resolve()
   private lastMove = 0
+  /** Lectures de l'état lancées au signal de clôture, pour cette clôture. */
+  private pre: { close: number; p: Promise<Snapshot> } | null = null
+  /** Ordres envoyés ou annulés par le bot : une lecture antérieure de l'état n'est plus à jour. */
+  private mutations = 0
+  /** Compte lu à la clôture en cours, valable tant qu'aucun ordre n'est parti depuis. */
+  private barAcct: { acct: AccountState; mut: number } | null = null
+  /** Chronologie de la clôture en cours, en ms depuis la clôture (journal : événement bar). */
+  private tl: { close: number; marks: Record<string, number>; orders: [string, number, number, string][] } | null = null
 
   private constructor(o: LiveOptions, runner: ShockRunner, session: Session | null, state: BotState) {
     this.o = o
@@ -206,7 +222,7 @@ export class LiveEngine {
     const known = new Set([p?.stopOid, p?.tp1Oid, p?.emergencyOid].filter((x): x is number => x != null))
     const orphans = orders.filter(o => cloidKind(o.cloid) != null && !known.has(o.oid))
     if (!orphans.length) return
-    const res = await this.ex.cancel(orphans.map(o => o.oid))
+    const res = await this.cancel(orphans.map(o => o.oid))
     this.journal.event('orphan_orders_canceled', {
       orders: orphans.map((o, k) => ({ oid: o.oid, cloid: o.cloid, kind: cloidKind(o.cloid), trigger: o.triggerPx, px: o.limitPx, sz: o.sz, ok: res[k]?.ok ?? false })),
     })
@@ -240,11 +256,53 @@ export class LiveEngine {
     this.save()
   }
 
+  // ---------------------------------------------------------------- lectures de l'état
+
+  /**
+   * Signal de clôture : fills, financement, compte et ordres ouverts sont demandés tout de suite, en
+   * parallèle (et en parallèle de la lecture des bougies). Lectures faites après la clôture : rien
+   * n'est anticipé, seule l'attente réseau est mise en commun.
+   */
+  prepareClose(close: number): void {
+    if (this.session || this.state.halted || this.pre?.close === close) return
+    const p = this.readState()
+    p.catch(() => undefined)
+    this.pre = { close, p }
+  }
+
+  /** Juste avant une clôture : connexions HTTP ouvertes et prêtes (aucun effet sur l'état). */
+  warm(): void {
+    if (this.session || this.state.halted) return
+    void this.ex.warm?.().catch(() => undefined)
+  }
+
+  private async readState(): Promise<Snapshot> {
+    const [fills, funding, acct, orders] = await Promise.all([
+      this.ex.fills(this.state.lastFillTime - 60000), this.ex.funding(this.state.lastFundingTime), this.ex.account(), this.ex.openOrders(),
+    ])
+    return { fills, funding, acct, orders }
+  }
+
+  private cancel(oids: number[]) {
+    this.mutations++
+    return this.ex.cancel(oids)
+  }
+
+  private mark(name: string): void {
+    if (this.tl) this.tl.marks[name] = this.now() - this.tl.close
+  }
+
+  private positionMatches(acct: AccountState): boolean {
+    const pos = this.state.position
+    const size = acct.position.size
+    return pos ? Math.sign(size) === pos.dir && Math.abs(Math.abs(size) - pos.size) <= this.lotEps() : Math.abs(size) <= this.lotEps()
+  }
+
   // ---------------------------------------------------------------- fills et financement
 
   /** Fills depuis le dernier connu : frais, PnL réalisé, sorties exécutées par l'exchange. */
-  private async applyFills(): Promise<void> {
-    const fills = (await this.ex.fills(this.state.lastFillTime - 60000)).sort((a, b) => a.time - b.time || a.tid - b.tid)
+  private async applyFills(prefetched?: Fill[]): Promise<void> {
+    const fills = (prefetched ?? await this.ex.fills(this.state.lastFillTime - 60000)).slice().sort((a, b) => a.time - b.time || a.tid - b.tid)
     const seen = new Set(this.state.seenFills)
     for (const f of fills) {
       if (seen.has(f.tid)) continue
@@ -280,8 +338,8 @@ export class LiveEngine {
     }
   }
 
-  private async applyFunding(): Promise<void> {
-    const ev = await this.ex.funding(this.state.lastFundingTime)
+  private async applyFunding(prefetched?: FundingEvent[]): Promise<void> {
+    const ev = prefetched ?? await this.ex.funding(this.state.lastFundingTime)
     for (const e of ev) {
       if (e.time < this.state.lastFundingTime) continue
       this.state.lastFundingTime = e.time + 1
@@ -302,7 +360,7 @@ export class LiveEngine {
     const left = [p.stopOid, p.tp1Oid, p.emergencyOid].filter((x): x is number => x != null)
     const open = new Set((await this.ex.openOrders()).map(o => o.oid))
     const toCancel = left.filter(x => open.has(x))
-    if (toCancel.length) await this.ex.cancel(toCancel)
+    if (toCancel.length) await this.cancel(toCancel)
     const exit = p.exitQty > 0 ? p.exitValue / p.exitQty : NaN
     const pnl = p.closedPnl - p.fees + p.funding
     this.journal.trade({
@@ -327,9 +385,13 @@ export class LiveEngine {
     const cloid = newCloid(kind)
     this.state.pending = { cloid, kind, side, sz, at: this.now() }
     this.save()
+    this.mutations++
+    const sent = this.now()
     let r = await send(cloid)
+    const acked = this.now()
     if (r.uncertain || (r.status === 'resting' && r.oid == null)) r = await this.resolve(cloid, r)
     this.state.pending = null
+    if (this.tl) this.tl.orders.push([kind, sent - this.tl.close, acked - this.tl.close, r.status])
     return { ...r, cloid }
   }
 
@@ -410,15 +472,30 @@ export class LiveEngine {
   }
 
   private async closeBar(bar: Bar, daily: Bars | undefined, execute: boolean): Promise<void> {
-    await this.applyFills()
-    await this.applyFunding()
-    const acct = await this.ex.account()
-    let pos = this.state.position
-    const size = acct.position.size
-    if (pos ? Math.sign(size) !== pos.dir || Math.abs(Math.abs(size) - pos.size) > this.lotEps() : Math.abs(size) > this.lotEps()) {
-      return this.halt(`position chez Hyperliquid ${size}, attendue ${pos ? pos.dir * pos.size : 0}`)
+    const close = bar.t + this.tfMs
+    this.tl = { close, marks: { start: this.now() - close }, orders: [] }
+    const pre = this.pre?.close === close ? this.pre.p : null
+    this.pre = null
+    let snap = pre ? await pre.catch(() => this.readState()) : await this.readState()
+    this.mark('state')
+    const mut0 = this.mutations
+    await this.applyFills(snap.fills)
+    await this.applyFunding(snap.funding)
+    if (!this.positionMatches(snap.acct)) {
+      // Un fill a pu tomber entre deux lectures parallèles : état relu une fois avant de conclure.
+      snap = await this.readState()
+      await this.applyFills(snap.fills)
+      await this.applyFunding(snap.funding)
+      if (!this.positionMatches(snap.acct)) {
+        const p = this.state.position
+        return this.halt(`position chez Hyperliquid ${snap.acct.position.size}, attendue ${p ? p.dir * p.size : 0}`)
+      }
+      this.journal.event('state_reread', { bar: iso(close) })
     }
-    if (execute && !(await this.checkOrders())) return
+    let pos = this.state.position
+    // Ordres ouverts de la lecture parallèle, sauf si le bot a déjà envoyé ou annulé un ordre depuis.
+    if (execute && !(await this.checkOrders(this.mutations === mut0 ? snap.orders : undefined))) return
+    this.barAcct = { acct: snap.acct, mut: this.mutations }
     if (pos && bar.t > pos.entryBar) {
       pos.hi = Math.max(pos.hi, bar.h)
       pos.lo = Math.min(pos.lo, bar.l)
@@ -427,6 +504,7 @@ export class LiveEngine {
     if (missing > 0) this.journal.event('gap', { before: iso(bar.t), missing })
     const view = pos ? { dir: pos.dir, set: pos.set, avg: pos.avg } : null
     const d = this.runner.decide(i, view, false)
+    this.mark('decided')
     const ctx = this.runner.context(i)
     this.state.lastBarTime = bar.t
     this.state.strategy = saveStrategy(this.runner.strategy.state, this.runner.m.bars.t)
@@ -445,9 +523,11 @@ export class LiveEngine {
     }
     await this.execute(d, i, bar)
     pos = this.state.position
+    this.mark('end')
     this.journal.event('bar', {
       bar: iso(bar.t + this.tfMs), close: bar.c, regime: regimeName(ctx.regime), position: pos ? (pos.dir === 1 ? 'long' : 'short') : 'flat',
       size: pos?.size ?? 0, stop: pos?.stopTrigger ?? null, tp1: pos && pos.tp1Oid != null && !pos.tp1Filled ? pos.tp : null,
+      timing: this.tl ? { ...this.tl.marks, orders: this.tl.orders } : null,
     })
   }
 
@@ -455,8 +535,8 @@ export class LiveEngine {
    * Ordres ouverts à la clôture : un ordre étranger arrête tout ; les ordres du bot que l'état ne
    * suit pas sont annulés ; un stop ou un TP1 disparu sans avoir été exécuté sera reposé.
    */
-  private async checkOrders(): Promise<boolean> {
-    const orders = await this.ex.openOrders()
+  private async checkOrders(prefetched?: OpenOrder[]): Promise<boolean> {
+    const orders = prefetched ?? await this.ex.openOrders()
     const foreign = orders.filter(o => cloidKind(o.cloid) == null)
     if (foreign.length) {
       this.halt(`${foreign.length} ordre(s) ouvert(s) sur ${this.o.cfg.coin} qui ne viennent pas du bot`)
@@ -536,7 +616,7 @@ export class LiveEngine {
     if (!this.state.position || this.state.halted) return
     if (pos.emergencyOid != null && pos.stopOid != null) {
       // Le stop du script est posé : le stop de sécurité n'a plus lieu d'être.
-      await this.ex.cancel([pos.emergencyOid])
+      await this.cancel([pos.emergencyOid])
       pos.emergencyOid = null
     }
     if (pos.useTP1 && !pos.tp1Filled && pos.tp1Oid == null) {
@@ -600,7 +680,7 @@ export class LiveEngine {
     this.journal.event(old == null ? 'stop_placed' : 'stop_moved', { trigger, size: sz, oid: r.oid })
     let oldFilled = false
     if (old != null) {
-      const [c] = await this.ex.cancel([old])
+      const [c] = await this.cancel([old])
       // Annulation refusée : l'ancien stop vient sans doute d'être exécuté ; les fills le diront.
       if (!c?.ok) { oldFilled = true; this.journal.event('stop_cancel_failed', { oid: old, error: c?.error }) }
     }
@@ -612,7 +692,7 @@ export class LiveEngine {
   private async closePosition(tag: string, ref: number): Promise<void> {
     const pos = this.state.position!
     const resting = [pos.stopOid, pos.tp1Oid, pos.emergencyOid].filter((x): x is number => x != null)
-    const canceled = resting.length ? await this.ex.cancel(resting) : []
+    const canceled = resting.length ? await this.cancel(resting) : []
     pos.stopOid = pos.tp1Oid = pos.emergencyOid = null
     if (canceled.some(c => !c.ok)) {
       // Un ordre de sortie a pu s'exécuter entre-temps : la position est relue avant de fermer.
@@ -621,18 +701,35 @@ export class LiveEngine {
       if (this.state.position !== pos) return
     }
     const side = this.sideOut(pos)
-    const q = await this.ex.quote()
-    pos.spreadExitBps = spreadBps(q)
     const sz = pos.size
-    const r = await this.place('close', side, sz, c => this.ex.market(side, sz, true, side === 'buy' ? q.ask : q.bid, this.o.cfg.maxSlippagePct, c))
-    if (r.oid != null) pos.oids.push(r.oid)
-    pos.cloids.push(r.cloid)
-    if (r.status !== 'filled' || r.filledSz + this.lotEps() < sz) {
-      return this.halt(`fermeture ${tag} incomplète : ${r.status} ${r.filledSz}/${sz} ${r.error ?? ''}`)
+    let value = 0, done = 0, attempts = 0, last: OrderResult & { cloid: string } | null = null
+    // IOC au meilleur prix ; un reliquat (carnet trop mince dans la limite) a droit à un second essai
+    // au prix du moment.
+    for (let attempt = 0; attempt < 2 && pos.size > this.lotEps(); attempt++) {
+      const q = await this.ex.quote()
+      if (attempt === 0) pos.spreadExitBps = spreadBps(q)
+      const left = pos.size
+      const r = await this.place('close', side, left, c => this.ex.market(side, left, true, side === 'buy' ? q.ask : q.bid, this.o.cfg.maxSlippagePct, c))
+      last = r
+      attempts++
+      if (r.oid != null) pos.oids.push(r.oid)
+      pos.cloids.push(r.cloid)
+      if (r.status === 'filled' && r.filledSz > 0) {
+        const px = r.avgPx ?? ref
+        pos.slippage += pos.dir * (ref - px) * r.filledSz
+        this.exitFill(pos, px, r.filledSz, tag)
+        value += px * r.filledSz
+        done += r.filledSz
+      }
     }
-    pos.slippage += pos.dir * (ref - (r.avgPx ?? ref)) * r.filledSz
-    this.exitFill(pos, r.avgPx ?? ref, r.filledSz, tag)
-    this.journal.event('exit', { tag, side, size: r.filledSz, avg: r.avgPx, ref, spreadBps: pos.spreadExitBps })
+    if (pos.size > this.lotEps()) {
+      // Toujours incomplète : le reliquat reçoit un stop avant l'arrêt des ordres, jamais laissé nu.
+      const stop = pos.exitsActive && Number.isFinite(this.effStop(pos)) ? this.effStop(pos) : pos.avg * (1 - pos.dir * (this.o.cfg.emergencyStopPct ?? REMAINDER_STOP_PCT) / 100)
+      const protectedBy = (await this.setStop(pos, stop)) ? `protégé par un stop à ${stop}` : 'stop refusé : à protéger à la main'
+      this.journal.event('exit_incomplete', { tag, side, filled: done, left: pos.size, stop, status: last?.status, error: last?.error ?? null })
+      return this.halt(`fermeture ${tag} incomplète : ${done}/${sz} exécutés, reliquat ${pos.size} ${protectedBy} ${last?.error ?? ''}`)
+    }
+    this.journal.event('exit', { tag, side, size: done, avg: done > 0 ? value / done : null, ref, spreadBps: pos.spreadExitBps, attempts })
     await this.applyFills()
     if (this.state.position === pos) await this.finalize()
   }
@@ -653,7 +750,8 @@ export class LiveEngine {
     }
     const spread = spreadBps(q)
     if (spread > this.o.cfg.maxSpreadBps) return this.journal.event('entry_skipped', { reason: `spread ${spread.toFixed(2)} pb > ${this.o.cfg.maxSpreadBps} pb`, side: sideName, bid: q.bid, ask: q.ask })
-    const acct = await this.ex.account()
+    // Compte lu à cette clôture, sauf si un ordre est parti depuis (retournement) : relu.
+    const acct = this.barAcct && this.barAcct.mut === this.mutations ? this.barAcct.acct : await this.ex.account()
     const size = this.risk.entrySize(acct.equity, midOf(q))
     if (!size.ok) return this.journal.event('entry_skipped', { reason: size.reason, side: sideName })
     const side: Side = order.dir === 1 ? 'buy' : 'sell'
@@ -673,7 +771,7 @@ export class LiveEngine {
       hi: avg, lo: avg, fees: 0, funding: 0, closedPnl: 0, slippage: order.dir * (avg - bar.c) * filled, exitValue: 0, exitQty: 0, exits: [],
       spreadEntryBps: spread,
     }
-    this.journal.event('entry', { side, size: filled, avg, ref: bar.c, bid: q.bid, ask: q.ask, spreadBps: spread, set: SET_NAMES[order.set], tag: order.tag, notional: filled * avg })
+    this.journal.event('entry', { side, size: filled, requested: size.size, avg, ref: bar.c, bid: q.bid, ask: q.ask, spreadBps: spread, set: SET_NAMES[order.set], tag: order.tag, notional: filled * avg })
     const em = this.o.cfg.emergencyStopPct
     if (em != null) {
       const p = this.state.position

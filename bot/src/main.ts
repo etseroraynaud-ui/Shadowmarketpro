@@ -6,9 +6,12 @@
 //   BOT_MODE=mainnet npm start      ordres réels (BOT_ALLOW_MAINNET=1 obligatoire)
 //   BOT_RESET_STATE=1               ignore l'état sauvegardé (le compte doit être à plat)
 //
-// Bougies : à chaque clôture 15 min (signal du WebSocket, avec une horloge de secours si le flux
-// est coupé) et à chaque reconnexion, les bougies closes manquantes sont récupérées par l'API REST,
-// dans l'ordre, puis passées au moteur. Aucune bougie en cours n'entre dans le calcul.
+// Bougies : à chaque clôture 15 min (dès le premier message WebSocket de la nouvelle bougie, avec une
+// horloge de secours à T + 2 s si le flux est muet) et à chaque reconnexion, les bougies closes
+// manquantes sont récupérées par l'API REST, dans l'ordre, puis passées au moteur. Aucune bougie en
+// cours n'entre dans le calcul : une bougie n'est acceptée que si l'exchange a ouvert la suivante.
+// Latence : lectures de l'état du compte lancées en même temps que celle des bougies, connexions
+// HTTP ouvertes 1,5 s avant chaque clôture, lecture périodique des fills suspendue autour des clôtures.
 // BBO (WebSocket) : stop suiveur, prix de référence des ordres, garde de spread, exchange papier.
 // Signal SIGUSR2 : coupe et rétablit le WebSocket (test des reconnexions).
 // Derrière un proxy HTTPS (variable HTTPS_PROXY), lancer Node avec NODE_USE_ENV_PROXY=1.
@@ -29,8 +32,12 @@ import type { Engine } from './runtime.ts'
 import type { Bar } from '../../lib/strategies/shock/live.ts'
 
 const STEP = INTERVAL_MS['15m']
-/** Délai après la clôture avant de lire la bougie : le temps que l'exchange ouvre la suivante. */
-const SETTLE_MS = 3000
+/** Horloge de secours : lecture à T + 2 s si le WebSocket n'a encore rien signalé. */
+const CLOCK_FALLBACK_MS = 2000
+/** Connexions HTTP ouvertes 1,5 s avant chaque clôture (fermées par Node après 4 s d'inactivité). */
+const WARM_BEFORE_MS = 1500
+/** Pas de lecture périodique des fills de T − 3 s à T + 5 s : la clôture a la priorité. */
+const nearClose = (now: number) => { const k = now % STEP; return k < 5000 || k > STEP - 3000 }
 /** Écart maximal toléré entre l'horloge locale et celle de l'exchange en testnet et mainnet. */
 const MAX_CLOCK_SKEW_MS = 5000
 
@@ -75,6 +82,7 @@ async function main() {
   journal.event('history', { bars: feed.chart.all.length, days: feed.daily.all.length, gaps: gaps.length, from: new Date(feed.chart.all[0]?.t ?? 0).toISOString(), to: new Date(feed.chart.lastTime).toISOString() })
 
   let engine: Engine
+  let warm: (() => void) | null = null
   let account: `0x${string}` | null = null
   let shadow: ShadowRunner | null = null
   if (cfg.mode === 'shadow') {
@@ -117,18 +125,28 @@ async function main() {
       onBar: (b, d) => live.onBar(b, d),
       onQuote: q => { if (exchange.quotes.update(q)) mid(midOf(q)) },
       syncFills: () => live.syncFills(),
+      prepareClose: c => live.prepareClose(c),
     }
+    warm = () => live.warm()
   }
 
-  const loop = new BotLoop({ feed, engine, journal, settleMs: SETTLE_MS })
+  const loop = new BotLoop({ feed, engine, journal, settleMs: cfg.settleMs })
 
-  // Horloge de secours : juste après chaque clôture 15 min.
+  // Horloge de secours : T + 2 s (ou après l'attente configurée), seulement si la bougie n'est pas lue.
   let timer: NodeJS.Timeout
   const schedule = () => {
-    const wait = Math.ceil((Date.now() + 1) / STEP) * STEP + SETTLE_MS - Date.now()
-    timer = setTimeout(() => { void loop.tick('clock'); schedule() }, wait)
+    const wait = Math.ceil((Date.now() + 1) / STEP) * STEP + Math.max(CLOCK_FALLBACK_MS, cfg.settleMs) - Date.now()
+    timer = setTimeout(() => { void loop.tickIfMissing('clock'); schedule() }, wait)
   }
   schedule()
+  // Connexions prêtes avant chaque clôture (réel seulement).
+  let warmTimer: NodeJS.Timeout
+  const scheduleWarm = () => {
+    let wait = Math.ceil((Date.now() + 1) / STEP) * STEP - WARM_BEFORE_MS - Date.now()
+    if (wait < 0) wait += STEP
+    warmTimer = setTimeout(() => { warm?.(); scheduleWarm() }, wait)
+  }
+  scheduleWarm()
 
   // WebSocket : bougie en cours (clôtures), BBO, et en réel les événements du compte.
   const stream = new HyperliquidStream(network === 'testnet', e => loop.onStream(e))
@@ -138,7 +156,10 @@ async function main() {
     const sync = coalesce(async () => { await new Promise(r => setTimeout(r, 300)); await engine.syncFills!() }, e => journal.event('error', { where: 'fills', error: String(e) }))
     await stream.onAccount(account, kind => { journal.event('account_event', { kind }); sync(undefined) })
   }
-  const fillsTimer = engine.syncFills ? setInterval(() => { engine.syncFills!().catch(e => journal.event('error', { where: 'fills', error: String(e) })) }, 15000) : null
+  const fillsTimer = engine.syncFills ? setInterval(() => {
+    if (nearClose(Date.now())) return
+    engine.syncFills!().catch(e => journal.event('error', { where: 'fills', error: String(e) }))
+  }, 15000) : null
 
   // Chien de garde : aucune donnée depuis trop longtemps, la connexion est refaite.
   let lastForced = 0
@@ -164,6 +185,7 @@ async function main() {
   const stop = async (sig: string) => {
     journal.event('stop', { signal: sig, loop: loop.stats, parity: shadow?.parity ?? null })
     clearTimeout(timer)
+    clearTimeout(warmTimer)
     clearInterval(watchdog)
     clearInterval(summary)
     if (fillsTimer) clearInterval(fillsTimer)

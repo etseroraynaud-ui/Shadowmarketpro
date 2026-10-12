@@ -24,6 +24,7 @@ function harness() {
   const journal = new Journal(join(dir, 'logs'), 'shadow', true)
   const clock = { t: 0 }
   const seen: number[] = []
+  const prepared: number[] = []
   let syncs = 0
   const engine = {
     onBar: async (b: { t: number }) => {
@@ -31,15 +32,16 @@ function harness() {
       seen.push(b.t)
     },
     syncFills: async () => { syncs++ },
+    prepareClose: (close: number) => { prepared.push(close) },
   }
-  const loop = new BotLoop({ feed, engine, journal, now: () => clock.t, sleep: async () => {}, settleMs: 0, retryMs: 5 })
+  const loop = new BotLoop({ feed, engine, journal, now: () => clock.t, sleep: async () => {}, fastRetryMs: [5, 5], retryMs: 5 })
   /** L'exchange connaît les bougies jusqu'à la k-ième (en cours), l'horloge est juste après son ouverture. */
   const at = (k: number, afterOpenMs = 3000) => {
     api.data['15m'] = chart.slice(0, k + 1)
     clock.t = chart[k].t + afterOpenMs
   }
   const ev = () => readdirSync(join(dir, 'logs')).filter(f => f.startsWith('events-')).flatMap(f => readFileSync(join(dir, 'logs', f), 'utf8').trim().split('\n')).map(l => JSON.parse(l))
-  return { chart, api, feed, loop, seen, clock, at, ev, syncs: () => syncs }
+  return { chart, api, feed, loop, seen, prepared, clock, at, ev, syncs: () => syncs }
 }
 
 test('clôture signalée deux fois (WebSocket et horloge) puis reconnexion : chaque bougie passe une seule fois, dans l\'ordre', async () => {
@@ -88,6 +90,7 @@ test('bougie close du WebSocket comparée à celle de l\'API REST', async () => 
   h.loop.onCandle({ ...b301, v: b301.v - 0.1, n: 5 }) // dernier état WS différent (volume)
   h.at(302)
   await h.loop.tick('clock')
+  await new Promise(r => setTimeout(r, 20)) // la lecture demandée pendant celle du WebSocket
   const mb = h.ev().filter(e => e.type === 'market_bar')
   const last2 = mb.slice(-2)
   assert.deepEqual(last2[0].ws, { same: true })
@@ -111,6 +114,36 @@ test('bougie close pas encore confirmée par l\'exchange : relue quelques second
   h.api.data['15m'] = h.chart.slice(0, 402)
   await new Promise(r => setTimeout(r, 40))
   assert.deepEqual(h.seen.slice(before), [h.chart[400].t])
+  h.loop.stop()
+})
+
+test('premier message WebSocket de la nouvelle bougie : lecture tout de suite, lectures du compte lancées en même temps', async () => {
+  const h = harness()
+  h.at(500)
+  await h.loop.tick('start')
+  const before = h.seen.length
+  h.loop.onCandle({ ...h.chart[500], n: 3 })
+  // 120 ms après la clôture de la 500, l'exchange ouvre la 501 : son premier message arrive.
+  h.api.data['15m'] = h.chart.slice(0, 502)
+  h.clock.t = h.chart[501].t + 120
+  h.loop.onCandle({ ...h.chart[501], n: 1 })
+  await new Promise(r => setTimeout(r, 20))
+  assert.deepEqual(h.seen.slice(before), [h.chart[500].t], 'bougie 500 lue sans attente')
+  assert.deepEqual(h.prepared.slice(-1), [h.chart[501].t], 'lectures du compte lancées pour la clôture de la 500')
+  const mb = h.ev().filter(e => e.type === 'market_bar').at(-1)
+  assert.equal(mb.reason, 'ws_close')
+  assert.equal(mb.timing.wsMs, 120)
+  assert.equal(mb.timing.tickMs, 120)
+  // Horloge de secours à T + 2 s : la bougie est déjà lue, aucune lecture REST de plus.
+  const calls = h.api.calls
+  h.clock.t = h.chart[501].t + 2000
+  await h.loop.tickIfMissing('clock')
+  assert.equal(h.api.calls, calls)
+  // Sans WebSocket : l'horloge de secours lit la bougie.
+  h.api.data['15m'] = h.chart.slice(0, 503)
+  h.clock.t = h.chart[502].t + 2000
+  await h.loop.tickIfMissing('clock')
+  assert.deepEqual(h.seen.slice(before), [h.chart[500].t, h.chart[501].t])
   h.loop.stop()
 })
 

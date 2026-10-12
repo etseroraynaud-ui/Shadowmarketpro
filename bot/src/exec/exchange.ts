@@ -109,6 +109,8 @@ export interface Exchange {
   cancel(oids: number[]): Promise<CancelResult[]>
   /** Statut d'un ordre par son identifiant client : sert à savoir si un ordre sans réponse est passé. */
   orderStatus(cloid: string): Promise<OrderStatus>
+  /** Facultatif : ouvre à l'avance les connexions utilisées à la clôture (aucun effet sur le compte). */
+  warm?(): Promise<void>
 }
 
 // Identifiants client des ordres du bot : partagés avec la page Performance live du site.

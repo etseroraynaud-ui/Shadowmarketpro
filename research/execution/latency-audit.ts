@@ -112,6 +112,8 @@ export function auditJournal(evs: Ev[]): JournalAudit {
         s.barAt = t
         add(seg, 'close_to_bar_read', k(e.reason), t - s.T)
         count(`bar_read_${e.reason}`)
+        // Chronologie détaillée (bot instrumenté) : message WebSocket, lecture lancée, bougie lue.
+        if (e.timing) for (const [name, v] of Object.entries(e.timing as Record<string, number | null>)) if (v != null) add(seg, `loop_${name}`, k(e.reason), v)
         if (e.ws) count(e.ws.same ? 'ws_equals_rest' : 'ws_differs_from_rest')
         else count('ws_not_seen')
         if (e.spread?.maxBps != null) add(cost, 'bar_max_spread', k('all'), e.spread.maxBps)
@@ -165,6 +167,17 @@ export function auditJournal(evs: Ev[]): JournalAudit {
       case 'trade':
         p.dir = 0
         break
+      case 'bar': {
+        // Chronologie de la clôture côté moteur : état lu, décision, fin ; envoi et réponse de chaque ordre.
+        const tm = e.timing as (Record<string, number> & { orders?: [string, number, number, string][] }) | null
+        if (!tm) break
+        for (const [name, v] of Object.entries(tm)) if (typeof v === 'number') add(seg, `engine_${name}`, k(p.regime), v)
+        for (const [kind, sent, acked] of tm.orders ?? []) {
+          add(seg, 'order_sent', k(kind), sent)
+          add(seg, 'order_round_trip', k(kind), acked - sent)
+        }
+        break
+      }
       case 'entry_skipped': case 'entry_failed': case 'entry_blocked': case 'HALT': case 'retry': case 'order_resolved':
       case 'candle_revised': case 'stop_rejected': case 'stop_move_failed': case 'cancel_failed': case 'ws_reconnected': case 'ws_stale':
         count(e.type)

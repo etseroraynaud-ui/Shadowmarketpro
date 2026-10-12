@@ -144,6 +144,9 @@ def journals(dirs):
         elif typ == "market_bar":
             s["T"], s["at"] = iso_ms(e["bar"]), t
             add(seg, "close_to_bar_read_s", k(e.get("reason")), (t - s["T"]) / 1000)
+            for name, v in (e.get("timing") or {}).items():
+                if isinstance(v, (int, float)):
+                    add(seg, "loop_" + name, k(e.get("reason")), v)
             ws = e.get("ws")
             count("ws_not_seen" if ws is None else "ws_equals_rest" if ws.get("same") else "ws_differs_from_rest")
             sp = e.get("spread") or {}
@@ -191,6 +194,14 @@ def journals(dirs):
             count("stop_moved_at_close" if s["T"] is not None and t - s["T"] < AT_CLOSE_MS else "stop_moved_intrabar")
         elif typ == "trade":
             p["dir"] = 0
+        elif typ == "bar":
+            tm = e.get("timing") or {}
+            for name, v in tm.items():
+                if isinstance(v, (int, float)):
+                    add(seg, "engine_" + name, k(p["regime"]), v)
+            for o in tm.get("orders") or []:
+                add(seg, "order_sent_ms", k(o[0]), o[1])
+                add(seg, "order_round_trip_ms", k(o[0]), o[2] - o[1])
         elif typ == "retry":
             count("retry")
             if "429" in str(e.get("error", "")):

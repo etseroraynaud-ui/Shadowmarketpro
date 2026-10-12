@@ -184,19 +184,23 @@ export class CandleFeed {
     const revised: Revision[] = []
     const known = this.chart.all.length ? this.chart.all[this.chart.all.length - 1] : null
     const from = known ? known.t : now - MAX_PER_CALL * step
-    const got = await fetchClosed(this.api, this.coin, '15m', from, now)
+    // Journalier : re-téléchargé en entier quand un nouveau jour est clos (au plus 5000 jours), en
+    // même temps que les bougies 15 min (un seul aller-retour réseau à la clôture de minuit).
+    const day = INTERVAL_MS['1d']
+    const lastClosedDay = Math.floor(now / day) * day - day
+    const needDaily = this.daily.lastTime < lastClosedDay
+    const [got, d] = await Promise.all([
+      fetchClosed(this.api, this.coin, '15m', from, now),
+      needDaily ? fetchClosed(this.api, this.coin, '1d', now - MAX_PER_CALL * day, now) : Promise.resolve(null),
+    ])
     const again = known ? got.find(b => b.t === known.t) : undefined
     if (known && again) {
       const diff = barDiff(known, again)
       if (Object.keys(diff).length) revised.push({ interval: '15m', t: known.t, diff })
     }
     const added = this.chart.append(got)
-    // Journalier : re-téléchargé en entier quand un nouveau jour est clos (au plus 5000 jours).
-    const day = INTERVAL_MS['1d']
-    const lastClosedDay = Math.floor(now / day) * day - day
     let dailyChanged = false
-    if (this.daily.lastTime < lastClosedDay) {
-      const d = await fetchClosed(this.api, this.coin, '1d', now - MAX_PER_CALL * day, now)
+    if (d) {
       if (!d.length || d[d.length - 1].t !== lastClosedDay) throw new Error(`bougie journalière du ${new Date(lastClosedDay).toISOString().slice(0, 10)} absente`)
       const old = new Map(this.daily.all.map(b => [b.t, b]))
       for (const b of d) {

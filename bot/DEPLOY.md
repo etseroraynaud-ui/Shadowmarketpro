@@ -16,8 +16,18 @@ Ils redémarrent seuls après une panne ou un redémarrage du serveur.
 
 ## 1. Louer un serveur (quelques euros par mois)
 
-N'importe quel VPS sous **Ubuntu 24.04** avec 1 Go de mémoire suffit. Par exemple Hetzner Cloud
-(type CX22 ou équivalent, centre de données en Europe), OVH, Scaleway ou DigitalOcean.
+N'importe quel VPS sous **Ubuntu 24.04** avec 1 Go de mémoire suffit (Hetzner, OVH, Scaleway,
+DigitalOcean, Vultr, AWS Lightsail…).
+
+**Où louer le serveur.** Chaque aller-retour réseau vers l'API de Hyperliquid coûte environ
+0,2–0,25 s depuis l'Europe et quelques millisecondes depuis **Tokyo**, où les serveurs de
+Hyperliquid sont réputés se trouver (la mesure ci-dessous le vérifie). À
+chaque clôture, l'ordre part après environ deux allers-retours (lecture de la bougie et de l'état,
+puis l'ordre) : ≈ 0,5 s depuis l'Europe, ≈ 0,1–0,2 s depuis Tokyo. Pour le bot réel, choisir un
+centre de données à Tokyo (par exemple AWS Lightsail ou EC2 `ap-northeast-1`, Vultr Tokyo).
+Vérifier avant de déménager, depuis le serveur actuel puis depuis le nouveau :
+`curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/shadowmarketpro/claude/shock-engine-portfolio-g79j1v/research/execution/vps_probe.py | sudo python3 -`
+(lecture seule : allers-retours mesurés et résumé des journaux).
 
 À la création :
 
