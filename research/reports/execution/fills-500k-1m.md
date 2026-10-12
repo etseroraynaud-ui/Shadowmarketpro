@@ -105,6 +105,24 @@ Décomposition à 1 M$ :
 | bot actuel → entrées à 0,5 s | 1,667 | **gain d'ingénierie livré** (+0,13) |
 | → stops gérés à 0,5 s | 1,697 | gain possible, non codé (+0,03) |
 
+## Capacité (Sharpe ≥ 1,5)
+
+Même calcul à 2 M$ et 5 M$ (`fills-2m-5m.json`). À 5 M$, les ordres de 2,5 M$ dépassent la plus
+grande taille observée directement (2 M$) : seuls 6 % des exécutions sont démontrées à < 50 pb et
+47 % à < 1 %. Le résultat est une **estimation**, pas une démonstration.
+
+| Sharpe (Binance) | 500 k$ | 1 M$ | 2 M$ | 5 M$ (estimé) | Capacité au Sharpe 1,5 |
+|---|---|---|---|---|---|
+| bot actuel | 1,575 | 1,540 | 1,485 | 1,324 | ≈ 1,7 M$ |
+| bot optimisé, entrées (livré) | 1,703 | 1,667 | 1,614 | 1,452 | ≈ 3,8 M$ |
+| bot optimisé, entrées + stops | 1,733 | 1,697 | 1,644 | 1,483 | ≈ 4,5 M$ |
+
+Exécutions démontrées intégralement à < 50 pb : 95 % à 500 k$, 89 % à 1 M$, 74 % à 2 M$, 6 % à 5 M$.
+
+Sur Hyperliquid, un carnet ρ fois moins profond équivaut, pour le coût immédiat, à un capital
+1 / ρ fois plus grand (la dérive ne dépend pas de la taille). Capacité du bot livré : ≈ 1,9 M$ si
+ρ = 0,5, ≈ 1 M$ si ρ = 0,25.
+
 ## Hyperliquid : bornes conditionnelles
 
 La dérive est supposée identique à celle de Binance pour le même délai. Le coût immédiat est celui

@@ -20,7 +20,7 @@ import { KLINES_TO } from '../capacity/data.ts'
 import { LIMIT_BPS, SIZES } from './fills-measure.ts'
 import type { FillRow, SizeStat } from './fills-measure.ts'
 
-const CAPITALS = [500e3, 1e6]
+const CAPITALS = (process.env.FILLS_CAPITALS ?? '500000,1000000').split(',').map(Number)
 const NREP = 2000
 const t0 = Date.now()
 const log = (s: string) => process.stderr.write(`${s} (${((Date.now() - t0) / 1000).toFixed(0)} s)\n`)
@@ -289,5 +289,5 @@ for (const A of CAPITALS) {
 out.fees = fees
 out.limitBps = LIMIT_BPS
 out.sizes = SIZES
-writeFileSync(join(ROOT, 'research/reports/execution/fills-500k-1m.json'), JSON.stringify({ generatedAt: new Date().toISOString(), prespec: 'research/preregistration/execution-fills-500k-1m.md', venue: 'Binance USDⓈ-M (observable) ; Hyperliquid : bornes conditionnelles (rho)', ...out }, null, 1))
+writeFileSync(join(ROOT, `research/reports/execution/${process.env.FILLS_OUT ?? 'fills-500k-1m'}.json`), JSON.stringify({ generatedAt: new Date().toISOString(), prespec: 'research/preregistration/execution-fills-500k-1m.md', venue: 'Binance USDⓈ-M (observable) ; Hyperliquid : bornes conditionnelles (rho)', ...out }, null, 1))
 log('écrit')
