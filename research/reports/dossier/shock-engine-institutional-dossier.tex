@@ -122,7 +122,7 @@
     {Strategy, execution and capacity of a systematic intraday strategy on Bitcoin and Ether};
   \node[anchor=north west,inner sep=0,text=white!80!navy,font=\sffamily\small,text width=14.5cm,align=left]
     at ([xshift=2.5cm,yshift=-7.0cm]current page.north west)
-    {Eight years of simulated trading, every one of its 2{,}474 executions replayed on real market data,
+    {Eight years of simulated trading, all 2{,}474 executions since 2020 replayed on real market data,
      and an honest account of what remains to be proven.};
   \node[anchor=north west,inner sep=0,text=white,font=\sffamily\normalsize]
     at ([xshift=2.5cm,yshift=-9.4cm]current page.north west)
@@ -135,7 +135,7 @@
   \foreach \i/\v/\l/\s in {
       0/{\PfSharpe}/{Sharpe ratio}/{simulated, 2018--2026},
       1/{\PfMaxDD}/{Maximum drawdown}/{simulated, 2018--2026},
-      2/{\ShDeliveredOne}/{Net Sharpe at \$1M}/{measured costs, estimated},
+      2/{\ShDeliveredOne}/{Net Sharpe at \$1M}/{2020--2026, measured costs},
       3/{\CapDelivered}/{Capacity at Sharpe 1.5}/{Binance, central estimate}} {
     \node[tile] (t\i) at (\i*4.08cm,0) {};
     \node[anchor=north west,font=\sffamily\bfseries\fontsize{22}{24}\selectfont,text=navy] at ([xshift=8pt,yshift=-8pt]t\i.north west) {\v};
@@ -176,7 +176,7 @@ the past ended. So this dossier is organised around the questions an allocator a
 ratio. Would the strategy have survived real execution? How much capital can it carry before its own orders eat the edge?
 What would prove it wrong, and when will we know?
 
-We tried to answer them the way a careful trading desk would. We wrote each test down before running it. We measured with
+We tried to answer them the way a careful trading desk would. For the validation studies, we wrote each test down before running it. We measured with
 market data rather than assumptions, and when a convenient model and a measurement disagreed, we kept the measurement. We
 tried hard to break our own result. And we say plainly, throughout, which numbers are \emph{demonstrated}, which are
 \emph{estimated}, and which only live trading can settle.
@@ -208,8 +208,8 @@ Shock Engine is a systematic intraday strategy on Bitcoin and Ether. Over 1~Sept
 50/50 portfolio shows, in simulation, a Sharpe ratio of \PfSharpe{} and a maximum drawdown of \PfMaxDD{}, against \BhSharpe{}
 and \BhMaxDD{} for buy-and-hold. The result survives placebos, delays, parameter perturbations, a transfer to Ether and a
 regression on standard trend strategies. Replaying all 2{,}474 historical executions on real market data, with the bot as it is
-now built, the net Sharpe at \$1M of capital is estimated at \ShDeliveredOne{} and stays above 1.5 up to about
-\CapDelivered{} on Binance. The evidence remains in-sample, the intended venue (Hyperliquid) has thinner books than Binance, and
+now coded, the net Sharpe at \$1M of capital over 2020--2026 is estimated at \ShDeliveredOne{} (\BtSharpe{} before execution
+costs) and stays above 1.5 up to about \CapDelivered{} on Binance. The evidence remains in-sample, the intended venue (Hyperliquid) has thinner books than Binance, and
 there is no live track record yet.
 
 \begin{table}[H]
@@ -232,9 +232,9 @@ All 2{,}474 executions replayed on real trades: 89\% of market orders demonstrab
 & On Hyperliquid: about \$1.9M if its books are half as deep as Binance's; about \$0.45M at the depth visible on Bitcoin.
 & Our own market impact; Hyperliquid depth beyond 20 levels; the bot's real latency on its server.\\[4pt]
 Each second of delay costs money: \DriftHalf\bps{} at 0.5\,s, \DriftFive\bps{} at 5\,s after the signal.
-& Cost of the bot as built at \$1M: \CostMeanDeliveredOne\bps{} per execution, \BudgetDeliveredOne{} of the budget compatible
-  with a Sharpe of 1.5.
-& A live track record. One year cannot tell a Sharpe of 1.5 from zero (Section~\ref{sec:forward}).\\
+& Cost of the bot as now coded (not yet deployed or traded) at \$1M: \CostMeanDeliveredOne\bps{} per execution, \BudgetDeliveredOne{} of
+  the budget compatible with a Sharpe of 1.5.
+& A live track record. One year cannot reliably tell a Sharpe of 1.5 from zero (Section~\ref{sec:forward}).\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -256,9 +256,10 @@ in-sample performance \citep{white2000,bailey2014,harvey2016}. We cannot remove 
 expose it and test around it. Six working rules shaped everything that follows.
 
 \begin{enumerate}[label={\sffamily\bfseries\color{accent}\arabic*.},leftmargin=1.6em]
-\item \textbf{Write the test before running it.} Each validation study was pre-registered: hypothesis, statistic, thresholds
-  and data were committed to version control before the first computation, in the tradition of clinical trials
-  \citep{nosek2018}. The commit is the timestamp.
+\item \textbf{Write the test before running it.} The validation studies of the last phase were pre-registered (Table~\ref{tab:prereg}):
+  hypothesis, statistic, thresholds and data were committed to version control before the first computation, in the tradition
+  of clinical trials \citep{nosek2018}. The commit is the timestamp. The earlier robustness tests of Table~\ref{tab:robust} used
+  criteria set during the original research, without a committed protocol.
 \item \textbf{Try to break the result, not to confirm it.} Random-entry placebos, delayed entries, shifted regimes and
   synthetic markets ask whether something with no edge could have done as well.
 \item \textbf{Measure before modelling.} When a measurement and a convenient model disagreed, we kept the measurement and
@@ -325,8 +326,8 @@ Table~\ref{tab:prereg} lists the protocols; their commit hashes are in Appendix~
 \thead{Committed (2026)} & \thead{Study} & \thead{Question} & \thead{Outcome}\\
 \midrule
 8 Oct. & Short entries, 8 unseen assets & Do symmetric filters improve the short side? & Improvement not demonstrated ($p=0.44$)\\
-8 Oct. & E2 historical diagnostics & Can past data eliminate the E2 condition? & Not eliminated; not a validation\\
 8 Oct. & E2 forward test & Do shorts in a bearish regime beat the others? & Running since 12 Oct.~2026\\
+8 Oct. & E2 historical diagnostics & Can past data eliminate the E2 condition? & Not eliminated; not a validation\\
 9 Oct. & E2 falsification (tests A--C) & Is E2's historical gain exceptional? & Short quality: yes. Sharpe gain: largely generic\\
 9 Oct. & Residual alpha & Is it repackaged trend following? & No: alpha \RaAlpha{}/yr, $t=\RaT$ (in-sample)\\
 12 Oct. & Capacity, phases P0--P1 & What cost can the strategy bear? & Budget of \BudgetBps\bps{} per execution at Sharpe 1.5\\
@@ -441,7 +442,8 @@ not only execution cost, matters so much here.
 
 \begin{table}[H]
 \centering\small
-\caption{Tests designed to break the result. Pass/fail criteria were fixed before each result was seen.}
+\caption{Tests designed to break the result. Placebo, delay and transfer criteria come from the original research and were applied
+unchanged; walk-forward and neighbourhood results are descriptive; the three E2 tests were pre-registered.}
 \label{tab:robust}
 \begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{5.1cm}L@{}}
 \toprule
@@ -466,7 +468,7 @@ E2 falsification, test C: synthetic markets & Short quality above the synthetic 
 \end{tabularx}
 \end{table}
 
-Sharpe ratios in the transfer and neighbourhood rows are annualised from 15-minute returns and differ slightly from the daily
+Sharpe ratios in the transfer, neighbourhood and walk-forward rows are annualised from 15-minute returns and differ slightly from the daily
 figures. The rules are not a universal law of markets: they work on the two most liquid crypto assets and fail elsewhere, and
 we see no reason to hide it.
 
@@ -503,8 +505,8 @@ waiting costs the edge itself \citep{cartea2015}. For a schedule of duration $T$
 where $D$, the drift during execution, grows with $T$ and $I$, the impact of quantity $Q$, shrinks with $T$. Shock Engine sits
 at the urgent extreme. At its signal times the price moves against a waiting order by \DriftHalf\bps{} in half a second and
 \DriftFive\bps{} in five seconds (Figure~\ref{fig:drift}); spreading the order over the next minute costs 4.6\bps{} (Bitcoin)
-and 6.9\bps{} (Ether) of drift. Taking the visible book at once costs a fraction of that up to orders of several million
-dollars (Section~\ref{sec:costs}). The optimal schedule collapses to a single immediate order, and engineering latency, not
+and 6.9\bps{} (Ether) of drift. Taking the visible book at once costs a fraction of that, at the median, up to \$2.5M orders on
+the rebuilt books (Section~\ref{sec:costs}). The optimal schedule collapses to a single immediate order, and engineering latency, not
 order slicing, is where the money is.
 
 \subsection{The square-root law, and why it overstated our costs}
@@ -514,13 +516,13 @@ moves the price by about
 I(Q) \approx Y\,\sigma_D\,\sqrt{Q/V_D},
 \label{eq:sqrt}
 \end{equation}
-where $\sigma_D$ is daily volatility, $V_D$ daily volume and $Y$ a constant of order one
-\citep{almgren2005,toth2011,bouchaud2018}, including on Bitcoin \citep{donierbonart2015}; other studies favour a logarithmic
-shape \citep{zarinelli2015}. Our first capacity study, pre-registered, used Equation~\eqref{eq:sqrt} with $Y\in\{0.5,1,2\}$
+where $\sigma_D$ is daily volatility, $V_D$ daily volume and $Y$ a constant of order one \citep{toth2011,bouchaud2018},
+including on Bitcoin \citep{donierbonart2015}. Estimated exponents vary: about 0.6 on US equities in \citet{almgren2005}, a
+logarithmic shape in \citet{zarinelli2015}. Our first capacity study, pre-registered, used Equation~\eqref{eq:sqrt} with $Y\in\{0.5,1,2\}$
 because no calibration was available. It implied about 3\bps{} for a \$500k order in the central case.
 
-The measured cost of the first \$500k of real orders of that size at our signal times was 0.30\bps{} on Bitcoin and 0.72\bps{}
-on Ether. The two numbers measure different things. The square-root law describes metaorders spread over minutes to days,
+The median measured cost of the first \$500k of real orders of that size at our signal times was 0.30\bps{} on Bitcoin and
+0.72\bps{} on Ether. The two numbers measure different things. The square-root law describes metaorders spread over minutes to days,
 including the reaction of liquidity providers to repeated flow. A single marketable order that sweeps the book in
 milliseconds pays the shape of the book at that instant \citep{obizhaevawang2013,cont2014}, and the books of Bitcoin and Ether
 perpetuals are deep near the touch. \citet{frazzini2018}, using a large manager's live executions, also found real costs well
@@ -545,8 +547,8 @@ sent at a fixed time.
 \question{``Could every order have been filled, and at what price?''}
 
 Every execution of the portfolio from January 2020 to September 2026, without exception, was replayed on the real trades of
-Binance USD-M perpetual futures, the most liquid venue and the only one with public history covering the
-period. None is demonstrably unfillable at \$500k or \$1M of capital.
+Binance USD-M perpetual futures, the most liquid venue and the only one with free millisecond trade history
+covering the period. None is demonstrably unfillable at \$500k or \$1M of capital.
 
 \begin{table}[H]
 \centering\small
@@ -580,7 +582,7 @@ was rebuilt to the millisecond (Section~\ref{sec:costs}).
 \paragraph{Method: what an order of our size actually paid} Rather than assume an impact model, we looked for real orders of
 our size around each execution (Figure~\ref{fig:method}). Aggressive orders were rebuilt from trades sharing a millisecond and
 a side. When a real order of at least $Q$ dollars traded within two minutes of our arrival, the cost of its first $Q$ dollars is
-what an order of our size really paid at that moment. When none did, the cost comes from a model fitted to these observations
+what an order of our size really paid within two minutes of ours. When none did, the cost comes from a model fitted to these observations
 ($\log$ cost on size, volatility and volume; $R^2$ of 0.43 for Bitcoin and 0.32 for Ether; size elasticity 0.84 and 0.72).
 
 \begin{figure}[H]
@@ -624,7 +626,8 @@ Total & 2{,}194 & 100\% & 2{,}194 & 100\%\\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
-\item 50\bps{} is the price limit of the bot's orders. Most executions without a comparable order are Ether in 2020--2022 (95
+\item 50\bps{} is the price cap of the bot's market orders at entries and exits at the close; stops are exchange stop orders,
+capped at 5\% from their trigger. Most executions without a comparable order are Ether in 2020--2022 (95
 of 105 at \$500k; 174 of 218 at \$1M), when real orders of that size were rare. At \$2M of capital, 74\% of market executions
 are demonstrated within 50\bps; at \$5M, 6\%, because \$2.5M orders exceed the largest size observed directly. All 280
 take-profits were traded through (median excess 32\bps{} on Bitcoin, 35\bps{} on Ether); counting the 15 that cleared by less
@@ -662,8 +665,9 @@ The dominant cost is time, not size. With the bot as it is now built, a \$1M por
 \CostMeanDeliveredOne\bps{} per execution relative to the backtest price, \BudgetDeliveredOne{} of the budget compatible with a
 Sharpe ratio of 1.5.
 
-\paragraph{The cost budget} Adding one basis point of cost to every execution removes 0.064 from the Sharpe ratio. The ratio
-stays above 1.5 as long as the average added cost stays below \BudgetBps\bps{} per execution, and above 1.0 up to 13.1\bps.
+\paragraph{The cost budget} Adding one basis point of cost to every execution removes 0.064 from the Sharpe ratio. The
+ratio stays above 1.5 as long as the average added cost stays below \BudgetBps\bps{} per execution (90\% interval: 0 to
+14.5\bps, because the history itself is uncertain), and above 1.0 up to 13.1\bps.
 Entries and stops carry the sensitivity; take-profits and exits at the close very little.
 
 \begin{figure}[H]
@@ -687,8 +691,8 @@ Entries and stops carry the sensitivity; take-profits and exits at the close ver
     circle,fill=bad,inner sep=1.6pt] at (axis cs:5,\DriftFive) {};
 \end{axis}
 \end{tikzpicture}
-\caption{One second of delay costs more than sweeping a million dollars of book depth. Mean drift of the mid-price against the
-order after the signal's bar close, \DriftN{} executions drawn at random and measured on Binance trades (pre-registered,
+\caption{One second of delay costs more than sweeping a million dollars of book depth. Mean drift of the last traded price
+against the order after the signal's bar close, \DriftN{} executions drawn at random and measured on Binance trades (pre-registered,
 bootstrap 95\% interval). Depth costs: median over 13 rebuilt order books.}
 \label{fig:drift}
 \end{figure}
@@ -698,8 +702,9 @@ time stamp 5.01\,s after the bar close. Reading the code explained it: a fixed t
 round trips made one after the other. Without touching the signals, the code was rewritten to read the closed candle as soon
 as the exchange opens the next one, to run its network calls in parallel and to keep connections warm, leaving two round trips
 between the close and the order. In the replay, this moves the Sharpe ratio at \$1M up by \GainDelivered{}
-[\GainDeliveredLo; \GainDeliveredHi], positive in \GainDeliveredShare{} of paired bootstrap draws. The target of about 0.5\,s
-is an estimate; the new time stamps journalled by the bot will measure it on its server.
+[\GainDeliveredLo; \GainDeliveredHi], positive in \GainDeliveredShare{} of paired bootstrap draws. The rewrite was committed on
+12~October~2026; it is not yet confirmed deployed and has not traded. The 0.5\,s target is the optimistic end of the 0.5 to
+0.9\,s expected from a server in Europe (0.1 to 0.3\,s from Tokyo); the new time stamps journalled by the bot will measure it.
 
 \begin{table}[H]
 \centering\small
@@ -717,7 +722,9 @@ is an estimate; the new time stamps journalled by the bot will measure it on its
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
-\item The delivered bot accelerates entries and exits at the close; stops remain native exchange stops. Decomposition at \$1M
+\item The delivered bot accelerates entries and exits at the close; stops remain native exchange stops, assumed to reach the book
+3\,s after the price crosses their level (Hyperliquid triggers them on the mark price, whose history we do not have). Costs
+cover the 2{,}473 executions with a reference price. Decomposition at \$1M
 for the initial bot (medians): half-spread 0.02\bps, drift during the delay 1.04\bps{} (2.7\bps{} on Bitcoin entries, 3.2\bps{} on
 Ether entries), depth 0.41\bps. Budget: \BudgetBps\bps{} per execution for a Sharpe ratio of 1.5.
 \end{tablenotes}
@@ -814,7 +821,9 @@ Section~\ref{sec:forward} exclude funding and say so.
 
 \paragraph{Safeguards in the bot}
 \begin{itemize}
-\item Market orders are sent as marketable limit orders (IOC) capped at 0.5\% from the best price: never a fill beyond it.
+\item Entries and exits at the close are sent as marketable limit orders (IOC) capped at 0.5\% from the best price: never a fill
+  beyond it. Stops are native exchange stop orders, triggered on the mark price and capped at 5\% from the trigger; at \$1M their
+  cost reaches 50 to 59\bps{} at the 99th percentile in the replay.
 \item An incomplete exit is retried, then the remainder is protected by a stop and the bot stops itself.
 \item The position is re-read from the exchange before any halt; every order carries an identifier that tells its purpose.
 \item Every step between the close and the fill is time-stamped, so that live latency and costs can be reported as P50 to P99
@@ -866,7 +875,8 @@ intervals. Solid grey line: the threshold of 1.5. Hollow points at \$5M are esti
 \item \textbf{Stops are the binding constraint.} Stops fire in fast markets. At \$1M of capital, the stop order exceeds 10\% of the
   volume of its trigger minute in 10\% of cases; at \$5M, in 44\%, and the whole minute's volume in 6\%.
 \item \textbf{What was gained.} Managing stops at 0.5\,s, not yet coded, would move the crossing to about \CapFull. The
-  pre-registered model-based study, with an uncalibrated square-root impact, placed it at \$366k in its central case.
+  pre-registered model-based study, which spread each order over the first minute and used an uncalibrated square-root impact,
+  placed it at \$366k in its central case; most of that gap comes from the one-minute execution assumption.
 \end{itemize}
 
 \paragraph{From Binance to Hyperliquid} For the depth part of the cost, a book $\rho$ times as deep as Binance's is equivalent to a
@@ -883,12 +893,12 @@ capital $1/\rho$ times larger; the drift does not depend on size. Capacity there
 1 & $\approx$\,\CapDelivered & Binance, measured costs\\
 0.5 & $\approx$\,\$1.9M & hypothesis\\
 0.25 & $\approx$\,\$1.0M & hypothesis\\
-0.12 & $\approx$\,\$0.45M & visible Bitcoin depth within 5\bps{} on 13 executions (lower bound)\\
+0.12 & $\approx$\,\$0.45M & visible Bitcoin depth within 5\bps{} on 6 executions (lower bound)\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-On the 13 rebuilt executions, the depth visible within 5\bps{} was \$1.1M on Hyperliquid against \$9.3M on Binance for Bitcoin
+On the rebuilt executions (six for Bitcoin, seven for Ether), the median depth visible within 5\bps{} was \$1.1M on Hyperliquid against \$9.3M on Binance for Bitcoin
 ($\rho\approx0.12$) and \$2.3M against \$3.0M for Ether ($\rho\approx0.77$). Beyond Hyperliquid's 20 published levels, liquidity is
 not observable, so the Bitcoin figure is a lower bound. Hyperliquid's real capacity will be measured by the bot's own first orders and
 by a deeper book archive (Section~\ref{sec:roadmap}).
@@ -927,27 +937,30 @@ the depth equivalence of Section~\ref{sec:capacity}.
 (1.11 against 1.49). Applying the same ratio to the net Sharpe at \$1M gives about 1.2. This is an order of magnitude to keep in
 mind, not an estimate.
 
-\paragraph{Why a live Sharpe ratio takes years} For independent returns, the standard error of an annual Sharpe ratio estimated
-over $T$ years is approximately \citep{lo2002}
+\paragraph{Why a live Sharpe ratio takes years} For independent daily returns, the standard error of an annualised Sharpe ratio
+estimated over $T$ years is approximately \citep{lo2002}
 \begin{equation}
-\widehat{\mathrm{SE}}(\widehat{\mathrm{SR}}) \approx \sqrt{\frac{1+\tfrac12\,\mathrm{SR}^2}{T}} .
+\widehat{\mathrm{SE}}(\widehat{\mathrm{SR}}) \approx \sqrt{365.25}\,\sqrt{\frac{1+\tfrac12\,\mathrm{SR}_d^2}{N}} \approx \frac{1}{\sqrt{T}},
+\qquad \mathrm{SR}_d=\frac{\mathrm{SR}}{\sqrt{365.25}},\quad N=365.25\,T .
 \label{eq:lo}
 \end{equation}
+Departures from independence and normality change it; the month-block bootstrap of our own history implies about $0.86/\sqrt{T}$.
 
 \begin{table}[H]
 \centering\small
-\caption{What a live record can show, for a true Sharpe ratio of 1.5 (Equation~\ref{eq:lo}, independent returns).}
+\caption{What a live record can show (Equation~\ref{eq:lo}, independent daily returns).}
 \label{tab:lo}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
 \thead{Years of live trading} & \thead{1} & \thead{2} & \thead{3} & \thead{5} & \thead{10}\\
 \midrule
-Standard error of the measured Sharpe ratio & 1.46 & 1.03 & 0.84 & 0.65 & 0.46\\
+Standard error of the measured Sharpe ratio & 1.00 & 0.71 & 0.58 & 0.45 & 0.32\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-To be 95\% confident that the true Sharpe ratio is above zero takes about 2.6 years; above 1.0, about 23 years. A first year of live
+If the true Sharpe ratio is 1.5, about 1.2 years of live trading are needed to be 95\% confident that it is above zero, and about
+11 years to tell it from 1.0. A first year of live
 trading will therefore establish \emph{implementation fidelity}: that the live system takes the same decisions as the simulation on
 the same bars, at a measured cost. It cannot establish the Sharpe ratio, and we will not present it as if it did.
 
@@ -973,9 +986,17 @@ Latency instrumentation of the bot & Oct.~2026 & In the code; deployment on the 
 \paragraph{The rules of the forward test} All committed before the first observation: interim looks after 25, 50 and 75 shorts
 closed in a bearish regime, each requiring $p<0.001$; a final look when both groups reach 100 closed shorts, requiring $p<0.047$, and no
 later than 1~October~2031, for a total type-I error of at most 0.05 \citep{haybittle1971,peto1976}. At roughly 89 shorts a year, the
-final look should come in about three years. Its power is 44\% to 54\% if the true difference is 0.4 standard deviation of trade
-returns, less once the correlation of shorts within a month is counted. An inconclusive result will often mean ``not enough data'':
-the protocol accepts this, preferring a clean test to a fast one, and decides in advance that an inconclusive result means no change.
+final look should come in about three years. Its power is 44\% to 54\% if the true difference in mean risk-normalised return $R$
+is 0.4 (about 0.2 standard deviation of $R$), less once the correlation of shorts within a month is counted. An inconclusive
+result will often mean ``not enough data''; the protocol accepts this, preferring a clean test to a fast one.
+
+\begin{discbox}[Disclosure: the reference specification changed after the forward protocol was written]
+The protocol was written when the unconditional version (v1) was the reference and E2 a shadow challenger, and it stated that an
+inconclusive result would mean no change. On 9~October~2026 the public specification, and the bot on the test network, moved to
+E2. The test itself is unaffected: it replays the frozen v1 offline on new data and classifies each short by the E2 regime. But an
+inconclusive result would now leave in place a condition that has not been validated. We record this here as a deviation from
+the protocol's governance, not from its test.
+\end{discbox}
 
 % ================================================================== 8. what we got wrong
 \section{What we got wrong, and what it taught us}\label{sec:wrong}
@@ -990,10 +1011,11 @@ On the first live test trade the order left 5.01\,s after the close, and the pre
 \textbf{What we did:} rewrote the critical path without touching the signals; Figure~\ref{fig:bridge} shows the value of that work.
 \end{keybox}
 
-\begin{keybox}[2.\quad A textbook impact model, ten times too pessimistic for our orders]
-Our first capacity study, lacking data, used the square-root law with an uncalibrated constant. It suggested the strategy would fall
-below a Sharpe ratio of 1.5 at about \$366k. Measuring what real orders of our size paid showed an immediate cost about ten times
-smaller, and showed that delay, not impact, dominated. \textbf{What we did:} kept the model's result in its report, labelled as
+\begin{keybox}[2.\quad An early capacity model that was too pessimistic, for two reasons]
+Our first capacity study, lacking data, assumed each order would be spread over the first minute after the signal and priced impact
+with the square-root law and an uncalibrated constant. It suggested the Sharpe ratio would fall below 1.5 at about \$366k. Most of
+that came from the one-minute assumption: the drift over a minute is 4.6 to 6.9\bps. The rest came from impact: the model's 3\bps{}
+for a \$500k order is four to ten times the median cost real orders of that size paid (0.72\bps{} on Ether, 0.30\bps{} on Bitcoin). \textbf{What we did:} kept the model's result in its report, labelled as
 superseded, and built the capacity curve from measurements.
 \end{keybox}
 
@@ -1021,8 +1043,9 @@ The same check found that our first summary left out 2 and 19 executions that sa
 
 % ================================================================== 9. risks
 \section{Risks and limitations}\label{sec:risks}
-These results show that the historical edge is not a simple artefact and that it survives measured execution costs up to a few
-million dollars. They do not show that it will persist.
+These results show that the historical edge is not a simple artefact and that, on Binance, it survives the measured execution
+costs up to a few million dollars in the central estimate. They do not show that it will persist, nor what Hyperliquid's depth
+allows.
 
 \begin{itemize}
 \item \textbf{Selection.} Bitcoin's rules were selected on data covering the whole period; Ether is a transfer across markets, not across
@@ -1036,8 +1059,11 @@ million dollars. They do not show that it will persist.
   conditional on a depth ratio that 13 cases place below one.
 \item \textbf{Own impact.} Permanent impact, information leakage and the adaptation of market makers to a regular flow are not
   measured. Above about \$4M of capital, single orders exceed the largest size observed.
-\item \textbf{Stop mechanics.} Hyperliquid stops trigger on the mark price, not the last trade. As in the backtest, no exit order rests
-  during a position's first 15-minute bar; an added protective stop would change realised results.
+\item \textbf{Stop mechanics.} Hyperliquid stops trigger on the mark price, not the last trade, and fill up to 5\% from the trigger.
+  As in the backtest, no exit order rests during a position's first 15-minute bar; an added protective stop would change realised
+  results.
+\item \textbf{Execution assumptions.} The bot as now coded has not traded; its 0.5\,s latency is a target; the replay assumes stops
+  reach the book 3\,s after the price crosses their level.
 \item \textbf{Funding.} Excluded from headline and projected figures; about \minus0.07 of Sharpe ratio historically.
 \item \textbf{Venue and operational risk.} Counterparty, technical and regulatory risks of the execution venue are not assessed in
   this dossier.
@@ -1053,8 +1079,9 @@ In order of information gained per unit of cost and time:
 \item \textbf{Six to twelve months of live execution with small capital on Hyperliquid}, with the new time stamps: real latency,
   fill rates, stop slippage and cost against the decision price, the only way to measure our own impact.
 \item \textbf{A server close to the exchange.} According to Tardis, Hyperliquid's servers are in Tokyo; every round trip saved is drift not paid.
-\item \textbf{Hyperliquid's official book archive} (requester-pays, about one dollar of transfer for all executions since 2023), to
-  measure the depth ratio $\rho$ at our own signal times instead of assuming it.
+\item \textbf{Hyperliquid's official book archive} (requester-pays, about one dollar of transfer; coverage not yet verified), to
+  measure $\rho$ near the best price at our own signal times. It probably carries the same 20-level limit, so Bitcoin's deeper
+  liquidity would still need another source, such as node or order-level data.
 \item \textbf{A pre-registered sample of about 300 executions on full Binance order books} (paid data), to fix the Ether correction and
   the worst cases at \$1M to \$2.5M orders.
 \item \textbf{Stops managed by the bot at 0.5\,s} on the last traded price, worth about +0.03 of Sharpe ratio in the replay.
@@ -1074,7 +1101,7 @@ In order of information gained per unit of cost and time:
 \item \textbf{Depth equivalence.} For the depth cost, an order $Q$ in a book $\rho$ times as deep costs what an order $Q/\rho$ costs in
   the reference book.
 \item \textbf{Bootstrap.} Calendar months drawn with replacement, the same months for every series, so that cross-sectional
-  dependence is preserved \citep{kunsch1989,politisromano1994}.
+  dependence is preserved \citep{kunsch1989}.
 \end{itemize}
 
 \section{Sources and reproducibility}\label{app:sources}
@@ -1116,7 +1143,7 @@ the portfolio's consistency checks fail.
 \renewcommand{\refname}{References}
 \begin{thebibliography}{99}\small\setlength{\itemsep}{1pt}
 \bibitem[Almgren and Chriss(2000)]{almgrenchriss2000} Almgren, R., and Chriss, N. (2000). Optimal execution of portfolio transactions. \emph{Journal of Risk}, 3(2), 5--39.
-\bibitem[Almgren et~al.(2005)]{almgren2005} Almgren, R., Thum, C., Hauptmann, E., and Li, H. (2005). Direct estimation of equity market impact. \emph{Risk}, 18(7), 58--62.
+\bibitem[Almgren et~al.(2005)]{almgren2005} Almgren, R., Thum, C., Hauptmann, E., and Li, H. (2005). Direct estimation of equity market impact. \emph{Risk}, 18(7), 57--62.
 \bibitem[Bacry et~al.(2015)]{bacry2015} Bacry, E., Iuga, A., Lasnier, M., and Lehalle, C.-A. (2015). Market impacts and the life cycle of investors orders. \emph{Market Microstructure and Liquidity}, 1(2), 1550009.
 \bibitem[Bailey and L\'opez de Prado(2014)]{bailey2014} Bailey, D.~H., and L\'opez de Prado, M. (2014). The deflated Sharpe ratio: correcting for selection bias, backtest overfitting, and non-normality. \emph{Journal of Portfolio Management}, 40(5), 94--107.
 \bibitem[Bouchaud et~al.(2018)]{bouchaud2018} Bouchaud, J.-P., Bonart, J., Donier, J., and Gould, M. (2018). \emph{Trades, Quotes and Prices: Financial Markets Under the Microscope}. Cambridge University Press.
@@ -1140,7 +1167,7 @@ the portfolio's consistency checks fail.
 \bibitem[Obizhaeva and Wang(2013)]{obizhaevawang2013} Obizhaeva, A.~A., and Wang, J. (2013). Optimal trading strategy and supply/demand dynamics. \emph{Journal of Financial Markets}, 16(1), 1--32.
 \bibitem[Perold(1988)]{perold1988} Perold, A.~F. (1988). The implementation shortfall: paper versus reality. \emph{Journal of Portfolio Management}, 14(3), 4--9.
 \bibitem[Peto et~al.(1976)]{peto1976} Peto, R., Pike, M.~C., Armitage, P., et al. (1976). Design and analysis of randomized clinical trials requiring prolonged observation of each patient. I. Introduction and design. \emph{British Journal of Cancer}, 34(6), 585--612.
-\bibitem[Politis and Romano(1994)]{politisromano1994} Politis, D.~N., and Romano, J.~P. (1994). The stationary bootstrap. \emph{Journal of the American Statistical Association}, 89(428), 1303--1313.
+
 \bibitem[T\'oth et~al.(2011)]{toth2011} T\'oth, B., Lemp\'eri\`ere, Y., Deremble, C., de Lataillade, J., Kockelkoren, J., and Bouchaud, J.-P. (2011). Anomalous price impact and the critical nature of liquidity in financial markets. \emph{Physical Review X}, 1(2), 021006.
 \bibitem[White(2000)]{white2000} White, H. (2000). A reality check for data snooping. \emph{Econometrica}, 68(5), 1097--1126.
 \bibitem[Zarinelli et~al.(2015)]{zarinelli2015} Zarinelli, E., Treccani, M., Farmer, J.~D., and Lillo, F. (2015). Beyond the square root: evidence for logarithmic dependence of market impact on size and participation rate. \emph{Market Microstructure and Liquidity}, 1(2), 1550004.
