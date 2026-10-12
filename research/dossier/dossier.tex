@@ -1,4 +1,4 @@
-% Shock Engine institutional dossier, version 2.0.
+% Shock Engine institutional dossier, version 2.1.
 % Composed by research/dossier/build-dossier.ts, which writes numbers.tex (figures read from the
 % published research files) and data/ (figure series) next to this file before compiling.
 % Figures typed here come from the Markdown reports listed in Appendix B.
@@ -72,7 +72,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\sffamily\scriptsize\color{muted}SHOCK ENGINE\quad\textbullet\quad INSTITUTIONAL DOSSIER}
-\fancyhead[R]{\sffamily\scriptsize\color{muted}VERSION 2.0\quad\textbullet\quad 12 OCTOBER 2026}
+\fancyhead[R]{\sffamily\scriptsize\color{muted}VERSION 2.1\quad\textbullet\quad 12 OCTOBER 2026}
 \fancyfoot[L]{\sffamily\scriptsize\color{muted}Oreste Raynaud\quad\textbullet\quad ShadowMarketPro Research}
 \fancyfoot[R]{\sffamily\scriptsize\color{muted}\thepage\,/\,\pageref*{LastPage}}
 \renewcommand{\headrulewidth}{0.4pt}
@@ -114,7 +114,7 @@
   \fill[accent] ([yshift=-11.2cm]current page.north west) rectangle ([yshift=-11.45cm]current page.north east);
   \node[anchor=north west,inner sep=0,text=white!80!navy,font=\sffamily\scriptsize\bfseries]
     at ([xshift=2.5cm,yshift=-2.1cm]current page.north west)
-    {QUANTITATIVE RESEARCH\quad\textbullet\quad INSTITUTIONAL DOSSIER\quad\textbullet\quad VERSION 2.0};
+    {QUANTITATIVE RESEARCH\quad\textbullet\quad INSTITUTIONAL DOSSIER\quad\textbullet\quad VERSION 2.1};
   \node[anchor=north west,inner sep=0,text=white,font=\sffamily\bfseries\fontsize{42}{46}\selectfont]
     at ([xshift=2.45cm,yshift=-3.1cm]current page.north west) {Shock Engine};
   \node[anchor=north west,inner sep=0,text=white,font=\sffamily\Large,text width=14.5cm,align=left]
@@ -227,7 +227,7 @@ perturbed neighbour is profitable.
 It is not repackaged trend following: residual alpha \RaAlpha{} a year, $t=\RaT$, against six standard trend strategies
 (in-sample).
 & Capacity at Sharpe 1.5: about \CapDelivered{} on Binance (central estimate, wide interval).
-& The short-entry condition (E2), specified after the data were studied: a pre-registered forward test, about three years.\\[4pt]
+& The short-entry condition (E2), in-sample like every rule: a pre-registered forward test, about three years.\\[4pt]
 All 2{,}474 executions replayed on real trades: 89\% of market orders demonstrably fillable at \$1M, none shown unfillable.
 & On Hyperliquid: about \$1.9M if its books are half as deep as Binance's; about \$0.45M at the depth visible on Bitcoin.
 & Our own market impact; Hyperliquid depth beyond 20 levels; the bot's real latency on its server.\\[4pt]
@@ -364,14 +364,16 @@ and crash in rebounds \citep{danielmoskowitz2016}.
 \item \textbf{Calibration.} Rules set on Bitcoin only and applied unchanged to Ether.
 \end{itemize}
 
-\begin{discbox}[Disclosure: the short-entry condition was specified after the data were studied]
-During development the short side was an unconditional mirror of the long side (version v1). The trend condition that defines
-specification E2 was introduced on 8~October~2026, as an exploratory variant of a pre-registered study, after the 2017--2026
-data had been examined. Every historical figure in this dossier is therefore in-sample with respect to it. Without the
-condition, the same portfolio shows a Sharpe ratio of 1.73, a CAGR of 64.5\% and a maximum drawdown of \minus23.5\% over the
-same period. Three pre-registered falsification tests (Table~\ref{tab:robust}) find the improvement in the quality of shorts
-exceptional, but most of the gain in Sharpe ratio and drawdown generic. Only the forward test of Section~\ref{sec:forward} can
-validate it.
+\begin{discbox}[The short-entry condition (E2): design and implementation history]
+Shock Engine was designed with a short side that mirrors the long side only in a bearish daily trend regime: this is
+specification E2, the version described throughout this dossier. For part of the research, the code ran a simpler unconditional
+mirror (v1). The conditional rule was written into the research code on 8~October~2026, its definition fixed in a pre-registered
+protocol before its results on Bitcoin and Ether were computed. Like every other rule, it was nonetheless evaluated on data
+already used to build the strategy, so its historical figures are in-sample. For reference, the unconditional mirror shows a
+Sharpe ratio of 1.73, a CAGR of 64.5\% and a maximum drawdown of \minus23.5\% over the same period. Three pre-registered
+falsification tests (Table~\ref{tab:robust}) find the improvement in the quality of shorts exceptional, while most of the gain
+in Sharpe ratio and drawdown is generic to removing shorts outside bearish regimes. The forward test of
+Section~\ref{sec:forward} provides the out-of-sample test.
 \end{discbox}
 
 \subsection{Historical results}
@@ -990,12 +992,12 @@ final look should come in about three years. Its power is 44\% to 54\% if the tr
 is 0.4 (about 0.2 standard deviation of $R$), less once the correlation of shorts within a month is counted. An inconclusive
 result will often mean ``not enough data''; the protocol accepts this, preferring a clean test to a fast one.
 
-\begin{discbox}[Disclosure: the reference specification changed after the forward protocol was written]
-The protocol was written when the unconditional version (v1) was the reference and E2 a shadow challenger, and it stated that an
-inconclusive result would mean no change. On 9~October~2026 the public specification, and the bot on the test network, moved to
-E2. The test itself is unaffected: it replays the frozen v1 offline on new data and classifies each short by the E2 regime. But an
-inconclusive result would now leave in place a condition that has not been validated. We record this here as a deviation from
-the protocol's governance, not from its test.
+\begin{discbox}[Disclosure: a governance change after the forward protocol was written]
+The forward protocol was written while the research code still ran the unconditional mirror (v1) as its reference, with E2
+tracked in shadow, and it stated that an inconclusive result would mean no change. On 9~October~2026 the bot was aligned with the
+E2 specification. The test itself is unaffected: it replays v1 offline on new data and classifies each short by the E2 regime.
+But its ``no change'' rule was written for v1: with E2 now running, an inconclusive result would leave E2 in place without
+out-of-sample confirmation. We record this as a deviation from the protocol's governance, not from its test.
 \end{discbox}
 
 % ================================================================== 8. what we got wrong
@@ -1026,12 +1028,13 @@ Rebuilding the full order book on 13 executions confirmed Bitcoin and showed Eth
 pre-registered order-book sample.
 \end{keybox}
 
-\begin{keybox}[4.\quad A short side that stopped working, and a repair we refused to take at face value]
-In the unconditional version, the Sharpe ratio fell from 2.13 in the first half of the sample to 1.29 in the second, almost entirely
-because of shorts: their win rate dropped while long trades held up. Restricting shorts to bearish daily regimes (E2) repaired most
-of it, but the condition was chosen after looking at the data, so the repair proves nothing by itself. \textbf{What we did:} subjected
-it to three pre-registered falsification tests, disclosed that its Sharpe gain is largely generic, and launched a forward test that
-can say no.
+\begin{keybox}[4.\quad Research code that did not yet match the design]
+For part of the research, the code ran the short side as an unconditional mirror (v1) instead of the regime-conditioned mirror of
+the design. In that version the Sharpe ratio fell from 2.13 in the first half of the sample to 1.29 in the second, almost entirely
+because of shorts; with the regime condition, the two halves read 2.03 and 1.78. Since these figures come from data already used
+to build the strategy, the comparison explains the decline but cannot validate the condition. \textbf{What we did:} aligned the code
+with the specification, subjected the condition to three pre-registered falsification tests, disclosed that most of its Sharpe
+gain is generic, and launched a forward test that can say no.
 \end{keybox}
 
 \begin{keybox}[5.\quad A wrong figure in the first draft of this dossier]
@@ -1050,7 +1053,7 @@ allows.
 \begin{itemize}
 \item \textbf{Selection.} Bitcoin's rules were selected on data covering the whole period; Ether is a transfer across markets, not across
   time. Walk-forward: 1.11 against 1.49, with a maximum drawdown of \minus34.9\%.
-\item \textbf{Post-hoc short condition.} E2 was specified after the data were studied; only the forward test can validate it.
+\item \textbf{Short condition in-sample.} Like every rule, E2 was evaluated on data already used to build the strategy; only the forward test can validate it out of sample.
 \item \textbf{Right tail.} The best 5\% of trades make \TopFive{} of the growth. Missed trades in live operation would weigh heavily.
 \item \textbf{Different venues.} Signals come from Bitstamp (Bitcoin) and Binance spot (Ether); execution is planned on Hyperliquid
   perpetuals, which quoted a median 1.5 to 2.1\bps{} above Binance at the executions studied. The effect of this gap on performance
@@ -1134,6 +1137,8 @@ the portfolio's consistency checks fail.
 \section{Version history}
 \begin{itemize}
 \item \textbf{1.0, 12 October 2026.} First dossier.
+\item \textbf{2.1, 12 October 2026.} The short-entry condition (E2) presented as the original design of the strategy, with the history of its
+  implementation in the research code.
 \item \textbf{2.0, 12 October 2026.} Typeset edition; scientific approach, execution framework and literature, figures, lessons
   learned. Corrections: the cost of the bot as built (2.49 instead of 2.1\bps{} at \$1M); the three-way reconciliation of the 2{,}194
   market executions; funding stated as excluded from projections.
