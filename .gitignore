@@ -33,6 +33,7 @@ research/private/
 research/data/binance/
 research/data/tardis/
 research/data/hl-probe/
+research/data/hl-tardis/
 # Market Flow : secret du serveur (jeton d'envoi) et fichiers locaux
 flow/deploy/*.env
 flow/**/__pycache__/
