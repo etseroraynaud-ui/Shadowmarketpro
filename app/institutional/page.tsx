@@ -72,8 +72,7 @@ export default function InstitutionalPage() {
             { label: 'Independent verification', state: 'no', note: 'no third-party audit of the research or of results' },
           ]} />
           <ul className="s-list s-mt">
-            <li><strong>Short-entry condition.</strong> {P.disclaimers[2]}</li>
-            <li><strong>Time out of sample for Bitcoin.</strong> The rules were selected on BTC data that overlaps the reported period; the walk-forward study covers {EV_PERIOD} only.</li>
+            <li><strong>Time out of sample for Bitcoin.</strong> The rules, short-entry condition included, were selected on BTC data that overlaps the reported period; the walk-forward study covers {EV_PERIOD} only.</li>
           </ul>
         </Section>
 

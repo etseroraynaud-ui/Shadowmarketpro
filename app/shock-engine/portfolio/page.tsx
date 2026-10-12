@@ -251,14 +251,14 @@ export default function PerformancePage() {
         <Section id="method" eyebrow="Method" title="Method and limitations">
           <ul className="s-list">
             <li><strong>Fixed rules.</strong> One 15-minute strategy with adaptive volatility, selected on Bitcoin. Ethereum runs it unchanged, without any ETH calibration. The portfolio reproduces the validated backtests exactly before any calculation; {P.manifest.checksPassed} of {P.manifest.checksTotal} consistency checks pass.</li>
-            <li><strong>Short entries.</strong> {P.disclaimers[2]}</li>
+            <li><strong>Short entries.</strong> Opened only when the daily trend regime is bearish.</li>
             <li><strong>Data.</strong> {P.manifest.datasets.btc}; {P.manifest.datasets.eth}; 15-minute bars, UTC.</li>
             <li><strong>Capital.</strong> 50/50 at the start; each half trades 100 % of its own equity, one position at a time, without leverage. Average gross exposure {pct(F.expo.avgGross, 0)} of the portfolio, maximum {pct(F.expo.maxGross, 0)}.</li>
             <li><strong>Costs.</strong> Commission 0.045 % per order on every fill. {P.disclaimers[3]} {P.disclaimers[4]}</li>
-            <li><strong>In-sample for BTC.</strong> The rules were chosen on BTC data from 2017 to 2026, which contains the whole period. ETH is a transfer across markets, not across time.</li>
+            <li><strong>In-sample for BTC.</strong> The rules, short-entry condition included, were chosen on BTC data from 2017 to 2026, which contains the whole period. ETH is a transfer across markets, not across time.</li>
             <li><strong>Venues.</strong> The data venues (Bitstamp, Binance spot) differ from a perpetual-futures execution venue: prices, fees, funding and stop mechanics differ.</li>
           </ul>
-          <p className="s-p">The <Link className="s-link" href="/research">research page</Link> lists the studies behind the strategy, including those that failed.</p>
+          <p className="s-p">The <Link className="s-link" href="/research">research page</Link> lists the studies behind the strategy.</p>
         </Section>
 
         {/* ---------------------------------------------------------------- téléchargements */}
