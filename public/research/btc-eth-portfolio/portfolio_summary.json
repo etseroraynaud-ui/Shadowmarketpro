@@ -12,7 +12,7 @@
   "Historical simulation after modeled transaction costs. Not live performance.",
   "Short entries are only allowed when the daily trend regime is bearish, as in the strategy’s design. Like every rule, this condition is evaluated on data already used to build the strategy: the figures are in-sample, not an independent out-of-sample test.",
   "Slippage and perpetual funding are not included in the headline figures.",
-  "Capacity and market impact are not yet modeled."
+  "Execution costs were measured separately on real Binance perpetual-futures trades for every execution since 2020 (institutional dossier); capacity on Hyperliquid, the intended venue, and the strategy’s own market impact are not yet measured."
  ],
  "stress": {
   "source": "research/reports/e2-diagnostics/e2-diagnostics.json",
@@ -3133,7 +3133,7 @@
     "maxGross": 1.062662586
    }
   },
-  "note": "Capacity and market impact are not yet modeled."
+  "note": "Execution costs were measured separately on real Binance perpetual-futures trades for every execution since 2020 (institutional dossier); capacity on Hyperliquid, the intended venue, and the strategy’s own market impact are not yet measured."
  },
  "reconciliation": {
   "rows": [

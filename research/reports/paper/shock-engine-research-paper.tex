@@ -323,12 +323,12 @@ Scenario & Sharpe & CAGR & Max.~drawdown \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
-\item Funding is applied with its sign to long and short positions held across funding times; before 2020 a constant 0.01\% per 8 hours is assumed. Market impact and capacity are not modelled.
+\item Funding is applied with its sign to long and short positions held across funding times; before 2020 a constant 0.01\% per 8 hours is assumed. Market impact and capacity are not modelled here.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-Turnover is high, about 157 times the capital a year, so costs matter. Doubling commissions, which is equivalent to adding 0.045\% of slippage on every fill, lowers the Sharpe ratio to 1.61. Historical perpetual funding, with the correct sign for long and short positions, lowers it to 1.81 (Table~\ref{tab:frictions}). Capacity and market impact are not modelled: the strategy enters precisely when liquidity is thinnest, which is the first thing a larger account would pay for.
+Turnover is high, about 157 times the capital a year, so costs matter. Doubling commissions, which is equivalent to adding 0.045\% of slippage on every fill, lowers the Sharpe ratio to 1.61. Historical perpetual funding, with the correct sign for long and short positions, lowers it to 1.81 (Table~\ref{tab:frictions}). Capacity and market impact are not modelled here: the strategy enters precisely when liquidity is thinnest, which is the first thing a larger account would pay for. A separate study replays every execution since 2020 on real Binance perpetual-futures trades and reports the measured execution costs and capacity (institutional dossier).
 
 \section{Robustness}\label{sec:robustness}
 
@@ -544,7 +544,7 @@ The residual alpha is 41.0\% a year with $t=4.56$; no bootstrap history out of 5
 \begin{itemize}
 \item \textbf{Selection.} The Bitcoin rules were selected on 2017--2026 data, which contains the whole portfolio period; Ether is a transfer across markets, not across time. The walk-forward Sharpe ratio (1.11) is clearly below the fixed preset.
 \item \textbf{Short condition in-sample.} Like every rule, the short-entry condition is evaluated on data already used to build the strategy; Section~\ref{sec:falsification} measures how unusual its benefit is but does not make it out-of-sample.
-\item \textbf{Frictions.} Slippage and funding are excluded from the headline figures. Capacity and market impact are not modelled, and the strategy trades when order books are thinnest.
+\item \textbf{Frictions.} Slippage and funding are excluded from the headline figures. Capacity and market impact are not modelled here; execution costs are measured on Binance in a separate study, while the depth of Hyperliquid, the intended venue, is not yet measured. The strategy trades when order books are thinnest.
 \item \textbf{Right tail.} A small number of large trades drive the long-run growth; missing a few of them in live trading would change the outcome materially.
 \item \textbf{Venues.} Data venues (Bitstamp, Binance spot) differ from the intended execution venue (Hyperliquid perpetuals) in prices, fees, funding and stop mechanics.
 \item \textbf{Multiple testing.} Many tests are reported. Their criteria were fixed in advance and failures are reported, but the overall research process still involved choices that no single test accounts for.
@@ -552,7 +552,7 @@ The residual alpha is 41.0\% a year with $t=4.56$; no bootstrap history out of 5
 
 \section{Conclusion}
 
-Shock Engine trades the continuation of qualified 15-minute shocks in Bitcoin and Ether, with a short side that mirrors the long side only in bearish daily regimes. On eight years of data the 50/50 portfolio delivers a Sharpe ratio of 1.88 with a maximum drawdown of \ensuremath{-}19.1\%, survives placebo, delay, cost, parameter and cross-asset tests, and is not spanned by standard trend strategies. The same evidence is in-sample, depends on a convex right tail, and excludes capacity. The decisive tests are the pre-registered forward analysis and a live track record, both under way and reported as they arrive, whatever they show.
+Shock Engine trades the continuation of qualified 15-minute shocks in Bitcoin and Ether, with a short side that mirrors the long side only in bearish daily regimes. On eight years of data the 50/50 portfolio delivers a Sharpe ratio of 1.88 with a maximum drawdown of \ensuremath{-}19.1\%, survives placebo, delay, cost, parameter and cross-asset tests, and is not spanned by standard trend strategies. The same evidence is in-sample, depends on a convex right tail, and leaves capacity to a separate execution study. The decisive tests are the pre-registered forward analysis and a live track record, both under way and reported as they arrive, whatever they show.
 
 \clearpage
 \appendix
@@ -573,7 +573,7 @@ Calendar blocks of $L$ days are drawn with replacement from the full history, th
 
 \section{Reproducibility}
 
-Every number in this paper is produced by versioned code from versioned data and read from the published research files (research version \texttt{shock-engine-2026.10}, code commit \texttt{73bfb32}, parameter hash \texttt{c6ac30464bce}); the portfolio pipeline runs 40 consistency checks, all passing. Pre-registration documents were committed before the corresponding computations. Data files, daily returns and the full numerical report are available at \url{https://www.shadowmarketpro.com/research}.
+Every number in this paper is produced by versioned code from versioned data and read from the published research files (research version \texttt{shock-engine-2026.10}, code commit \texttt{d5162ee}, parameter hash \texttt{c6ac30464bce}); the portfolio pipeline runs 40 consistency checks, all passing. Pre-registration documents were committed before the corresponding computations. Data files, daily returns and the full numerical report are available at \url{https://www.shadowmarketpro.com/research}.
 
 \clearpage
 \begin{thebibliography}{99}
