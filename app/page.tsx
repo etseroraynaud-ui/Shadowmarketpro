@@ -42,7 +42,7 @@ export default function HomePage() {
             { label: 'Sharpe ratio', value: <CountUp value={F.m.sharpe} decimals={2} />, sub: `BTC ${num(P.headline.btcSharpe)} · ETH ${num(P.headline.ethSharpe)}`, accent: true },
             { label: 'CAGR', value: <CountUp value={F.m.cagr} percent decimals={1} suffix="%" />, sub: `${CP.years.toFixed(1)} years · 50/50 portfolio` },
             { label: 'Max drawdown', value: <CountUp value={F.m.maxDD} percent decimals={1} suffix="%" />, sub: 'daily closes' },
-            { label: 'Markets', value: 'BTC + ETH', sub: `${CP.start.slice(0, 4)} → ${CP.end.slice(0, 4)}` },
+            { label: 'Sortino ratio', value: <CountUp value={F.m.sortino} decimals={2} />, sub: `BTC ${num(P.series.btc.m.sortino)} · ETH ${num(P.series.eth.m.sortino)}` },
           ]} />
           <SimNote />
         </section>
@@ -86,7 +86,7 @@ export default function HomePage() {
               { name: BH_NAME, color: COLORS.buyHold, values: S(P.chart.eqBuyHold), dash: true },
             ]} />
           </div>
-          <p className="s-small">Dashed line: buy &amp; hold BTC/ETH 50/50 over the same period (half in each coin on {BH.from}, no rebalancing, no costs): 100 → {int(100 + BH.totalReturn * 100)}, CAGR {pct(BH.cagr)}, max drawdown {pct(BH.maxDD)}, Sharpe {num(BH.sharpe)}.</p>
+          <p className="s-small">Dashed line: buy &amp; hold BTC/ETH 50/50 over the same period (half in each coin on {BH.from}, no rebalancing, no costs): 100 → {int(100 + BH.totalReturn * 100)}, CAGR {pct(BH.cagr)}, max drawdown {pct(BH.maxDD)}, Sharpe {num(BH.sharpe)}, Sortino {num(BH.sortino)}.</p>
           <SimNote>{SIM} Commission 0.045 % per order; slippage and funding are not in these figures.</SimNote>
         </Section>
 

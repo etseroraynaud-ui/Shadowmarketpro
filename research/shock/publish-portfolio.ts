@@ -96,8 +96,37 @@ const bhEq = spotB.eq.map((x, i) => 50 * x + 50 * spotE.eq[i])
 const bhM = PL.dailyMetrics(PL.returnsOf(bhEq.map(x => x / 100), 1), bhDays)
 const buyHold = {
   label: 'Buy & hold BTC/ETH 50/50', rebalancing: 'none', from: daily[0].date, to: daily[daily.length - 1].date,
-  totalReturn: bhM.totalReturn, cagr: bhM.cagr, vol: bhM.vol, sharpe: bhM.sharpe, maxDD: bhM.maxDD, calmar: bhM.calmar,
+  totalReturn: bhM.totalReturn, cagr: bhM.cagr, vol: bhM.vol, sharpe: bhM.sharpe, sortino: bhM.sortino, maxDD: bhM.maxDD, calmar: bhM.calmar,
 }
+
+// Sortino (même définition que portfolio.ts : moyenne des rendements journaliers / écart à la baisse,
+// cible 0, carrés des rendements négatifs moyennés sur tous les jours, × √365.25), dérivé des
+// rendements journaliers publiés pour la période complète, chaque année et chaque moitié. Contrôles :
+// Sortino de la période complète, Sharpe et rendement de chaque tranche identiques au résumé.
+const near = (a: number, b: number, what: string) => { if (!(Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(b)))) throw new Error(`Sortino : ${what} ${a} ≠ résumé ${b}`) }
+const SLEEVES = [['btc', 'btc_return'], ['eth', 'eth_return'], ['portfolio', 'portfolio_return']] as const
+for (const [k, c] of SLEEVES) near(PL.dailyMetrics(ret(c), bhDays).sortino, summary.series[k].m.sortino, `période complète ${k}`)
+const annual = summary.annual.map((a: { year: number; days: number; btcSharpe: number; ethSharpe: number; portfolioSharpe: number }) => {
+  const ix = bhDays.map((d, i) => (PL.yearOf(d) === a.year ? i : -1)).filter(i => i >= 0)
+  if (ix.length !== a.days) throw new Error(`Sortino ${a.year} : ${ix.length} jours ≠ ${a.days}`)
+  const so = Object.fromEntries(SLEEVES.map(([k, c]) => {
+    const m = PL.dailyMetrics(ix.map(i => ret(c)[i]), ix.map(i => bhDays[i]))
+    near(m.sharpe, a[`${k}Sharpe`], `Sharpe ${a.year} ${k}`)
+    return [`${k}Sortino`, m.sortino]
+  }))
+  return { ...a, ...so }
+})
+// Moitiés : portefeuille repartant à 50/50 au début de chaque moitié, comme dans portfolio.ts.
+type Half = { from: string; to: string; btc: { sharpe: number }; eth: { sharpe: number }; portfolio: { sharpe: number } }
+const halves = Object.fromEntries((['firstHalf', 'secondHalf', 'from2019'] as const).map(h => {
+  const sp: Half = summary.stability.subPeriods[h]
+  const a = daily.findIndex(r => r.date === sp.from), b = daily.findIndex(r => r.date === sp.to) + 1
+  if (a < 0 || b <= a) throw new Error(`Sortino ${h} : période introuvable`)
+  const rb = ret('btc_return').slice(a, b), re = ret('eth_return').slice(a, b), d = bhDays.slice(a, b)
+  const m = { btc: PL.dailyMetrics(rb, d), eth: PL.dailyMetrics(re, d), portfolio: PL.dailyMetrics(PL.book(rb, re).r, d) }
+  for (const k of ['btc', 'eth', 'portfolio'] as const) near(m[k].sharpe, sp[k].sharpe, `Sharpe ${h} ${k}`)
+  return [h, { ...sp, btc: { ...sp.btc, sortino: m.btc.sortino }, eth: { ...sp.eth, sortino: m.eth.sortino }, portfolio: { ...sp.portfolio, sortino: m.portfolio.sortino } }]
+}))
 
 // Tests de falsification de la condition de tendance (données historiques déjà vues) et état de la
 // validation forward : repris tels quels des rapports de recherche.
@@ -135,6 +164,9 @@ const residualAlpha = {
 const { reconciliation, sanity, ...rest } = summary
 const out = {
   ...rest,
+  conventions: { ...rest.conventions, sortino: 'mean / downside deviation of daily returns × √365.25 (target 0: squared negative returns averaged over all days)' },
+  annual,
+  stability: { ...rest.stability, subPeriods: halves },
   manifest: {
     version: manifest.version, generatedAt: manifest.generatedAt, commit: manifest.git.commit, sourcesClean: manifest.git.sourcesClean,
     parametersSha256: manifest.strategy.parametersSha256, checksPassed: manifest.sanityChecks.passed, checksTotal: sanity.length,

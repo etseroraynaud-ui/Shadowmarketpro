@@ -44,11 +44,11 @@ export default function InstitutionalPage() {
         <Section id="figures" eyebrow="Key figures" title="BTC/ETH portfolio" intro={<p>50/50 without rebalancing, {CP.start} → {CP.end}.</p>}>
           <Metrics items={[
             { label: 'Sharpe ratio', value: num(F.m.sharpe), sub: `resampled 90 %: ${num(P.bootstrap.sharpe.p5)} to ${num(P.bootstrap.sharpe.p95)}` },
+            { label: 'Sortino ratio', value: num(F.m.sortino), sub: `buy & hold BTC/ETH ${num(P.buyHold.sortino)}` },
             { label: 'CAGR', value: pct(F.m.cagr), sub: 'after modeled commissions' },
             { label: 'Max drawdown', value: pct(F.m.maxDD), sub: `Calmar ${num(F.m.calmar)}` },
-            { label: 'Volatility', value: pct(F.m.vol), sub: `worst month ${pct(F.m.worstMonth.ret)}` },
+            { label: 'Volatility', value: pct(F.m.vol), sub: `worst month ${pct(F.m.worstMonth.ret)} · in market ${pct(F.expo.timeInMarket, 0)} of the time` },
             { label: 'BTC/ETH correlation', value: num(P.correlation.dailyPearson), sub: 'strategy returns, daily' },
-            { label: 'Time in market', value: pct(F.expo.timeInMarket, 0), sub: `average exposure ${pct(F.expo.avgGross, 0)}` },
           ]} />
           <SimNote />
         </Section>

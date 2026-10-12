@@ -77,10 +77,10 @@ export default function PerformancePage() {
           <h1 className="s-h1">Performance dashboard</h1>
           <p className="s-sub">Bitcoin and Ethereum, half of the capital each, {CP.start} → {CP.end}. Every figure on this page comes from the published research files and can be downloaded below.</p>
           <Kpis items={[
-            { label: 'Sharpe ratio', value: <CountUp value={F.m.sharpe} decimals={2} />, sub: `Sortino ${num(F.m.sortino)}`, accent: true },
+            { label: 'Sharpe ratio', value: <CountUp value={F.m.sharpe} decimals={2} />, sub: `buy & hold ${num(BH.sharpe)}`, accent: true },
             { label: 'CAGR', value: <CountUp value={F.m.cagr} percent decimals={1} suffix="%" />, sub: `${CP.years.toFixed(1)} years` },
             { label: 'Max drawdown', value: <CountUp value={F.m.maxDD} percent decimals={1} suffix="%" />, sub: `${pct(F.ddIntraday)} on 15-min marks` },
-            { label: 'Sharpe by half', value: `${num(SP.firstHalf.portfolio.sharpe)} · ${num(SP.secondHalf.portfolio.sharpe)}`, sub: `${SP.firstHalf.from.slice(0, 4)}–${SP.firstHalf.to.slice(0, 4)} · ${SP.secondHalf.from.slice(0, 4)}–${SP.secondHalf.to.slice(0, 4)}` },
+            { label: 'Sortino ratio', value: <CountUp value={F.m.sortino} decimals={2} />, sub: `buy & hold ${num(BH.sortino)}` },
           ]} />
           <SimNote />
         </section>
@@ -95,11 +95,11 @@ export default function PerformancePage() {
               { name: BH_NAME, color: COLORS.buyHold, values: S(P.chart.eqBuyHold), dash: true },
             ]} />
           </div>
-          <p className="s-small">Dashed line: buy &amp; hold BTC/ETH 50/50 over the same period (half in each coin on {BH.from}, no rebalancing, no costs): 100 → {int(100 + BH.totalReturn * 100)}, CAGR {pct(BH.cagr)}, max drawdown {pct(BH.maxDD)}, Sharpe {num(BH.sharpe)}.</p>
+          <p className="s-small">Dashed line: buy &amp; hold BTC/ETH 50/50 over the same period (half in each coin on {BH.from}, no rebalancing, no costs): 100 → {int(100 + BH.totalReturn * 100)}, CAGR {pct(BH.cagr)}, max drawdown {pct(BH.maxDD)}, Sharpe {num(BH.sharpe)}, Sortino {num(BH.sortino)}.</p>
         </Section>
 
         {/* ---------------------------------------------------------------- métriques */}
-        <Section id="metrics" eyebrow="Metrics" title="Key figures" intro={<p>Daily UTC close-to-close returns, annualized with √365.25, risk-free rate 0. BTC, ETH and the portfolio cover exactly the same {int(CP.days)} days.</p>}>
+        <Section id="metrics" eyebrow="Metrics" title="Key figures" intro={<p>Daily UTC close-to-close returns, annualized with √365.25, risk-free rate 0. The Sortino ratio counts only losing days as risk: {P.conventions.sortino}. BTC, ETH and the portfolio cover exactly the same {int(CP.days)} days.</p>}>
           <Metrics items={[
             { label: 'Total return', value: pct(F.m.totalReturn, 0), sub: `100 → ${int(100 + F.m.totalReturn * 100)}` },
             { label: 'Volatility', value: pct(F.m.vol), sub: 'annualized' },
@@ -110,6 +110,7 @@ export default function PerformancePage() {
           ]} />
           <div className="s-gap" />
           <Table compact head={['', 'BTC', 'ETH', 'Portfolio']} rows={perf.map(([l, f]) => [l, f(B), f(E), <strong key="p">{f(F)}</strong>])} />
+          <p className="s-small">When gains and losses are spread alike, the Sortino is about 1.4 times the Sharpe: {num(BH.sortino / BH.sharpe)} times for buy &amp; hold BTC/ETH 50/50 (Sortino {num(BH.sortino)}). For the portfolio it is {num(F.m.sortino / F.m.sharpe)} times: most of its day-to-day volatility comes from gains, not losses.</p>
           <p className="s-small">Portfolio trades are the {int(F.trades.trades)} trades of both markets pooled; the payoff ratio uses their contribution to portfolio equity. The first and last years are partial ({P.annual[0].from} → {P.annual[0].to} and {P.annual[P.annual.length - 1].from} → {P.annual[P.annual.length - 1].to}).</p>
         </Section>
 
@@ -158,8 +159,8 @@ export default function PerformancePage() {
             <Heatmap title="Monthly returns of the 50/50 portfolio" rows={years} cols={[...MN, 'Year']} values={heat} cap={0.2} />
           </div>
           <div className="s-gap" />
-          <Table compact head={['Year', 'BTC', 'ETH', 'Portfolio', 'Portfolio Sharpe', 'Portfolio max DD']}
-            rows={P.annual.map(a => [`${a.year}${partial(a.year) ? '*' : ''}`, spct(a.btc), spct(a.eth), <strong key="p">{spct(a.portfolio)}</strong>, num(a.portfolioSharpe), pct(a.portfolioDD)])} />
+          <Table compact head={['Year', 'BTC', 'ETH', 'Portfolio', 'Portfolio Sharpe', 'Portfolio Sortino', 'Portfolio max DD']}
+            rows={P.annual.map(a => [`${a.year}${partial(a.year) ? '*' : ''}`, spct(a.btc), spct(a.eth), <strong key="p">{spct(a.portfolio)}</strong>, num(a.portfolioSharpe), num(a.portfolioSortino), pct(a.portfolioDD)])} />
         </Section>
 
         {/* ---------------------------------------------------------------- diversification */}
@@ -224,9 +225,9 @@ export default function PerformancePage() {
             <div>
               <h3 className="s-h3">Sub-periods</h3>
               <p className="s-p">The second half is weaker than the first, and the two markets are more correlated in it.</p>
-              <Table stack head={['Period', 'Sharpe', 'CAGR', 'Correlation']} rows={[
-                [`${SP.firstHalf.from} → ${SP.firstHalf.to}`, num(SP.firstHalf.portfolio.sharpe), pct(SP.firstHalf.portfolio.cagr), num(SP.firstHalf.corr)],
-                [`${SP.secondHalf.from} → ${SP.secondHalf.to}`, num(SP.secondHalf.portfolio.sharpe), pct(SP.secondHalf.portfolio.cagr), num(SP.secondHalf.corr)],
+              <Table stack head={['Period', 'Sharpe', 'Sortino', 'CAGR', 'Correlation']} rows={[
+                [`${SP.firstHalf.from} → ${SP.firstHalf.to}`, num(SP.firstHalf.portfolio.sharpe), num(SP.firstHalf.portfolio.sortino), pct(SP.firstHalf.portfolio.cagr), num(SP.firstHalf.corr)],
+                [`${SP.secondHalf.from} → ${SP.secondHalf.to}`, num(SP.secondHalf.portfolio.sharpe), num(SP.secondHalf.portfolio.sortino), pct(SP.secondHalf.portfolio.cagr), num(SP.secondHalf.corr)],
               ]} />
             </div>
           </div>
