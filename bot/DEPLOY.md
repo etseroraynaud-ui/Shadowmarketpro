@@ -26,7 +26,7 @@ chaque clôture, l'ordre part après environ deux allers-retours (lecture de la 
 puis l'ordre) : ≈ 0,5 s depuis l'Europe, ≈ 0,1–0,2 s depuis Tokyo. Pour le bot réel, choisir un
 centre de données à Tokyo (par exemple AWS Lightsail ou EC2 `ap-northeast-1`, Vultr Tokyo).
 Vérifier avant de déménager, depuis le serveur actuel puis depuis le nouveau :
-`curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/shadowmarketpro/claude/shock-engine-portfolio-g79j1v/research/execution/vps_probe.py | sudo python3 -`
+`curl -fsSL https://raw.githubusercontent.com/etseroraynaud-ui/shadowmarketpro/main/research/execution/vps_probe.py | sudo python3 -`
 (lecture seule : allers-retours mesurés et résumé des journaux).
 
 À la création :

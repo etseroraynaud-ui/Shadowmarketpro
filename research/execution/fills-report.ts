@@ -15,7 +15,8 @@ import { ShockStrategy } from '../../lib/strategies/shock/strategy.ts'
 import { SimBroker } from '../../lib/strategies/shock/broker.ts'
 import type { ExitTag } from '../../lib/strategies/shock/broker.ts'
 import { costsFor } from '../lib/frozen-shock.ts'
-import { DATA, SYM } from '../capacity/binance.ts'
+import { DATA, MIN, SYM, T0, loadMinutes } from '../capacity/binance.ts'
+import { KLINES_TO } from '../capacity/data.ts'
 import { LIMIT_BPS, SIZES } from './fills-measure.ts'
 import type { FillRow, SizeStat } from './fills-measure.ts'
 
@@ -88,6 +89,24 @@ const skipTp1: Record<SleeveKey, Set<number>> = { btc: new Set(), ethusdt: new S
 for (const k of KEYS) for (const r of rowOf[k].values()) if (r.family === 'tp1' && r.tp1Through === false) skipTp1[k].add(r.pos)
 const tp1Run: Record<SleeveKey, Run> = { btc: replay(S.btc, skipTp1.btc), ethusdt: replay(S.ethusdt, skipTp1.ethusdt) }
 log(`TP1 sans transaction au-delà du niveau : BTC ${skipTp1.btc.size}, ETH ${skipTp1.ethusdt.size}`)
+// Sensibilité (ajoutée après lecture des mesures, non pré-enregistrée) : le niveau converti sur Binance
+// dépend de l'écart de prix à l'entrée ; un TP1 dépassé de moins de 5 pb (bougies 1 min Binance) est
+// compté non rempli.
+const marginTp1: Record<SleeveKey, number[]> = { btc: [], ethusdt: [] }
+const skipTp1Margin: Record<SleeveKey, Set<number>> = { btc: new Set(skipTp1.btc), ethusdt: new Set(skipTp1.ethusdt) }
+for (const k of KEYS) {
+  const { m } = await loadMinutes(SYM[k], KLINES_TO)
+  for (const r of rowOf[k].values()) {
+    if (r.family !== 'tp1') continue
+    const j0 = Math.round((Math.floor(r.tRef / 900000) * 900000 - T0) / MIN)
+    let best = r.side === -1 ? -Infinity : Infinity
+    for (let j = j0; j < j0 + 15; j++) best = r.side === -1 ? Math.max(best, m.h[j]) : Math.min(best, m.l[j])
+    const ex = (r.side === -1 ? best / r.P0! - 1 : 1 - best / r.P0!) * 1e4
+    marginTp1[k].push(ex)
+    if (ex < 5) skipTp1Margin[k].add(r.pos)
+  }
+}
+const tp1RunMargin: Record<SleeveKey, Run> = { btc: replay(S.btc, skipTp1Margin.btc), ethusdt: replay(S.ethusdt, skipTp1Margin.ethusdt) }
 
 // ---------------------------------------------------------------- modèle calibré du coût immédiat
 /** Paires (exécution, taille) observées : log coût = a + b log Q + c log σ₆₀ + d log V₂₄, par actif. */
@@ -215,6 +234,7 @@ const tp1Only = summary(seriesOf(tp1Run))
 const strip = ({ _b, ...rest }: ReturnType<typeof summary>) => rest
 out.backtest = strip(backtest)
 out.tp1RuleOnly = strip(tp1Only)
+out.tp1MarginSensitivity = { skipped: { BTC: skipTp1Margin.btc.size, ETH: skipTp1Margin.ethusdt.size }, excursionBps: Object.fromEntries(KEYS.map(k => [NAMES[k], { p5: q(marginTp1[k], 0.05), p25: q(marginTp1[k], 0.25), p50: q(marginTp1[k], 0.5) }])), ...strip(summary(seriesOf(tp1RunMargin))) }
 log(`backtest Sharpe ${backtest.sharpe.toFixed(3)} ; règle TP1 seule ${tp1Only.sharpe.toFixed(3)}`)
 
 const pct = (xs: number[], p: number) => q(xs.filter(Number.isFinite), p)
