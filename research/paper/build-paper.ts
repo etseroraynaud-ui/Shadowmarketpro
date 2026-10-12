@@ -151,7 +151,7 @@ const TABLE_FRICTIONS = table({
     '\\multicolumn{4}{l}{\\textit{Perpetual funding, on top of the base commission}}\\\\',
     ...fu.map((s, k) => row(`\\quad ${FUNDING_LABELS[k]}`, fx(s.sharpe), pct(s.cagr), pct(s.maxDD))),
   ].join('\n'),
-  notes: 'Funding is applied with its sign to long and short positions held across funding times; before 2020 a constant 0.01\\% per 8 hours is assumed. Market impact and capacity are not modelled.',
+  notes: 'Funding is applied with its sign to long and short positions held across funding times; before 2020 a constant 0.01\\% per 8 hours is assumed. Market impact and capacity are not modelled here.',
 })
 
 type Ev = { label: string; period: string[]; verdict: { eventsPreset: boolean; eventsShockTrend: boolean; preset: { pf: boolean; sharpe: boolean; random: boolean; delay: boolean } }; meanTrade: number; sharpe: number; cagr: number; dd: number; trades: number; randomBeaten: number; delay1Share: number }

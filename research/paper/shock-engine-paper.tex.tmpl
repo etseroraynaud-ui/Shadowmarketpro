@@ -218,7 +218,7 @@ Bitcoin and Ether prices are highly correlated (daily correlation @@CORR_SPOT@@)
 
 @@TABLE_FRICTIONS@@
 
-Turnover is high, about @@TURNOVER@@ times the capital a year, so costs matter. Doubling commissions, which is equivalent to adding 0.045\% of slippage on every fill, lowers the Sharpe ratio to @@SR_COST2@@. Historical perpetual funding, with the correct sign for long and short positions, lowers it to @@SR_FUNDING@@ (Table~\ref{tab:frictions}). Capacity and market impact are not modelled: the strategy enters precisely when liquidity is thinnest, which is the first thing a larger account would pay for.
+Turnover is high, about @@TURNOVER@@ times the capital a year, so costs matter. Doubling commissions, which is equivalent to adding 0.045\% of slippage on every fill, lowers the Sharpe ratio to @@SR_COST2@@. Historical perpetual funding, with the correct sign for long and short positions, lowers it to @@SR_FUNDING@@ (Table~\ref{tab:frictions}). Capacity and market impact are not modelled here: the strategy enters precisely when liquidity is thinnest, which is the first thing a larger account would pay for. A separate study replays every execution since 2020 on real Binance perpetual-futures trades and reports the measured execution costs and capacity (institutional dossier).
 
 \section{Robustness}\label{sec:robustness}
 
@@ -277,7 +277,7 @@ The residual alpha is @@RA_ALPHA@@ a year with $t=@@RA_T@@$; no bootstrap histor
 \begin{itemize}
 \item \textbf{Selection.} The Bitcoin rules were selected on 2017--2026 data, which contains the whole portfolio period; Ether is a transfer across markets, not across time. The walk-forward Sharpe ratio (@@WF_SR@@) is clearly below the fixed preset.
 \item \textbf{Short condition in-sample.} Like every rule, the short-entry condition is evaluated on data already used to build the strategy; Section~\ref{sec:falsification} measures how unusual its benefit is but does not make it out-of-sample.
-\item \textbf{Frictions.} Slippage and funding are excluded from the headline figures. Capacity and market impact are not modelled, and the strategy trades when order books are thinnest.
+\item \textbf{Frictions.} Slippage and funding are excluded from the headline figures. Capacity and market impact are not modelled here; execution costs are measured on Binance in a separate study, while the depth of Hyperliquid, the intended venue, is not yet measured. The strategy trades when order books are thinnest.
 \item \textbf{Right tail.} A small number of large trades drive the long-run growth; missing a few of them in live trading would change the outcome materially.
 \item \textbf{Venues.} Data venues (Bitstamp, Binance spot) differ from the intended execution venue (Hyperliquid perpetuals) in prices, fees, funding and stop mechanics.
 \item \textbf{Multiple testing.} Many tests are reported. Their criteria were fixed in advance and failures are reported, but the overall research process still involved choices that no single test accounts for.
@@ -285,7 +285,7 @@ The residual alpha is @@RA_ALPHA@@ a year with $t=@@RA_T@@$; no bootstrap histor
 
 \section{Conclusion}
 
-Shock Engine trades the continuation of qualified 15-minute shocks in Bitcoin and Ether, with a short side that mirrors the long side only in bearish daily regimes. On eight years of data the 50/50 portfolio delivers a Sharpe ratio of @@SR_PF@@ with a maximum drawdown of @@MDD_PF@@, survives placebo, delay, cost, parameter and cross-asset tests, and is not spanned by standard trend strategies. The same evidence is in-sample, depends on a convex right tail, and excludes capacity. The decisive tests are the pre-registered forward analysis and a live track record, both under way and reported as they arrive, whatever they show.
+Shock Engine trades the continuation of qualified 15-minute shocks in Bitcoin and Ether, with a short side that mirrors the long side only in bearish daily regimes. On eight years of data the 50/50 portfolio delivers a Sharpe ratio of @@SR_PF@@ with a maximum drawdown of @@MDD_PF@@, survives placebo, delay, cost, parameter and cross-asset tests, and is not spanned by standard trend strategies. The same evidence is in-sample, depends on a convex right tail, and leaves capacity to a separate execution study. The decisive tests are the pre-registered forward analysis and a live track record, both under way and reported as they arrive, whatever they show.
 
 \clearpage
 \appendix

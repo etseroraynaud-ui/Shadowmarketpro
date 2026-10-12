@@ -23,6 +23,11 @@ if (!P.downloads.some(d => d.file === PAPER)) throw new Error('papier de recherc
 /** Dossier institutionnel (PDF), composé par research/dossier/build-dossier.ts. */
 export const DOSSIER = '/research/dossier/shock-engine-institutional-dossier.pdf'
 if (!existsSync(join(process.cwd(), 'public', DOSSIER))) throw new Error('dossier institutionnel absent de public/research/dossier')
+/**
+ * Coûts d'exécution mesurés (bot livré, entrées à T + 0,5 s), repris de research/reports/execution/fills-500k-1m.json
+ * et fills-2m-5m.json, que le site ne lit pas (research/ est exclu du déploiement) ; détails dans le dossier.
+ */
+export const CAPACITY_FINDING = 'All 2,474 executions since 2020 were replayed on real Binance perpetual-futures trades. With the bot as now coded, execution costs average about 2.5 bps per execution at $1M of capital, for a net Sharpe of 1.67 over 2020–2026 (resampled 90 %: 1.12 to 2.19, funding excluded), above 1.5 up to about $3.8M in the central estimate. Capacity on Hyperliquid, the intended venue, and our own market impact are not yet measured.'
 
 /**
  * Série du graphique : jours sans valeur (fenêtres glissantes incomplètes) en NaN, valeurs arrondies à
