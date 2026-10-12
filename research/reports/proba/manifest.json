@@ -1,25 +1,11 @@
 {
  "version": "shock-proba-1.0.0",
- "generatedAt": "2026-10-12T23:50:33.364Z",
+ "generatedAt": "2026-10-12T23:55:23.221Z",
  "prereg": "research/preregistration/probabilistic-layer.md",
  "git": {
-  "commit": "f2e8cffa272be9118a0cdf59d0420b4106951c26",
-  "sourcesClean": false,
-  "dirtyFiles": [
-   "?? research/proba/README.md",
-   "?? research/proba/card.ts",
-   "?? research/proba/charts.ts",
-   "?? research/proba/dataset.ts",
-   "?? research/proba/evaluate.ts",
-   "?? research/proba/features.ts",
-   "?? research/proba/frozen.ts",
-   "?? research/proba/metrics.ts",
-   "?? research/proba/models.ts",
-   "?? research/proba/report.ts",
-   "?? research/proba/run.ts",
-   "?? research/proba/score.ts",
-   "?? research/proba/walkforward.ts"
-  ]
+  "commit": "26a4d8e0913726e5c6378ccfa14d6169221a763b",
+  "sourcesClean": true,
+  "dirtyFiles": []
  },
  "runtime": {
   "node": "v22.22.0",
