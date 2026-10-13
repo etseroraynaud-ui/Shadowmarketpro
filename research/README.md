@@ -229,3 +229,11 @@ drawdowns, bootstrap par mois et contrôles. Rapport : `reports/btc-eth-portfoli
 
 Synthèse des deux passages (diagnostic, walk-forward, paramètres par régime) :
 [`reports/SYNTHESE.md`](reports/SYNTHESE.md).
+
+## Shock Fade Engine (projet indépendant, Python)
+
+Recherche Merton × Hawkes × Ornstein-Uhlenbeck sur le Fade des chocs BTC/ETH (bougies 1 min Binance), sans
+modification de V1 : code dans [`fade/`](fade/README.md), protocole pré-enregistré
+[`preregistration/shock-fade.md`](preregistration/shock-fade.md), dossier
+[`reports/shock-fade/00-dossier.md`](reports/shock-fade/00-dossier.md). Verdict : aucun alpha exploitable
+après coûts, en validation walk-forward comme sur le holdout 2025-01 → 2026-09.
