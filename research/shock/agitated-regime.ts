@@ -114,7 +114,7 @@ const portfolio = (v: V, k: number) => {
   const e = dailyOf(ETH.bars, RUNS.get('ETH')![v][k].run.equity, ETH.lo, ETH.end, PD0, PD1)
   return { days: b.days, r: P.book(b.r, e.r).r, wb: b, we: e }
 }
-const PORT = Object.fromEntries(VS.map(v => [v, { 1: portfolio(v, 1), 2: portfolio(v, 2) }])) as Record<V, Record<number, ReturnType<typeof portfolio>>>
+const PORT = Object.fromEntries(VS.map(v => [v, { 1: portfolio(v, 1), 2: portfolio(v, 2) }])) as unknown as Record<V, Record<number, ReturnType<typeof portfolio>>>
 const pub = JSON.parse(readFileSync(join(ROOT, 'research/reports/btc-eth-portfolio-e2/portfolio_summary.json'), 'utf8')).headline.portfolioSharpe
 const s0 = P.dailyMetrics(PORT.V0[1].r, PORT.V0[1].days).sharpe
 check('BTC/ETH : Sharpe de V0 = Sharpe publié', Math.abs(s0 - pub) < 1e-9, `${s0} / ${pub}`)
@@ -180,8 +180,8 @@ function metrics(a: Asset | null, v: V, k: number) {
   }
 }
 const TABLE = {
-  portfolio: Object.fromEntries(VS.map(v => [v, { 1: metrics(null, v, 1), 2: metrics(null, v, 2) }])) as Record<V, Record<number, ReturnType<typeof metrics>>>,
-  assets: Object.fromEntries(ASSETS.map(a => [a.key, Object.fromEntries(VS.map(v => [v, { 1: metrics(a, v, 1), 2: metrics(a, v, 2) }]))])) as Record<string, Record<V, Record<number, ReturnType<typeof metrics>>>>,
+  portfolio: Object.fromEntries(VS.map(v => [v, { 1: metrics(null, v, 1), 2: metrics(null, v, 2) }])) as unknown as Record<V, Record<number, ReturnType<typeof metrics>>>,
+  assets: Object.fromEntries(ASSETS.map(a => [a.key, Object.fromEntries(VS.map(v => [v, { 1: metrics(a, v, 1), 2: metrics(a, v, 2) }]))])) as unknown as Record<string, Record<V, Record<number, ReturnType<typeof metrics>>>>,
 }
 
 // Bootstrap par mois des écarts de Sharpe (sommes mensuelles : Σr, Σr², n).

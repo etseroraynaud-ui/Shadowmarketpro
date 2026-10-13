@@ -102,7 +102,7 @@ function portfolio(v: Variant, k: number) {
   const de = dailyOf(ETH.bars, RUNS.get('ETH')![v][k].res.equity, ETH.lo, ETH.end, PD0, PD1)
   return { days: db.days, r: P.book(db.r, de.r).r }
 }
-const PORT = Object.fromEntries(VARIANTS.map(v => [v, { 1: portfolio(v, 1), 2: portfolio(v, 2) }])) as Record<Variant, Record<number, { days: number[]; r: number[] }>>
+const PORT = Object.fromEntries(VARIANTS.map(v => [v, { 1: portfolio(v, 1), 2: portfolio(v, 2) }])) as unknown as Record<Variant, Record<number, { days: number[]; r: number[] }>>
 const pubSharpe = JSON.parse(readFileSync(join(ROOT, 'research/reports/btc-eth-portfolio-e2/portfolio_summary.json'), 'utf8')).headline.portfolioSharpe
 const v0Sharpe = P.dailyMetrics(PORT.V0[1].r, PORT.V0[1].days).sharpe
 check('BTC/ETH : Sharpe de V0 = Sharpe publié du portefeuille E2', Math.abs(v0Sharpe - pubSharpe) < 1e-9, `${v0Sharpe} / ${pubSharpe}`)
