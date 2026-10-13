@@ -7,12 +7,12 @@
 //
 //   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/capacity/budget.ts
 
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { simulate } from '../../lib/strategies/shock/engine.ts'
 import { costsFor } from '../lib/frozen-shock.ts'
 import * as P from '../lib/portfolio.ts'
-import { BINANCE_START, KEYS, NAMES, OFFICIAL_SHARPE, OUT, SPEC, bootSharpe, crossing, familyOf, fillDay, loadPublished, monthDraws, netDaily, portfolio, q, runFills, sleeveDaily, statsOf, windowOf } from './lib.ts'
+import { BINANCE_START, KEYS, NAMES, OFFICIAL_SHARPE, OUT, ROOT, SPEC, bootSharpe, crossing, familyOf, fillDay, loadPublished, monthDraws, netDaily, portfolio, q, runFills, sleeveDaily, statsOf, windowOf } from './lib.ts'
 import type { Fill, Run, SleeveKey, Stats, Window } from './lib.ts'
 
 const NREP = 2000
@@ -45,8 +45,11 @@ check(`Official portfolio Sharpe reproduced (${SPEC})`, Math.abs(s0.sharpe - OFF
 
 // ---------------------------------------------------------------- 2. validation de la correction après coup
 // Relance du moteur avec glissement uniforme (ordres au marché et stops ; pas le TP1, ordre limite),
-// comparée à la correction appliquée aux mêmes exécutions ; référence publiée : e2-diagnostics.
-const PUBLISHED: Record<number, number> = { 0.01: 1.819588965, 0.02: 1.761575202, 0.05: 1.581793727 }
+// comparée à la correction appliquée aux mêmes exécutions ; référence publiée : e2-diagnostics pour E2,
+// published-stress pour la spécification publiée.
+const PUBLISHED: Record<number, number> = SPEC === 'e2'
+  ? { 0.01: 1.819588965, 0.02: 1.761575202, 0.05: 1.581793727 }
+  : Object.fromEntries((JSON.parse(readFileSync(join(ROOT, 'research/reports/published-stress/published-stress.json'), 'utf8')).slippage as { slip: number; published: number }[]).filter(x => x.slip > 0).map(x => [x.slip, x.published]))
 const validation = Object.entries(PUBLISHED).map(([slip, pub]) => {
   const s = +slip
   const rr = KEYS.map(k => {

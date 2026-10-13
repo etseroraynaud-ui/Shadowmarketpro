@@ -27,7 +27,15 @@ if (!existsSync(join(process.cwd(), 'public', DOSSIER))) throw new Error('dossie
  * Coûts d'exécution mesurés (bot livré, entrées à T + 0,5 s), repris de research/reports/execution/fills-500k-1m.json
  * et fills-2m-5m.json, que le site ne lit pas (research/ est exclu du déploiement) ; détails dans le dossier.
  */
-export const CAPACITY_FINDING = 'All 2,474 executions since 2020 were replayed on real Binance perpetual-futures trades. With the bot as now coded, execution costs average about 2.5 bps per execution at $1M of capital, for a net Sharpe of 1.67 over 2020–2026 (resampled 90 %: 1.12 to 2.19, funding excluded), above 1.5 up to about $3.8M in the central estimate. Capacity on Hyperliquid, the intended venue, and our own market impact are not yet measured.'
+export const CAPACITY_FINDING = 'All 1,150 executions since 2020 were replayed on real Binance perpetual-futures trades. With the bot as now coded, execution costs average about 2.3 bps per execution at $1M of capital, for a net Sharpe of 1.92 over 2020–2026 (resampled 90 %: 1.40 to 2.41, funding excluded), still 1.83 at $5M, the largest capital tested, in the central estimate. Capacity on Hyperliquid, the intended venue, and our own market impact are not yet measured.'
+/**
+ * Risque de sélection de la restriction au régime calme (research/reports/calm-only/calm-only.json, que le site
+ * ne lit pas) : CSCV sur les 16 configurations de règles réellement essayées, 16 blocs (12 870 découpages), et
+ * Sharpe dégonflé du gain sur les règles précédentes.
+ */
+export const SELECTION = { variants: 16, splits: 12870, pbo: 0.192, gainDsr: 0.18, gainPsr: 0.937 }
+/** Nombre d'exécutions rejouées sur les transactions Binance (fills-500k-1m.json, results[…].executions.all.n). */
+export const EXECUTIONS = '1,150'
 
 /**
  * Série du graphique : jours sans valeur (fenêtres glissantes incomplètes) en NaN, valeurs arrondies à
@@ -82,7 +90,11 @@ for (const f of [...RA.factors.map(x => x.name), ...RA.benchmarks.map(x => x.id)
 export const raVerdict = (): { kind: 'pass' | 'partial' | 'fail'; label: string } =>
   RA.verdict === 'demonstrated' ? { kind: 'pass', label: 'demonstrated · in-sample' } : RA.verdict === 'indicative' ? { kind: 'partial', label: 'indicative' } : { kind: 'fail', label: 'not demonstrated' }
 
-/** Bot testnet suivi sur /live (argent fictif) : début du suivi, version publique. */
+/**
+ * Bot testnet suivi sur /live (argent fictif) : début du suivi. Il applique encore les règles d'avant le
+ * 2026-10-13 (entrées aussi en régime agité) tant qu'il n'est pas relancé avec la restriction au régime calme.
+ */
+export const TESTNET_RULES_PENDING = true
 export const TESTNET = LIVE_ACCOUNTS.find(a => a.network === 'testnet' && a.version !== 'v1')
 export const TESTNET_SINCE = TESTNET?.since?.slice(0, 10)
 

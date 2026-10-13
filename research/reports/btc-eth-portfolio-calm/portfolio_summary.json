@@ -1,0 +1,4080 @@
+{
+ "schema": "shock-engine-portfolio-summary/1",
+ "version": "shock-engine-2026.10.13",
+ "variant": "calm",
+ "status": "HISTORICAL SIMULATION",
+ "liveResults": null,
+ "title": "Shock Engine BTC/ETH Portfolio",
+ "subtitle": "BTC-calibrated strategy · applied unchanged to Ethereum",
+ "parametersSha256": "c6ac30464bce14ddb6e5625cbcf08f68e69e3cc5e5454a0c2268583070a74435",
+ "disclaimers": [
+  "Ethereum parameters were inherited from Bitcoin and were not calibrated on ETH.",
+  "Historical simulation after modeled transaction costs. Not live performance.",
+  "New positions are only opened in the calm volatility regime, and short entries only when the daily trend regime is bearish. Both conditions were set in October 2026 with knowledge of the 2017–2026 data: the figures are in-sample, not an independent out-of-sample test.",
+  "Slippage and perpetual funding are not included in the headline figures.",
+  "Execution costs were measured separately on real Binance perpetual-futures trades for every execution since 2020 (institutional dossier); capacity on Hyperliquid, the intended venue, and the strategy’s own market impact are not yet measured."
+ ],
+ "stress": {
+  "source": "research/reports/published-stress/published-stress.json",
+  "funding": [
+   {
+    "scenario": "historical Binance perpetual funding (2020 onwards; constant +0.01 % per 8 h before 2020)",
+    "sharpe": 1.966107057,
+    "cagr": 0.646594802,
+    "maxDD": -0.1791441955
+   },
+   {
+    "scenario": "same, with Hyperliquid funding from May 2023",
+    "sharpe": 1.952159788,
+    "cagr": 0.6399872906,
+    "maxDD": -0.1791441955
+   },
+   {
+    "scenario": "stress: shorts pay 0.01 % per 8 h at all times",
+    "sharpe": 2.002542993,
+    "cagr": 0.6671425943,
+    "maxDD": -0.1813997865
+   }
+  ],
+  "slippage": [
+   {
+    "slippagePctPerOrder": 0,
+    "sharpe": 2.024207889
+   },
+   {
+    "slippagePctPerOrder": 0.01,
+    "sharpe": 1.991791088
+   },
+   {
+    "slippagePctPerOrder": 0.02,
+    "sharpe": 1.959360226
+   },
+   {
+    "slippagePctPerOrder": 0.05,
+    "sharpe": 1.861995142
+   }
+  ]
+ },
+ "commonPeriod": {
+  "start": "2018-09-01",
+  "end": "2026-09-30",
+  "days": 2952,
+  "years": 8.082135524,
+  "rule": "first UTC day on which both strategies are simulated after warm-up (ETH simulation start) → last complete UTC day covered by both"
+ },
+ "conventions": {
+  "returns": "daily, UTC close-to-close (equity of the last 15-min bar of each day)",
+  "annualization": 365.25,
+  "riskFree": 0,
+  "sharpe": "mean / population sd of daily returns × √365.25",
+  "costs": "commission 0.045 % per order (each entry and exit fill); slippage 0 as in the validated reference; no funding; no leverage"
+ },
+ "allocation": {
+  "weights": {
+   "btc": 0.5,
+   "eth": 0.5
+  },
+  "rebalancing": "none (official variant A: independent sleeves from a 50/50 start)",
+  "diagnostics": [
+   "B: monthly rebalancing to 50/50 (month-end UTC close)",
+   "C (exploratory): inverse 90-day volatility, monthly, weights sum to 1"
+  ]
+ },
+ "headline": {
+  "btcSharpe": 1.456496892,
+  "ethSharpe": 1.927275806,
+  "portfolioSharpe": 2.024207889,
+  "portfolioCagr": 0.6772734024,
+  "portfolioMaxDD": -0.1784987916,
+  "portfolioCalmar": 3.79427444,
+  "correlationDaily": 0.3575145632,
+  "worstMonth": {
+   "month": "2022-02",
+   "ret": -0.1391138576
+  },
+  "trades": {
+   "btc": 358,
+   "eth": 358,
+   "total": 716
+  }
+ },
+ "series": {
+  "btc": {
+   "name": "BTC",
+   "m": {
+    "days": 2952,
+    "years": 8.082135524,
+    "totalReturn": 13.8110162,
+    "cagr": 0.3958414274,
+    "vol": 0.2497440409,
+    "sharpe": 1.456496892,
+    "sortino": 3.231332882,
+    "downsideDev": 0.1125700856,
+    "maxDD": -0.24764948,
+    "calmar": 1.598393937,
+    "skew": 4.249404243,
+    "kurt": 41.1477516,
+    "bestDay": {
+     "day": 17988,
+     "ret": 0.1846199563
+    },
+    "worstDay": {
+     "day": 18415,
+     "ret": -0.07159509679
+    },
+    "bestMonth": {
+     "key": 24269,
+     "ret": 0.3032879677,
+     "n": 30,
+     "from": 19144,
+     "to": 19173,
+     "full": true
+    },
+    "worstMonth": {
+     "key": 24265,
+     "ret": -0.08766209862,
+     "n": 28,
+     "from": 19024,
+     "to": 19051,
+     "full": true
+    },
+    "bestYear": {
+     "key": 2024,
+     "ret": 1.051615663,
+     "n": 366,
+     "from": 19723,
+     "to": 20088,
+     "full": true
+    },
+    "worstYear": {
+     "key": 2025,
+     "ret": 0.01183377855,
+     "n": 365,
+     "from": 20089,
+     "to": 20453,
+     "full": true
+    },
+    "positiveDays": 0.1097560976,
+    "flatDays": 0.7567750678,
+    "dailyPF": 1.625954838
+   },
+   "trades": {
+    "trades": 358,
+    "perYear": 44.29522358,
+    "winners": 106,
+    "winRate": 0.2960893855,
+    "avgWin": 0.05313684452,
+    "avgLoss": -0.01026273877,
+    "payoff": 5.177647577,
+    "profitFactor": 1.927639143,
+    "skew": 3.413081912,
+    "holdMeanH": 29.3603352,
+    "holdMedianH": 11.5,
+    "long": 222,
+    "short": 136
+   },
+   "cost": {
+    "commissionPctYr": 0.03978555883,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.03978555883,
+    "turnoverOneWay": 44.13536444,
+    "turnoverTwoWay": 88.41235296
+   },
+   "expo": {
+    "timeInMarket": 0.148359869,
+    "avgGross": 0.1441971232,
+    "maxGross": 1.037431058
+   },
+   "ddIntraday": -0.264797703
+  },
+  "eth": {
+   "name": "ETH",
+   "m": {
+    "days": 2952,
+    "years": 8.082135524,
+    "totalReturn": 114.8989892,
+    "cagr": 0.8004783505,
+    "vol": 0.3328232808,
+    "sharpe": 1.927275806,
+    "sortino": 4.624222383,
+    "downsideDev": 0.1387135401,
+    "maxDD": -0.2414861458,
+    "calmar": 3.314800308,
+    "skew": 4.090172515,
+    "kurt": 33.47079328,
+    "bestDay": {
+     "day": 17779,
+     "ret": 0.1986552332
+    },
+    "worstDay": {
+     "day": 18508,
+     "ret": -0.07602253086
+    },
+    "bestMonth": {
+     "key": 24226,
+     "ret": 0.6212816762,
+     "n": 30,
+     "from": 17836,
+     "to": 17865,
+     "full": true
+    },
+    "worstMonth": {
+     "key": 24265,
+     "ret": -0.152440604,
+     "n": 28,
+     "from": 19024,
+     "to": 19051,
+     "full": true
+    },
+    "bestYear": {
+     "key": 2018,
+     "ret": 2.243026874,
+     "n": 122,
+     "from": 17775,
+     "to": 17896,
+     "full": true
+    },
+    "worstYear": {
+     "key": 2019,
+     "ret": -0.09020343496,
+     "n": 365,
+     "from": 17897,
+     "to": 18261,
+     "full": true
+    },
+    "positiveDays": 0.1283875339,
+    "flatDays": 0.7300135501,
+    "dailyPF": 1.818306156
+   },
+   "trades": {
+    "trades": 358,
+    "perYear": 44.29522358,
+    "winners": 117,
+    "winRate": 0.3268156425,
+    "avgWin": 0.0742604378,
+    "avgLoss": -0.01345445428,
+    "payoff": 5.519394266,
+    "profitFactor": 2.733672987,
+    "skew": 3.718147225,
+    "holdMeanH": 33.88407821,
+    "holdMedianH": 14.875,
+    "long": 244,
+    "short": 114
+   },
+   "cost": {
+    "commissionPctYr": 0.03895108517,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.03895108517,
+    "turnoverOneWay": 43.17429197,
+    "turnoverTwoWay": 86.55796704
+   },
+   "expo": {
+    "timeInMarket": 0.1712186653,
+    "avgGross": 0.1637540942,
+    "maxGross": 1.062662586
+   },
+   "ddIntraday": -0.2671922719
+  },
+  "portfolio": {
+   "name": "Portfolio 50/50",
+   "m": {
+    "days": 2952,
+    "years": 8.082135524,
+    "totalReturn": 64.3550027,
+    "cagr": 0.6772734024,
+    "vol": 0.273534079,
+    "sharpe": 2.024207889,
+    "sortino": 4.728717568,
+    "downsideDev": 0.1170909094,
+    "maxDD": -0.1784987916,
+    "calmar": 3.79427444,
+    "skew": 3.651537226,
+    "kurt": 28.80581597,
+    "bestDay": {
+     "day": 20684,
+     "ret": 0.1623008056
+    },
+    "worstDay": {
+     "day": 20490,
+     "ret": -0.06153104582
+    },
+    "bestMonth": {
+     "key": 24226,
+     "ret": 0.4575906503,
+     "n": 30,
+     "from": 17836,
+     "to": 17865,
+     "full": true
+    },
+    "worstMonth": {
+     "key": 24265,
+     "ret": -0.1391138576,
+     "n": 28,
+     "from": 19024,
+     "to": 19051,
+     "full": true
+    },
+    "bestYear": {
+     "key": 2018,
+     "ret": 1.202683448,
+     "n": 122,
+     "from": 17775,
+     "to": 17896,
+     "full": true
+    },
+    "worstYear": {
+     "key": 2019,
+     "ret": 0.08004430326,
+     "n": 365,
+     "from": 17897,
+     "to": 18261,
+     "full": true
+    },
+    "positiveDays": 0.1693766938,
+    "flatDays": 0.6300813008,
+    "dailyPF": 1.793980619
+   },
+   "trades": {
+    "trades": 716,
+    "perYear": 88.59044715,
+    "winners": 223,
+    "winRate": 0.311452514,
+    "avgWin": 0.03449540677,
+    "avgLoss": -0.006183230017,
+    "payoff": 5.578865201,
+    "profitFactor": 2.585816473,
+    "skew": 4.801226875,
+    "holdMeanH": 31.6222067,
+    "holdMedianH": 13,
+    "long": 466,
+    "short": 250
+   },
+   "cost": {
+    "commissionPctYr": 0.0391167062,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.0391167062,
+    "turnoverOneWay": 43.36503953,
+    "turnoverTwoWay": 86.92601379
+   },
+   "expo": {
+    "timeInMarket": 0.2466724537,
+    "avgGross": 0.1604284324,
+    "avgNet": 0.04904724444,
+    "maxGross": 1.035519121
+   },
+   "ddIntraday": -0.19634215
+  }
+ },
+ "variants": {
+  "A": {
+   "name": "A · 50/50, no rebalancing (official)",
+   "m": {
+    "days": 2952,
+    "years": 8.082135524,
+    "totalReturn": 64.3550027,
+    "cagr": 0.6772734024,
+    "vol": 0.273534079,
+    "sharpe": 2.024207889,
+    "sortino": 4.728717568,
+    "downsideDev": 0.1170909094,
+    "maxDD": -0.1784987916,
+    "calmar": 3.79427444,
+    "skew": 3.651537226,
+    "kurt": 28.80581597,
+    "bestDay": {
+     "day": 20684,
+     "ret": 0.1623008056
+    },
+    "worstDay": {
+     "day": 20490,
+     "ret": -0.06153104582
+    },
+    "bestMonth": {
+     "key": 24226,
+     "ret": 0.4575906503,
+     "n": 30,
+     "from": 17836,
+     "to": 17865,
+     "full": true
+    },
+    "worstMonth": {
+     "key": 24265,
+     "ret": -0.1391138576,
+     "n": 28,
+     "from": 19024,
+     "to": 19051,
+     "full": true
+    },
+    "bestYear": {
+     "key": 2018,
+     "ret": 1.202683448,
+     "n": 122,
+     "from": 17775,
+     "to": 17896,
+     "full": true
+    },
+    "worstYear": {
+     "key": 2019,
+     "ret": 0.08004430326,
+     "n": 365,
+     "from": 17897,
+     "to": 18261,
+     "full": true
+    },
+    "positiveDays": 0.1693766938,
+    "flatDays": 0.6300813008,
+    "dailyPF": 1.793980619
+   },
+   "cost": 0.0391167062,
+   "rebalCostPctYr": 0,
+   "rebalances": 0,
+   "wEnd": 0.1133120311
+  },
+  "B": {
+   "name": "B · 50/50, monthly rebalancing (diagnostic)",
+   "m": {
+    "days": 2952,
+    "years": 8.082135524,
+    "totalReturn": 46.56755013,
+    "cagr": 0.6126239962,
+    "vol": 0.2431960413,
+    "sharpe": 2.084304977,
+    "sortino": 4.869653974,
+    "downsideDev": 0.104092554,
+    "maxDD": -0.1739352431,
+    "calmar": 3.522138384,
+    "skew": 3.479358439,
+    "kurt": 26.73748643,
+    "bestDay": {
+     "day": 17854,
+     "ret": 0.1248149729
+    },
+    "worstDay": {
+     "day": 20490,
+     "ret": -0.06469968906
+    },
+    "bestMonth": {
+     "key": 24226,
+     "ret": 0.42433965,
+     "n": 30,
+     "from": 17836,
+     "to": 17865,
+     "full": true
+    },
+    "worstMonth": {
+     "key": 24265,
+     "ret": -0.1200586422,
+     "n": 28,
+     "from": 19024,
+     "to": 19051,
+     "full": true
+    },
+    "bestYear": {
+     "key": 2018,
+     "ret": 1.023667516,
+     "n": 122,
+     "from": 17775,
+     "to": 17896,
+     "full": true
+    },
+    "worstYear": {
+     "key": 2019,
+     "ret": 0.2064661369,
+     "n": 365,
+     "from": 17897,
+     "to": 18261,
+     "full": true
+    },
+    "positiveDays": 0.1693766938,
+    "flatDays": 0.6300813008,
+    "dailyPF": 1.799338068
+   },
+   "cost": 0.0391167062,
+   "rebalCostPctYr": 0.00001728488422,
+   "rebalances": 97,
+   "wEnd": 0.5
+  },
+  "C": {
+   "name": "C · equal risk, 90-day vol, monthly (exploratory)",
+   "m": {
+    "days": 2952,
+    "years": 8.082135524,
+    "totalReturn": 35.40382678,
+    "cagr": 0.5601279431,
+    "vol": 0.236259605,
+    "sharpe": 1.998541279,
+    "sortino": 4.592562514,
+    "downsideDev": 0.1028128788,
+    "maxDD": -0.2042283932,
+    "calmar": 2.742654604,
+    "skew": 3.445112442,
+    "kurt": 27.02747171,
+    "bestDay": {
+     "day": 17854,
+     "ret": 0.1248149729
+    },
+    "worstDay": {
+     "day": 20490,
+     "ret": -0.06594194782
+    },
+    "bestMonth": {
+     "key": 24226,
+     "ret": 0.42433965,
+     "n": 30,
+     "from": 17836,
+     "to": 17865,
+     "full": true
+    },
+    "worstMonth": {
+     "key": 24265,
+     "ret": -0.1165835497,
+     "n": 28,
+     "from": 19024,
+     "to": 19051,
+     "full": true
+    },
+    "bestYear": {
+     "key": 2018,
+     "ret": 0.8869214532,
+     "n": 122,
+     "from": 17775,
+     "to": 17896,
+     "full": true
+    },
+    "worstYear": {
+     "key": 2019,
+     "ret": 0.2215299532,
+     "n": 365,
+     "from": 17897,
+     "to": 18261,
+     "full": true
+    },
+    "positiveDays": 0.1707317073,
+    "flatDays": 0.6280487805,
+    "dailyPF": 1.764219771
+   },
+   "cost": 0.0391167062,
+   "rebalCostPctYr": 0.0001271388769,
+   "rebalances": 97,
+   "wEnd": 0.6362221671
+  }
+ },
+ "weights": {
+  "A": {
+   "min": 0.1089720583,
+   "max": 0.5038313736,
+   "mean": 0.2530555404,
+   "end": 0.1133120311,
+   "yearEnds": [
+    {
+     "day": 17896,
+     "wBtc": 0.2638463603
+    },
+    {
+     "day": 18261,
+     "wBtc": 0.3798865003
+    },
+    {
+     "day": 18627,
+     "wBtc": 0.29483915
+    },
+    {
+     "day": 18992,
+     "wBtc": 0.2506110431
+    },
+    {
+     "day": 19357,
+     "wBtc": 0.1941610478
+    },
+    {
+     "day": 19722,
+     "wBtc": 0.2388526003
+    },
+    {
+     "day": 20088,
+     "wBtc": 0.2790439508
+    },
+    {
+     "day": 20453,
+     "wBtc": 0.1554657768
+    },
+    {
+     "day": 20726,
+     "wBtc": 0.1133120311
+    }
+   ]
+  },
+  "C": [
+   {
+    "date": "2018-09-30",
+    "wBtc": 0.5
+   },
+   {
+    "date": "2018-10-31",
+    "wBtc": 0.5
+   },
+   {
+    "date": "2018-11-30",
+    "wBtc": 0.66838475
+   },
+   {
+    "date": "2018-12-31",
+    "wBtc": 0.6832946341
+   },
+   {
+    "date": "2019-01-31",
+    "wBtc": 0.6558006955
+   },
+   {
+    "date": "2019-02-28",
+    "wBtc": 0.6928649525
+   },
+   {
+    "date": "2019-03-31",
+    "wBtc": 0.4323897797
+   },
+   {
+    "date": "2019-04-30",
+    "wBtc": 0.3078060564
+   },
+   {
+    "date": "2019-05-31",
+    "wBtc": 0.3563233919
+   },
+   {
+    "date": "2019-06-30",
+    "wBtc": 0.3704839197
+   },
+   {
+    "date": "2019-07-31",
+    "wBtc": 0.4574928999
+   },
+   {
+    "date": "2019-08-31",
+    "wBtc": 0.8180160684
+   },
+   {
+    "date": "2019-09-30",
+    "wBtc": 0.6318601853
+   },
+   {
+    "date": "2019-10-31",
+    "wBtc": 0.5559801025
+   },
+   {
+    "date": "2019-11-30",
+    "wBtc": 0.4332849541
+   },
+   {
+    "date": "2019-12-31",
+    "wBtc": 0.4800744466
+   },
+   {
+    "date": "2020-01-31",
+    "wBtc": 0.5803373611
+   },
+   {
+    "date": "2020-02-29",
+    "wBtc": 0.6605196361
+   },
+   {
+    "date": "2020-03-31",
+    "wBtc": 0.683089538
+   },
+   {
+    "date": "2020-04-30",
+    "wBtc": 0.5258748328
+   },
+   {
+    "date": "2020-05-31",
+    "wBtc": 0.4946758984
+   },
+   {
+    "date": "2020-06-30",
+    "wBtc": 0.4604551565
+   },
+   {
+    "date": "2020-07-31",
+    "wBtc": 0.5112104681
+   },
+   {
+    "date": "2020-08-31",
+    "wBtc": 0.4784866659
+   },
+   {
+    "date": "2020-09-30",
+    "wBtc": 0.5605386393
+   },
+   {
+    "date": "2020-10-31",
+    "wBtc": 0.6137668699
+   },
+   {
+    "date": "2020-11-30",
+    "wBtc": 0.6085353051
+   },
+   {
+    "date": "2020-12-31",
+    "wBtc": 0.5576128635
+   },
+   {
+    "date": "2021-01-31",
+    "wBtc": 0.7432890751
+   },
+   {
+    "date": "2021-02-28",
+    "wBtc": 0.5
+   },
+   {
+    "date": "2021-03-31",
+    "wBtc": 0.5
+   },
+   {
+    "date": "2021-04-30",
+    "wBtc": 0.5798863708
+   },
+   {
+    "date": "2021-05-31",
+    "wBtc": 0.5680479131
+   },
+   {
+    "date": "2021-06-30",
+    "wBtc": 0.6581763473
+   },
+   {
+    "date": "2021-07-31",
+    "wBtc": 0.658748835
+   },
+   {
+    "date": "2021-08-31",
+    "wBtc": 0.6501681554
+   },
+   {
+    "date": "2021-09-30",
+    "wBtc": 0.6351304145
+   },
+   {
+    "date": "2021-10-31",
+    "wBtc": 0.6714969669
+   },
+   {
+    "date": "2021-11-30",
+    "wBtc": 0.5234479308
+   },
+   {
+    "date": "2021-12-31",
+    "wBtc": 0.5127954955
+   },
+   {
+    "date": "2022-01-31",
+    "wBtc": 0.5535782348
+   },
+   {
+    "date": "2022-02-28",
+    "wBtc": 0.5643668336
+   },
+   {
+    "date": "2022-03-31",
+    "wBtc": 0.5669680212
+   },
+   {
+    "date": "2022-04-30",
+    "wBtc": 0.5008628023
+   },
+   {
+    "date": "2022-05-31",
+    "wBtc": 0.3455420483
+   },
+   {
+    "date": "2022-06-30",
+    "wBtc": 0.4343037854
+   },
+   {
+    "date": "2022-07-31",
+    "wBtc": 0.5584738769
+   },
+   {
+    "date": "2022-08-31",
+    "wBtc": 0.6125282113
+   },
+   {
+    "date": "2022-09-30",
+    "wBtc": 0.6654562952
+   },
+   {
+    "date": "2022-10-31",
+    "wBtc": 0.5439858732
+   },
+   {
+    "date": "2022-11-30",
+    "wBtc": 0.5482756479
+   },
+   {
+    "date": "2022-12-31",
+    "wBtc": 0.6432042693
+   },
+   {
+    "date": "2023-01-31",
+    "wBtc": 0.5196231564
+   },
+   {
+    "date": "2023-02-28",
+    "wBtc": 0.498072099
+   },
+   {
+    "date": "2023-03-31",
+    "wBtc": 0.3693547687
+   },
+   {
+    "date": "2023-04-30",
+    "wBtc": 0.3755915378
+   },
+   {
+    "date": "2023-05-31",
+    "wBtc": 0.4064655917
+   },
+   {
+    "date": "2023-06-30",
+    "wBtc": 0.5103260023
+   },
+   {
+    "date": "2023-07-31",
+    "wBtc": 0.5338842347
+   },
+   {
+    "date": "2023-08-31",
+    "wBtc": 0.4912576711
+   },
+   {
+    "date": "2023-09-30",
+    "wBtc": 0.6075807375
+   },
+   {
+    "date": "2023-10-31",
+    "wBtc": 0.5424832623
+   },
+   {
+    "date": "2023-11-30",
+    "wBtc": 0.6927525693
+   },
+   {
+    "date": "2023-12-31",
+    "wBtc": 0.687133001
+   },
+   {
+    "date": "2024-01-31",
+    "wBtc": 0.6609962479
+   },
+   {
+    "date": "2024-02-29",
+    "wBtc": 0.4293911597
+   },
+   {
+    "date": "2024-03-31",
+    "wBtc": 0.4007417214
+   },
+   {
+    "date": "2024-04-30",
+    "wBtc": 0.4143297171
+   },
+   {
+    "date": "2024-05-31",
+    "wBtc": 0.196626952
+   },
+   {
+    "date": "2024-06-30",
+    "wBtc": 0.4601490356
+   },
+   {
+    "date": "2024-07-31",
+    "wBtc": 0.09642745221
+   },
+   {
+    "date": "2024-08-31",
+    "wBtc": 0.08274846514
+   },
+   {
+    "date": "2024-09-30",
+    "wBtc": 0.5
+   },
+   {
+    "date": "2024-10-31",
+    "wBtc": 0.4943843921
+   },
+   {
+    "date": "2024-11-30",
+    "wBtc": 0.515371378
+   },
+   {
+    "date": "2024-12-31",
+    "wBtc": 0.5184649901
+   },
+   {
+    "date": "2025-01-31",
+    "wBtc": 0.4984730445
+   },
+   {
+    "date": "2025-02-28",
+    "wBtc": 0.6246122857
+   },
+   {
+    "date": "2025-03-31",
+    "wBtc": 0.5895725658
+   },
+   {
+    "date": "2025-04-30",
+    "wBtc": 0.6196151539
+   },
+   {
+    "date": "2025-05-31",
+    "wBtc": 0.7599286441
+   },
+   {
+    "date": "2025-06-30",
+    "wBtc": 0.7647305673
+   },
+   {
+    "date": "2025-07-31",
+    "wBtc": 0.7830962136
+   },
+   {
+    "date": "2025-08-31",
+    "wBtc": 0.7052205576
+   },
+   {
+    "date": "2025-09-30",
+    "wBtc": 0.695390756
+   },
+   {
+    "date": "2025-10-31",
+    "wBtc": 0.6244453836
+   },
+   {
+    "date": "2025-11-30",
+    "wBtc": 0.5974019026
+   },
+   {
+    "date": "2025-12-31",
+    "wBtc": 0.6680325119
+   },
+   {
+    "date": "2026-01-31",
+    "wBtc": 0.6386928153
+   },
+   {
+    "date": "2026-02-28",
+    "wBtc": 0.5523478703
+   },
+   {
+    "date": "2026-03-31",
+    "wBtc": 0.5350820272
+   },
+   {
+    "date": "2026-04-30",
+    "wBtc": 0.5321142446
+   },
+   {
+    "date": "2026-05-31",
+    "wBtc": 0.6823187965
+   },
+   {
+    "date": "2026-06-30",
+    "wBtc": 0.7578271971
+   },
+   {
+    "date": "2026-07-31",
+    "wBtc": 0.7234849251
+   },
+   {
+    "date": "2026-08-31",
+    "wBtc": 0.6512992263
+   },
+   {
+    "date": "2026-09-30",
+    "wBtc": 0.6362221671
+   }
+  ]
+ },
+ "costs": {
+  "perSeries": {
+   "btc": {
+    "commissionPctYr": 0.03978555883,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.03978555883,
+    "turnoverOneWay": 44.13536444,
+    "turnoverTwoWay": 88.41235296
+   },
+   "eth": {
+    "commissionPctYr": 0.03895108517,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.03895108517,
+    "turnoverOneWay": 43.17429197,
+    "turnoverTwoWay": 86.55796704
+   },
+   "portfolio": {
+    "commissionPctYr": 0.0391167062,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.0391167062,
+    "turnoverOneWay": 43.36503953,
+    "turnoverTwoWay": 86.92601379
+   }
+  },
+  "cagrDrag": {
+   "btc": 0.05645609066,
+   "eth": 0.07243781511,
+   "portfolio": 0.06752154759
+  },
+  "stress": [
+   {
+    "k": 0,
+    "commissionPct": 0,
+    "btc": {
+     "sharpe": 1.62042418,
+     "cagr": 0.4522975181,
+     "maxDD": -0.2308612391,
+     "vol": 0.2488232055
+    },
+    "eth": {
+     "sharpe": 2.049688894,
+     "cagr": 0.8729161656,
+     "maxDD": -0.2209755762,
+     "vol": 0.3320963375
+    },
+    "portfolio": {
+     "sharpe": 2.16987898,
+     "cagr": 0.74479495,
+     "maxDD": -0.1720187667,
+     "vol": 0.2733564723
+    },
+    "rebalanced": {
+     "sharpe": 2.250100558,
+     "cagr": 0.6774893016,
+     "maxDD": -0.167345607,
+     "vol": 0.2427773015
+    },
+    "costBtc": 0,
+    "costEth": 0,
+    "costPortfolio": 0
+   },
+   {
+    "k": 1,
+    "commissionPct": 0.045,
+    "btc": {
+     "sharpe": 1.456496892,
+     "cagr": 0.3958414274,
+     "maxDD": -0.24764948,
+     "vol": 0.2497440409
+    },
+    "eth": {
+     "sharpe": 1.927275806,
+     "cagr": 0.8004783505,
+     "maxDD": -0.2414861458,
+     "vol": 0.3328232808
+    },
+    "portfolio": {
+     "sharpe": 2.024207889,
+     "cagr": 0.6772734024,
+     "maxDD": -0.1784987916,
+     "vol": 0.273534079
+    },
+    "rebalanced": {
+     "sharpe": 2.084304977,
+     "cagr": 0.6126239962,
+     "maxDD": -0.1739352431,
+     "vol": 0.2431960413
+    },
+    "costBtc": 0.03978555883,
+    "costEth": 0.03895108517,
+    "costPortfolio": 0.0391167062
+   },
+   {
+    "k": 2,
+    "commissionPct": 0.09,
+    "btc": {
+     "sharpe": 1.29318401,
+     "cagr": 0.341532262,
+     "maxDD": -0.2640860337,
+     "vol": 0.2507780338
+    },
+    "eth": {
+     "sharpe": 1.804965038,
+     "cagr": 0.7307811538,
+     "maxDD": -0.2614746855,
+     "vol": 0.3336275843
+    },
+    "portfolio": {
+     "sharpe": 1.87822813,
+     "cagr": 0.6123080126,
+     "maxDD": -0.1969313177,
+     "vol": 0.2737774187
+    },
+    "rebalanced": {
+     "sharpe": 1.918529257,
+     "cagr": 0.550241705,
+     "maxDD": -0.1882606356,
+     "vol": 0.2436878309
+    },
+    "costBtc": 0.0796079723,
+    "costEth": 0.07781279913,
+    "costPortfolio": 0.07817648626
+   }
+  ],
+  "rebalancingCostPctYr": {
+   "B": 0.00001728488422,
+   "C": 0.0001271388769
+  }
+ },
+ "correlation": {
+  "dailyPearson": 0.3575145632,
+  "dailySpearman": 0.2683011648,
+  "weekly": 0.3873903557,
+  "weeks": 421,
+  "monthly": 0.3698742301,
+  "months": 97,
+  "bothInPosition": {
+   "n": 423,
+   "pearson": 0.5418063729,
+   "spearman": 0.5735167932
+  },
+  "rolling": {
+   "30": {
+    "n": 2228,
+    "median": 0.3604126723,
+    "p10": -0.05252042564,
+    "p90": 0.8424280425,
+    "min": -1,
+    "max": 0.9930667922,
+    "mean": 0.3647241013
+   },
+   "90": {
+    "n": 2741,
+    "median": 0.3544901969,
+    "p10": 0.0216122289,
+    "p90": 0.6631842523,
+    "min": -1,
+    "max": 0.9020939863,
+    "mean": 0.3537035999
+   },
+   "252": {
+    "n": 2701,
+    "median": 0.3292900629,
+    "p10": 0.1885077827,
+    "p90": 0.6045671629,
+    "min": 0.004458639426,
+    "max": 0.7464713944,
+    "mean": 0.3702762918
+   }
+  },
+  "underlyingDaily": 0.8204072202,
+  "coLoss": {
+   "pEthNeg": 0.141598916,
+   "independence10": 0.1002710027,
+   "independence5": 0.05013550136,
+   "rows": [
+    {
+     "key": "coNeg",
+     "observed": 0.3883248731,
+     "mean": 0.4182677665,
+     "p5": 0.3831218274,
+     "p95": 0.4543147208
+    },
+    {
+     "key": "tail10",
+     "observed": 0.3344594595,
+     "mean": 0.3608530405,
+     "p5": 0.3209459459,
+     "p95": 0.3986486486
+    },
+    {
+     "key": "tail5",
+     "observed": 0.277027027,
+     "mean": 0.2817060811,
+     "p5": 0.2297297297,
+     "p95": 0.3310810811
+    }
+   ]
+  }
+ },
+ "crisis": {
+  "rows": [
+   {
+    "key": "all",
+    "label": "All days",
+    "group": "reference",
+    "days": 2952,
+    "pearson": 0.3575145632,
+    "spearman": 0.2683011648,
+    "nullMean": null,
+    "nullP5": null,
+    "nullP95": null
+   },
+   {
+    "key": "btcNeg",
+    "label": "BTC strategy < 0",
+    "group": "return-conditioned",
+    "days": 394,
+    "pearson": 0.1979585861,
+    "spearman": 0.2264956329,
+    "nullMean": 0.2651159128,
+    "nullP5": 0.1649966342,
+    "nullP95": 0.3718774967
+   },
+   {
+    "key": "ethNeg",
+    "label": "ETH strategy < 0",
+    "group": "return-conditioned",
+    "days": 418,
+    "pearson": 0.2943741339,
+    "spearman": 0.2044194262,
+    "nullMean": 0.2618420448,
+    "nullP5": 0.1650431671,
+    "nullP95": 0.3632169202
+   },
+   {
+    "key": "bothNeg",
+    "label": "Both strategies < 0",
+    "group": "return-conditioned",
+    "days": 153,
+    "pearson": 0.5637694805,
+    "spearman": 0.5204957581,
+    "nullMean": 0.2040344272,
+    "nullP5": 0.05879131687,
+    "nullP95": 0.3606495467
+   },
+   {
+    "key": "pNeg",
+    "label": "Portfolio < 0",
+    "group": "return-conditioned",
+    "days": 591,
+    "pearson": 0.04237876887,
+    "spearman": -0.2964304325,
+    "nullMean": 0.05918482456,
+    "nullP5": -0.02836710646,
+    "nullP95": 0.1499000902
+   },
+   {
+    "key": "pWorst10",
+    "label": "Worst 10 % portfolio days",
+    "group": "return-conditioned",
+    "days": 296,
+    "pearson": 0.1057837596,
+    "spearman": -0.08466408815,
+    "nullMean": -0.002026764163,
+    "nullP5": -0.1291176752,
+    "nullP95": 0.1363636372
+   },
+   {
+    "key": "pWorst5",
+    "label": "Worst 5 % portfolio days",
+    "group": "return-conditioned",
+    "days": 148,
+    "pearson": 0.2124649603,
+    "spearman": 0.002292764428,
+    "nullMean": -0.06639167183,
+    "nullP5": -0.2444680817,
+    "nullP95": 0.1237342469
+   },
+   {
+    "key": "pUnder10",
+    "label": "Portfolio more than 10 % below its peak",
+    "group": "portfolio drawdown",
+    "days": 308,
+    "pearson": 0.1564343908,
+    "spearman": 0.2495375223,
+    "nullMean": null,
+    "nullP5": null,
+    "nullP95": null
+   },
+   {
+    "key": "pDecline",
+    "label": "Decline phases of the 5 deepest portfolio drawdowns",
+    "group": "portfolio drawdown",
+    "days": 402,
+    "pearson": 0.381112775,
+    "spearman": 0.3060033751,
+    "nullMean": null,
+    "nullP5": null,
+    "nullP95": null
+   },
+   {
+    "key": "mktCrash",
+    "label": "Market crash days (worst 5 % of BTC+ETH spot)",
+    "group": "market stress (spot)",
+    "days": 148,
+    "pearson": 0.525540883,
+    "spearman": 0.5914055678,
+    "nullMean": null,
+    "nullP5": null,
+    "nullP95": null
+   },
+   {
+    "key": "mktBear",
+    "label": "Crypto bear market (BTC+ETH spot > 30 % below 1-year high)",
+    "group": "market stress (spot)",
+    "days": 1370,
+    "pearson": 0.3823634713,
+    "spearman": 0.2578006589,
+    "nullMean": null,
+    "nullP5": null,
+    "nullP95": null
+   },
+   {
+    "key": "episodes",
+    "label": "Named stress episodes (pooled)",
+    "group": "market stress (spot)",
+    "days": 289,
+    "pearson": 0.6231728608,
+    "spearman": 0.3523856375,
+    "nullMean": null,
+    "nullP5": null,
+    "nullP95": null
+   },
+   {
+    "key": "calm",
+    "label": "Non-stress days (no crash day, no bear market, no episode)",
+    "group": "market stress (spot)",
+    "days": 1459,
+    "pearson": 0.3238890563,
+    "spearman": 0.2766224375,
+    "nullMean": null,
+    "nullP5": null,
+    "nullP95": null
+   },
+   {
+    "key": "bothIn",
+    "label": "Both sleeves exposed during the day",
+    "group": "reference",
+    "days": 423,
+    "pearson": 0.5418063729,
+    "spearman": 0.5735167932,
+    "nullMean": null,
+    "nullP5": null,
+    "nullP95": null
+   }
+  ],
+  "copulaParameter": 0.5598478891,
+  "nullSimulations": 400,
+  "portfolioNegActualWeights": {
+   "n": 592,
+   "pearson": 0.02403068995,
+   "spearman": -0.2970738154
+  },
+  "episodes": [
+   {
+    "name": "2018 Q4 capitulation",
+    "from": "2018-11-08",
+    "to": "2018-12-15",
+    "days": 38,
+    "pearson": 0.8360923071,
+    "btc": 0.2566476628,
+    "eth": 0.5213691946,
+    "portfolio": 0.4168429094,
+    "spotBtc": -0.5109152438,
+    "spotEth": -0.6176564568
+   },
+   {
+    "name": "COVID-19 crash",
+    "from": "2020-03-01",
+    "to": "2020-03-31",
+    "days": 31,
+    "pearson": null,
+    "btc": -0.008137856531,
+    "eth": 0,
+    "portfolio": -0.002508068149,
+    "spotBtc": -0.2470291074,
+    "spotEth": -0.388978408
+   },
+   {
+    "name": "May–July 2021 sell-off",
+    "from": "2021-05-10",
+    "to": "2021-07-20",
+    "days": 72,
+    "pearson": 0.02063284696,
+    "btc": 0.01892524391,
+    "eth": 0.1164146695,
+    "portfolio": 0.08960973107,
+    "spotBtc": -0.4891268778,
+    "spotEth": -0.5448387467
+   },
+   {
+    "name": "Terra/LUNA and 3AC",
+    "from": "2022-05-05",
+    "to": "2022-06-30",
+    "days": 57,
+    "pearson": 0.652082131,
+    "btc": 0.5037061111,
+    "eth": 0.2522616749,
+    "portfolio": 0.3018177712,
+    "spotBtc": -0.4979268106,
+    "spotEth": -0.6357901681
+   },
+   {
+    "name": "FTX collapse",
+    "from": "2022-11-06",
+    "to": "2022-11-30",
+    "days": 25,
+    "pearson": 0.4897627245,
+    "btc": -0.005614215201,
+    "eth": 0.007524161119,
+    "portfolio": 0.004996394734,
+    "spotBtc": -0.1939345571,
+    "spotEth": -0.2043786648
+   },
+   {
+    "name": "August 2024 carry unwind",
+    "from": "2024-08-01",
+    "to": "2024-08-10",
+    "days": 10,
+    "pearson": null,
+    "btc": 0.04417644118,
+    "eth": 0,
+    "portfolio": 0.01213802337,
+    "spotBtc": -0.05664582431,
+    "spotEth": -0.1926600964
+   },
+   {
+    "name": "Oct–Nov 2025 deleveraging",
+    "from": "2025-10-06",
+    "to": "2025-11-30",
+    "days": 56,
+    "pearson": 0.7902097483,
+    "btc": 0.02966121806,
+    "eth": 0.08473984387,
+    "portfolio": 0.07577698897,
+    "spotBtc": -0.2682745165,
+    "spotEth": -0.3373841464
+   }
+  ],
+  "crashCut": -0.05560930841
+ },
+ "overlap": {
+  "entries": [
+   {
+    "window": "±15 min",
+    "ethWithBtc": 0.2346368715,
+    "btcWithEth": 0.2346368715,
+    "ethWithBtcOpposite": 0,
+    "baselineEthWithBtc": 0.001270949721,
+    "baselineBtcWithEth": 0.001312849162
+   },
+   {
+    "window": "±1 h",
+    "ethWithBtc": 0.2541899441,
+    "btcWithEth": 0.2541899441,
+    "ethWithBtcOpposite": 0,
+    "baselineEthWithBtc": 0.005195530726,
+    "baselineBtcWithEth": 0.005460893855
+   },
+   {
+    "window": "±2 h",
+    "ethWithBtc": 0.2793296089,
+    "btcWithEth": 0.2793296089,
+    "ethWithBtcOpposite": 0.002793296089,
+    "baselineEthWithBtc": 0.0100698324,
+    "baselineBtcWithEth": 0.01087988827
+   },
+   {
+    "window": "±4 h",
+    "ethWithBtc": 0.3184357542,
+    "btcWithEth": 0.3212290503,
+    "ethWithBtcOpposite": 0.01675977654,
+    "baselineEthWithBtc": 0.0205027933,
+    "baselineBtcWithEth": 0.02152234637
+   },
+   {
+    "window": "±8 h",
+    "ethWithBtc": 0.3324022346,
+    "btcWithEth": 0.3407821229,
+    "ethWithBtcOpposite": 0.02234636872,
+    "baselineEthWithBtc": 0.04129888268,
+    "baselineBtcWithEth": 0.04203910615
+   }
+  ],
+  "states": {
+   "none": 0.7533275463,
+   "btcOnly": 0.07545378839,
+   "ethOnly": 0.09831258469,
+   "both": 0.07290608062,
+   "longLong": 0.04475779133,
+   "shortShort": 0.02666977191,
+   "btcLongEthShort": 0.0002822944896,
+   "btcShortEthLong": 0.0011962229
+  },
+  "trades": {
+   "ethSame": 0.5139664804,
+   "ethOpp": 0.02793296089,
+   "btcSame": 0.5251396648,
+   "btcOpp": 0.03072625698,
+   "longLong": 0.487704918,
+   "shortShort": 0.5701754386
+  }
+ },
+ "risk": {
+  "equalWeights": {
+   "cov": [
+    [
+     0.0001707654646,
+     0.00008136026311
+    ],
+    [
+     0.00008136026311,
+     0.0003032753902
+    ]
+   ],
+   "corr": 0.3575145632,
+   "sigma": [
+    0.2497440409,
+    0.3328232808
+   ],
+   "sigmaP": 0.2411312373,
+   "mrc": [
+    0.1909518714,
+    0.2913106032
+   ],
+   "crc": [
+    0.09547593572,
+    0.1456553016
+   ],
+   "pct": [
+    0.3959500925,
+    0.6040499075
+   ],
+   "dr": 1.207988082,
+   "enbDR2": 1.459235206,
+   "enbPca": 1.207255356
+  },
+  "averageWeights": {
+   "cov": [
+    [
+     0.0001707654646,
+     0.00008136026311
+    ],
+    [
+     0.00008136026311,
+     0.0003032753902
+    ]
+   ],
+   "corr": 0.3575145632,
+   "sigma": [
+    0.2497440409,
+    0.3328232808
+   ],
+   "sigmaP": 0.2775435082,
+   "mrc": [
+    0.1368449518,
+    0.3252104382
+   ],
+   "crc": [
+    0.03462937322,
+    0.242914135
+   ],
+   "pct": [
+    0.1247709717,
+    0.8752290283
+   ],
+   "dr": 1.123426092,
+   "enbDR2": 1.262086185,
+   "enbPca": 1.033673517
+  },
+  "byYear": [
+   {
+    "year": 2018,
+    "btcPct": 0.2218731669,
+    "ethPct": 0.7781268331,
+    "corr": 0.3947938027
+   },
+   {
+    "year": 2019,
+    "btcPct": 0.577469994,
+    "ethPct": 0.422530006,
+    "corr": 0.2693569707
+   },
+   {
+    "year": 2020,
+    "btcPct": 0.3950116759,
+    "ethPct": 0.6049883241,
+    "corr": 0.2657419228
+   },
+   {
+    "year": 2021,
+    "btcPct": 0.3296482551,
+    "ethPct": 0.6703517449,
+    "corr": 0.342169959
+   },
+   {
+    "year": 2022,
+    "btcPct": 0.4139761609,
+    "ethPct": 0.5860238391,
+    "corr": 0.4103024347
+   },
+   {
+    "year": 2023,
+    "btcPct": 0.5098115269,
+    "ethPct": 0.4901884731,
+    "corr": 0.2290422915
+   },
+   {
+    "year": 2024,
+    "btcPct": 0.5742944236,
+    "ethPct": 0.4257055764,
+    "corr": 0.4836757073
+   },
+   {
+    "year": 2025,
+    "btcPct": 0.2471611693,
+    "ethPct": 0.7528388307,
+    "corr": 0.4456279535
+   },
+   {
+    "year": 2026,
+    "btcPct": 0.3759096276,
+    "ethPct": 0.6240903724,
+    "corr": 0.7176403142
+   }
+  ]
+ },
+ "diversification": {
+  "sharpeVsBest": 1.050294868,
+  "sharpeVsBtc": 1.389778379,
+  "sharpeVsEth": 1.050294868,
+  "theoreticalEqualSharpe": 1.213787747,
+  "maxDDvsBtc": 0.7207719217,
+  "maxDDvsEth": 0.7391678349,
+  "volVsWeighted": 0.9390642721,
+  "volVsBtc": 1.095257681,
+  "volVsEth": 0.8218598118,
+  "dr": 1.207988082,
+  "enbDR2": 1.459235206,
+  "enbPca": 1.207255356
+ },
+ "drawdowns": {
+  "top10": {
+   "btc": [
+    {
+     "start": "2026-02-05",
+     "trough": "2026-08-09",
+     "recovery": null,
+     "depth": -0.24764948,
+     "days": 237,
+     "recoveryDays": null,
+     "others": {
+      "ETH": -0.08749724726,
+      "Portfolio": -0.1099931215
+     }
+    },
+    {
+     "start": "2022-01-22",
+     "trough": "2022-05-05",
+     "recovery": "2022-06-10",
+     "depth": -0.1987135166,
+     "days": 139,
+     "recoveryDays": 36,
+     "others": {
+      "ETH": -0.1124060889,
+      "Portfolio": -0.1308798688
+     }
+    },
+    {
+     "start": "2024-11-11",
+     "trough": "2025-02-27",
+     "recovery": "2025-11-04",
+     "depth": -0.1265411912,
+     "days": 358,
+     "recoveryDays": 250,
+     "others": {
+      "ETH": 0.01725882293,
+      "Portfolio": -0.02342325942
+     }
+    },
+    {
+     "start": "2022-07-12",
+     "trough": "2022-07-18",
+     "recovery": "2023-01-12",
+     "depth": -0.1216209719,
+     "days": 184,
+     "recoveryDays": 178,
+     "others": {
+      "ETH": 0.2458824692,
+      "Portfolio": 0.1643023466
+     }
+    },
+    {
+     "start": "2023-04-11",
+     "trough": "2023-05-18",
+     "recovery": "2023-06-21",
+     "depth": -0.1212233146,
+     "days": 71,
+     "recoveryDays": 34,
+     "others": {
+      "ETH": 0.0211509427,
+      "Portfolio": -0.01729277749
+     }
+    },
+    {
+     "start": "2019-11-24",
+     "trough": "2020-03-07",
+     "recovery": "2020-06-01",
+     "depth": -0.1057920142,
+     "days": 190,
+     "recoveryDays": 86,
+     "others": {
+      "ETH": 0.1385101335,
+      "Portfolio": 0.05055171652
+     }
+    },
+    {
+     "start": "2019-09-08",
+     "trough": "2019-11-18",
+     "recovery": "2019-11-24",
+     "depth": -0.104411243,
+     "days": 77,
+     "recoveryDays": 6,
+     "others": {
+      "ETH": -0.0893269344,
+      "Portfolio": -0.09446019675
+     }
+    },
+    {
+     "start": "2020-10-27",
+     "trough": "2021-04-10",
+     "recovery": "2021-07-26",
+     "depth": -0.1020010417,
+     "days": 272,
+     "recoveryDays": 107,
+     "others": {
+      "ETH": 0.2554282103,
+      "Portfolio": 0.1393977065
+     }
+    },
+    {
+     "start": "2020-06-01",
+     "trough": "2020-07-14",
+     "recovery": "2020-07-27",
+     "depth": -0.08990423863,
+     "days": 56,
+     "recoveryDays": 13,
+     "others": {
+      "ETH": -0.04912156329,
+      "Portfolio": -0.06184384516
+     }
+    },
+    {
+     "start": "2019-02-23",
+     "trough": "2019-03-05",
+     "recovery": "2019-04-02",
+     "depth": -0.08251809087,
+     "days": 38,
+     "recoveryDays": 28,
+     "others": {
+      "ETH": -0.04545025393,
+      "Portfolio": -0.05650045713
+     }
+    }
+   ],
+   "eth": [
+    {
+     "start": "2019-09-18",
+     "trough": "2020-01-11",
+     "recovery": "2020-02-09",
+     "depth": -0.2414861458,
+     "days": 144,
+     "recoveryDays": 29,
+     "others": {
+      "BTC": -0.04222151155,
+      "Portfolio": -0.1775169954
+     }
+    },
+    {
+     "start": "2022-01-22",
+     "trough": "2022-02-28",
+     "recovery": "2022-06-12",
+     "depth": -0.1797079121,
+     "days": 141,
+     "recoveryDays": 104,
+     "others": {
+      "BTC": -0.1602163602,
+      "Portfolio": -0.1755358188
+     }
+    },
+    {
+     "start": "2019-02-10",
+     "trough": "2019-05-07",
+     "recovery": "2019-08-09",
+     "depth": -0.1752879498,
+     "days": 180,
+     "recoveryDays": 94,
+     "others": {
+      "BTC": 0.1060476126,
+      "Portfolio": -0.0968423784
+     }
+    },
+    {
+     "start": "2020-09-01",
+     "trough": "2020-10-19",
+     "recovery": "2021-03-29",
+     "depth": -0.1689877081,
+     "days": 209,
+     "recoveryDays": 161,
+     "others": {
+      "BTC": -0.0144928783,
+      "Portfolio": -0.1260150768
+     }
+    },
+    {
+     "start": "2022-07-18",
+     "trough": "2022-10-24",
+     "recovery": "2023-01-14",
+     "depth": -0.1619326475,
+     "days": 180,
+     "recoveryDays": 82,
+     "others": {
+      "BTC": 0.02151462394,
+      "Portfolio": -0.1312105837
+     }
+    },
+    {
+     "start": "2021-10-20",
+     "trough": "2021-12-23",
+     "recovery": "2022-01-20",
+     "depth": -0.1555386962,
+     "days": 92,
+     "recoveryDays": 28,
+     "others": {
+      "BTC": 0.07120234245,
+      "Portfolio": -0.1078845928
+     }
+    },
+    {
+     "start": "2026-02-05",
+     "trough": "2026-05-31",
+     "recovery": "2026-06-05",
+     "depth": -0.1451235598,
+     "days": 120,
+     "recoveryDays": 5,
+     "others": {
+      "BTC": -0.1302959911,
+      "Portfolio": -0.143040797
+     }
+    },
+    {
+     "start": "2024-11-11",
+     "trough": "2025-02-13",
+     "recovery": "2025-02-26",
+     "depth": -0.120678117,
+     "days": 107,
+     "recoveryDays": 13,
+     "others": {
+      "BTC": -0.09152816334,
+      "Portfolio": -0.1124313806
+     }
+    },
+    {
+     "start": "2026-06-06",
+     "trough": "2026-07-23",
+     "recovery": "2026-08-19",
+     "depth": -0.1137988704,
+     "days": 74,
+     "recoveryDays": 27,
+     "others": {
+      "BTC": -0.1078123004,
+      "Portfolio": -0.1130645164
+     }
+    },
+    {
+     "start": "2020-08-01",
+     "trough": "2020-08-05",
+     "recovery": "2020-09-01",
+     "depth": -0.1052290961,
+     "days": 31,
+     "recoveryDays": 27,
+     "others": {
+      "BTC": -0.05176006102,
+      "Portfolio": -0.08954862948
+     }
+    }
+   ],
+   "portfolio": [
+    {
+     "start": "2022-01-22",
+     "trough": "2022-03-03",
+     "recovery": "2022-06-12",
+     "depth": -0.1784987916,
+     "days": 141,
+     "recoveryDays": 101,
+     "others": {
+      "BTC": -0.1740590366,
+      "ETH": -0.1797079121
+     }
+    },
+    {
+     "start": "2019-09-18",
+     "trough": "2020-01-11",
+     "recovery": "2020-02-12",
+     "depth": -0.1775169954,
+     "days": 147,
+     "recoveryDays": 32,
+     "others": {
+      "BTC": -0.04222151155,
+      "ETH": -0.2414861458
+     }
+    },
+    {
+     "start": "2026-02-05",
+     "trough": "2026-05-31",
+     "recovery": "2026-08-19",
+     "depth": -0.143040797,
+     "days": 195,
+     "recoveryDays": 80,
+     "others": {
+      "BTC": -0.1302959911,
+      "ETH": -0.1451235598
+     }
+    },
+    {
+     "start": "2022-07-18",
+     "trough": "2022-10-21",
+     "recovery": "2023-01-11",
+     "depth": -0.1314192908,
+     "days": 177,
+     "recoveryDays": 82,
+     "others": {
+      "BTC": 0.01930799588,
+      "ETH": -0.1617394546
+     }
+    },
+    {
+     "start": "2020-09-01",
+     "trough": "2020-10-08",
+     "recovery": "2021-03-29",
+     "depth": -0.128291658,
+     "days": 209,
+     "recoveryDays": 172,
+     "others": {
+      "BTC": -0.03391484238,
+      "ETH": -0.1646576924
+     }
+    },
+    {
+     "start": "2024-11-11",
+     "trough": "2025-02-17",
+     "recovery": "2025-02-28",
+     "depth": -0.116640544,
+     "days": 109,
+     "recoveryDays": 11,
+     "others": {
+      "BTC": -0.1064064026,
+      "ETH": -0.120678117
+     }
+    },
+    {
+     "start": "2021-10-20",
+     "trough": "2021-12-27",
+     "recovery": "2022-01-12",
+     "depth": -0.1107814865,
+     "days": 84,
+     "recoveryDays": 16,
+     "others": {
+      "BTC": 0.05741875118,
+      "ETH": -0.1555386962
+     }
+    },
+    {
+     "start": "2020-08-01",
+     "trough": "2020-08-07",
+     "recovery": "2020-09-01",
+     "depth": -0.09831103089,
+     "days": 31,
+     "recoveryDays": 25,
+     "others": {
+      "BTC": -0.0816390921,
+      "ETH": -0.1052290961
+     }
+    },
+    {
+     "start": "2019-02-10",
+     "trough": "2019-05-07",
+     "recovery": "2019-05-15",
+     "depth": -0.0968423784,
+     "days": 94,
+     "recoveryDays": 8,
+     "others": {
+      "BTC": 0.1060476126,
+      "ETH": -0.1752879498
+     }
+    },
+    {
+     "start": "2025-08-13",
+     "trough": "2025-09-30",
+     "recovery": "2025-10-06",
+     "depth": -0.08244571367,
+     "days": 54,
+     "recoveryDays": 6,
+     "others": {
+      "BTC": -0.06451088564,
+      "ETH": -0.08578396635
+     }
+    }
+   ]
+  },
+  "help": {
+   "ethDuringBtcTop10": {
+    "n": 10,
+    "otherPositive": 0.5,
+    "otherMean": 0.02944284909,
+    "portfolioMean": -0.01401417567,
+    "ownMean": -0.1300375103
+   },
+   "btcDuringEthTop10": {
+    "n": 10,
+    "otherPositive": 0.3,
+    "otherMean": -0.0399562687,
+    "portfolioMean": -0.1273090769,
+    "ownMean": -0.1567770703
+   },
+   "ethDuringBtc15": {
+    "n": 2,
+    "otherPositive": 0,
+    "otherMean": -0.09995166807,
+    "portfolioMean": -0.1204364951,
+    "ownMean": -0.2231814983
+   },
+   "btcDuringEth15": {
+    "n": 6,
+    "otherPositive": 0.5,
+    "otherMean": -0.003027695189,
+    "portfolioMean": -0.135834241,
+    "ownMean": -0.1804901766
+   }
+  },
+  "intraday": {
+   "btc": -0.264797703,
+   "eth": -0.2671922719,
+   "portfolio": -0.19634215
+  }
+ },
+ "annual": [
+  {
+   "year": 2018,
+   "days": 122,
+   "partial": true,
+   "from": "2018-09-01",
+   "to": "2018-12-31",
+   "btc": 0.1623400211,
+   "eth": 2.243026874,
+   "portfolio": 1.202683448,
+   "rebalanced": 1.023667516,
+   "btcSharpe": 1.711130384,
+   "ethSharpe": 5.415727238,
+   "portfolioSharpe": 5.215758401,
+   "portfolioDD": -0.06447409639
+  },
+  {
+   "year": 2019,
+   "days": 365,
+   "partial": false,
+   "from": "2019-01-01",
+   "to": "2019-12-31",
+   "btc": 0.5550498785,
+   "eth": -0.09020343496,
+   "portfolio": 0.08004430326,
+   "rebalanced": 0.2064661369,
+   "btcSharpe": 1.523551739,
+   "ethSharpe": -0.227762834,
+   "portfolioSharpe": 0.4523349443,
+   "portfolioDD": -0.1425561922
+  },
+  {
+   "year": 2020,
+   "days": 366,
+   "partial": false,
+   "from": "2020-01-01",
+   "to": "2020-12-31",
+   "btc": 0.2115744786,
+   "eth": 0.7751531742,
+   "portfolio": 0.5610572359,
+   "rebalanced": 0.4846955696,
+   "btcSharpe": 0.8700674339,
+   "ethSharpe": 1.863911932,
+   "portfolioSharpe": 1.823421667,
+   "portfolioDD": -0.128291658
+  },
+  {
+   "year": 2021,
+   "days": 365,
+   "partial": false,
+   "from": "2021-01-01",
+   "to": "2021-12-31",
+   "btc": 0.2829540947,
+   "eth": 0.604039874,
+   "portfolio": 0.5093712158,
+   "rebalanced": 0.4436187872,
+   "btcSharpe": 1.421255564,
+   "ethSharpe": 1.708927541,
+   "portfolioSharpe": 1.795300684,
+   "portfolioDD": -0.1107814865
+  },
+  {
+   "year": 2022,
+   "days": 365,
+   "partial": false,
+   "from": "2022-01-01",
+   "to": "2022-12-31",
+   "btc": 0.4013782046,
+   "eth": 0.9450663613,
+   "portfolio": 0.8088121052,
+   "rebalanced": 0.6900781874,
+   "btcSharpe": 1.308210225,
+   "ethSharpe": 1.977935249,
+   "portfolioSharpe": 1.995439724,
+   "portfolioDD": -0.1784987916
+  },
+  {
+   "year": 2023,
+   "days": 365,
+   "partial": false,
+   "from": "2023-01-01",
+   "to": "2023-12-31",
+   "btc": 0.5928042672,
+   "eth": 0.2229678932,
+   "portfolio": 0.2947757111,
+   "rebalanced": 0.4141498429,
+   "btcSharpe": 1.977440357,
+   "ethSharpe": 0.9406622289,
+   "portfolioSharpe": 1.350871653,
+   "portfolioDD": -0.07070590886
+  },
+  {
+   "year": 2024,
+   "days": 366,
+   "partial": false,
+   "from": "2024-01-01",
+   "to": "2024-12-31",
+   "btc": 1.051615663,
+   "eth": 0.6633873321,
+   "portfolio": 0.7561166785,
+   "rebalanced": 0.8537418403,
+   "btcSharpe": 3.027246871,
+   "ethSharpe": 2.667201479,
+   "portfolioSharpe": 3.13249459,
+   "portfolioDD": -0.04690052653
+  },
+  {
+   "year": 2025,
+   "days": 365,
+   "partial": false,
+   "from": "2025-01-01",
+   "to": "2025-12-31",
+   "btc": 0.01183377855,
+   "eth": 1.127430825,
+   "portfolio": 0.8161302179,
+   "rebalanced": 0.4942460303,
+   "btcSharpe": 0.1530229907,
+   "ethSharpe": 2.378421869,
+   "portfolioSharpe": 2.244979287,
+   "portfolioDD": -0.08647526504
+  },
+  {
+   "year": 2026,
+   "days": 273,
+   "partial": true,
+   "from": "2026-01-01",
+   "to": "2026-09-30",
+   "btc": 0.1376879529,
+   "eth": 0.638836012,
+   "portfolio": 0.5609246397,
+   "rebalanced": 0.3730708908,
+   "btcSharpe": 0.8596798374,
+   "ethSharpe": 2.021515151,
+   "portfolioSharpe": 1.947143395,
+   "portfolioDD": -0.143040797
+  }
+ ],
+ "monthly": [
+  {
+   "month": "2018-09",
+   "btc": -0.04057617786,
+   "eth": 0.2916179397,
+   "portfolio": 0.1255208809,
+   "rebalanced": 0.1255208809
+  },
+  {
+   "month": "2018-10",
+   "btc": -0.01295543711,
+   "eth": 0.03104350052,
+   "portfolio": 0.01229057038,
+   "rebalanced": 0.009039288715
+  },
+  {
+   "month": "2018-11",
+   "btc": 0.2273994753,
+   "eth": 0.6212816762,
+   "portfolio": 0.4575906503,
+   "rebalanced": 0.42433965
+  },
+  {
+   "month": "2018-12",
+   "btc": 0,
+   "eth": 0.5020383316,
+   "portfolio": 0.326348854,
+   "rebalanced": 0.2510191658
+  },
+  {
+   "month": "2019-01",
+   "btc": 0.04042743302,
+   "eth": 0,
+   "portfolio": 0.01066663106,
+   "rebalanced": 0.02020938682
+  },
+  {
+   "month": "2019-02",
+   "btc": 0.01068524117,
+   "eth": -0.08928839862,
+   "portfolio": -0.06213398185,
+   "rebalanced": -0.03930179087
+  },
+  {
+   "month": "2019-03",
+   "btc": -0.003700009381,
+   "eth": 0.002995265293,
+   "portfolio": 0.00103552511,
+   "rebalanced": -0.0003531255982
+  },
+  {
+   "month": "2019-04",
+   "btc": 0.1997470479,
+   "eth": -0.05395025249,
+   "portfolio": 0.01995691888,
+   "rebalanced": 0.07289830209
+  },
+  {
+   "month": "2019-05",
+   "btc": 0.1446977058,
+   "eth": 0.1258822418,
+   "portfolio": 0.1323297741,
+   "rebalanced": 0.1352899738
+  },
+  {
+   "month": "2019-06",
+   "btc": 0.002470940041,
+   "eth": -0.01837298796,
+   "portfolio": -0.01115234208,
+   "rebalanced": -0.00795102396
+  },
+  {
+   "month": "2019-07",
+   "btc": 0,
+   "eth": 0,
+   "portfolio": 0,
+   "rebalanced": 0
+  },
+  {
+   "month": "2019-08",
+   "btc": 0.03040380304,
+   "eth": 0.1835580405,
+   "portfolio": 0.1297722071,
+   "rebalanced": 0.1069647162
+  },
+  {
+   "month": "2019-09",
+   "btc": -0.0003959708709,
+   "eth": -0.02701525643,
+   "portfolio": -0.01848912847,
+   "rebalanced": -0.0137058085
+  },
+  {
+   "month": "2019-10",
+   "btc": -0.0379398908,
+   "eth": -0.06064203809,
+   "portfolio": -0.05323652299,
+   "rebalanced": -0.04929096445
+  },
+  {
+   "month": "2019-11",
+   "btc": 0.07882588842,
+   "eth": -0.002379894891,
+   "portfolio": 0.02453768471,
+   "rebalanced": 0.03822299677
+  },
+  {
+   "month": "2019-12",
+   "btc": 0.008521512514,
+   "eth": -0.117287671,
+   "portfolio": -0.07337550975,
+   "rebalanced": -0.05438307922
+  },
+  {
+   "month": "2020-01",
+   "btc": -0.03119917578,
+   "eth": 0.09447239262,
+   "portfolio": 0.04673146031,
+   "rebalanced": 0.03163660842
+  },
+  {
+   "month": "2020-02",
+   "btc": -0.02524347478,
+   "eth": 0.1864822675,
+   "portfolio": 0.1120387738,
+   "rebalanced": 0.08061939638
+  },
+  {
+   "month": "2020-03",
+   "btc": -0.008137856531,
+   "eth": 0,
+   "portfolio": -0.002508068149,
+   "rebalanced": -0.004068928266
+  },
+  {
+   "month": "2020-04",
+   "btc": 0.09287531541,
+   "eth": 0,
+   "portfolio": 0.02846240072,
+   "rebalanced": 0.04643765771
+  },
+  {
+   "month": "2020-05",
+   "btc": 0,
+   "eth": 0.1156882582,
+   "portfolio": 0.07801417372,
+   "rebalanced": 0.05784412908
+  },
+  {
+   "month": "2020-06",
+   "btc": 0.01036313933,
+   "eth": -0.006121224039,
+   "portfolio": -0.001141547508,
+   "rebalanced": 0.002120957645
+  },
+  {
+   "month": "2020-07",
+   "btc": 0.1471273628,
+   "eth": 0.2167784217,
+   "portfolio": 0.1954955503,
+   "rebalanced": 0.1819372148
+  },
+  {
+   "month": "2020-08",
+   "btc": -0.01238946152,
+   "eth": -0.0199494898,
+   "portfolio": -0.01773287824,
+   "rebalanced": -0.01617032652
+  },
+  {
+   "month": "2020-09",
+   "btc": -0.02147877768,
+   "eth": -0.06385496999,
+   "portfolio": -0.05136261801,
+   "rebalanced": -0.04267168483
+  },
+  {
+   "month": "2020-10",
+   "btc": 0.1093848422,
+   "eth": 0.04550771199,
+   "portfolio": 0.06493166829,
+   "rebalanced": 0.07744611596
+  },
+  {
+   "month": "2020-11",
+   "btc": -0.04748854125,
+   "eth": 0.07885312624,
+   "portfolio": 0.03883107107,
+   "rebalanced": 0.01568229249
+  },
+  {
+   "month": "2020-12",
+   "btc": 0,
+   "eth": -0.02095910729,
+   "portfolio": -0.01487144095,
+   "rebalanced": -0.01047955365
+  },
+  {
+   "month": "2021-01",
+   "btc": 0,
+   "eth": 0.02153766454,
+   "portfolio": 0.01518751783,
+   "rebalanced": 0.01076883227
+  },
+  {
+   "month": "2021-02",
+   "btc": 0,
+   "eth": 0,
+   "portfolio": 0,
+   "rebalanced": 0
+  },
+  {
+   "month": "2021-03",
+   "btc": 0,
+   "eth": 0.07094150026,
+   "portfolio": 0.05033808338,
+   "rebalanced": 0.03546276571
+  },
+  {
+   "month": "2021-04",
+   "btc": 0.05553250042,
+   "eth": 0.06202599567,
+   "portfolio": 0.06023048374,
+   "rebalanced": 0.05877849402
+  },
+  {
+   "month": "2021-05",
+   "btc": -0.001662430936,
+   "eth": 0,
+   "portfolio": -0.0004576407661,
+   "rebalanced": -0.0008312148959
+  },
+  {
+   "month": "2021-06",
+   "btc": 0,
+   "eth": 0.1117675243,
+   "portfolio": 0.08103679026,
+   "rebalanced": 0.05588376215
+  },
+  {
+   "month": "2021-07",
+   "btc": 0.0520225602,
+   "eth": 0.02624546544,
+   "portfolio": 0.03280164435,
+   "rebalanced": 0.03913111161
+  },
+  {
+   "month": "2021-08",
+   "btc": 0.03012042592,
+   "eth": 0.1698801207,
+   "portfolio": 0.1336719233,
+   "rebalanced": 0.09998434891
+  },
+  {
+   "month": "2021-09",
+   "btc": -0.0005175977087,
+   "eth": 0.07966023977,
+   "portfolio": 0.06078554631,
+   "rebalanced": 0.03957074778
+  },
+  {
+   "month": "2021-10",
+   "btc": 0.02466955387,
+   "eth": 0.01383104248,
+   "portfolio": 0.01623508844,
+   "rebalanced": 0.01925029818
+  },
+  {
+   "month": "2021-11",
+   "btc": 0.01919109569,
+   "eth": -0.04284124678,
+   "portfolio": -0.02896790919,
+   "rebalanced": -0.01182507554
+  },
+  {
+   "month": "2021-12",
+   "btc": 0.07630271487,
+   "eth": -0.01277392821,
+   "portfolio": 0.008135812774,
+   "rebalanced": 0.03176439333
+  },
+  {
+   "month": "2022-01",
+   "btc": 0.02407835164,
+   "eth": 0.3222153473,
+   "portfolio": 0.2474989238,
+   "rebalanced": 0.1731468495
+  },
+  {
+   "month": "2022-02",
+   "btc": -0.08766209862,
+   "eth": -0.152440604,
+   "portfolio": -0.1391138576,
+   "rebalanced": -0.1200586422
+  },
+  {
+   "month": "2022-03",
+   "btc": 0.02756571034,
+   "eth": 0.1266053375,
+   "portfolio": 0.1050123762,
+   "rebalanced": 0.07708593422
+  },
+  {
+   "month": "2022-04",
+   "btc": -0.01768760023,
+   "eth": -0.01934123247,
+   "portfolio": -0.01900597026,
+   "rebalanced": -0.01851459405
+  },
+  {
+   "month": "2022-05",
+   "btc": 0.1134432658,
+   "eth": -0.02060908344,
+   "portfolio": 0.006605604735,
+   "rebalanced": 0.04641707903
+  },
+  {
+   "month": "2022-06",
+   "btc": 0.3032879677,
+   "eth": 0.2804943627,
+   "portfolio": 0.2856129569,
+   "rebalanced": 0.2918911652
+  },
+  {
+   "month": "2022-07",
+   "btc": 0.005520427032,
+   "eth": 0.3393715398,
+   "portfolio": 0.2633703038,
+   "rebalanced": 0.1724459834
+  },
+  {
+   "month": "2022-08",
+   "btc": -0.02402083634,
+   "eth": -0.01989920557,
+   "portfolio": -0.02064599325,
+   "rebalanced": -0.02196002096
+  },
+  {
+   "month": "2022-09",
+   "btc": 0.07618195832,
+   "eth": -0.01709532843,
+   "portfolio": -0.0002528962695,
+   "rebalanced": 0.02954331494
+  },
+  {
+   "month": "2022-10",
+   "btc": -0.06551134238,
+   "eth": -0.03924759541,
+   "portfolio": -0.04435242372,
+   "rebalanced": -0.0523794689
+  },
+  {
+   "month": "2022-11",
+   "btc": 0.01985173651,
+   "eth": 0.0178674876,
+   "portfolio": 0.01824462263,
+   "rebalanced": 0.01885938873
+  },
+  {
+   "month": "2022-12",
+   "btc": 0.0173503122,
+   "eth": -0.007220743105,
+   "portfolio": -0.002543289915,
+   "rebalanced": 0.005062229155
+  },
+  {
+   "month": "2023-01",
+   "btc": 0.1560704175,
+   "eth": 0.06142657499,
+   "portfolio": 0.07980272262,
+   "rebalanced": 0.1087486167
+  },
+  {
+   "month": "2023-02",
+   "btc": 0.03891071978,
+   "eth": 0.04956612037,
+   "portfolio": 0.04735113043,
+   "rebalanced": 0.04423842008
+  },
+  {
+   "month": "2023-03",
+   "btc": 0.2425452297,
+   "eth": -0.06717003758,
+   "portfolio": -0.00330686156,
+   "rebalanced": 0.08765273751
+  },
+  {
+   "month": "2023-04",
+   "btc": -0.00262383753,
+   "eth": 0.03989236601,
+   "portfolio": 0.02896304671,
+   "rebalanced": 0.01863358293
+  },
+  {
+   "month": "2023-05",
+   "btc": -0.01944320109,
+   "eth": -0.007044922166,
+   "portfolio": -0.01013421619,
+   "rebalanced": -0.01324545104
+  },
+  {
+   "month": "2023-06",
+   "btc": 0.08834599366,
+   "eth": -0.00009025301292,
+   "portfolio": 0.02173828191,
+   "rebalanced": 0.04412780806
+  },
+  {
+   "month": "2023-07",
+   "btc": -0.04356510333,
+   "eth": 0.007079816755,
+   "portfolio": -0.006235683679,
+   "rebalanced": -0.01824264329
+  },
+  {
+   "month": "2023-08",
+   "btc": 0.01212775869,
+   "eth": 0.006158238052,
+   "portfolio": 0.007668780996,
+   "rebalanced": 0.00914235763
+  },
+  {
+   "month": "2023-09",
+   "btc": -0.01631506765,
+   "eth": 0.01043133711,
+   "portfolio": 0.003633409068,
+   "rebalanced": -0.002944883922
+  },
+  {
+   "month": "2023-10",
+   "btc": 0.05303352372,
+   "eth": 0.04846039425,
+   "portfolio": 0.04959960888,
+   "rebalanced": 0.05074696588
+  },
+  {
+   "month": "2023-11",
+   "btc": 0,
+   "eth": 0.06180557015,
+   "portfolio": 0.04635878115,
+   "rebalanced": 0.03090278507
+  },
+  {
+   "month": "2023-12",
+   "btc": 0,
+   "eth": 0,
+   "portfolio": 0,
+   "rebalanced": 0
+  },
+  {
+   "month": "2024-01",
+   "btc": 0.0652352495,
+   "eth": 0,
+   "portfolio": 0.01558160898,
+   "rebalanced": 0.03261762475
+  },
+  {
+   "month": "2024-02",
+   "btc": 0.280976551,
+   "eth": 0.2656947856,
+   "portfolio": 0.2695233346,
+   "rebalanced": 0.2733322285
+  },
+  {
+   "month": "2024-03",
+   "btc": 0.06821639733,
+   "eth": 0.02969547845,
+   "portfolio": 0.03943321017,
+   "rebalanced": 0.04895593789
+  },
+  {
+   "month": "2024-04",
+   "btc": 0,
+   "eth": 0,
+   "portfolio": 0,
+   "rebalanced": 0
+  },
+  {
+   "month": "2024-05",
+   "btc": 0,
+   "eth": 0,
+   "portfolio": 0,
+   "rebalanced": 0
+  },
+  {
+   "month": "2024-06",
+   "btc": -0.008598147297,
+   "eth": -0.01013112145,
+   "portfolio": -0.009732868819,
+   "rebalanced": -0.009364806909
+  },
+  {
+   "month": "2024-07",
+   "btc": 0.07779333777,
+   "eth": 0,
+   "portfolio": 0.02023315396,
+   "rebalanced": 0.03889666211
+  },
+  {
+   "month": "2024-08",
+   "btc": 0.04417644118,
+   "eth": 0,
+   "portfolio": 0.01213802337,
+   "rebalanced": 0.02208822059
+  },
+  {
+   "month": "2024-09",
+   "btc": -0.01239053403,
+   "eth": 0,
+   "portfolio": -0.003512217622,
+   "rebalanced": -0.006195267013
+  },
+  {
+   "month": "2024-10",
+   "btc": 0.09270757527,
+   "eth": -0.0004309551652,
+   "portfolio": 0.02573484617,
+   "rebalanced": 0.04613831005
+  },
+  {
+   "month": "2024-11",
+   "btc": 0.1913285876,
+   "eth": 0.2899269743,
+   "portfolio": 0.260418734,
+   "rebalanced": 0.240627781
+  },
+  {
+   "month": "2024-12",
+   "btc": -0.01877143091,
+   "eth": 0,
+   "portfolio": -0.005309915327,
+   "rebalanced": -0.009385715455
+  },
+  {
+   "month": "2025-01",
+   "btc": -0.03352364361,
+   "eth": -0.03728017624,
+   "portfolio": -0.03623193854,
+   "rebalanced": -0.03540190993
+  },
+  {
+   "month": "2025-02",
+   "btc": -0.02223644917,
+   "eth": 0.1109374382,
+   "portfolio": 0.07367164294,
+   "rebalanced": 0.0443401421
+  },
+  {
+   "month": "2025-03",
+   "btc": -0.004762805397,
+   "eth": -0.004821569854,
+   "portfolio": -0.0048065948,
+   "rebalanced": -0.004792187335
+  },
+  {
+   "month": "2025-04",
+   "btc": 0.01972423833,
+   "eth": 0.01098272971,
+   "portfolio": 0.01321044239,
+   "rebalanced": 0.01535348402
+  },
+  {
+   "month": "2025-05",
+   "btc": -0.02880073085,
+   "eth": 0.3114704609,
+   "portfolio": 0.2241972302,
+   "rebalanced": 0.141334865
+  },
+  {
+   "month": "2025-06",
+   "btc": 0.03661606558,
+   "eth": 0.0392897462,
+   "portfolio": 0.03874571682,
+   "rebalanced": 0.03795290589
+  },
+  {
+   "month": "2025-07",
+   "btc": 0.04599296281,
+   "eth": 0.2151264275,
+   "portfolio": 0.1807824129,
+   "rebalanced": 0.1305596952
+  },
+  {
+   "month": "2025-08",
+   "btc": -0.03300161032,
+   "eth": 0.1005981691,
+   "portfolio": 0.0765663779,
+   "rebalanced": 0.03379827941
+  },
+  {
+   "month": "2025-09",
+   "btc": -0.02381992246,
+   "eth": -0.01231725958,
+   "portfolio": -0.01417576457,
+   "rebalanced": -0.01806988564
+  },
+  {
+   "month": "2025-10",
+   "btc": 0.05927584296,
+   "eth": 0.08880926502,
+   "portfolio": 0.08408418072,
+   "rebalanced": 0.07403920016
+  },
+  {
+   "month": "2025-11",
+   "btc": 0.04780624103,
+   "eth": 0.05240882487,
+   "portfolio": 0.05168930373,
+   "rebalanced": 0.05010754018
+  },
+  {
+   "month": "2025-12",
+   "btc": -0.04374444666,
+   "eth": -0.04165456655,
+   "portfolio": -0.04198007087,
+   "rebalanced": -0.04269974261
+  },
+  {
+   "month": "2026-01",
+   "btc": 0.07445627535,
+   "eth": 0.1870840016,
+   "portfolio": 0.1695742446,
+   "rebalanced": 0.1307502267
+  },
+  {
+   "month": "2026-02",
+   "btc": 0.08589268865,
+   "eth": 0.09672025521,
+   "portfolio": 0.09517383821,
+   "rebalanced": 0.09130647703
+  },
+  {
+   "month": "2026-03",
+   "btc": 0,
+   "eth": -0.04733405537,
+   "portfolio": -0.04063099216,
+   "rebalanced": -0.02366702768
+  },
+  {
+   "month": "2026-04",
+   "btc": -0.01187811788,
+   "eth": 0.03201632742,
+   "portfolio": 0.02553709617,
+   "rebalanced": 0.01006910477
+  },
+  {
+   "month": "2026-05",
+   "btc": -0.05439633702,
+   "eth": -0.05695238797,
+   "portfolio": -0.05658885604,
+   "rebalanced": -0.0556743625
+  },
+  {
+   "month": "2026-06",
+   "btc": -0.03027277595,
+   "eth": 0.07945830999,
+   "portfolio": 0.06381564015,
+   "rebalanced": 0.02459276702
+  },
+  {
+   "month": "2026-07",
+   "btc": -0.08733672413,
+   "eth": -0.01554675164,
+   "portfolio": -0.0248756037,
+   "rebalanced": -0.05144173788
+  },
+  {
+   "month": "2026-08",
+   "btc": 0.1609302055,
+   "eth": 0.2964860628,
+   "portfolio": 0.2799993808,
+   "rebalanced": 0.2287081342
+  },
+  {
+   "month": "2026-09",
+   "btc": 0.01569091094,
+   "eth": -0.01456375746,
+   "portfolio": -0.01122639235,
+   "rebalanced": 0.0005635767374
+  }
+ ],
+ "stability": {
+  "rolling12": {
+   "btc": {
+    "n": 2588,
+    "positive": 0.9887944359,
+    "aboveOne": 0.7894126739,
+    "min": -0.2637925446,
+    "median": 1.39520159
+   },
+   "eth": {
+    "n": 2588,
+    "positive": 0.9914992272,
+    "aboveOne": 0.8589644513,
+    "min": -0.3405146684,
+    "median": 1.799260985
+   },
+   "portfolio": {
+    "n": 2588,
+    "positive": 1,
+    "aboveOne": 0.9277434312,
+    "min": 0.2675277197,
+    "median": 1.940504508
+   }
+  },
+  "subPeriods": {
+   "firstHalf": {
+    "from": "2018-09-01",
+    "to": "2022-09-15",
+    "btc": {
+     "sharpe": 1.3851027,
+     "cagr": 0.4145127161,
+     "maxDD": -0.1987135166,
+     "vol": 0.2771385785
+    },
+    "eth": {
+     "sharpe": 2.049745614,
+     "cagr": 1.011018452,
+     "maxDD": -0.2414861458,
+     "vol": 0.3735887789
+    },
+    "portfolio": {
+     "sharpe": 2.119698521,
+     "cagr": 0.7871075885,
+     "maxDD": -0.1784987916,
+     "vol": 0.2938074772
+    },
+    "corr": 0.306332092
+   },
+   "secondHalf": {
+    "from": "2022-09-16",
+    "to": "2026-09-30",
+    "btc": {
+     "sharpe": 1.569527172,
+     "cagr": 0.377416596,
+     "maxDD": -0.24764948,
+     "vol": 0.2189432915
+    },
+    "eth": {
+     "sharpe": 1.807088636,
+     "cagr": 0.6119803814,
+     "maxDD": -0.1451235598,
+     "vol": 0.2861633584
+    },
+    "portfolio": {
+     "sharpe": 1.98342365,
+     "cagr": 0.5085112249,
+     "maxDD": -0.152170677,
+     "vol": 0.2191590268
+    },
+    "corr": 0.4421716467
+   },
+   "from2019": {
+    "from": "2019-01-01",
+    "to": "2026-09-30",
+    "btc": {
+     "sharpe": 1.444564967,
+     "cagr": 0.388825761,
+     "maxDD": -0.24764948,
+     "vol": 0.2480702958
+    },
+    "eth": {
+     "sharpe": 1.657330554,
+     "cagr": 0.5865451639,
+     "maxDD": -0.2414861458,
+     "vol": 0.3058238003
+    },
+    "portfolio": {
+     "sharpe": 1.862159038,
+     "cagr": 0.5090135443,
+     "maxDD": -0.1772688983,
+     "vol": 0.2355815092
+    },
+    "corr": 0.3634065933
+   }
+  }
+ },
+ "bootstrap": {
+  "replications": 5000,
+  "blocks": 97,
+  "seed": 20261008,
+  "sharpe": {
+   "p2_5": 1.440085172,
+   "p5": 1.525603596,
+   "median": 2.026236605,
+   "p95": 2.513777894,
+   "p97_5": 2.597058926
+  },
+  "cagr": {
+   "p2_5": 0.3676215621,
+   "p5": 0.4009884544,
+   "median": 0.6776732985,
+   "p95": 1.07128392,
+   "p97_5": 1.165362766
+  },
+  "maxDD": {
+   "p2_5": -0.3363211955,
+   "p5": -0.3057462232,
+   "median": -0.1972759366,
+   "p95": -0.1366889683,
+   "p97_5": -0.1275280563
+  },
+  "sharpeBtc": {
+   "p2_5": 0.8907542454,
+   "p5": 0.9882361716,
+   "median": 1.443911106,
+   "p95": 1.909248444,
+   "p97_5": 1.999593579
+  },
+  "sharpeEth": {
+   "p2_5": 1.273682486,
+   "p5": 1.375993775,
+   "median": 1.919642818,
+   "p95": 2.422537306,
+   "p97_5": 2.531808622
+  },
+  "pSharpePos": 1,
+  "pSharpeGt1": 0.9996,
+  "pBeatsBtc": 0.9996,
+  "pBeatsEth": 0.875,
+  "pBeatsBoth": 0.8746,
+  "pDDBetterThanBtc": 0.4984,
+  "pDDBetterThanEth": 0.992
+ },
+ "concentration": {
+  "tradesPortfolio": {
+   "n": 716,
+   "top1": 0.3627315351,
+   "top5": 0.9895025019,
+   "top10": 1.352785218,
+   "cagrWithoutTop5": -0.003108037067,
+   "cagr": 0.6772734024,
+   "skew": 4.416584743
+  },
+  "tradesBtc": {
+   "n": 358,
+   "top1": 0.3417181897,
+   "top5": 1.080790882,
+   "top10": 1.544769571,
+   "cagrWithoutTop5": -0.02658381052,
+   "cagr": 0.3958414274,
+   "skew": 3.22048006
+  },
+  "tradesEth": {
+   "n": 358,
+   "top1": 0.2728496122,
+   "top5": 0.8253708387,
+   "top10": 1.180780046,
+   "cagrWithoutTop5": 0.1081490422,
+   "cagr": 0.8004783505,
+   "skew": 3.284520208
+  },
+  "daysPortfolio": {
+   "n": 2952,
+   "top1": 0.6281578079,
+   "top5": 1.707475132,
+   "top10": 2.213798611,
+   "cagrWithoutTop5": -0.3064171365,
+   "cagr": 0.6772734024,
+   "skew": 3.355856305
+  },
+  "daysBtc": {
+   "n": 2952,
+   "top1": 0.9418090196,
+   "top5": 2.314081015,
+   "top10": 2.752436898,
+   "cagrWithoutTop5": -0.3548307616,
+   "cagr": 0.3958414274,
+   "skew": 3.838904323
+  },
+  "daysEth": {
+   "n": 2952,
+   "top1": 0.6931794933,
+   "top5": 1.803189626,
+   "top10": 2.295382433,
+   "cagrWithoutTop5": -0.3764445418,
+   "cagr": 0.8004783505,
+   "skew": 3.704894481
+  },
+  "currencyTop5": 1.239373179,
+  "tradeSkewPortfolio": 4.801226875
+ },
+ "capacity": {
+  "tradesPerYear": {
+   "btc": 44.29522358,
+   "eth": 44.29522358,
+   "total": 88.59044715
+  },
+  "turnover": {
+   "btc": {
+    "commissionPctYr": 0.03978555883,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.03978555883,
+    "turnoverOneWay": 44.13536444,
+    "turnoverTwoWay": 88.41235296
+   },
+   "eth": {
+    "commissionPctYr": 0.03895108517,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.03895108517,
+    "turnoverOneWay": 43.17429197,
+    "turnoverTwoWay": 86.55796704
+   },
+   "portfolio": {
+    "commissionPctYr": 0.0391167062,
+    "slippagePctYr": 0,
+    "totalCostPctYr": 0.0391167062,
+    "turnoverOneWay": 43.36503953,
+    "turnoverTwoWay": 86.92601379
+   }
+  },
+  "holdingHours": {
+   "btc": [
+    29.3603352,
+    11.5
+   ],
+   "eth": [
+    33.88407821,
+    14.875
+   ],
+   "pooled": [
+    31.6222067,
+    13
+   ]
+  },
+  "simultaneous": 0.07290608062,
+  "exposure": {
+   "timeInMarket": 0.2466724537,
+   "avgGross": 0.1604284324,
+   "avgNet": 0.04904724444,
+   "maxGross": 1.035519121
+  },
+  "sleeves": {
+   "btc": {
+    "timeInMarket": 0.148359869,
+    "avgGross": 0.1441971232,
+    "maxGross": 1.037431058
+   },
+   "eth": {
+    "timeInMarket": 0.1712186653,
+    "avgGross": 0.1637540942,
+    "maxGross": 1.062662586
+   }
+  },
+  "note": "Execution costs were measured separately on real Binance perpetual-futures trades for every execution since 2020 (institutional dossier); capacity on Hyperliquid, the intended venue, and the strategy’s own market impact are not yet measured."
+ },
+ "reconciliation": {
+  "rows": [
+   {
+    "key": "BTC",
+    "k": 0,
+    "field": "totalReturn",
+    "validated": 39.66913842,
+    "recomputed": 39.66913842
+   },
+   {
+    "key": "BTC",
+    "k": 0,
+    "field": "cagr",
+    "validated": 0.4620528369,
+    "recomputed": 0.4620528369
+   },
+   {
+    "key": "BTC",
+    "k": 0,
+    "field": "sharpe",
+    "validated": 1.74647876,
+    "recomputed": 1.74647876
+   },
+   {
+    "key": "BTC",
+    "k": 0,
+    "field": "maxDD",
+    "validated": -0.2480477979,
+    "recomputed": -0.2480477979
+   },
+   {
+    "key": "BTC",
+    "k": 0,
+    "field": "profitFactor",
+    "validated": 2.16417456,
+    "recomputed": 2.16417456
+   },
+   {
+    "key": "BTC",
+    "k": 0,
+    "field": "trades",
+    "validated": 396,
+    "recomputed": 396
+   },
+   {
+    "key": "BTC",
+    "k": 1,
+    "field": "totalReturn",
+    "validated": 27.54313082,
+    "recomputed": 27.54313082
+   },
+   {
+    "key": "BTC",
+    "k": 1,
+    "field": "cagr",
+    "validated": 0.4099413318,
+    "recomputed": 0.4099413318
+   },
+   {
+    "key": "BTC",
+    "k": 1,
+    "field": "sharpe",
+    "validated": 1.586033921,
+    "recomputed": 1.586033921
+   },
+   {
+    "key": "BTC",
+    "k": 1,
+    "field": "maxDD",
+    "validated": -0.264797703,
+    "recomputed": -0.264797703
+   },
+   {
+    "key": "BTC",
+    "k": 1,
+    "field": "profitFactor",
+    "validated": 1.942287913,
+    "recomputed": 1.942287913
+   },
+   {
+    "key": "BTC",
+    "k": 1,
+    "field": "trades",
+    "validated": 396,
+    "recomputed": 396
+   },
+   {
+    "key": "BTC",
+    "k": 2,
+    "field": "totalReturn",
+    "validated": 19.02628599,
+    "recomputed": 19.02628599
+   },
+   {
+    "key": "BTC",
+    "k": 2,
+    "field": "cagr",
+    "validated": 0.3596429878,
+    "recomputed": 0.3596429878
+   },
+   {
+    "key": "BTC",
+    "k": 2,
+    "field": "sharpe",
+    "validated": 1.426221518,
+    "recomputed": 1.426221518
+   },
+   {
+    "key": "BTC",
+    "k": 2,
+    "field": "maxDD",
+    "validated": -0.2811890621,
+    "recomputed": -0.2811890621
+   },
+   {
+    "key": "BTC",
+    "k": 2,
+    "field": "profitFactor",
+    "validated": 1.761638829,
+    "recomputed": 1.761638829
+   },
+   {
+    "key": "BTC",
+    "k": 2,
+    "field": "trades",
+    "validated": 396,
+    "recomputed": 396
+   },
+   {
+    "key": "ETH",
+    "k": 0,
+    "field": "totalReturn",
+    "validated": 158.4153517,
+    "recomputed": 158.4153517
+   },
+   {
+    "key": "ETH",
+    "k": 0,
+    "field": "cagr",
+    "validated": 0.8729161656,
+    "recomputed": 0.8729161656
+   },
+   {
+    "key": "ETH",
+    "k": 0,
+    "field": "sharpe",
+    "validated": 2.187382235,
+    "recomputed": 2.187382235
+   },
+   {
+    "key": "ETH",
+    "k": 0,
+    "field": "maxDD",
+    "validated": -0.2562979711,
+    "recomputed": -0.2562979711
+   },
+   {
+    "key": "ETH",
+    "k": 0,
+    "field": "profitFactor",
+    "validated": 3.02862949,
+    "recomputed": 3.02862949
+   },
+   {
+    "key": "ETH",
+    "k": 0,
+    "field": "trades",
+    "validated": 358,
+    "recomputed": 358
+   },
+   {
+    "key": "ETH",
+    "k": 1,
+    "field": "totalReturn",
+    "validated": 114.8989892,
+    "recomputed": 114.8989892
+   },
+   {
+    "key": "ETH",
+    "k": 1,
+    "field": "cagr",
+    "validated": 0.8004783505,
+    "recomputed": 0.8004783505
+   },
+   {
+    "key": "ETH",
+    "k": 1,
+    "field": "sharpe",
+    "validated": 2.054930374,
+    "recomputed": 2.054930374
+   },
+   {
+    "key": "ETH",
+    "k": 1,
+    "field": "maxDD",
+    "validated": -0.2671922719,
+    "recomputed": -0.2671922719
+   },
+   {
+    "key": "ETH",
+    "k": 1,
+    "field": "profitFactor",
+    "validated": 2.733672987,
+    "recomputed": 2.733672987
+   },
+   {
+    "key": "ETH",
+    "k": 1,
+    "field": "trades",
+    "validated": 358,
+    "recomputed": 358
+   },
+   {
+    "key": "ETH",
+    "k": 2,
+    "field": "totalReturn",
+    "validated": 83.23748755,
+    "recomputed": 83.23748755
+   },
+   {
+    "key": "ETH",
+    "k": 2,
+    "field": "cagr",
+    "validated": 0.7307811538,
+    "recomputed": 0.7307811538
+   },
+   {
+    "key": "ETH",
+    "k": 2,
+    "field": "sharpe",
+    "validated": 1.922776486,
+    "recomputed": 1.922776486
+   },
+   {
+    "key": "ETH",
+    "k": 2,
+    "field": "maxDD",
+    "validated": -0.2868350068,
+    "recomputed": -0.2868350068
+   },
+   {
+    "key": "ETH",
+    "k": 2,
+    "field": "profitFactor",
+    "validated": 2.482261103,
+    "recomputed": 2.482261103
+   },
+   {
+    "key": "ETH",
+    "k": 2,
+    "field": "trades",
+    "validated": 358,
+    "recomputed": 358
+   }
+  ],
+  "common": {
+   "BTC": {
+    "sharpe15": 1.547053897,
+    "maxDD15": -0.264797703,
+    "cagr": 0.3958414274,
+    "trades": 358,
+    "sharpe15Grid": 1.547053875,
+    "sharpeDaily": 1.456496892,
+    "maxDDDaily": -0.24764948,
+    "gridExact": 0.9995942017
+   },
+   "ETH": {
+    "sharpe15": 2.054930374,
+    "maxDD15": -0.2671922719,
+    "cagr": 0.8004783505,
+    "trades": 358,
+    "sharpe15Grid": 2.054930238,
+    "sharpeDaily": 1.927275806,
+    "maxDDDaily": -0.2414861458,
+    "gridExact": 0.9989025802
+   },
+   "Portfolio": {
+    "sharpe15Grid": 2.132762476,
+    "maxDD15": -0.19634215,
+    "sharpeDaily": 2.024207889,
+    "maxDDDaily": -0.1784987916
+   }
+  },
+  "btcOpenAtT0": false,
+  "freshStart": {
+   "btc": {
+    "days": 2952,
+    "years": 8.082135524,
+    "totalReturn": 13.8110162,
+    "cagr": 0.3958414274,
+    "vol": 0.2497440409,
+    "sharpe": 1.456496892,
+    "sortino": 3.231332882,
+    "downsideDev": 0.1125700856,
+    "maxDD": -0.24764948,
+    "calmar": 1.598393937,
+    "skew": 4.249404243,
+    "kurt": 41.1477516,
+    "bestDay": {
+     "day": 17988,
+     "ret": 0.1846199563
+    },
+    "worstDay": {
+     "day": 18415,
+     "ret": -0.07159509679
+    },
+    "bestMonth": {
+     "key": 24269,
+     "ret": 0.3032879677,
+     "n": 30,
+     "from": 19144,
+     "to": 19173,
+     "full": true
+    },
+    "worstMonth": {
+     "key": 24265,
+     "ret": -0.08766209862,
+     "n": 28,
+     "from": 19024,
+     "to": 19051,
+     "full": true
+    },
+    "bestYear": {
+     "key": 2024,
+     "ret": 1.051615663,
+     "n": 366,
+     "from": 19723,
+     "to": 20088,
+     "full": true
+    },
+    "worstYear": {
+     "key": 2025,
+     "ret": 0.01183377855,
+     "n": 365,
+     "from": 20089,
+     "to": 20453,
+     "full": true
+    },
+    "positiveDays": 0.1097560976,
+    "flatDays": 0.7567750678,
+    "dailyPF": 1.625954838
+   },
+   "btcTrades": 358,
+   "portfolio": {
+    "days": 2952,
+    "years": 8.082135524,
+    "totalReturn": 64.3550027,
+    "cagr": 0.6772734024,
+    "vol": 0.273534079,
+    "sharpe": 2.024207889,
+    "sortino": 4.728717568,
+    "downsideDev": 0.1170909094,
+    "maxDD": -0.1784987916,
+    "calmar": 3.79427444,
+    "skew": 3.651537226,
+    "kurt": 28.80581597,
+    "bestDay": {
+     "day": 20684,
+     "ret": 0.1623008056
+    },
+    "worstDay": {
+     "day": 20490,
+     "ret": -0.06153104582
+    },
+    "bestMonth": {
+     "key": 24226,
+     "ret": 0.4575906503,
+     "n": 30,
+     "from": 17836,
+     "to": 17865,
+     "full": true
+    },
+    "worstMonth": {
+     "key": 24265,
+     "ret": -0.1391138576,
+     "n": 28,
+     "from": 19024,
+     "to": 19051,
+     "full": true
+    },
+    "bestYear": {
+     "key": 2018,
+     "ret": 1.202683448,
+     "n": 122,
+     "from": 17775,
+     "to": 17896,
+     "full": true
+    },
+    "worstYear": {
+     "key": 2019,
+     "ret": 0.08004430326,
+     "n": 365,
+     "from": 17897,
+     "to": 18261,
+     "full": true
+    },
+    "positiveDays": 0.1693766938,
+    "flatDays": 0.6300813008,
+    "dailyPF": 1.793980619
+   }
+  },
+  "lagCorr": [
+   {
+    "lag": -4,
+    "corr": -0.002472653453
+   },
+   {
+    "lag": -3,
+    "corr": 0.005356122635
+   },
+   {
+    "lag": -2,
+    "corr": -0.02487586458
+   },
+   {
+    "lag": -1,
+    "corr": 0.01156094977
+   },
+   {
+    "lag": 0,
+    "corr": 0.8133828391
+   },
+   {
+    "lag": 1,
+    "corr": 0.005375756058
+   },
+   {
+    "lag": 2,
+    "corr": -0.03267140224
+   },
+   {
+    "lag": 3,
+    "corr": 0.004556380641
+   },
+   {
+    "lag": 4,
+    "corr": -0.003417371249
+   }
+  ]
+ },
+ "sanity": [
+  {
+   "name": "BTC ×0: detailed loop = simulate()",
+   "ok": true,
+   "detail": "max |Δequity| 0, trades 396 / 396"
+  },
+  {
+   "name": "BTC ×0: full-period metrics = validated report",
+   "ok": true,
+   "detail": "research/reports/shock-15m-zeroshot-btc-calm.json, worst relative gap 0.0e+0"
+  },
+  {
+   "name": "BTC ×1: detailed loop = simulate()",
+   "ok": true,
+   "detail": "max |Δequity| 0, trades 396 / 396"
+  },
+  {
+   "name": "BTC ×1: full-period metrics = validated report",
+   "ok": true,
+   "detail": "research/reports/shock-15m-zeroshot-btc-calm.json, worst relative gap 0.0e+0"
+  },
+  {
+   "name": "BTC ×2: detailed loop = simulate()",
+   "ok": true,
+   "detail": "max |Δequity| 0, trades 396 / 396"
+  },
+  {
+   "name": "BTC ×2: full-period metrics = validated report",
+   "ok": true,
+   "detail": "research/reports/shock-15m-zeroshot-btc-calm.json, worst relative gap 0.0e+0"
+  },
+  {
+   "name": "BTC: equity = capital + Σ trade PnL (+ open position)",
+   "ok": true,
+   "detail": "residual 0.000000000 (open position at end: false)"
+  },
+  {
+   "name": "BTC: commissions charged once per fill",
+   "ok": true,
+   "detail": "Σ fees vs 0.045 % × (entries + exits), relative gap 7.8e-16"
+  },
+  {
+   "name": "BTC: no leverage at entry",
+   "ok": true,
+   "detail": "max entry notional / sleeve equity = 1.000000000000"
+  },
+  {
+   "name": "ETH ×0: detailed loop = simulate()",
+   "ok": true,
+   "detail": "max |Δequity| 0, trades 358 / 358"
+  },
+  {
+   "name": "ETH ×0: full-period metrics = validated report",
+   "ok": true,
+   "detail": "research/reports/shock-15m-zeroshot-ethusdt-calm.json, worst relative gap 0.0e+0"
+  },
+  {
+   "name": "ETH ×1: detailed loop = simulate()",
+   "ok": true,
+   "detail": "max |Δequity| 0, trades 358 / 358"
+  },
+  {
+   "name": "ETH ×1: full-period metrics = validated report",
+   "ok": true,
+   "detail": "research/reports/shock-15m-zeroshot-ethusdt-calm.json, worst relative gap 0.0e+0"
+  },
+  {
+   "name": "ETH ×2: detailed loop = simulate()",
+   "ok": true,
+   "detail": "max |Δequity| 0, trades 358 / 358"
+  },
+  {
+   "name": "ETH ×2: full-period metrics = validated report",
+   "ok": true,
+   "detail": "research/reports/shock-15m-zeroshot-ethusdt-calm.json, worst relative gap 0.0e+0"
+  },
+  {
+   "name": "ETH: equity = capital + Σ trade PnL (+ open position)",
+   "ok": true,
+   "detail": "residual 0.000000000 (open position at end: false)"
+  },
+  {
+   "name": "ETH: commissions charged once per fill",
+   "ok": true,
+   "detail": "Σ fees vs 0.045 % × (entries + exits), relative gap 5.7e-16"
+  },
+  {
+   "name": "ETH: no leverage at entry",
+   "ok": true,
+   "detail": "max entry notional / sleeve equity = 1.000000000000"
+  },
+  {
+   "name": "BTC: timestamps on the UTC 15-min grid",
+   "ok": true,
+   "detail": "283277 bars, 0 off-grid, 0 non-increasing (bar-open timestamps, ms UTC)"
+  },
+  {
+   "name": "ETH: timestamps on the UTC 15-min grid",
+   "ok": true,
+   "detail": "283081 bars, 0 off-grid, 0 non-increasing (bar-open timestamps, ms UTC)"
+  },
+  {
+   "name": "BTC: one close per day, no interpolation",
+   "ok": true,
+   "detail": "2952 days, 0 days without a bar (carried, return 0)"
+  },
+  {
+   "name": "BTC: zero-return days are days without a position",
+   "ok": true,
+   "detail": "2234 zero-return days, 2234 of them flat all day"
+  },
+  {
+   "name": "ETH: one close per day, no interpolation",
+   "ok": true,
+   "detail": "2952 days, 0 days without a bar (carried, return 0)"
+  },
+  {
+   "name": "ETH: zero-return days are days without a position",
+   "ok": true,
+   "detail": "2155 zero-return days, 2155 of them flat all day"
+  },
+  {
+   "name": "Capital: BTC sleeve 50 + ETH sleeve 50 = 100 at t0",
+   "ok": true,
+   "detail": "each sleeve compounds only its own 50"
+  },
+  {
+   "name": "Capital: portfolio = BTC sleeve + ETH sleeve, every day",
+   "ok": true,
+   "detail": "max |V − (V_BTC + V_ETH)| = 0.0e+0"
+  },
+  {
+   "name": "Sleeve value = 50 × strategy equity / equity at t0 (engine is scale-invariant)",
+   "ok": true,
+   "detail": "max relative gap 5.3e-15"
+  },
+  {
+   "name": "No double compounding: Π(1 + r_portfolio) reproduces the portfolio value",
+   "ok": true,
+   "detail": "max relative gap 6.3e-15"
+  },
+  {
+   "name": "Portfolio return = drifting-weight average of sleeve returns",
+   "ok": true,
+   "detail": "max |r_p − (w_BTC r_BTC + w_ETH r_ETH)| = 3.3e-16, weights from the previous close"
+  },
+  {
+   "name": "15-min portfolio marks agree with daily closes",
+   "ok": true,
+   "detail": "max relative gap at 23:45 bars 2.4e-15"
+  },
+  {
+   "name": "BTC/ETH timestamps not shifted (15-min underlying returns peak at lag 0)",
+   "ok": true,
+   "detail": "-4: -0.002 · -3: 0.005 · -2: -0.025 · -1: 0.012 · 0: 0.813 · +1: 0.005 · +2: -0.033 · +3: 0.005 · +4: -0.003"
+  },
+  {
+   "name": "Correlation recomputed independently (z-score formula)",
+   "ok": true,
+   "detail": "0.357515 vs 0.357515"
+  },
+  {
+   "name": "Max drawdown recomputed independently (episodes vs running peak)",
+   "ok": true,
+   "detail": "-17.8499 %"
+  },
+  {
+   "name": "Sharpe recomputed independently (Welford vs two-pass)",
+   "ok": true,
+   "detail": "2.024208"
+  },
+  {
+   "name": "CAGR recomputed independently (log-sum vs end value)",
+   "ok": true,
+   "detail": "67.7273 %"
+  },
+  {
+   "name": "Equal-risk weights causal (window ends at the rebalancing close)",
+   "ok": true,
+   "detail": "97 monthly targets; truncating the series after the rebalancing day leaves each weight unchanged"
+  },
+  {
+   "name": "Gross exposure of the 50/50 portfolio",
+   "ok": true,
+   "detail": "max 103.6 % of portfolio equity (100 % = both sleeves fully invested; above 100 % only through price moves against open shorts and the entry commission)"
+  },
+  {
+   "name": "ETH runs the BTC preset unchanged",
+   "ok": true,
+   "detail": "parameter hash c6ac30464bce14dd… identical for both sleeves"
+  },
+  {
+   "name": "Stress: zero-slippage portfolio Sharpe = this report (research/shock/published-stress.ts)",
+   "ok": true,
+   "detail": "2.0242078889"
+  }
+ ],
+ "evidence": {
+  "btc": {
+   "file": "shock-15m-zeroshot-btc-calm.json",
+   "label": "BTC/USD (Bitstamp)",
+   "period": [
+    "2017-01-01",
+    "2026-10-04"
+   ],
+   "verdict": {
+    "eventsPreset": true,
+    "eventsCore": true,
+    "eventsShock": true,
+    "eventsShockTrend": true,
+    "preset": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    },
+    "core": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    }
+   },
+   "meanTrade": 0.009469263138,
+   "sharpe": 1.586033921,
+   "cagr": 0.4099413318,
+   "dd": -0.264797703,
+   "trades": 396,
+   "randomBeaten": 1,
+   "randomP95": 0.900100616,
+   "delay1Share": 0.972486176,
+   "delay1Sharpe": 1.540880576,
+   "eventsShockTrend": true
+  },
+  "eth": {
+   "file": "shock-15m-zeroshot-ethusdt-calm.json",
+   "label": "ETH/USDT (Binance)",
+   "period": [
+    "2018-09-01",
+    "2026-09-30"
+   ],
+   "verdict": {
+    "eventsPreset": true,
+    "eventsCore": true,
+    "eventsShock": true,
+    "eventsShockTrend": true,
+    "preset": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    },
+    "core": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    }
+   },
+   "meanTrade": 0.01521214453,
+   "sharpe": 2.054930374,
+   "cagr": 0.8004783505,
+   "dd": -0.2671922719,
+   "trades": 358,
+   "randomBeaten": 1,
+   "randomP95": 1.285733836,
+   "delay1Share": 0.9423898787,
+   "delay1Sharpe": 1.914183591,
+   "eventsShockTrend": true
+  },
+  "ethDukascopy": {
+   "file": "shock-15m-zeroshot-eth-dukascopy-calm.json",
+   "label": "ETH/USD (Dukascopy)",
+   "period": [
+    "2019-01-01",
+    "2026-09-30"
+   ],
+   "verdict": {
+    "eventsPreset": true,
+    "eventsCore": true,
+    "eventsShock": true,
+    "eventsShockTrend": true,
+    "preset": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    },
+    "core": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    }
+   },
+   "meanTrade": 0.01914295002,
+   "sharpe": 1.816670239,
+   "cagr": 0.5749854153,
+   "dd": -0.2358212344,
+   "trades": 206,
+   "randomBeaten": 1,
+   "randomP95": 1.101673334,
+   "delay1Share": 0.7283604565,
+   "delay1Sharpe": 1.396336623,
+   "eventsShockTrend": true
+  },
+  "gold": {
+   "file": "shock-15m-zeroshot-xauusd-calm.json",
+   "label": "Or comptant XAU/USD (Dukascopy)",
+   "period": [
+    "2013-01-01",
+    "2026-09-30"
+   ],
+   "verdict": {
+    "eventsPreset": false,
+    "eventsCore": false,
+    "eventsShock": false,
+    "eventsShockTrend": false,
+    "preset": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    },
+    "core": {
+     "pf": true,
+     "sharpe": false,
+     "random": true,
+     "delay": true
+    }
+   },
+   "meanTrade": 0.0008427016123,
+   "sharpe": 0.3945043725,
+   "cagr": 0.01828651021,
+   "dd": -0.1181578457,
+   "trades": 319,
+   "randomBeaten": 0.995,
+   "randomP95": 0.2083406795,
+   "delay1Share": 1.153829011,
+   "delay1Sharpe": 0.4630931782,
+   "eventsShockTrend": false
+  },
+  "sol": {
+   "file": "shock-15m-zeroshot-solusdt-calm.json",
+   "label": "SOL/USDT (Binance)",
+   "period": [
+    "2021-09-01",
+    "2026-09-30"
+   ],
+   "verdict": {
+    "eventsPreset": false,
+    "eventsCore": false,
+    "eventsShock": false,
+    "eventsShockTrend": true,
+    "preset": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    },
+    "core": {
+     "pf": true,
+     "sharpe": true,
+     "random": true,
+     "delay": true
+    }
+   },
+   "meanTrade": 0.004913325242,
+   "sharpe": 0.5734321649,
+   "cagr": 0.160037163,
+   "dd": -0.5401632453,
+   "trades": 251,
+   "randomBeaten": 0.925,
+   "randomP95": 0.6617414113,
+   "delay1Share": 0.8004350261,
+   "delay1Sharpe": 0.4645546716,
+   "eventsShockTrend": true
+  },
+  "tao": {
+   "file": "shock-15m-zeroshot-taousdt-calm.json",
+   "label": "TAO/USDT (Binance)",
+   "period": [
+    "2024-08-15",
+    "2026-09-30"
+   ],
+   "verdict": {
+    "eventsPreset": false,
+    "eventsCore": false,
+    "eventsShock": false,
+    "eventsShockTrend": false,
+    "preset": {
+     "pf": false,
+     "sharpe": false,
+     "random": false,
+     "delay": false
+    },
+    "core": {
+     "pf": false,
+     "sharpe": false,
+     "random": false,
+     "delay": false
+    }
+   },
+   "meanTrade": -0.0008554545969,
+   "sharpe": 0.01092948024,
+   "cagr": -0.07301225863,
+   "dd": -0.3922714351,
+   "trades": 95,
+   "randomBeaten": 0.545,
+   "randomP95": 0.8111959472,
+   "delay1Share": 3.870259925,
+   "delay1Sharpe": -0.3076488888,
+   "eventsShockTrend": false
+  },
+  "robBtc": {
+   "file": "shock-15m-robustness-local-calm.json",
+   "period": [
+    "2017-01-01",
+    "2026-10-04"
+   ],
+   "levels": [
+    {
+     "level": 0.05,
+     "medianSharpe": 1.493055513,
+     "p10": 1.421308907,
+     "p90": 1.576822486,
+     "preset": 1.586033921,
+     "rank": 0.92,
+     "profitable": 1,
+     "keep80": 1
+    },
+    {
+     "level": 0.1,
+     "medianSharpe": 1.418505941,
+     "p10": 1.320209067,
+     "p90": 1.516753954,
+     "preset": 1.586033921,
+     "rank": 0.9866666667,
+     "profitable": 1,
+     "keep80": 0.97
+    },
+    {
+     "level": 0.2,
+     "medianSharpe": 1.353885346,
+     "p10": 1.23225855,
+     "p90": 1.46668372,
+     "preset": 1.586033921,
+     "rank": 0.9966666667,
+     "profitable": 1,
+     "keep80": 0.8333333333
+    }
+   ]
+  },
+  "robEth": {
+   "file": "shock-15m-robustness-local-ethusdt-calm.json",
+   "period": [
+    "2018-09-01",
+    "2026-09-30"
+   ],
+   "levels": [
+    {
+     "level": 0.05,
+     "medianSharpe": 2.045679362,
+     "p10": 1.906907723,
+     "p90": 2.187741614,
+     "preset": 2.054930374,
+     "rank": 0.5466666667,
+     "profitable": 1,
+     "keep80": 1
+    },
+    {
+     "level": 0.1,
+     "medianSharpe": 2.030291511,
+     "p10": 1.80706392,
+     "p90": 2.209281326,
+     "preset": 2.054930374,
+     "rank": 0.5466666667,
+     "profitable": 1,
+     "keep80": 0.9966666667
+    },
+    {
+     "level": 0.2,
+     "medianSharpe": 1.944690761,
+     "p10": 1.762320335,
+     "p90": 2.138936037,
+     "preset": 2.054930374,
+     "rank": 0.7566666667,
+     "profitable": 1,
+     "keep80": 0.9866666667
+    }
+   ]
+  },
+  "walkForward": {
+   "file": "shock-15m-wf-plateau-36-3-calm.md",
+   "period": "2020-01-01 → 2026-10-04",
+   "windows": 28,
+   "cagr": "14.3 %",
+   "sharpe": "0.83",
+   "dd": "-27.6 %",
+   "trades": "390"
+  }
+ }
+}

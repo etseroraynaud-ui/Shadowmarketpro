@@ -1,17 +1,17 @@
 {
-  "version": "shock-engine-2026.10",
-  "variant": "e2",
-  "generatedAt": "2026-10-12T20:19:41.588Z",
+  "version": "shock-engine-2026.10.13",
+  "variant": "calm",
+  "generatedAt": "2026-10-13T04:37:02.036Z",
   "status": "HISTORICAL SIMULATION",
   "git": {
-    "commit": "d5162eea98d926ed89eefbdd4b3b7dffbf414a08",
-    "branch": "claude/shock-engine-portfolio-g79j1v",
+    "commit": "f05641888ea91035e8ac31b480b7ef4729291f4d",
+    "branch": "claude/sleepy-cerf-1q6bgu",
     "sourcesClean": true,
     "dirtyFiles": []
   },
   "runtime": {
     "node": "v22.22.0",
-    "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts --variant e2",
+    "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/portfolio.ts --variant calm",
     "seeds": {
       "bootstrap": 20261008,
       "overlapBaseline": 20261009,
@@ -59,7 +59,7 @@
     "rule": "first UTC day on which both strategies are simulated after warm-up (ETH simulation start) → last complete UTC day covered by both"
   },
   "strategy": {
-    "name": "Shock Engine, adaptive volatility preset, 15 min; short entries only in a bearish daily trend regime (research/lib/e2.ts)",
+    "name": "Shock Engine, adaptive volatility preset, 15 min; new positions only in the calm volatility regime (research/lib/calm-only.ts); short entries only in a bearish daily trend regime (research/lib/e2.ts)",
     "regimes": [
       "calm",
       "agitated"
@@ -90,24 +90,24 @@
   },
   "validatedReference": [
     {
-      "file": "research/reports/shock-15m-zeroshot-btc-e2.json",
-      "sha256": "171c5e7116101756ac164e8a9e7204e608a40698e4a64f858aa64749ac1e0665",
+      "file": "research/reports/shock-15m-zeroshot-btc-calm.json",
+      "sha256": "d1e439ca3584204efc560ff5f07c74366dc6050db0c7108b4f6e3f8f506a88b4",
       "reproduced": true
     },
     {
-      "file": "research/reports/shock-15m-zeroshot-ethusdt-e2.json",
-      "sha256": "7ec32caeafe968620d994dc1205fa9d2b8549e3519c3c331a50616fc0b5c7ee5",
+      "file": "research/reports/shock-15m-zeroshot-ethusdt-calm.json",
+      "sha256": "b5d82f380de136a91b115992639ebf55acf40e2ff826d25efa2b286031d4761b",
       "reproduced": true
     }
   ],
   "scripts": [
     {
       "path": "research/shock/portfolio.ts",
-      "sha256": "763ffa0ae7b45af2ab6b8e18bef96a957d0972a9ab308074c60195da66e29375"
+      "sha256": "33e992e4bca9de1229331114e5e18d3fbb2425588bc3fa6044399f22f8151c0f"
     },
     {
       "path": "research/shock/portfolio-html.ts",
-      "sha256": "d51faccbd94c4954279d6a3f8f4f882ecc93a92f00dabed6fb461908c2df3d7a"
+      "sha256": "78cc14404d51812f24dfbe883c21577862f6b52911abecbcf2b6250b2e1834d6"
     },
     {
       "path": "research/lib/portfolio.ts",
@@ -120,6 +120,14 @@
     {
       "path": "research/lib/e2.ts",
       "sha256": "d871214da8d4efb72dc6cf3cddfe8d53112a642361656ce24d365f259f2820e8"
+    },
+    {
+      "path": "research/lib/calm-only.ts",
+      "sha256": "3b97ef4263ccb54098223587d1aa001d30d76aa8bbc65f3d6a8fe28df990569d"
+    },
+    {
+      "path": "research/shock/published-stress.ts",
+      "sha256": "209ba82e8ffaead4658d4191069acba58d42d060ddf531b545f0ce0d6adfd8ca"
     },
     {
       "path": "research/lib/svg.ts",
@@ -135,7 +143,7 @@
     },
     {
       "path": "research/shock/zero-shot.ts",
-      "sha256": "a6487a2e74ac2284a59ec30b7fe3d2471d369577b86ba64a4f0f552930597d6d"
+      "sha256": "465808fb33e045a2829696fd3da085320231aaeb7c54d3be67f80c24fb3b83bf"
     },
     {
       "path": "lib/strategies/shock/engine.ts",
@@ -184,36 +192,36 @@
   ],
   "outputs": [
     {
-      "path": "research/reports/btc-eth-portfolio-e2/portfolio_daily_returns.csv",
-      "sha256": "27b5907621461d317e04dbb6d73c19055fea4c5ad224adbfff396ccb5b29e1d4"
+      "path": "research/reports/btc-eth-portfolio-calm/portfolio_daily_returns.csv",
+      "sha256": "b932c7c341e5b4269998934e414196a5b10b2f82ca61c6bd838d5a2151cada5b"
     },
     {
-      "path": "research/reports/btc-eth-portfolio-e2/portfolio_monthly_returns.csv",
-      "sha256": "2cf0e76f0fbb7fa23f058f7b777066723dfc49669e1b2decfbadb20fd148b2a7"
+      "path": "research/reports/btc-eth-portfolio-calm/portfolio_monthly_returns.csv",
+      "sha256": "caebf581c52db1b8fc72feb0fdc0478e6db5df347d4c2f829af44ad6cbd0a808"
     },
     {
-      "path": "research/reports/btc-eth-portfolio-e2/portfolio_annual_returns.csv",
-      "sha256": "6b1e170c7367d88f172e41b1485271e1091db0c42f67e396108654d50bda7746"
+      "path": "research/reports/btc-eth-portfolio-calm/portfolio_annual_returns.csv",
+      "sha256": "9f0d46487ec1077306733f44cf09db3fdb36febc8b08ba59a629eed1cf8d211d"
     },
     {
-      "path": "research/reports/btc-eth-portfolio-e2/portfolio_drawdowns.csv",
-      "sha256": "7372222dfc947761ba2137507a43c0679c34e11e7f9e346134477966b13717bc"
+      "path": "research/reports/btc-eth-portfolio-calm/portfolio_drawdowns.csv",
+      "sha256": "667c533e14ffb5275079280f3b53202afd05809b413833c54eecbb5e427dec6e"
     },
     {
-      "path": "research/reports/btc-eth-portfolio-e2/portfolio_correlation_rolling.csv",
-      "sha256": "d0b8c3f5e290a57b873898b49b61c4a54b3787993e1b777d9860119c27e6fd4b"
+      "path": "research/reports/btc-eth-portfolio-calm/portfolio_correlation_rolling.csv",
+      "sha256": "cfe9636ee6f9add3ab07e7e697bcc98f35121aec541a16bf7fedc270f43b6dca"
     },
     {
-      "path": "research/reports/btc-eth-portfolio-e2/portfolio_summary.json",
-      "sha256": "f351ad667584a6722b04ebbf7008ca4deef8e1e6eca10b7314d582b7e0c69e1b"
+      "path": "research/reports/btc-eth-portfolio-calm/portfolio_summary.json",
+      "sha256": "3008c8aeb853ecdc3096353d218e287c02e32e908e649bb8d9acc3a80a0ba761"
     },
     {
-      "path": "research/reports/btc-eth-portfolio-e2/btc-eth-portfolio.html",
-      "sha256": "42bfbd2a541661d9216a14eb3249fedc862694e9c47ddd9ff7bfd10fd7e11cd0"
+      "path": "research/reports/btc-eth-portfolio-calm/btc-eth-portfolio.html",
+      "sha256": "ffdb066010cdb66cb79b37f9e38a08fd0297240807777678e2984eea29cfa04c"
     }
   ],
   "sanityChecks": {
-    "passed": 40,
+    "passed": 39,
     "failed": []
   }
 }

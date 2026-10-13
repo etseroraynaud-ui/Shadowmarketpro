@@ -291,7 +291,7 @@ export function walkForward(rows: TradeRow[]): WalkForward {
         ? fitPlatt(prior.map(q => q.p[key][model]!), y) : null
     }
     for (const r of f.test) {
-      const p = predictBinary(S, r)
+      const p: Record<string, Partial<Record<ModelName | 'cal', number>>> = predictBinary(S, r)
       for (const [key, which] of Object.entries(CALIBRATED)) {
         const model = which === 'full' ? 'full' : display[key]
         const c = platt[key]

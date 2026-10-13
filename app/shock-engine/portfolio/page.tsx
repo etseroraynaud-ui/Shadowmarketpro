@@ -206,7 +206,7 @@ export default function PerformancePage() {
             ['Both markets lost on the day', int(crisis('bothNeg').days), num(crisis('bothNeg').pearson), `${num(crisis('bothNeg').nullMean)} [${num(crisis('bothNeg').nullP5)}, ${num(crisis('bothNeg').nullP95)}]`],
             ['P(ETH loses | BTC loses)', '—', pct(tail('coNeg').observed, 0), `${pct(tail('coNeg').mean, 0)} [${pct(tail('coNeg').p5, 0)}, ${pct(tail('coNeg').p95, 0)}]`],
           ]} />
-          <p className="s-p">Correlation does not jump in market stress, and joint losses are not more frequent than constant dependence implies. On days when both markets lose, the size of their losses is more aligned, consistent with some trades being the same shock traded on both markets ({pct(P.overlap.entries[0].ethWithBtc, 0)} of ETH entries are within 15 minutes of a same-direction BTC entry).</p>
+          <p className="s-p">Correlation is {num(crisis('mktCrash').pearson)} on market crash days and {num(crisis('mktBear').pearson)} in bear markets, against {num(crisis('calm').pearson)} on non-stress days{Math.max(crisis('mktCrash').pearson, crisis('mktBear').pearson) <= Math.max(...(P.chart.corr90.filter(x => x !== null) as number[])) ? ', within the range of 90-day rolling correlations' : ''}. Joint losses are {tail('coNeg').observed > tail('coNeg').p95 ? 'more' : 'not more'} frequent than constant dependence implies. On days when both markets lose, the size of their losses is {crisis('bothNeg').pearson > (crisis('bothNeg').nullP95 ?? Infinity) ? 'more aligned than the benchmark' : 'within the benchmark'}, consistent with some trades being the same shock traded on both markets ({pct(P.overlap.entries[0].ethWithBtc, 0)} of ETH entries are within 15 minutes of a same-direction BTC entry).</p>
         </Section>
 
         {/* ---------------------------------------------------------------- robustesse */}
@@ -224,7 +224,7 @@ export default function PerformancePage() {
             </div>
             <div>
               <h3 className="s-h3">Sub-periods</h3>
-              <p className="s-p">The second half is weaker than the first, and the two markets are more correlated in it.</p>
+              <p className="s-p">The second half is {SP.secondHalf.portfolio.sharpe < SP.firstHalf.portfolio.sharpe ? 'weaker' : 'stronger'} than the first, and the two markets are {SP.secondHalf.corr > SP.firstHalf.corr ? 'more' : 'less'} correlated in it.</p>
               <Table stack head={['Period', 'Sharpe', 'Sortino', 'CAGR', 'Correlation']} rows={[
                 [`${SP.firstHalf.from} → ${SP.firstHalf.to}`, num(SP.firstHalf.portfolio.sharpe), num(SP.firstHalf.portfolio.sortino), pct(SP.firstHalf.portfolio.cagr), num(SP.firstHalf.corr)],
                 [`${SP.secondHalf.from} → ${SP.secondHalf.to}`, num(SP.secondHalf.portfolio.sharpe), num(SP.secondHalf.portfolio.sortino), pct(SP.secondHalf.portfolio.cagr), num(SP.secondHalf.corr)],
@@ -250,12 +250,13 @@ export default function PerformancePage() {
         {/* ---------------------------------------------------------------- méthode */}
         <Section id="method" eyebrow="Method" title="Method and limitations">
           <ul className="s-list">
-            <li><strong>Fixed rules.</strong> One 15-minute strategy with adaptive volatility, selected on Bitcoin. Ethereum runs it unchanged, without any ETH calibration. The portfolio reproduces the validated backtests exactly before any calculation; {P.manifest.checksPassed} of {P.manifest.checksTotal} consistency checks pass.</li>
+            <li><strong>Fixed rules.</strong> One 15-minute strategy, with parameters selected on Bitcoin. Ethereum runs it unchanged, without any ETH calibration. The portfolio reproduces the validated backtests exactly before any calculation; {P.manifest.checksPassed} of {P.manifest.checksTotal} consistency checks pass.</li>
+            <li><strong>Calm regime.</strong> New positions are only opened when the daily volatility regime is calm; an open position keeps its exits if the regime changes.</li>
             <li><strong>Short entries.</strong> Opened only when the daily trend regime is bearish.</li>
             <li><strong>Data.</strong> {P.manifest.datasets.btc}; {P.manifest.datasets.eth}; 15-minute bars, UTC.</li>
             <li><strong>Capital.</strong> 50/50 at the start; each half trades 100 % of its own equity, one position at a time, without leverage. Average gross exposure {pct(F.expo.avgGross, 0)} of the portfolio, maximum {pct(F.expo.maxGross, 0)}.</li>
             <li><strong>Costs.</strong> Commission 0.045 % per order on every fill. {P.disclaimers[3]} {CAPACITY_FINDING} <a className="s-link" href={DOSSIER} download>Institutional dossier (PDF)</a>.</li>
-            <li><strong>In-sample for BTC.</strong> The rules, short-entry condition included, were chosen on BTC data from 2017 to 2026, which contains the whole period. ETH is a transfer across markets, not across time.</li>
+            <li><strong>In-sample.</strong> The parameters were chosen on BTC data from 2017 to 2026, which contains the whole period; ETH is a transfer across markets, not across time. The two entry conditions (calm regime, short-side trend) were set in October 2026 with knowledge of both markets, so BTC and ETH are both in-sample for them.</li>
             <li><strong>Venues.</strong> The data venues (Bitstamp, Binance spot) differ from a perpetual-futures execution venue: prices, fees, funding and stop mechanics differ.</li>
           </ul>
           <p className="s-p">The <Link className="s-link" href="/research">research page</Link> lists the studies behind the strategy.</p>

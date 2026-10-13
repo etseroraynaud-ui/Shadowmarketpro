@@ -5,7 +5,7 @@ import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import { SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Section, SiteFooter, StatusList, Table, Verdict, type VerdictKind } from '../_site/ui'
-import { CAPACITY_FINDING, DOSSIER, DOWNLOADS, FACTOR_NAMES, MANIFEST, P, PAPER, RA, raVerdict, verdictOf } from '../_site/data'
+import { CAPACITY_FINDING, DOSSIER, DOWNLOADS, FACTOR_NAMES, MANIFEST, P, PAPER, RA, SELECTION, raVerdict, verdictOf } from '../_site/data'
 import { int, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -31,15 +31,18 @@ const SECTIONS = [
 type Study = { name: ReactNode; period: string; finding: ReactNode; verdict: { kind: VerdictKind; label: string } }
 
 export default function ResearchPage() {
+  const closest = RA.factors.reduce((a, b) => (Math.abs(b.t) > Math.abs(a.t) ? b : a))
+  const closestBench = RA.benchmarks.find(b => b.id === closest.name)
   const studies: Study[] = [
     { name: <Link className="s-link" href="/shock-engine/portfolio">BTC/ETH portfolio, 50/50</Link>, period: `${P.commonPeriod.start.slice(0, 4)}–${P.commonPeriod.end.slice(0, 4)}`, finding: `Sharpe ${num(P.headline.portfolioSharpe)}, against ${num(P.headline.btcSharpe)} for BTC and ${num(P.headline.ethSharpe)} for ETH alone; strategy correlation ${num(P.correlation.dailyPearson)}; max drawdown ${pct(P.headline.portfolioMaxDD)}.`, verdict: { kind: 'pass', label: 'complete' } },
     { name: <a className="s-link" href="#residual-alpha">Residual alpha vs simple trend strategies</a>, period: `${P.commonPeriod.start.slice(0, 4)}–${P.commonPeriod.end.slice(0, 4)}`, finding: `After buy & hold and six standard trend strategies are removed, alpha of ${pct(RA.alphaAnn)} a year (t = ${num(RA.t)}); ${pct(RA.unexplained, 0)} of the average return is not explained by them. In-sample.`, verdict: raVerdict() },
     { name: 'BTC: event study, random entries, delayed entry', period: yrs(EV.btc.period), finding: `Continuation after shocks confirmed; beats ${pct(EV.btc.randomBeaten, 0)} of random-entry runs; a one-bar delay keeps ${pct(EV.btc.delay1Share, 0)} of the average trade. Sharpe ${num(EV.btc.sharpe)} (15-min), ${int(EV.btc.trades)} trades.`, verdict: verdictOf(EV.btc) },
     { name: 'BTC: walk-forward, 36-month calibration, 3-month tests', period: EV.walkForward.period.slice(0, 4) + '–' + EV.walkForward.period.slice(-10, -6), finding: `${EV.walkForward.windows} windows, settings re-selected on past data only: Sharpe ${EV.walkForward.sharpe}, CAGR ${fixMinus(EV.walkForward.cagr)}, max drawdown ${fixMinus(EV.walkForward.dd)}. Positive out of sample, clearly below the fixed preset.`, verdict: { kind: 'partial', label: 'positive, weaker' } },
     { name: 'BTC: parameter neighborhood (1,810 runs)', period: yrs(EV.robBtc.period), finding: `All parameters perturbed together by up to ±20 %: median Sharpe ${num(rob('robBtc').medianSharpe)} against ${num(rob('robBtc').preset)}; ${pct(rob('robBtc').profitable, 0)} profitable. The preset tops its neighborhood, as expected of rules selected on this data.`, verdict: { kind: 'pass', label: 'pass, selection bias' } },
-    { name: 'ETH: transfer of the BTC rules', period: yrs(EV.eth.period), finding: `No ETH calibration. Every pre-set criterion met: continuation, random entries (${pct(EV.eth.randomBeaten, 0)}), delay (${pct(EV.eth.delay1Share, 0)}). Sharpe ${num(EV.eth.sharpe)}, ${int(EV.eth.trades)} trades.`, verdict: verdictOf(EV.eth) },
+    { name: 'ETH: transfer of the BTC rules', period: yrs(EV.eth.period), finding: `No ETH calibration of the parameters (the two entry conditions were set with knowledge of ETH data). Every pre-set criterion met: continuation, random entries (${pct(EV.eth.randomBeaten, 0)}), delay (${pct(EV.eth.delay1Share, 0)}). Sharpe ${num(EV.eth.sharpe)}, ${int(EV.eth.trades)} trades.`, verdict: verdictOf(EV.eth) },
     { name: 'ETH: independent price feed (Dukascopy)', period: yrs(EV.ethDukascopy.period), finding: `Same verdict on a different data source: Sharpe ${num(EV.ethDukascopy.sharpe)}, ${int(EV.ethDukascopy.trades)} trades.`, verdict: verdictOf(EV.ethDukascopy) },
     { name: 'ETH: parameter neighborhood (1,810 runs)', period: yrs(EV.robEth.period), finding: `At ±20 %, median Sharpe ${num(rob('robEth').medianSharpe)} against ${num(rob('robEth').preset)}; ${pct(rob('robEth').profitable, 0)} profitable. The rules sit mid-neighborhood: a plateau, not a peak.`, verdict: { kind: 'pass', label: 'pass' } },
+    { name: 'Rule selection risk (CSCV)', period: `${P.commonPeriod.start.slice(0, 4)}–${P.commonPeriod.end.slice(0, 4)}`, finding: `The ${SELECTION.variants} rule variants actually tried on the portfolio, compared over ${int(SELECTION.splits)} splits of the history: the variant that is best on one half ranks above the median on the other half in ${pct(1 - SELECTION.pbo, 0)} of splits (probability of backtest overfitting ${pct(SELECTION.pbo, 0)}). The gain of the calm-regime restriction over the previous rules is consistent over time but not significant once the number of variants tried is accounted for (deflated Sharpe ${pct(SELECTION.gainDsr, 0)}).`, verdict: { kind: 'partial', label: 'low overfitting, gain not proven' } },
     { name: <a className="s-link" href={DOSSIER} download>Execution costs and capacity</a>, period: '2020–2026', finding: CAPACITY_FINDING, verdict: { kind: 'partial', label: 'Binance measured' } },
   ]
   const passed = studies.filter(s => s.verdict.kind === 'pass').length
@@ -52,7 +55,7 @@ export default function ResearchPage() {
         <section className="s-hero s-hero-simple">
           <p className="s-eyebrow">Research</p>
           <h1 className="s-h1">How Shock Engine is tested</h1>
-          <p className="s-sub">Rules are fixed before they are tested. Each test has a pass/fail criterion set in advance.</p>
+          <p className="s-sub">Each test has a pass/fail criterion set in advance, and every change to the rules is disclosed with its selection risk.</p>
           <div className="s-chips">
             <span className="s-chip"><span className="s-chip-dot" /><b>{passed}</b> passed</span>
             <span className="s-chip"><span className="s-chip-dot" style={{ background: 'var(--s-amber)' }} /><b>{studies.length - passed - failed}</b> partial or open</span>
@@ -63,7 +66,7 @@ export default function ResearchPage() {
         <Section id="principles" eyebrow="Method" title="Principles">
           <div className="s-grid3">
             {[
-              ['01', 'No tuning after the fact', 'The rules were selected once, on Bitcoin. Later tests run them unchanged: no new variable, no re-estimated parameter, no adjusted cost.'],
+              ['01', 'Parameters fixed once', 'The parameters were selected once, on Bitcoin, and are never re-estimated. Two entry conditions were added in October 2026 after studying the historical data (new positions in the calm regime only; shorts only in a bearish daily trend): the history is in-sample for them, and their selection risk is measured.'],
               ['02', 'Criteria first', 'Each study states its criteria before the result is seen: profit factor, Sharpe, placebo rank, delay tolerance, event-study significance.'],
               ['03', 'Placebos', 'Random entries with identical exits separate the value of the signal from the market’s drift and from the shape of the exits.'],
               ['04', 'Across time and markets', 'Walk-forward re-selection on past data only, and transfer of the Bitcoin rules to Ethereum without recalibration.'],
@@ -106,10 +109,10 @@ export default function ResearchPage() {
             ['Weekly returns', pct(RA.sensitivities.weekly.alphaAnn), num(RA.sensitivities.weekly.t)],
             ['Benchmarks without commissions', pct(RA.sensitivities.frictionless.alphaAnn), num(RA.sensitivities.frictionless.t)],
           ]} />
-          <p className="s-small">Pre-registered before any computation: alpha counts as demonstrated only if t ≥ 3 and fewer than 1 % of month-block resampled histories give alpha ≤ 0. In-sample: the rules were chosen on data covering this period. The test shows that simple trend strategies do not reproduce the historical result; it does not show that the alpha will persist. Closest factor: the intraday breakout, which shares part of the timing but loses money on its own after costs.</p>
+          <p className="s-small">Pre-registered before any computation: alpha counts as demonstrated only if t ≥ 3 and fewer than 1 % of month-block resampled histories give alpha ≤ 0. In-sample: the rules were chosen on data covering this period. The test shows that simple trend strategies do not reproduce the historical result; it does not show that the alpha will persist. Closest factor: {FACTOR_NAMES[closest.name]}{closestBench ? `, which ${closestBench.sharpe < 0 ? 'loses money' : closestBench.sharpe < 0.1 ? 'barely breaks even' : 'is profitable'} on its own after costs (Sharpe ${num(closestBench.sharpe)})` : ''}.</p>
         </Section>
 
-        <Section id="short-condition" eyebrow="Short entries" title="Could the trend condition be luck?" intro={<p>Short positions are only opened when the daily trend regime is bearish. Two placebo tests, specified before they were run, ask whether a condition of the same size, chosen at random, would have done as well.</p>}>
+        <Section id="short-condition" eyebrow="Short entries" title="Could the trend condition be luck?" intro={<p>Short positions are only opened when the daily trend regime is bearish. Two placebo tests, specified before they were run, ask whether a condition of the same size, chosen at random, would have done as well. They were run before the calm-regime restriction; every short entry comes from the calm regime under both rule sets, but the portfolio-level figure below includes the agitated-regime longs of the earlier rules.</p>}>
           <div className="s-grid2">
             <EvidenceCard k="Random selection" stat={`${num(FA.randomSelection.evPercentile, 1)}th`} sub="percentile" href="#short-condition" link="On this page">
               The same number of short trades, kept at random, {int(FA.randomSelection.draws)} times by market and year. The average risk-adjusted gain of the shorts actually kept beats {num(FA.randomSelection.evPercentile, 1)} % of the draws (p = {num(FA.randomSelection.evP, 3)}); for the portfolio Sharpe, {num(FA.randomSelection.sharpePercentile, 1)} % (p = {num(FA.randomSelection.sharpeP, 3)}).
@@ -138,7 +141,7 @@ export default function ResearchPage() {
           </div>
         </Section>
 
-        <Section id="archive" eyebrow="History" title="Earlier work" intro={<p>Shock Engine started as a TradingView script whose original settings lost money on Bitcoin after costs. The first research passes diagnosed why, showed that re-optimizing many parameters chases noise, and that among regime-based selections only a calm/agitated volatility split was worth pursuing: it became the basis of the current rules.</p>} />
+        <Section id="archive" eyebrow="History" title="Earlier work" intro={<p>Shock Engine started as a TradingView script whose original settings lost money on Bitcoin after costs. The first research passes diagnosed why, showed that re-optimizing many parameters chases noise, and that among regime-based selections only a calm/agitated volatility split was worth pursuing: it became the basis of the current rules. In October 2026 the rules were narrowed to the calm regime: new positions are no longer opened in the agitated regime.</p>} />
 
         <Section id="versions" eyebrow="Reproducibility" title="Current version">
           <Table text head={['', '']} rows={[

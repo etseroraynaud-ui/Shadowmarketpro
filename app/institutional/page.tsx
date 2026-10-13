@@ -3,7 +3,7 @@ import Link from 'next/link'
 import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import { Arrow, Disclaimer, Metrics, Section, SimNote, SiteFooter, StatusList } from '../_site/ui'
-import { CONTACT_EMAIL, DOSSIER, DOWNLOADS, MANIFEST, P, PAPER } from '../_site/data'
+import { CONTACT_EMAIL, DOSSIER, DOWNLOADS, EXECUTIONS, MANIFEST, P, PAPER } from '../_site/data'
 import { num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ export default function InstitutionalPage() {
         <section className="s-hero s-hero-simple">
           <p className="s-eyebrow">Institutional</p>
           <h1 className="s-h1">Research materials for allocators and partners</h1>
-          <p className="s-sub">Shock Engine is documented to be checked, not taken on trust: fixed rules, criteria set in advance, placebo and out-of-sample tests, and a manifest that ties every figure to code and data.</p>
+          <p className="s-sub">Shock Engine is documented to be checked, not taken on trust: parameters fixed on Bitcoin, criteria set in advance, placebo and out-of-sample tests, disclosed rule changes, and a manifest that ties every figure to code and data.</p>
           <div className="s-actions">
             {CONTACT_EMAIL
               ? <a className="s-btn s-btn-primary" href={`mailto:${CONTACT_EMAIL}?subject=${subject}`}>Request the research pack <Arrow /></a>
@@ -56,7 +56,7 @@ export default function InstitutionalPage() {
 
         <Section id="materials" eyebrow="Materials" title="What is available">
           <div className="s-grid2">
-            <Doc k="Dossier" title="Institutional dossier" href={DOSSIER} label="Download the dossier (PDF)" download wide>Strategy and how it was tested; a framework for executing large notional drawn from the market-impact literature; all 2,474 historical executions replayed on real market data; execution costs, capacity and forward-looking estimates; what we got wrong along the way; risks and what remains to be proven.</Doc>
+            <Doc k="Dossier" title="Institutional dossier" href={DOSSIER} label="Download the dossier (PDF)" download wide>{`Strategy and how it was tested; a framework for executing large notional drawn from the market-impact literature; all ${EXECUTIONS} historical executions since 2020 replayed on real market data; execution costs, capacity and forward-looking estimates; what we got wrong along the way; risks and what remains to be proven.`}</Doc>
             <Doc k="Paper" title="Research paper" href={`${DOWNLOADS}/${PAPER}`} label="Download the paper (PDF)" download>Design, statistical framework, results, robustness, falsification of the short-entry condition, residual alpha against trend strategies, limitations and the pre-registered forward test, with references.</Doc>
             <Doc k="Data" title="Return series" href={`${DOWNLOADS}/portfolio_daily_returns.csv`} label="Daily returns (CSV)" download>Daily returns and equity of both markets and the portfolio, monthly and annual returns, drawdown episodes and rolling correlations, as CSV.</Doc>
             <Doc k="Manifest" title="Reproducibility manifest" href={`${DOWNLOADS}/${MANIFEST}`} label="Manifest (JSON)">Code commit, dataset hashes, parameter hash, cost assumptions and random seeds. The research code regenerates the same files from the same data.</Doc>
@@ -68,13 +68,13 @@ export default function InstitutionalPage() {
         <Section id="not-done" eyebrow="Limits" title="What is not done yet" intro={<p>Stated plainly, so that it can be weighed.</p>}>
           <StatusList items={[
             { label: 'Live track record', state: 'no', note: 'not available; live results will be reported separately from the simulation, from their own start date' },
-            { label: 'Forward validation', state: 'wait', note: `of the short-entry condition; pre-registered, observation starts ${P.forward.start}` },
-            { label: 'Capacity and market impact', state: 'wait', note: `costs measured on Binance perpetuals for all 2,474 historical executions (see the institutional dossier); not yet measured on Hyperliquid, the intended venue, and our own impact needs live trading; turnover about ${Math.round(F.cost.turnoverOneWay)}× the capital a year` },
+            { label: 'Forward validation', state: 'wait', note: `of the short-entry condition, pre-registered, observation from ${P.forward.start}; not yet for the calm-regime restriction` },
+            { label: 'Capacity and market impact', state: 'wait', note: `costs measured on Binance perpetuals for all ${EXECUTIONS} historical executions since 2020 (see the institutional dossier); not yet measured on Hyperliquid, the intended venue, and our own impact needs live trading; turnover about ${Math.round(F.cost.turnoverOneWay)}× the capital a year` },
             { label: 'Slippage and funding', state: 'no', note: `not in the headline figures; with commissions doubled the Sharpe is ${num(P.costs.stress[2].portfolio.sharpe)}, with historical funding ${num(P.stress.funding[0].sharpe)}` },
             { label: 'Independent verification', state: 'no', note: 'no third-party audit of the research or of results' },
           ]} />
           <ul className="s-list s-mt">
-            <li><strong>Time out of sample for Bitcoin.</strong> The rules, short-entry condition included, were selected on BTC data that overlaps the reported period; the walk-forward study covers {EV_PERIOD} only.</li>
+            <li><strong>Time out of sample.</strong> The parameters were selected on BTC data that overlaps the reported period, and the two entry conditions (calm regime, short-side trend) were set in October 2026 with knowledge of BTC and ETH data; the walk-forward study covers {EV_PERIOD} only.</li>
           </ul>
         </Section>
 
