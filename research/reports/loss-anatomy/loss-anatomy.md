@@ -1,6 +1,6 @@
 # Anatomie des pertes du Shock Engine
 
-Plan : `research/preregistration/loss-anatomy.md`, commité avant tout calcul. Script : `research/shock/loss-anatomy.ts` (commit `89bee8d`, sources modifiées). Descriptif : aucune règle du Shock Engine n'est modifiée ni testée. Trades V0 (E2 inchangé) : BTC/ETH de référence (développement) et 8 actifs vierges (réplication).
+Plan : `research/preregistration/loss-anatomy.md`, commité avant tout calcul. Script : `research/shock/loss-anatomy.ts` (commit `34541ff`). Descriptif : aucune règle du Shock Engine n'est modifiée ni testée. Trades V0 (E2 inchangé) : BTC/ETH de référence (développement) et 8 actifs vierges (réplication).
 
 ## Réponse
 

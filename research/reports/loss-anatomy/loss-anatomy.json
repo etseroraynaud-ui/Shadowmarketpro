@@ -1,9 +1,9 @@
 {
  "plan": "research/preregistration/loss-anatomy.md",
- "generatedAt": "2026-10-13T01:40:55.678Z",
+ "generatedAt": "2026-10-13T01:43:54.102Z",
  "git": {
-  "commit": "89bee8d1989bb742009ea9282d577d254cc2375c",
-  "clean": false
+  "commit": "34541ffa258b18e9df066b6293f92ca0e5e4e601",
+  "clean": true
  },
  "checks": [
   {
