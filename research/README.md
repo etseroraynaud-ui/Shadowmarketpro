@@ -164,6 +164,17 @@ Exploratoire (BTC/ETH et 8 cryptos déjà consultées) ; pas de candidate.
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/early-invalidation.ts
 ```
 
+V1-calme figée et surajustement de sélection (plan : `research/preregistration/calm-only.md`, commité
+avec la règle figée `research/lib/calm-only.ts` et les mesures `research/lib/overfit.ts` avant tout
+calcul ; rapport dans `research/reports/calm-only/`). Les 16 configurations réellement rejouées en
+portefeuille BTC/ETH sont rejouées à nouveau (chacune redonne son Sharpe publié) ; CSCV-PBO sur 16 blocs,
+walk-forward à recalage annuel, Sharpe dégonflé du Sharpe absolu (avec la lignée des 206 candidats
+de la recherche des réglages) et du gain sur E2. Verdict : candidate fragile ; E2 reste la référence.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/calm-only.ts
+```
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 
