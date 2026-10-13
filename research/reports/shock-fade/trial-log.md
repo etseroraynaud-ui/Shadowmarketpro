@@ -30,3 +30,9 @@ commité (fichiers nouveaux non détectés par l'ancien marqueur) ; ce code est 
 | 2026-10-13 16:44 | 5302de0 | `shockfade/mtf_report.py` | tests primaires et secondaires MTF, réplication | P 2020-07 → 2026-09, R 2018-01 → 2019-12 |
 | 2026-10-13 16:45 | 5302de0+modif | `shockfade/run_mtf_race_checks.py` | course 50 % par sens, régime, cassure, actif (a posteriori) | P et R |
 | 2026-10-13 16:46 | 5302de0+modif | `shockfade/mtf_report.py` | tests primaires et secondaires MTF, réplication | P 2020-07 → 2026-09, R 2018-01 → 2019-12 |
+| 2026-10-13 17:02 | 8d1a6a5+modif | `shockfade/v1_hawkes.py` | V1 × Hawkes/Merton : 20 tests hors échantillon, 2 règles fixées | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 17:03 | 8d1a6a5+modif | `shockfade/v1_hawkes.py` | V1 × Hawkes/Merton : 24 tests hors échantillon, 2 règles fixées | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 17:05 | 8d1a6a5+modif | `shockfade/v1_hawkes.py` | V1 × Hawkes/Merton : 24 tests hors échantillon, 2 règles fixées | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 17:06 | 8d1a6a5+modif | `shockfade/v1_hawkes.py` | V1 × Hawkes/Merton : 24 tests hors échantillon, 2 règles fixées | 2018-09 → 2026-09 (V1) |
+
+Note : pour `shockfade/v1_hawkes.py`, les exécutions antérieures à la dernière groupaient les erreurs types sur 3 « jours » (conversion des dates en microsecondes avec pandas 3) ; corrigé, seuls les résultats de la dernière exécution sont rapportés.
