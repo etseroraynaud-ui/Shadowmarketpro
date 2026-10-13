@@ -1,0 +1,353 @@
+{
+ "generatedAt": "2026-10-13T14:22:58.630Z",
+ "prespec": "research/preregistration/wf-longer-windows.md",
+ "variant": "e2",
+ "period": "2020-01-01 → 2026-10-04",
+ "rule": {
+  "shortWindows": 1.2,
+  "notWindows": 1
+ },
+ "summary": {
+  "configs": 12,
+  "median": 1.1949999999999998,
+  "min": 1.03,
+  "max": 1.29,
+  "minKey": "exp/3",
+  "maxKey": "48/6",
+  "medianRatio": 0.8020134228187918,
+  "fixedSharpe": 1.49,
+  "belowFixed": 12,
+  "medianMaxDD": -0.3625,
+  "worstMaxDD": -0.536,
+  "reference": {
+   "train": "36",
+   "test": 3,
+   "sharpe": 1.11
+  },
+  "verdict": "mixed"
+ },
+ "configs": [
+  {
+   "calm": {
+    "changes": 16,
+    "distinct": 10,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 10,
+    "distinct": 9,
+    "off": 0
+   },
+   "train": "36",
+   "test": 3,
+   "file": "shock-15m-wf-plateau-36-3-e2.md",
+   "windows": 28,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.11,
+   "sortino": 1.57,
+   "cagr": 0.325,
+   "maxDD": -0.349,
+   "trades": 502,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.7449664429530202
+  },
+  {
+   "calm": {
+    "changes": 6,
+    "distinct": 6,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 7,
+    "distinct": 7,
+    "off": 0
+   },
+   "train": "36",
+   "test": 6,
+   "file": "shock-15m-wf-plateau-36-6-e2.md",
+   "windows": 14,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.09,
+   "sortino": 1.54,
+   "cagr": 0.317,
+   "maxDD": -0.40399999999999997,
+   "trades": 490,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.7315436241610739
+  },
+  {
+   "calm": {
+    "changes": 3,
+    "distinct": 4,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 3,
+    "distinct": 4,
+    "off": 0
+   },
+   "train": "36",
+   "test": 12,
+   "file": "shock-15m-wf-plateau-36-12-e2.md",
+   "windows": 7,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.12,
+   "sortino": 1.58,
+   "cagr": 0.327,
+   "maxDD": -0.39,
+   "trades": 471,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.7516778523489933
+  },
+  {
+   "calm": {
+    "changes": 10,
+    "distinct": 6,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 12,
+    "distinct": 7,
+    "off": 0
+   },
+   "train": "48",
+   "test": 3,
+   "file": "shock-15m-wf-plateau-48-3-e2.md",
+   "windows": 28,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.21,
+   "sortino": 1.71,
+   "cagr": 0.39299999999999996,
+   "maxDD": -0.326,
+   "trades": 422,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.8120805369127516
+  },
+  {
+   "calm": {
+    "changes": 6,
+    "distinct": 5,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 8,
+    "distinct": 6,
+    "off": 0
+   },
+   "train": "48",
+   "test": 6,
+   "file": "shock-15m-wf-plateau-48-6-e2.md",
+   "windows": 14,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.29,
+   "sortino": 1.82,
+   "cagr": 0.441,
+   "maxDD": -0.335,
+   "trades": 397,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.865771812080537
+  },
+  {
+   "calm": {
+    "changes": 1,
+    "distinct": 2,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 3,
+    "distinct": 4,
+    "off": 0
+   },
+   "train": "48",
+   "test": 12,
+   "file": "shock-15m-wf-plateau-48-12-e2.md",
+   "windows": 7,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.18,
+   "sortino": 1.67,
+   "cagr": 0.38799999999999996,
+   "maxDD": -0.33,
+   "trades": 393,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.7919463087248322
+  },
+  {
+   "calm": {
+    "changes": 5,
+    "distinct": 5,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 10,
+    "distinct": 7,
+    "off": 0
+   },
+   "train": "60",
+   "test": 3,
+   "file": "shock-15m-wf-plateau-60-3-e2.md",
+   "windows": 28,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.22,
+   "sortino": 1.72,
+   "cagr": 0.39899999999999997,
+   "maxDD": -0.315,
+   "trades": 399,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.8187919463087249
+  },
+  {
+   "calm": {
+    "changes": 5,
+    "distinct": 5,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 6,
+    "distinct": 6,
+    "off": 0
+   },
+   "train": "60",
+   "test": 6,
+   "file": "shock-15m-wf-plateau-60-6-e2.md",
+   "windows": 14,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.23,
+   "sortino": 1.73,
+   "cagr": 0.401,
+   "maxDD": -0.327,
+   "trades": 399,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.825503355704698
+  },
+  {
+   "calm": {
+    "changes": 5,
+    "distinct": 5,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 4,
+    "distinct": 5,
+    "off": 0
+   },
+   "train": "60",
+   "test": 12,
+   "file": "shock-15m-wf-plateau-60-12-e2.md",
+   "windows": 7,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.12,
+   "sortino": 1.58,
+   "cagr": 0.349,
+   "maxDD": -0.42100000000000004,
+   "trades": 393,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.7516778523489933
+  },
+  {
+   "calm": {
+    "changes": 7,
+    "distinct": 4,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 4,
+    "distinct": 2,
+    "off": 0
+   },
+   "train": "exp",
+   "test": 3,
+   "file": "shock-15m-wf-plateau-exp-3-e2.md",
+   "windows": 28,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.03,
+   "sortino": 1.44,
+   "cagr": 0.325,
+   "maxDD": -0.536,
+   "trades": 339,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.6912751677852349
+  },
+  {
+   "calm": {
+    "changes": 2,
+    "distinct": 2,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 2,
+    "distinct": 2,
+    "off": 0
+   },
+   "train": "exp",
+   "test": 6,
+   "file": "shock-15m-wf-plateau-exp-6-e2.md",
+   "windows": 14,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.24,
+   "sortino": 1.75,
+   "cagr": 0.43,
+   "maxDD": -0.376,
+   "trades": 338,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.8322147651006712
+  },
+  {
+   "calm": {
+    "changes": 1,
+    "distinct": 2,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 2,
+    "distinct": 2,
+    "off": 0
+   },
+   "train": "exp",
+   "test": 12,
+   "file": "shock-15m-wf-plateau-exp-12-e2.md",
+   "windows": 7,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.24,
+   "sortino": 1.75,
+   "cagr": 0.43,
+   "maxDD": -0.376,
+   "trades": 338,
+   "fixedSharpe": 1.49,
+   "fixedCagr": 0.366,
+   "ratio": 0.8322147651006712
+  }
+ ],
+ "checks": [
+  {
+   "name": "36/3 = résultat publié",
+   "ok": true,
+   "detail": "Sharpe 1.11, 502 trades, préréglage 1.49"
+  },
+  {
+   "name": "même période de test pour les 12",
+   "ok": true,
+   "detail": "2020-01-01 → 2026-10-04"
+  },
+  {
+   "name": "même préréglage fixe pour les 12",
+   "ok": true,
+   "detail": "1.49"
+  },
+  {
+   "name": "12 configurations",
+   "ok": true,
+   "detail": "12"
+  }
+ ]
+}
