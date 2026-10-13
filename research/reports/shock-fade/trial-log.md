@@ -38,5 +38,9 @@ commité (fichiers nouveaux non détectés par l'ancien marqueur) ; ce code est 
 | 2026-10-13 18:14 | eb10895+modif | `v1/trailing-study.ts` | Trailing de V1 : 11 variantes pré-enregistrées (apparié + rejeu complet) ; rapport seul modifié, mêmes chiffres | 2018-09 → 2026-09 (V1) |
 | 2026-10-13 18:16 | eb10895+modif | `v1/trailing-study.ts` | Trailing de V1 : 11 variantes pré-enregistrées (apparié + rejeu complet) ; rapport seul modifié, mêmes chiffres | 2018-09 → 2026-09 (V1) |
 | 2026-10-13 18:40 | cc31829+modif | `v1/exit-report.ts` | Sorties de V1 : description des 716 trades (aucun test, aucune décision ; 3 exécutions, mise en forme seulement) | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 19:20 | d9aa9fa+modif | `v1/be-volume-study.ts controls` | Point mort / volume : contrôles d'identité et couverture du volume seuls (aucune performance ; 3 exécutions) | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 19:35 | 713d08f | `v1/be-volume-study.ts` | Point mort / volume : arrêt sur un contrôle mécanique trop strict (égalité de flottants), aucun résultat produit | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 19:37 | 713d08f+modif | `v1/be-volume-study.ts` | Point mort / volume : 8 variantes + 6 contrôles de prix + 2 rejeux de diagnostic, pré-enregistrés | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 19:45 | 713d08f+modif | `v1/be-volume-study.ts` | Idem ; décompte des décisions limité aux 716 trades de la fenêtre, interprétation du critère 6, DSR du candidat (hors règle) ; mêmes résultats de performance | 2018-09 → 2026-09 (V1) |
 
 Note : pour `shockfade/v1_hawkes.py`, les exécutions antérieures à la dernière groupaient les erreurs types sur 3 « jours » (conversion des dates en microsecondes avec pandas 3) ; corrigé, seuls les résultats de la dernière exécution sont rapportés.

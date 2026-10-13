@@ -262,6 +262,8 @@ const T1s: T1[] = A.flatMap((a, j) => v1Trades[j].map(p => {
 const NTOP = Math.ceil(0.05 * T1s.length)
 const TOP = new Set([...T1s].sort((x, y) => y.R - x.R).slice(0, NTOP).map(t => key(t.j, t.entryIdx)))
 const YEARS = [...new Set(T1s.map(t => t.year))].sort()
+const T1KEY = new Set(T1s.map(t => key(t.j, t.entryIdx)))
+const medRiskPct = P.quantile(A.flatMap((a, j) => v1Trades[j].map(p => riskOf(a, p) / p.entryPrice)), 0.5)
 
 // ---------------------------------------------------------------- rejeux
 const groups = monthGroups(base.days)
@@ -281,8 +283,10 @@ for (const [ci, c] of CFGS.entries()) {
   // d'entrée, à l'ouverture (gap) ou à la clôture d'activation, jamais au-dessus du prix d'entrée (long).
   A.forEach((a, j) => paired[j].positions.forEach(p => {
     const { t, o, c: cl } = a.bars, i = p.exitIdx
-    if (p.exits.includes('EARLY') && (t[i] < t[p.entryIdx] + c.h! || t[i - 1] >= t[p.entryIdx] + c.h! || p.exitPrice !== cl[i])) fail(`${c.id} : sortie anticipée ${a.key} ${p.entryIdx}`)
-    if (p.exits.includes('BE') && (![p.entryPrice, o[i], cl[i]].includes(p.exitPrice) || p.dir * (p.exitPrice - p.entryPrice) > 1e-9)) fail(`${c.id} : point mort ${a.key} ${p.entryIdx}`)
+    // prix de sortie moyen = Σ px·qty / Σ qty : égalité à 1e-12 près en relatif
+    const same = (x: number, y: number) => Math.abs(x - y) <= 1e-12 * Math.abs(y)
+    if (p.exits.includes('EARLY') && (t[i] < t[p.entryIdx] + c.h! || t[i - 1] >= t[p.entryIdx] + c.h! || !same(p.exitPrice, cl[i]))) fail(`${c.id} : sortie anticipée ${a.key} ${p.entryIdx}`)
+    if (p.exits.includes('BE') && (![p.entryPrice, o[i], cl[i]].some(x => same(p.exitPrice, x)) || p.dir * (p.exitPrice - p.entryPrice) > 1e-12 * p.entryPrice)) fail(`${c.id} : point mort ${a.key} ${p.entryIdx}`)
   }))
   const pairedR = new Map<string, { R: number; exit: number; tags: string }>()
   A.forEach((a, j) => inRef(a, paired[j].positions).forEach(p => pairedR.set(key(j, p.entryIdx), { R: Rof(a, p), exit: p.exitIdx, tags: p.exits.join('+') })))
@@ -293,7 +297,7 @@ for (const [ci, c] of CFGS.entries()) {
   })
   const ch = rows.filter(r => r.changed)
   const losers = rows.filter(r => r.t.R <= 0), winners = rows.filter(r => r.t.R > 0)
-  const lg = logs.flat()
+  const lg = logs.flatMap((l, j) => l.filter(d => T1KEY.has(key(j, d.entryIdx))))
   const pairedRes = {
     evaluated: lg.length, missing: c.vol ? lg.filter(d => !(d.imb === d.imb)).length : 0, triggered: lg.filter(d => d.exit).length, late: lg.filter(d => d.late).length,
     beExits: rows.filter(r => r.tags.includes('BE')).length, earlyExits: rows.filter(r => r.tags.includes('EARLY')).length,
@@ -410,6 +414,7 @@ for (const v of VARS) {
   r.paired.convincing = Object.values(r.paired.crit).every(x => x === null || x === true)
 }
 const winners = VARS.map(v => RES.get(v.id)!).filter(r => r.paired.convincing).sort((x, y) => x.paired.changed - y.paired.changed)
+const dsrCand = winners.map(w => ({ id: w.c.id, p: dsr(diffs[ids.indexOf(w.c.id) - 1], VARS.length, P.sd(diffs.map(d => sharpe(d)))).p, ir: sharpe(diffs[ids.indexOf(w.c.id) - 1]) * ANNF }))
 const decision = winners.length ? `variante candidate : ${winners[0].c.id} (${winners[0].c.label}), exploratoire jusqu'à validation prospective` : 'aucune variante convaincante : V1 conservée inchangée'
 
 // ---------------------------------------------------------------- rapport
@@ -429,6 +434,15 @@ L.push('# Shock Engine V1 — point mort et volume directionnel 2 h / 4 h', '',
   + '(copie isolée `trail-broker.ts` / `trail-sim.ts`, volume `taker15.py`). Moteur figé, bot et site non modifiés. '
   + '**Tout est mesuré sur l\'historique qui a servi à développer V1 : une amélioration resterait exploratoire jusqu\'à validation prospective.**', '',
   '## Verdict', '', `**${decision}.**`, '',
+  ...winners.map(w => { const f = w.full, b = w.boot, p = w.paired
+    return `- **${w.c.id} remplit les six critères.** ΔSharpe ${sg(b.port.est)} ${ci(b.port, 2)}, p Holm ${n(b.port.pHolm, 3)} ; BTC ${sg(b.btc.est)} ${ci(b.btc, 2)}, ETH ${sg(b.eth.est)} ${ci(b.eth, 2)} ; `
+      + `drawdown ${pc(f.maxDD)} contre ${pc(base.m.maxDD)} ; Sharpe coûts × 2 ${n(f.sharpe2)} contre ${n(base2.m.sharpe)} ; ${f.topKept} / ${NTOP} très gros gagnants conservés. `
+      + `Effet petit : ${p.changed} sorties modifiées sur 716, ΔR apparié ${sg(p.total.est, 1)} R ${ci(p.total)} (${pc(p.total.est / P.sum(T1s.map(t => t.R)), 0)} du R total), `
+      + `${p.saved} perdants ramenés vers le point mort pour ${sg(p.recovered, 1)} R, ${p.cut} gagnants coupés pour ${sg(p.sacrificed, 1)} R ; ΔR apparié ${Object.values(p.byYear as Record<string, number>).every(x => x >= -1e-9) ? '≥ 0 chaque année' : `négatif certaines années (${Object.entries(p.byYear as Record<string, number>).filter(([, x]) => x < -1e-9).map(([y]) => y).join(', ')})`}. `
+      + 'C\'est une candidate exploratoire : V1 reste inchangée tant qu\'une validation prospective séparée (plan à pré-enregistrer) ne l\'a pas confirmée.' }),
+  ...DEC.map(d => `- **Volume à ${d.H} h : aucune information mesurable au-delà du prix.** À gain latent donné, corrélation partielle entre I et R_garder ${sg(d.partial.all.est, 3)} ${ci(d.partial.all, 3)} ; `
+    + `parmi les trades à gain < +0,5 R, l'écart de R_garder entre I < 0 et I ≥ 0 vaut ${sg(d.lowDiff.all.est)} R ${ci(d.lowDiff.all, 2)}. Les deux groupes ont un R_garder positif : couper l'un ou l'autre coûte.`),
+  `- V3 et C1 passent formellement le critère 6 parce qu'ils coupent moins de trades que leur contrôle de prix (${RES.get('V3')!.paired.triggered} contre ${RES.get('P3')!.paired.triggered} déclenchements à 2 h), pas parce que le volume trie les trades : ils échouent d'ailleurs aux critères 1 et 2. Toutes les variantes de volume perdent du R en apparié (${sg(Math.min(...['V1', 'V2', 'V3', 'V4'].map(i => RES.get(i)!.paired.total.est)), 0)} à ${sg(Math.max(...['V1', 'V2', 'V3', 'V4'].map(i => RES.get(i)!.paired.total.est)), 0)} R) et coupent des très gros gagnants.`,
   `- Rejeu complet : ΔSharpe de ${sg(Math.min(...VARS.map(v => RES.get(v.id)!.boot.port.est)))} à ${sg(Math.max(...VARS.map(v => RES.get(v.id)!.boot.port.est)))} ; meilleure variante ${best.c.id} (${sg(best.boot.port.est)}, IC ${ci(best.boot.port, 2)}, p Holm ${n(best.boot.port.pHolm, 3)}).`,
   `- Apparié : ΔR total de ${sg(Math.min(...VARS.map(v => RES.get(v.id)!.paired.total.est)), 0)} à ${sg(Math.max(...VARS.map(v => RES.get(v.id)!.paired.total.est)), 0)} R ; R récupérés sur les perdants ${sg(Math.min(...VARS.map(v => RES.get(v.id)!.paired.recovered)), 0)} à ${sg(Math.max(...VARS.map(v => RES.get(v.id)!.paired.recovered)), 0)} R, R sacrifiés sur les gagnants ${sg(Math.min(...VARS.map(v => RES.get(v.id)!.paired.sacrificed)), 0)} à ${sg(Math.max(...VARS.map(v => RES.get(v.id)!.paired.sacrificed)), 0)} R.`,
   `- Volume contre prix seul : ${VP.filter(x => x.boot.est > 0).length} / ${VP.length} variantes de volume font mieux que leur contrôle de prix ; ${VP.filter(x => x.ok).length} / ${VP.length} passent le critère 6.`,
@@ -492,6 +506,7 @@ L.push('## 6. Le volume apporte-t-il plus que le prix ? (critère 6)', '',
 L.push('## 7. Contrôles statistiques', '',
   `- CSCV-PBO (B0 + 8 variantes, 16 blocs) : **${pc(CS.pbo)}** ; configuration la plus souvent choisie : ${ids[CS.chosenCount.indexOf(Math.max(...CS.chosenCount))]}.`,
   `- Sharpe dégonflé de la meilleure variante (${ids[bestI]}, N = 241 essais connus, minimum) : ${n(dsrBest.p, 3)} — il reflète surtout le niveau hérité de V1 ; de son écart à B0 (N = 8), seul pertinent pour la décision : ${n(dsrDiff.p, 3)}.`,
+  ...dsrCand.map(d => `- Ajouté après les résultats, informatif et hors règle de décision : Sharpe dégonflé de l'écart ${d.id} − B0 (N = 8) ${n(d.p, 3)}, ratio d'information annualisé ${n(d.ir)}.`),
   `- Walk-forward **rétrospectif** (recalage annuel 2020 → 2026, meilleur Sharpe passé parmi les 9) : Sharpe hors période d'entraînement ${n(wf.oos)} contre ${n(wf.b0)} pour B0 sur les mêmes jours ; choix : ${wf.chosen.join(', ')}. `
   + 'Ce n\'est pas une validation prospective indépendante : tout l\'historique a servi à développer V1.',
   '- Par actif et par année : sections 3 et 4.', '',
@@ -501,6 +516,7 @@ L.push('## 7. Contrôles statistiques', '',
   '## 9. Limites', '',
   '- **BTC** : V1 trade Bitstamp, le volume agresseur vient de Binance comptant (proxy, voir section 2). Le flux des perpétuels, majoritaire, n\'est pas utilisé.',
   '- **Point mort** activé à la clôture de bougie (comportement d\'un script qui déplace son stop en fin de bougie) ; un stop modifié en cours de bougie donnerait d\'autres sorties.',
+  `- **Exécution** : point mort exécuté au prix d'entrée sans glissement, comme tous les stops de V1. Le risque initial médian vaut ${pc(medRiskPct, 2)} du prix : un glissement de 0,05 % coûterait ≈ ${n(0.0005 / medRiskPct)} R par sortie au point mort.`,
   '- **Un seul historique**, déjà utilisé pour développer V1 (≥ 241 essais connus) ; les règles de sortie précoce et de point mort avaient déjà été explorées sur E2 avec des résultats négatifs.',
   '- Le walk-forward est rétrospectif, et les moitiés chronologiques sont une lecture descriptive, pas un échantillon de validation.', '')
 
