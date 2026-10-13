@@ -141,6 +141,17 @@ sur les 8 actifs vierges. Descriptif : aucune règle n'est modifiée.
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/loss-anatomy.ts
 ```
 
+Architecture du régime agité (plan : `research/preregistration/agitated-regime.md`, commité avant
+toute simulation ; rapport dans `research/reports/agitated-regime/`). Diagnostics (continuation après
+le signal, reprise après le stop, excursions en ATR) et trois variantes rejouées en portefeuille
+complet : sans entrées en régime agité, stop agité à 3,3 ATR à taille inchangée, et à risque monétaire
+égal (taille par jeu ajustée dans une copie de la boucle de `simulate`, sans modifier le moteur).
+Exploratoire (BTC/ETH et 8 cryptos déjà consultées) ; aucune variante candidate.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/agitated-regime.ts
+```
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 
