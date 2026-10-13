@@ -1,0 +1,955 @@
+{
+ "protocol": "research/preregistration/v1-trailing.md",
+ "controls": [
+  "copie (spécification V1) = moteur figé, positions et equity au bit près, BTC et ETH",
+  "copie (atrTrailMult = 10, hors liste) = moteur figé avec le même réglage",
+  "rejeu apparié (entrées imposées) = 716 trades V1",
+  "Sharpe du portefeuille V1 = fiche (2.0242)"
+ ],
+ "base": {
+  "days": 2952,
+  "years": 8.0821355,
+  "totalReturn": 64.355003,
+  "cagr": 0.6772734,
+  "vol": 0.27353408,
+  "sharpe": 2.0242079,
+  "sortino": 4.7287176,
+  "downsideDev": 0.11709091,
+  "maxDD": -0.17849879,
+  "calmar": 3.7942744,
+  "skew": 3.6515372,
+  "kurt": 28.805816,
+  "bestDay": {
+   "day": 20684,
+   "ret": 0.16230081
+  },
+  "worstDay": {
+   "day": 20490,
+   "ret": -0.061531046
+  },
+  "bestMonth": {
+   "key": 24226,
+   "ret": 0.45759065,
+   "n": 30,
+   "from": 17836,
+   "to": 17865,
+   "full": true
+  },
+  "worstMonth": {
+   "key": 24265,
+   "ret": -0.13911386,
+   "n": 28,
+   "from": 19024,
+   "to": 19051,
+   "full": true
+  },
+  "bestYear": {
+   "key": 2018,
+   "ret": 1.2026834,
+   "n": 122,
+   "from": 17775,
+   "to": 17896,
+   "full": true
+  },
+  "worstYear": {
+   "key": 2019,
+   "ret": 0.080044303,
+   "n": 365,
+   "from": 17897,
+   "to": 18261,
+   "full": true
+  },
+  "positiveDays": 0.16937669,
+  "flatDays": 0.6300813,
+  "dailyPF": 1.7939806,
+  "sharpeBTC": 1.4564969,
+  "sharpeETH": 1.9272758,
+  "sharpe2": 1.8782281
+ },
+ "groups": {
+  "G": 126,
+  "TOP": 36
+ },
+ "variants": [
+  {
+   "id": "C8",
+   "fam": 1,
+   "label": "classique 8 ATR",
+   "paired": {
+    "changed": 224,
+    "G": {
+     "est": 172.17268,
+     "lo": 118.02604,
+     "hi": 230.53059
+    },
+    "TOP": {
+     "est": -445.68482,
+     "lo": -617.65456,
+     "hi": -288.47486
+    },
+    "all": {
+     "est": -343.54168,
+     "lo": -605.79395,
+     "hi": -110.49655
+    },
+    "allBTC": -192.59393,
+    "allETH": -150.94775,
+    "topKept": 8,
+    "gChangedPositive": 95
+   },
+   "full": {
+    "trades": [
+     391,
+     406
+    ],
+    "sharpe": 1.7637439,
+    "cagr": 0.3911305,
+    "maxDD": -0.12942543,
+    "calmar": 3.0220529,
+    "sortino": 4.2685574,
+    "pf": 1.8826419,
+    "tim": 0.099113241,
+    "exitsTrail": 245,
+    "sharpeBTC": 1.2586481,
+    "sharpeETH": 1.6040967,
+    "cagrBTC": 0.24928033,
+    "cagrETH": 0.4722185,
+    "sharpe2": 1.5400332,
+    "cagr2": 0.33041789,
+    "topKept": 8
+   },
+   "boot": {
+    "port": {
+     "est": -0.26046397,
+     "lo": -0.68900701,
+     "hi": 0.14159816,
+     "p": 0.89305347,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.19784883,
+     "lo": -0.55270945,
+     "hi": 0.14610682,
+     "p": 0.86006997
+    },
+    "eth": {
+     "est": -0.3231791,
+     "lo": -0.81764902,
+     "hi": 0.10682783,
+     "p": 0.92703648
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "C12",
+   "fam": 1,
+   "label": "classique 12 ATR",
+   "paired": {
+    "changed": 134,
+    "G": {
+     "est": 91.461516,
+     "lo": 57.170044,
+     "hi": 132.3021
+    },
+    "TOP": {
+     "est": -354.63156,
+     "lo": -504.63871,
+     "hi": -221.05708
+    },
+    "all": {
+     "est": -269.37254,
+     "lo": -491.13984,
+     "hi": -79.197869
+    },
+    "allBTC": -168.93298,
+    "allETH": -100.43956,
+    "topKept": 12,
+    "gChangedPositive": 60
+   },
+   "full": {
+    "trades": [
+     374,
+     379
+    ],
+    "sharpe": 1.891454,
+    "cagr": 0.48855843,
+    "maxDD": -0.13337006,
+    "calmar": 3.6631793,
+    "sortino": 4.6098552,
+    "pf": 2.0731787,
+    "tim": 0.12356781,
+    "exitsTrail": 140,
+    "sharpeBTC": 1.2965621,
+    "sharpeETH": 1.7545315,
+    "cagrBTC": 0.28726721,
+    "cagrETH": 0.58851813,
+    "sharpe2": 1.7040909,
+    "cagr2": 0.4275703,
+    "topKept": 12
+   },
+   "boot": {
+    "port": {
+     "est": -0.1327539,
+     "lo": -0.43733049,
+     "hi": 0.1591734,
+     "p": 0.81509245,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.15993474,
+     "lo": -0.48061727,
+     "hi": 0.13566449,
+     "p": 0.84057971
+    },
+    "eth": {
+     "est": -0.17274435,
+     "lo": -0.48765324,
+     "hi": 0.13018442,
+     "p": 0.86006997
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "C16",
+   "fam": 1,
+   "label": "classique 16 ATR",
+   "paired": {
+    "changed": 86,
+    "G": {
+     "est": 48.639075,
+     "lo": 24.307332,
+     "hi": 78.924094
+    },
+    "TOP": {
+     "est": -271.38626,
+     "lo": -425.28974,
+     "hi": -130.30674
+    },
+    "all": {
+     "est": -208.80286,
+     "lo": -404.32031,
+     "hi": -46.703029
+    },
+    "allBTC": -134.49191,
+    "allETH": -74.310943,
+    "topKept": 18,
+    "gChangedPositive": 44
+   },
+   "full": {
+    "trades": [
+     366,
+     367
+    ],
+    "sharpe": 1.9143778,
+    "cagr": 0.55348563,
+    "maxDD": -0.17818368,
+    "calmar": 3.1062645,
+    "sortino": 4.6958195,
+    "pf": 2.206649,
+    "tim": 0.1347988,
+    "exitsTrail": 88,
+    "sharpeBTC": 1.3047413,
+    "sharpeETH": 1.7998397,
+    "cagrBTC": 0.30896594,
+    "cagrETH": 0.66479968,
+    "sharpe2": 1.7490066,
+    "cagr2": 0.4917648,
+    "topKept": 18
+   },
+   "boot": {
+    "port": {
+     "est": -0.10983004,
+     "lo": -0.3601288,
+     "hi": 0.13297087,
+     "p": 0.78910545,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.15175555,
+     "lo": -0.41634783,
+     "hi": 0.092310359,
+     "p": 0.88155922
+    },
+    "eth": {
+     "est": -0.12743611,
+     "lo": -0.38211463,
+     "hi": 0.12094745,
+     "p": 0.83158421
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "C25",
+   "fam": 1,
+   "label": "classique 25 ATR",
+   "paired": {
+    "changed": 24,
+    "G": {
+     "est": 10.901805,
+     "lo": 0.74251152,
+     "hi": 28.880854
+    },
+    "TOP": {
+     "est": -92.154082,
+     "lo": -234.30596,
+     "hi": 2.3866078
+    },
+    "all": {
+     "est": -77.589182,
+     "lo": -223.53794,
+     "hi": 22.333125
+    },
+    "allBTC": -25.716873,
+    "allETH": -51.872309,
+    "topKept": 28,
+    "gChangedPositive": 27
+   },
+   "full": {
+    "trades": [
+     360,
+     360
+    ],
+    "sharpe": 1.9864656,
+    "cagr": 0.61370332,
+    "maxDD": -0.17817832,
+    "calmar": 3.4443209,
+    "sortino": 4.7144557,
+    "pf": 2.3722955,
+    "tim": 0.15153683,
+    "exitsTrail": 25,
+    "sharpeBTC": 1.5026851,
+    "sharpeETH": 1.8361488,
+    "cagrBTC": 0.39442982,
+    "cagrETH": 0.72230496,
+    "sharpe2": 1.8308022,
+    "cagr2": 0.55082333,
+    "topKept": 28
+   },
+   "boot": {
+    "port": {
+     "est": -0.037742251,
+     "lo": -0.22798892,
+     "hi": 0.12778828,
+     "p": 0.64667666,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": 0.04618819,
+     "lo": -0.03524905,
+     "hi": 0.13524473,
+     "p": 0.15042479
+    },
+    "eth": {
+     "est": -0.091126959,
+     "lo": -0.30090848,
+     "hi": 0.093290975,
+     "p": 0.82008996
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "D3-2",
+   "fam": 2,
+   "label": "découplé +3 R / 2 R",
+   "paired": {
+    "changed": 221,
+    "G": {
+     "est": 163.18343,
+     "lo": 124.52257,
+     "hi": 209.92929
+    },
+    "TOP": {
+     "est": -471.16872,
+     "lo": -649.00178,
+     "hi": -310.14935
+    },
+    "all": {
+     "est": -371.91452,
+     "lo": -633.03,
+     "hi": -125.83599
+    },
+    "allBTC": -199.093,
+    "allETH": -172.82152,
+    "topKept": 4,
+    "gChangedPositive": 85
+   },
+   "full": {
+    "trades": [
+     397,
+     411
+    ],
+    "sharpe": 1.7932513,
+    "cagr": 0.3787805,
+    "maxDD": -0.12667077,
+    "calmar": 2.9902756,
+    "sortino": 4.2164701,
+    "pf": 1.8113364,
+    "tim": 0.096718869,
+    "exitsTrail": 243,
+    "sharpeBTC": 1.2211283,
+    "sharpeETH": 1.6115844,
+    "cagrBTC": 0.23177856,
+    "cagrETH": 0.46110689,
+    "sharpe2": 1.5572777,
+    "cagr2": 0.31782065,
+    "topKept": 4
+   },
+   "boot": {
+    "port": {
+     "est": -0.23095657,
+     "lo": -0.64219252,
+     "hi": 0.12000622,
+     "p": 0.89205397,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.23536855,
+     "lo": -0.58434684,
+     "hi": 0.13626807,
+     "p": 0.90054973
+    },
+    "eth": {
+     "est": -0.31569137,
+     "lo": -0.73700036,
+     "hi": 0.093649674,
+     "p": 0.92603698
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "D5-3",
+   "fam": 2,
+   "label": "découplé +5 R / 3 R",
+   "paired": {
+    "changed": 129,
+    "G": {
+     "est": 88.117489,
+     "lo": 46.504766,
+     "hi": 135.56488
+    },
+    "TOP": {
+     "est": -368.22123,
+     "lo": -526.2077,
+     "hi": -218.19075
+    },
+    "all": {
+     "est": -291.02872,
+     "lo": -521.797,
+     "hi": -86.183919
+    },
+    "allBTC": -158.41852,
+    "allETH": -132.6102,
+    "topKept": 11,
+    "gChangedPositive": 50
+   },
+   "full": {
+    "trades": [
+     376,
+     385
+    ],
+    "sharpe": 1.7851113,
+    "cagr": 0.424629,
+    "maxDD": -0.15197811,
+    "calmar": 2.7940142,
+    "sortino": 4.1468739,
+    "pf": 1.9576988,
+    "tim": 0.11763463,
+    "exitsTrail": 135,
+    "sharpeBTC": 1.2998479,
+    "sharpeETH": 1.620976,
+    "cagrBTC": 0.28688609,
+    "cagrETH": 0.50525488,
+    "sharpe2": 1.5840968,
+    "cagr2": 0.36546879,
+    "topKept": 11
+   },
+   "boot": {
+    "port": {
+     "est": -0.23909661,
+     "lo": -0.52710915,
+     "hi": 0.063536208,
+     "p": 0.93353323,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.15664895,
+     "lo": -0.44679336,
+     "hi": 0.15577805,
+     "p": 0.83358321
+    },
+    "eth": {
+     "est": -0.30629981,
+     "lo": -0.64588975,
+     "hi": 0.023994628,
+     "p": 0.96501749
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "D5-4",
+   "fam": 2,
+   "label": "découplé +5 R / 4 R",
+   "paired": {
+    "changed": 98,
+    "G": {
+     "est": 68.951821,
+     "lo": 36.178258,
+     "hi": 108.38569
+    },
+    "TOP": {
+     "est": -326.39337,
+     "lo": -481.29336,
+     "hi": -193.6005
+    },
+    "all": {
+     "est": -252.48175,
+     "lo": -457.81363,
+     "hi": -74.867384
+    },
+    "allBTC": -153.4664,
+    "allETH": -99.015354,
+    "topKept": 16,
+    "gChangedPositive": 45
+   },
+   "full": {
+    "trades": [
+     369,
+     372
+    ],
+    "sharpe": 1.93356,
+    "cagr": 0.52125408,
+    "maxDD": -0.17759233,
+    "calmar": 2.935116,
+    "sortino": 4.7103209,
+    "pf": 2.1404716,
+    "tim": 0.12934391,
+    "exitsTrail": 100,
+    "sharpeBTC": 1.3603561,
+    "sharpeETH": 1.7801635,
+    "cagrBTC": 0.31088249,
+    "cagrETH": 0.62444477,
+    "sharpe2": 1.7557113,
+    "cagr2": 0.46002552,
+    "topKept": 16
+   },
+   "boot": {
+    "port": {
+     "est": -0.090647936,
+     "lo": -0.37779071,
+     "hi": 0.20042003,
+     "p": 0.70914543,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.096140824,
+     "lo": -0.3731484,
+     "hi": 0.14718835,
+     "p": 0.77411294
+    },
+    "eth": {
+     "est": -0.14711231,
+     "lo": -0.46569453,
+     "hi": 0.16454691,
+     "p": 0.82258871
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "X2-1.5",
+   "fam": 3,
+   "label": "agité, MFE ≥ 2 R → 1.5 R",
+   "paired": {
+    "changed": 50,
+    "G": {
+     "est": 21.559692,
+     "lo": 4.3864551,
+     "hi": 44.323949
+    },
+    "TOP": {
+     "est": -174.90966,
+     "lo": -276.03243,
+     "hi": -92.279857
+    },
+    "all": {
+     "est": -163.28635,
+     "lo": -293.91237,
+     "hi": -59.76872
+    },
+    "allBTC": -51.484796,
+    "allETH": -111.80156,
+    "topKept": 22,
+    "gChangedPositive": 36
+   },
+   "full": {
+    "trades": [
+     358,
+     364
+    ],
+    "sharpe": 1.7191502,
+    "cagr": 0.42713725,
+    "maxDD": -0.17785295,
+    "calmar": 2.4016316,
+    "sortino": 3.9093071,
+    "pf": 2.0320638,
+    "tim": 0.13554206,
+    "exitsTrail": 53,
+    "sharpeBTC": 1.2983954,
+    "sharpeETH": 1.5526037,
+    "cagrBTC": 0.30300122,
+    "cagrETH": 0.50310994,
+    "sharpe2": 1.5366112,
+    "cagr2": 0.37099006,
+    "topKept": 22
+   },
+   "boot": {
+    "port": {
+     "est": -0.30505772,
+     "lo": -0.6487722,
+     "hi": 0.0011428423,
+     "p": 0.97451274,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.15810148,
+     "lo": -0.38668389,
+     "hi": 0.063837448,
+     "p": 0.91804098
+    },
+    "eth": {
+     "est": -0.37467209,
+     "lo": -0.74823772,
+     "hi": -0.047254837,
+     "p": 0.98850575
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "X2-3",
+   "fam": 3,
+   "label": "agité, MFE ≥ 2 R → 3 R",
+   "paired": {
+    "changed": 40,
+    "G": {
+     "est": 22.752308,
+     "lo": 1.1447538,
+     "hi": 54.237522
+    },
+    "TOP": {
+     "est": -143.50293,
+     "lo": -222.33555,
+     "hi": -70.58515
+    },
+    "all": {
+     "est": -130.67889,
+     "lo": -235.65696,
+     "hi": -40.515393
+    },
+    "allBTC": -42.109072,
+    "allETH": -88.569815,
+    "topKept": 24,
+    "gChangedPositive": 42
+   },
+   "full": {
+    "trades": [
+     358,
+     363
+    ],
+    "sharpe": 1.7867887,
+    "cagr": 0.46755777,
+    "maxDD": -0.17792337,
+    "calmar": 2.6278604,
+    "sortino": 4.0820588,
+    "pf": 2.0983195,
+    "tim": 0.14119734,
+    "exitsTrail": 42,
+    "sharpeBTC": 1.3199676,
+    "sharpeETH": 1.6226695,
+    "cagrBTC": 0.32018569,
+    "cagrETH": 0.55238523,
+    "sharpe2": 1.6106553,
+    "cagr2": 0.40994284,
+    "topKept": 24
+   },
+   "boot": {
+    "port": {
+     "est": -0.23741921,
+     "lo": -0.56321745,
+     "hi": 0.050137994,
+     "p": 0.94152924,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.13652929,
+     "lo": -0.32175671,
+     "hi": 0.046623129,
+     "p": 0.93203398
+    },
+    "eth": {
+     "est": -0.3046063,
+     "lo": -0.68240758,
+     "hi": 0.027822584,
+     "p": 0.96451774
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "X4-1.5",
+   "fam": 3,
+   "label": "agité, MFE ≥ 4 R → 1.5 R",
+   "paired": {
+    "changed": 41,
+    "G": {
+     "est": 14.413198,
+     "lo": 7.6275791e-16,
+     "hi": 34.328495
+    },
+    "TOP": {
+     "est": -171.30849,
+     "lo": -272.06062,
+     "hi": -91.466738
+    },
+    "all": {
+     "est": -160.65694,
+     "lo": -282.35207,
+     "hi": -64.222939
+    },
+    "allBTC": -51.22602,
+    "allETH": -109.43092,
+    "topKept": 22,
+    "gChangedPositive": 32
+   },
+   "full": {
+    "trades": [
+     358,
+     363
+    ],
+    "sharpe": 1.704084,
+    "cagr": 0.42171748,
+    "maxDD": -0.17776616,
+    "calmar": 2.3723158,
+    "sortino": 3.8272538,
+    "pf": 2.018404,
+    "tim": 0.13873022,
+    "exitsTrail": 43,
+    "sharpeBTC": 1.3025609,
+    "sharpeETH": 1.5255253,
+    "cagrBTC": 0.30845392,
+    "cagrETH": 0.49347486,
+    "sharpe2": 1.5215037,
+    "cagr2": 0.36590619,
+    "topKept": 22
+   },
+   "boot": {
+    "port": {
+     "est": -0.32012385,
+     "lo": -0.63774922,
+     "hi": -0.0390802,
+     "p": 0.98750625,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.15393598,
+     "lo": -0.34553531,
+     "hi": 0.027673399,
+     "p": 0.95352324
+    },
+    "eth": {
+     "est": -0.40175051,
+     "lo": -0.76644019,
+     "hi": -0.084769907,
+     "p": 0.998001
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  },
+  {
+   "id": "X4-3",
+   "fam": 3,
+   "label": "agité, MFE ≥ 4 R → 3 R",
+   "paired": {
+    "changed": 35,
+    "G": {
+     "est": 20.278036,
+     "lo": 2.8296809e-15,
+     "hi": 50.332653
+    },
+    "TOP": {
+     "est": -143.50293,
+     "lo": -227.40533,
+     "hi": -72.274455
+    },
+    "all": {
+     "est": -125.55336,
+     "lo": -230.92713,
+     "hi": -37.381031
+    },
+    "allBTC": -40.334937,
+    "allETH": -85.218419,
+    "topKept": 24,
+    "gChangedPositive": 38
+   },
+   "full": {
+    "trades": [
+     358,
+     362
+    ],
+    "sharpe": 1.8125973,
+    "cagr": 0.47461168,
+    "maxDD": -0.17782462,
+    "calmar": 2.6689874,
+    "sortino": 4.139137,
+    "pf": 2.1131385,
+    "tim": 0.14188749,
+    "exitsTrail": 37,
+    "sharpeBTC": 1.3446678,
+    "sharpeETH": 1.6350939,
+    "cagrBTC": 0.33045475,
+    "cagrETH": 0.55858464,
+    "sharpe2": 1.6361989,
+    "cagr2": 0.41685307,
+    "topKept": 24
+   },
+   "boot": {
+    "port": {
+     "est": -0.21161055,
+     "lo": -0.52716315,
+     "hi": 0.065729384,
+     "p": 0.92203898,
+     "pHolm": 1
+    },
+    "btc": {
+     "est": -0.11182913,
+     "lo": -0.28062483,
+     "hi": 0.054450293,
+     "p": 0.90704648
+    },
+    "eth": {
+     "est": -0.29218194,
+     "lo": -0.68147453,
+     "hi": 0.032764007,
+     "p": 0.96201899
+    }
+   },
+   "crit": {
+    "c1": false,
+    "c2": false,
+    "c3": false,
+    "c4": false,
+    "c5": false,
+    "c6": false
+   },
+   "convincing": false
+  }
+ ],
+ "pbo": 0.26394716,
+ "wf": {
+  "oosSharpe": 1.9396882,
+  "v1Sharpe": 1.9815956,
+  "chosen": [
+   "2020 : D5-3",
+   "2021 : C16",
+   "2022 : V1",
+   "2023 : V1",
+   "2024 : V1",
+   "2025 : V1",
+   "2026 : V1"
+  ]
+ },
+ "dsrBest": {
+  "id": "C25",
+  "p": 1
+ },
+ "dsrDiff": {
+  "p": 0.00079367414
+ },
+ "decision": "aucune variante convaincante : trailing de 50 ATR conservé"
+}

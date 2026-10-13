@@ -206,6 +206,17 @@ const winners = res.filter(r => r.convincing).sort((x, y) => x.paired.changed - 
 const decision = winners.length ? `variante candidate : ${winners[0].id} (${winners[0].label}) — à valider prospectivement` : 'aucune variante convaincante : trailing de 50 ATR conservé'
 
 // ---------------------------------------------------------------- rapport
+function synthesis(): string[] {
+  const rg = (xs: number[], d = 0) => `${sg(Math.min(...xs), d)} à ${sg(Math.max(...xs), d)}`
+  const ratio = res.map(r => -r.paired.TOP.est / r.paired.G.est)
+  const best = res.reduce((x, y) => (y.boot.port.est > x.boot.port.est ? y : x))
+  const tight = res.filter(r => r.full.maxDD > base.m.maxDD + 0.01)
+  return [
+    `- Apparié : R récupéré sur les trades qui rendent leurs gains ${rg(res.map(r => r.paired.G.est))} R ; R sacrifié sur les ${NTOP} très gros gagnants ${rg(res.map(r => r.paired.TOP.est))} R, soit ${n(Math.min(...ratio), 1)} à ${n(Math.max(...ratio), 1)} R perdus par R récupéré. ΔR total négatif pour les ${res.filter(r => r.paired.all.est < 0).length} variantes, sur BTC (${res.filter(r => r.paired.allBTC < 0).length} / ${res.length}) comme sur ETH (${res.filter(r => r.paired.allETH < 0).length} / ${res.length}).`,
+    `- Portefeuille : ΔSharpe ${rg(res.map(r => r.boot.port.est), 2)} ; meilleure variante ${best.id} (${sg(best.boot.port.est)}, IC ${ci(best.boot.port, 2)}). Sharpe relevé sur les deux sleeves : ${res.filter(r => r.crit.c2).length} / ${res.length} ; Calmar ≥ V1 : ${res.filter(r => r.full.calmar >= base.m.calmar).length} / ${res.length}.`,
+    `- Les trailings serrés (${tight.map(r => r.id).join(', ')}) réduisent le drawdown (${rg(tight.map(r => 100 * r.full.maxDD), 1)} % contre ${pc(base.m.maxDD)}) au prix de la CAGR (${n(100 * Math.min(...tight.map(r => r.full.cagr)), 1)} à ${n(100 * Math.max(...tight.map(r => r.full.cagr)), 1)} % contre ${pc(base.m.cagr)}).`,
+  ]
+}
 const fr = (s: string) => s.replace(/(\d)\.(\d)/g, '$1,$2')
 const n = (x: number, d = 2) => fr((x > 0 ? '' : x < 0 ? '−' : '') + Math.abs(x).toFixed(d))
 const sg = (x: number, d = 2) => fr((x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(d))
@@ -217,7 +228,7 @@ L.push('# Trailing stop de Shock Engine V1 — variantes pré-enregistrées', ''
   'Protocole : `research/preregistration/v1-trailing.md` (commité avant les résultats). Généré par `research/fade/v1/trailing-study.ts`. '
   + 'Moteur figé non modifié ; variantes découplées et conditionnelles via la copie isolée `research/fade/v1/trail-broker.ts`. '
   + '**Simulation historique dans l\'échantillon de conception de V1** : aucun chiffre n\'est une validation indépendante.', '',
-  `## Verdict`, '', `**${decision}.**`, '',
+  `## Verdict`, '', `**${decision}.**`, '', ...synthesis(), '',
   '## Contrôles', '', ...CONTROLS.map(c => `- ${c} : OK`), '',
   `V1 : ${T1s.length} trades, Sharpe ${n(base.m.sharpe)}, CAGR ${pc(base.m.cagr)}, drawdown ${pc(base.m.maxDD)}, Calmar ${n(base.m.calmar)}. `
   + `Groupe « rend ses gains » (MFE ≥ 2 R et R < 1 R) : ${G.size} trades. « Très gros gagnants » (5 % meilleurs) : ${NTOP} trades, `
@@ -242,7 +253,7 @@ for (const r of res) {
 }
 L.push('', '## 3. Contrôles statistiques', '',
   `- CSCV-PBO (12 configurations, 16 blocs) : **${pc(CS.pbo)}** ; configuration la plus souvent choisie : ${ids[CS.chosenCount.indexOf(Math.max(...CS.chosenCount))]}.`,
-  `- Sharpe dégonflé de la meilleure variante (${ids[bestI]}, N = 233 essais) : ${n(dsrBest.p, 3)} ; de son écart à V1 (N = 11) : ${n(dsrDiff.p, 3)}.`,
+  `- Sharpe dégonflé de la meilleure variante (${ids[bestI]}, N = 233 essais) : ${n(dsrBest.p, 3)} — il reflète le niveau hérité de V1, pas un apport du trailing ; de son écart à V1 (N = 11), seul pertinent pour la décision : ${n(dsrDiff.p, 3)}.`,
   `- Walk-forward **rétrospectif** (recalage annuel 2020 → 2026, meilleur Sharpe passé parmi les 12) : Sharpe hors période d'entraînement ${n(wf.oosSharpe)} contre ${n(wf.v1Sharpe)} pour V1 sur les mêmes jours ; choix : ${wf.chosen.join(', ')}. `
   + 'Ce n\'est pas une validation prospective indépendante : tout l\'historique a servi à concevoir V1.', '',
   '## 4. Règle de décision', '',

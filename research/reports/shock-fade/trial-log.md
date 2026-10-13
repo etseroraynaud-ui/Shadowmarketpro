@@ -34,5 +34,8 @@ commité (fichiers nouveaux non détectés par l'ancien marqueur) ; ce code est 
 | 2026-10-13 17:03 | 8d1a6a5+modif | `shockfade/v1_hawkes.py` | V1 × Hawkes/Merton : 24 tests hors échantillon, 2 règles fixées | 2018-09 → 2026-09 (V1) |
 | 2026-10-13 17:05 | 8d1a6a5+modif | `shockfade/v1_hawkes.py` | V1 × Hawkes/Merton : 24 tests hors échantillon, 2 règles fixées | 2018-09 → 2026-09 (V1) |
 | 2026-10-13 17:06 | 8d1a6a5+modif | `shockfade/v1_hawkes.py` | V1 × Hawkes/Merton : 24 tests hors échantillon, 2 règles fixées | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 18:10 | eb10895 | `v1/trailing-study.ts` | Trailing de V1 : 11 variantes pré-enregistrées (apparié + rejeu complet) | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 18:14 | eb10895+modif | `v1/trailing-study.ts` | Trailing de V1 : 11 variantes pré-enregistrées (apparié + rejeu complet) ; rapport seul modifié, mêmes chiffres | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 18:16 | eb10895+modif | `v1/trailing-study.ts` | Trailing de V1 : 11 variantes pré-enregistrées (apparié + rejeu complet) ; rapport seul modifié, mêmes chiffres | 2018-09 → 2026-09 (V1) |
 
 Note : pour `shockfade/v1_hawkes.py`, les exécutions antérieures à la dernière groupaient les erreurs types sur 3 « jours » (conversion des dates en microsecondes avec pandas 3) ; corrigé, seuls les résultats de la dernière exécution sont rapportés.
