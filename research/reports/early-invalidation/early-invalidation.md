@@ -1,6 +1,6 @@
 # Invalidation précoce d'un choc qui ne confirme pas
 
-Plan : `research/preregistration/early-invalidation.md`, commité avant tout calcul. Script : `research/shock/early-invalidation.ts` (commit `8ebe720`, sources modifiées). Moteur non modifié. Exploratoire : BTC/ETH (développement) et 8 cryptos déjà consultées.
+Plan : `research/preregistration/early-invalidation.md`, commité avant tout calcul. Script : `research/shock/early-invalidation.ts` (commit `60112a3`). Moteur non modifié. Exploratoire : BTC/ETH (développement) et 8 cryptos déjà consultées.
 
 ## Réponse
 

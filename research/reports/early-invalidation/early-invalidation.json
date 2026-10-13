@@ -1,9 +1,9 @@
 {
  "plan": "research/preregistration/early-invalidation.md",
- "generatedAt": "2026-10-13T02:20:50.093Z",
+ "generatedAt": "2026-10-13T02:24:30.754Z",
  "git": {
-  "commit": "8ebe720aa194f4249f90e6705380829f54b4d362",
-  "clean": false
+  "commit": "60112a3127dd0b1ee33e786af11d877c27d1b9f4",
+  "clean": true
  },
  "checks": [
   {
