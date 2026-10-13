@@ -118,6 +118,19 @@ npm run research:proba
 npm run research:proba:score -- --asset btc --at 2026-09-21T20:30:00Z
 ```
 
+Régime directionnel avant le signal et coût des faux départs (plan :
+`research/preregistration/regime-fakeout.md`, commité avant tout calcul ; rapport dans
+`research/reports/regime-fakeout/`). Efficiency Ratio 5 h (et 24 h), ADX et fréquence historique des
+faux départs avant chaque entrée, en percentile causal sur 90 jours ; matrice de rendement
+conditionnel sur les 1 311 trades BTC/ETH et sur les 8 actifs vierges ; variantes figées d'avance
+(anti-range, confirmation retardée, sorties du jeu agité en range) rejouées en portefeuille complet
+sans modifier le moteur, test confirmatoire sur les actifs vierges. Résultat : aucun régime ne
+concentre le coût des faux départs, aucune variante ne démontre d'avantage ; V0 reste la référence.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/regime-fakeout.ts
+```
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 

@@ -1,0 +1,4046 @@
+{
+ "plan": "research/preregistration/regime-fakeout.md",
+ "generatedAt": "2026-10-13T01:26:32.521Z",
+ "git": {
+  "commit": "a6af958feece0550b71bf40b97f2888f6d7551e6",
+  "clean": false
+ },
+ "config": {
+  "erN": 20,
+  "erN2": 96,
+  "adxLen": 14,
+  "fakeN": 20,
+  "fakeK": 4,
+  "fakeWin": 672,
+  "fakeMin": 10,
+  "pctWin": 8640,
+  "pctMin": 2880,
+  "rangePct": 0.25,
+  "reentry": [
+   1,
+   4,
+   16
+  ],
+  "boot": 10000,
+  "seed": 20261013
+ },
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "b69ad8f8f89a4ded"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "fafb22d6373b19bf"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "bad42836b9d61569"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "15211a3e185b1214"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/params.ts",
+   "ok": true,
+   "detail": "5f7cd0c941d70273"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/presets.ts",
+   "ok": true,
+   "detail": "f97449733ec945bb"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/regimes.ts",
+   "ok": true,
+   "detail": "d72f79d1d97c214d"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/live.ts",
+   "ok": true,
+   "detail": "05caf82ece9ad7f8"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "be445aa726433c3e"
+  },
+  {
+   "name": "empreinte research/lib/e2.ts",
+   "ok": true,
+   "detail": "d871214da8d4efb7"
+  },
+  {
+   "name": "BTC : V0 = trades du portefeuille E2 publié",
+   "ok": true,
+   "detail": "644 / 644"
+  },
+  {
+   "name": "ETH : V0 = trades du portefeuille E2 publié",
+   "ok": true,
+   "detail": "667 / 667"
+  },
+  {
+   "name": "BTC/ETH : Sharpe de V0 = Sharpe publié du portefeuille E2",
+   "ok": true,
+   "detail": "1.877566513286129 / 1.877566513"
+  },
+  {
+   "name": "BTC : V3 sans range = V0",
+   "ok": true,
+   "detail": "774 positions"
+  },
+  {
+   "name": "XRP : V3 sans range = V0",
+   "ok": true,
+   "detail": "589 positions"
+  },
+  {
+   "name": "mesures identiques sur un historique coupé à la bougie de signal",
+   "ok": true,
+   "detail": "48 comparaisons, 0 écart(s)"
+  },
+  {
+   "name": "BTC/ETH : 1 311 trades dans la matrice",
+   "ok": true,
+   "detail": "1311"
+  }
+ ],
+ "phase1": {
+  "BTC/ETH (développement)": {
+   "er": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 1311,
+    "undefinedPct": 0,
+    "bigThreshold": 3.8383172,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 236,
+      "share": 0.18001526,
+      "winRate": 0.30932203,
+      "winLo": 0.25379998,
+      "winHi": 0.37095213,
+      "meanR": 0.64354487,
+      "meanLo": 0.11471797,
+      "meanHi": 1.247425,
+      "medianR": -1.0575037,
+      "payoff": 4.1710358,
+      "pf": 1.8680099,
+      "mfe": 1.1069233,
+      "mae": -1,
+      "reentry": [
+       0.11864407,
+       0.26694915,
+       0.50423729
+      ],
+      "bigInGroup": 0.11440678,
+      "bigShare": 0.20454545,
+      "sumRShare": 0.20640407,
+      "lossShare": 0.17720065
+     },
+     {
+      "group": "Range modéré",
+      "n": 254,
+      "share": 0.19374523,
+      "winRate": 0.33070866,
+      "winLo": 0.27575035,
+      "winHi": 0.39071136,
+      "meanR": 0.52030359,
+      "meanLo": -0.024756813,
+      "meanHi": 1.19268,
+      "medianR": -1.0476895,
+      "payoff": 3.4173151,
+      "pf": 1.6885557,
+      "mfe": 1.4624326,
+      "mae": -1,
+      "reentry": [
+       0.13385827,
+       0.27559055,
+       0.46850394
+      ],
+      "bigInGroup": 0.098425197,
+      "bigShare": 0.18939394,
+      "sumRShare": 0.17960481,
+      "lossShare": 0.19437957
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 317,
+      "share": 0.24180015,
+      "winRate": 0.28391167,
+      "winLo": 0.23709355,
+      "winHi": 0.33590428,
+      "meanR": 0.44289235,
+      "meanLo": 0.070107125,
+      "meanHi": 0.86525544,
+      "medianR": -1.0583023,
+      "payoff": 3.9282271,
+      "pf": 1.5574469,
+      "mfe": 1.1278137,
+      "mae": -1,
+      "reentry": [
+       0.12302839,
+       0.32492114,
+       0.50788644
+      ],
+      "bigInGroup": 0.09148265,
+      "bigShare": 0.21969697,
+      "sumRShare": 0.19080285,
+      "lossShare": 0.25506631
+     },
+     {
+      "group": "Tendance forte",
+      "n": 504,
+      "share": 0.38443936,
+      "winRate": 0.31547619,
+      "winLo": 0.27643112,
+      "winHi": 0.35731285,
+      "meanR": 0.61783949,
+      "meanLo": 0.2606727,
+      "meanHi": 1.0213018,
+      "medianR": -1.03986,
+      "payoff": 4.0025777,
+      "pf": 1.8446663,
+      "mfe": 1.4184113,
+      "mae": -1,
+      "reentry": [
+       0.099206349,
+       0.26190476,
+       0.46428571
+      ],
+      "bigInGroup": 0.10119048,
+      "bigShare": 0.38636364,
+      "sumRShare": 0.42318827,
+      "lossShare": 0.37335347
+     }
+    ],
+    "D1": {
+     "est": 0.10034014,
+     "lo": -0.46819918,
+     "hi": 0.72321249,
+     "pTwoSided": 0.7618,
+     "n0": 236,
+     "n1": 1075
+    }
+   },
+   "er2": {
+    "measure": "er2",
+    "label": "ER 96 bougies (24 h)",
+    "n": 1311,
+    "undefinedPct": 0,
+    "bigThreshold": 3.8383172,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 275,
+      "share": 0.20976354,
+      "winRate": 0.32727273,
+      "winLo": 0.27452727,
+      "winHi": 0.38477734,
+      "meanR": 0.83618392,
+      "meanLo": 0.24324412,
+      "meanHi": 1.5153024,
+      "medianR": -1.0579459,
+      "payoff": 4.4332747,
+      "pf": 2.1567282,
+      "mfe": 1.3155479,
+      "mae": -1,
+      "reentry": [
+       0.11636364,
+       0.29090909,
+       0.52727273
+      ],
+      "bigInGroup": 0.10545455,
+      "bigShare": 0.21969697,
+      "sumRShare": 0.31250857,
+      "lossShare": 0.20132713
+     },
+     {
+      "group": "Range modéré",
+      "n": 281,
+      "share": 0.2143402,
+      "winRate": 0.2633452,
+      "winLo": 0.21528784,
+      "winHi": 0.31778575,
+      "meanR": 0.33867737,
+      "meanLo": -0.10083115,
+      "meanHi": 0.83911577,
+      "medianR": -1.0662953,
+      "payoff": 3.975951,
+      "pf": 1.4213545,
+      "mfe": 1.2790871,
+      "mae": -1,
+      "reentry": [
+       0.10676157,
+       0.25978648,
+       0.4519573
+      ],
+      "bigInGroup": 0.088967972,
+      "bigShare": 0.18939394,
+      "sumRShare": 0.12933615,
+      "lossShare": 0.228741
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 346,
+      "share": 0.26392067,
+      "winRate": 0.33236994,
+      "winLo": 0.28481448,
+      "winHi": 0.38360675,
+      "meanR": 0.84576749,
+      "meanLo": 0.39334642,
+      "meanHi": 1.3951598,
+      "medianR": -1.0346599,
+      "payoff": 4.3414946,
+      "pf": 2.1613501,
+      "mfe": 1.5009903,
+      "mae": -1,
+      "reentry": [
+       0.086705202,
+       0.21098266,
+       0.39595376
+      ],
+      "bigInGroup": 0.13294798,
+      "bigShare": 0.34848485,
+      "sumRShare": 0.39769901,
+      "lossShare": 0.25518965
+     },
+     {
+      "group": "Tendance forte",
+      "n": 409,
+      "share": 0.31197559,
+      "winRate": 0.31051345,
+      "winLo": 0.26760844,
+      "winHi": 0.35694477,
+      "meanR": 0.28867289,
+      "meanLo": -0.020223547,
+      "meanHi": 0.67321922,
+      "medianR": -1.0391453,
+      "payoff": 3.064038,
+      "pf": 1.3799037,
+      "mfe": 1.2268228,
+      "mae": -1,
+      "reentry": [
+       0.14425428,
+       0.34718826,
+       0.54767726
+      ],
+      "bigInGroup": 0.078239609,
+      "bigShare": 0.24242424,
+      "sumRShare": 0.16045628,
+      "lossShare": 0.31474221
+     }
+    ],
+    "D1": {
+     "est": 0.34789135,
+     "lo": -0.2471075,
+     "hi": 0.99209197,
+     "pTwoSided": 0.2618,
+     "n0": 275,
+     "n1": 1036
+    }
+   },
+   "adx": {
+    "measure": "adx",
+    "label": "ADX(14)",
+    "n": 1311,
+    "undefinedPct": 0,
+    "bigThreshold": 3.8383172,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 280,
+      "share": 0.21357742,
+      "winRate": 0.35714286,
+      "winLo": 0.30329999,
+      "winHi": 0.41485253,
+      "meanR": 0.8100091,
+      "meanLo": 0.34177977,
+      "meanHi": 1.3325418,
+      "medianR": -1.0448653,
+      "payoff": 3.8540282,
+      "pf": 2.1411268,
+      "mfe": 1.4549635,
+      "mae": -1,
+      "reentry": [
+       0.11428571,
+       0.26428571,
+       0.46428571
+      ],
+      "bigInGroup": 0.12857143,
+      "bigShare": 0.27272727,
+      "sumRShare": 0.30823031,
+      "lossShare": 0.20128582
+     },
+     {
+      "group": "Range modéré",
+      "n": 338,
+      "share": 0.25781846,
+      "winRate": 0.26923077,
+      "winLo": 0.22473199,
+      "winHi": 0.31891611,
+      "meanR": 0.31739424,
+      "meanLo": -0.082714955,
+      "meanHi": 0.83466515,
+      "medianR": -1.0649767,
+      "payoff": 3.7899868,
+      "pf": 1.3963109,
+      "mfe": 1.2616128,
+      "mae": -1,
+      "reentry": [
+       0.1035503,
+       0.26923077,
+       0.48224852
+      ],
+      "bigInGroup": 0.091715976,
+      "bigShare": 0.23484848,
+      "sumRShare": 0.14579518,
+      "lossShare": 0.27414407
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 324,
+      "share": 0.24713959,
+      "winRate": 0.33950617,
+      "winLo": 0.29009276,
+      "winHi": 0.39268073,
+      "meanR": 0.77738527,
+      "meanLo": 0.28378862,
+      "meanHi": 1.3628387,
+      "medianR": -1.0422334,
+      "payoff": 4.0970933,
+      "pf": 2.1059825,
+      "mfe": 1.3344052,
+      "mae": -1,
+      "reentry": [
+       0.089506173,
+       0.23765432,
+       0.4691358
+      ],
+      "bigInGroup": 0.092592593,
+      "bigShare": 0.22727273,
+      "sumRShare": 0.34230145,
+      "lossShare": 0.23063871
+     },
+     {
+      "group": "Tendance forte",
+      "n": 369,
+      "share": 0.28146453,
+      "winRate": 0.28455285,
+      "winLo": 0.24091985,
+      "winHi": 0.33262543,
+      "meanR": 0.40614377,
+      "meanLo": 0.064558346,
+      "meanHi": 0.80776364,
+      "medianR": -1.0517921,
+      "payoff": 3.8125824,
+      "pf": 1.516368,
+      "mfe": 1.2811628,
+      "mae": -1,
+      "reentry": [
+       0.14905149,
+       0.34146341,
+       0.50948509
+      ],
+      "bigInGroup": 0.094850949,
+      "bigShare": 0.26515152,
+      "sumRShare": 0.20367306,
+      "lossShare": 0.2939314
+     }
+    ],
+    "D1": {
+     "est": 0.3162951,
+     "lo": -0.20830755,
+     "hi": 0.85576331,
+     "pTwoSided": 0.2392,
+     "n0": 280,
+     "n1": 1031
+    }
+   },
+   "fake": {
+    "measure": "fake",
+    "label": "Fréquence des faux départs (7 j)",
+    "n": 1311,
+    "undefinedPct": 0,
+    "bigThreshold": 3.8383172,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 332,
+      "share": 0.2532418,
+      "winRate": 0.29216867,
+      "winLo": 0.24585131,
+      "winHi": 0.34324051,
+      "meanR": 0.32004198,
+      "meanLo": -0.018519077,
+      "meanHi": 0.72034245,
+      "medianR": -1.0417432,
+      "payoff": 3.4584776,
+      "pf": 1.4275418,
+      "mfe": 1.2203164,
+      "mae": -1,
+      "reentry": [
+       0.12951807,
+       0.32228916,
+       0.49698795
+      ],
+      "bigInGroup": 0.087349398,
+      "bigShare": 0.21969697,
+      "sumRShare": 0.14440175,
+      "lossShare": 0.25168979
+     },
+     {
+      "group": "Range modéré",
+      "n": 314,
+      "share": 0.23951182,
+      "winRate": 0.31847134,
+      "winLo": 0.26940064,
+      "winHi": 0.37192998,
+      "meanR": 0.45938918,
+      "meanLo": 0.074991888,
+      "meanHi": 0.88011144,
+      "medianR": -1.0567711,
+      "payoff": 3.4407754,
+      "pf": 1.607839,
+      "mfe": 1.0854964,
+      "mae": -1,
+      "reentry": [
+       0.10828025,
+       0.29299363,
+       0.50318471
+      ],
+      "bigInGroup": 0.10828025,
+      "bigShare": 0.25757576,
+      "sumRShare": 0.1960369,
+      "lossShare": 0.2403372
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 303,
+      "share": 0.23112128,
+      "winRate": 0.32343234,
+      "winLo": 0.27325563,
+      "winHi": 0.37803008,
+      "meanR": 0.75356531,
+      "meanLo": 0.21969558,
+      "meanHi": 1.395818,
+      "medianR": -1.0504609,
+      "payoff": 4.2262871,
+      "pf": 2.0203714,
+      "mfe": 1.4392825,
+      "mae": -1,
+      "reentry": [
+       0.11881188,
+       0.24752475,
+       0.50165017
+      ],
+      "bigInGroup": 0.099009901,
+      "bigShare": 0.22727273,
+      "sumRShare": 0.31030655,
+      "lossShare": 0.22662322
+     },
+     {
+      "group": "Tendance forte",
+      "n": 362,
+      "share": 0.2761251,
+      "winRate": 0.30662983,
+      "winLo": 0.26136781,
+      "winHi": 0.35595276,
+      "meanR": 0.70991506,
+      "meanLo": 0.22142705,
+      "meanHi": 1.2876225,
+      "medianR": -1.0612641,
+      "payoff": 4.3530521,
+      "pf": 1.9250549,
+      "mfe": 1.427957,
+      "mae": -1,
+      "reentry": [
+       0.10497238,
+       0.25966851,
+       0.43646409
+      ],
+      "bigInGroup": 0.10773481,
+      "bigShare": 0.29545455,
+      "sumRShare": 0.3492548,
+      "lossShare": 0.28134978
+     }
+    ],
+    "D1": {
+     "est": -0.32303028,
+     "lo": -0.6855394,
+     "hi": 0.055100608,
+     "pTwoSided": 0.095,
+     "n0": 332,
+     "n1": 979
+    }
+   }
+  },
+  "8 actifs vierges (réplication)": {
+   "er": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 4722,
+    "undefinedPct": 0,
+    "bigThreshold": 2.9117988,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 701,
+      "share": 0.14845404,
+      "winRate": 0.2510699,
+      "winLo": 0.2203853,
+      "winHi": 0.28446789,
+      "meanR": 0.22131452,
+      "meanLo": -0.066380979,
+      "meanHi": 0.55344765,
+      "medianR": -1.0590345,
+      "payoff": 3.8054218,
+      "pf": 1.2757224,
+      "mfe": 1.006165,
+      "mae": -1.0125853,
+      "reentry": [
+       0.12410842,
+       0.28673324,
+       0.49072753
+      ],
+      "bigInGroup": 0.09700428,
+      "bigShare": 0.14376321,
+      "sumRShare": 0.20013647,
+      "lossShare": 0.15380753
+     },
+     {
+      "group": "Range modéré",
+      "n": 948,
+      "share": 0.20076239,
+      "winRate": 0.24894515,
+      "winLo": 0.22247001,
+      "winHi": 0.27744671,
+      "meanR": -0.040050221,
+      "meanLo": -0.20689922,
+      "meanHi": 0.13630398,
+      "medianR": -1.0562907,
+      "payoff": 2.867499,
+      "pf": 0.95046315,
+      "mfe": 1.1180794,
+      "mae": -1.0126109,
+      "reentry": [
+       0.1371308,
+       0.32383966,
+       0.52742616
+      ],
+      "bigInGroup": 0.088607595,
+      "bigShare": 0.17758985,
+      "sumRShare": -0.048979187,
+      "lossShare": 0.20951085
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 1198,
+      "share": 0.25370606,
+      "winRate": 0.28797997,
+      "winLo": 0.26304799,
+      "winHi": 0.31426731,
+      "meanR": 0.17281444,
+      "meanLo": -0.01619125,
+      "meanHi": 0.37591766,
+      "medianR": -1.0476423,
+      "payoff": 3.0483585,
+      "pf": 1.2329234,
+      "mfe": 1.296718,
+      "mae": -1.0124565,
+      "reentry": [
+       0.11185309,
+       0.26711185,
+       0.48747913
+      ],
+      "bigInGroup": 0.10016694,
+      "bigShare": 0.25369979,
+      "sumRShare": 0.26707618,
+      "lossShare": 0.24296589
+     },
+     {
+      "group": "Tendance forte",
+      "n": 1875,
+      "share": 0.39707751,
+      "winRate": 0.2848,
+      "winLo": 0.2648279,
+      "winHi": 0.3056521,
+      "meanR": 0.24051887,
+      "meanLo": 0.071845159,
+      "meanHi": 0.42437825,
+      "medianR": -1.0461851,
+      "payoff": 3.2975152,
+      "pf": 1.3131045,
+      "mfe": 1.227801,
+      "mae": -1.0123459,
+      "reentry": [
+       0.10613333,
+       0.2912,
+       0.49866667
+      ],
+      "bigInGroup": 0.1072,
+      "bigShare": 0.42494715,
+      "sumRShare": 0.58176654,
+      "lossShare": 0.39371573
+     }
+    ],
+    "D1": {
+     "est": 0.067114826,
+     "lo": -0.20061089,
+     "hi": 0.37893709,
+     "pTwoSided": 0.6784,
+     "n0": 701,
+     "n1": 4021
+    }
+   },
+   "er2": {
+    "measure": "er2",
+    "label": "ER 96 bougies (24 h)",
+    "n": 4722,
+    "undefinedPct": 0,
+    "bigThreshold": 2.9117988,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 963,
+      "share": 0.20393901,
+      "winRate": 0.27622015,
+      "winLo": 0.24891133,
+      "winHi": 0.30530721,
+      "meanR": 0.27126346,
+      "meanLo": 0.049028241,
+      "meanHi": 0.5259071,
+      "medianR": -1.0532821,
+      "payoff": 3.5629397,
+      "pf": 1.3597445,
+      "mfe": 1.3026792,
+      "mae": -1.0115038,
+      "reentry": [
+       0.093457944,
+       0.25649013,
+       0.46209761
+      ],
+      "bigInGroup": 0.11630322,
+      "bigShare": 0.23678647,
+      "sumRShare": 0.33698914,
+      "lossShare": 0.19849293
+     },
+     {
+      "group": "Range modéré",
+      "n": 996,
+      "share": 0.21092757,
+      "winRate": 0.27409639,
+      "winLo": 0.24730207,
+      "winHi": 0.30262657,
+      "meanR": 0.21905465,
+      "meanLo": -0.010508487,
+      "meanHi": 0.47048228,
+      "medianR": -1.0540418,
+      "payoff": 3.4042949,
+      "pf": 1.2854392,
+      "mfe": 1.1834425,
+      "mae": -1.0119888,
+      "reentry": [
+       0.11746988,
+       0.27811245,
+       0.46586345
+      ],
+      "bigInGroup": 0.11044177,
+      "bigShare": 0.23255814,
+      "sumRShare": 0.28145574,
+      "lossShare": 0.20893919
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 1125,
+      "share": 0.23824651,
+      "winRate": 0.26577778,
+      "winLo": 0.24079309,
+      "winHi": 0.29235659,
+      "meanR": 0.12461119,
+      "meanLo": -0.09843314,
+      "meanHi": 0.40560597,
+      "medianR": -1.0532194,
+      "payoff": 3.2013912,
+      "pf": 1.1588571,
+      "mfe": 1.2658663,
+      "mae": -1.0128405,
+      "reentry": [
+       0.104,
+       0.28444444,
+       0.50577778
+      ],
+      "bigInGroup": 0.089777778,
+      "bigShare": 0.21353066,
+      "sumRShare": 0.18084557,
+      "lossShare": 0.24122626
+     },
+     {
+      "group": "Tendance forte",
+      "n": 1638,
+      "share": 0.34688691,
+      "winRate": 0.27655678,
+      "winLo": 0.25543726,
+      "winHi": 0.29872188,
+      "meanR": 0.094985175,
+      "meanLo": -0.072801982,
+      "meanHi": 0.26999009,
+      "medianR": -1.0466973,
+      "payoff": 2.9325458,
+      "pf": 1.1210492,
+      "mfe": 1.0702582,
+      "mae": -1.013367,
+      "reentry": [
+       0.13797314,
+       0.32356532,
+       0.54029304
+      ],
+      "bigInGroup": 0.091575092,
+      "bigShare": 0.31712474,
+      "sumRShare": 0.20070955,
+      "lossShare": 0.35134162
+     }
+    ],
+    "D1": {
+     "est": 0.13453781,
+     "lo": -0.11988054,
+     "hi": 0.40992884,
+     "pTwoSided": 0.3176,
+     "n0": 963,
+     "n1": 3759
+    }
+   },
+   "adx": {
+    "measure": "adx",
+    "label": "ADX(14)",
+    "n": 4722,
+    "undefinedPct": 0,
+    "bigThreshold": 2.9117988,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 957,
+      "share": 0.20266836,
+      "winRate": 0.26123302,
+      "winLo": 0.23439392,
+      "winHi": 0.28998131,
+      "meanR": 0.090055946,
+      "meanLo": -0.12763349,
+      "meanHi": 0.34338506,
+      "medianR": -1.0576848,
+      "payoff": 3.1512009,
+      "pf": 1.114286,
+      "mfe": 1.220431,
+      "mae": -1.0129515,
+      "reentry": [
+       0.096133751,
+       0.26436782,
+       0.47857889
+      ],
+      "bigInGroup": 0.085684431,
+      "bigShare": 0.17336152,
+      "sumRShare": 0.11117897,
+      "lossShare": 0.20613552
+     },
+     {
+      "group": "Range modéré",
+      "n": 1123,
+      "share": 0.23782296,
+      "winRate": 0.26803206,
+      "winLo": 0.24294912,
+      "winHi": 0.29469658,
+      "meanR": 0.10862203,
+      "meanLo": -0.076797413,
+      "meanHi": 0.30677302,
+      "medianR": -1.058079,
+      "payoff": 3.107837,
+      "pf": 1.1380279,
+      "mfe": 1.1324465,
+      "mae": -1.0129313,
+      "reentry": [
+       0.11041852,
+       0.27070347,
+       0.50667854
+      ],
+      "bigInGroup": 0.097951915,
+      "bigShare": 0.23255814,
+      "sumRShare": 0.1573606,
+      "lossShare": 0.24157528
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 1229,
+      "share": 0.26027107,
+      "winRate": 0.28315704,
+      "winLo": 0.25867466,
+      "winHi": 0.30899075,
+      "meanR": 0.20419973,
+      "meanLo": 0.010274739,
+      "meanHi": 0.42713918,
+      "medianR": -1.0460346,
+      "payoff": 3.2141755,
+      "pf": 1.2696176,
+      "mfe": 1.2427036,
+      "mae": -1.0118221,
+      "reentry": [
+       0.11310008,
+       0.3002441,
+       0.49389748
+      ],
+      "bigInGroup": 0.11147274,
+      "bigShare": 0.28964059,
+      "sumRShare": 0.32374671,
+      "lossShare": 0.25443714
+     },
+     {
+      "group": "Tendance forte",
+      "n": 1413,
+      "share": 0.29923761,
+      "winRate": 0.27742392,
+      "winLo": 0.25470641,
+      "winHi": 0.30134836,
+      "meanR": 0.22367367,
+      "meanLo": 0.047066955,
+      "meanHi": 0.41305891,
+      "medianR": -1.046314,
+      "payoff": 3.3600627,
+      "pf": 1.2900535,
+      "mfe": 1.1163325,
+      "mae": -1.0119075,
+      "reentry": [
+       0.13800425,
+       0.31705591,
+       0.51592357
+      ],
+      "bigInGroup": 0.10191083,
+      "bigShare": 0.30443975,
+      "sumRShare": 0.40771373,
+      "lossShare": 0.29785206
+     }
+    ],
+    "D1": {
+     "est": -0.092944029,
+     "lo": -0.31112895,
+     "hi": 0.1395286,
+     "pTwoSided": 0.423,
+     "n0": 957,
+     "n1": 3765
+    }
+   },
+   "fake": {
+    "measure": "fake",
+    "label": "Fréquence des faux départs (7 j)",
+    "n": 4722,
+    "undefinedPct": 0,
+    "bigThreshold": 2.9117988,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 1231,
+      "share": 0.26069462,
+      "winRate": 0.2623883,
+      "winLo": 0.23857895,
+      "winHi": 0.28767602,
+      "meanR": 0.11842785,
+      "meanLo": -0.086180351,
+      "meanHi": 0.33051459,
+      "medianR": -1.0513212,
+      "payoff": 3.2358505,
+      "pf": 1.151079,
+      "mfe": 1.1337397,
+      "mae": -1.0122961,
+      "reentry": [
+       0.12185215,
+       0.28269699,
+       0.48984565
+      ],
+      "bigInGroup": 0.10073111,
+      "bigShare": 0.26215645,
+      "sumRShare": 0.18806596,
+      "lossShare": 0.26377247
+     },
+     {
+      "group": "Range modéré",
+      "n": 1071,
+      "share": 0.22681067,
+      "winRate": 0.26704015,
+      "winLo": 0.24141095,
+      "winHi": 0.29433454,
+      "meanR": 0.061689488,
+      "meanLo": -0.13907923,
+      "meanHi": 0.29954667,
+      "medianR": -1.0513648,
+      "payoff": 2.9589685,
+      "pf": 1.0780446,
+      "mfe": 1.1532531,
+      "mae": -1.0127865,
+      "reentry": [
+       0.12138189,
+       0.32212885,
+       0.52287582
+      ],
+      "bigInGroup": 0.090569561,
+      "bigShare": 0.205074,
+      "sumRShare": 0.085231268,
+      "lossShare": 0.23140869
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 1145,
+      "share": 0.242482,
+      "winRate": 0.28034934,
+      "winLo": 0.25510003,
+      "winHi": 0.30706758,
+      "meanR": 0.2501412,
+      "meanLo": 0.042863363,
+      "meanHi": 0.47437293,
+      "medianR": -1.0484381,
+      "payoff": 3.4126604,
+      "pf": 1.3294466,
+      "mfe": 1.197749,
+      "mae": -1.0127673,
+      "reentry": [
+       0.10655022,
+       0.27860262,
+       0.49432314
+      ],
+      "bigInGroup": 0.10567686,
+      "bigShare": 0.25581395,
+      "sumRShare": 0.36947837,
+      "lossShare": 0.23764428
+     },
+     {
+      "group": "Tendance forte",
+      "n": 1275,
+      "share": 0.27001271,
+      "winRate": 0.28313725,
+      "winLo": 0.25908809,
+      "winHi": 0.30848927,
+      "meanR": 0.2171864,
+      "meanLo": 0.010923205,
+      "meanHi": 0.44786647,
+      "medianR": -1.0534894,
+      "payoff": 3.2491684,
+      "pf": 1.2833149,
+      "mfe": 1.2619412,
+      "mae": -1.0123955,
+      "reentry": [
+       0.11607843,
+       0.28392157,
+       0.4972549
+      ],
+      "bigInGroup": 0.1027451,
+      "bigShare": 0.2769556,
+      "sumRShare": 0.3572244,
+      "lossShare": 0.26717457
+     }
+    ],
+    "D1": {
+     "est": -0.06186255,
+     "lo": -0.28458594,
+     "hi": 0.15960177,
+     "pTwoSided": 0.5686,
+     "n0": 1231,
+     "n1": 3491
+    }
+   }
+  }
+ },
+ "splits": {
+  "BTC/ETH (développement)": {
+   "BTC": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 644,
+    "undefinedPct": 0,
+    "bigThreshold": 3.807523,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 110,
+      "share": 0.17080745,
+      "winRate": 0.32727273,
+      "winLo": 0.24671133,
+      "winHi": 0.41949113,
+      "meanR": 0.42728619,
+      "meanLo": -0.14592987,
+      "meanHi": 1.2187024,
+      "medianR": -1.0683666,
+      "payoff": 3.2417501,
+      "pf": 1.5770676,
+      "mfe": 1.3029592,
+      "mae": -1,
+      "reentry": [
+       0.072727273,
+       0.23636364,
+       0.47272727
+      ],
+      "bigInGroup": 0.10909091,
+      "bigShare": 0.18461538,
+      "sumRShare": 0.12143006,
+      "lossShare": 0.16452425
+     },
+     {
+      "group": "Range modéré",
+      "n": 124,
+      "share": 0.19254658,
+      "winRate": 0.32258065,
+      "winLo": 0.24670399,
+      "winHi": 0.40911971,
+      "meanR": 0.67521699,
+      "meanLo": -0.20976479,
+      "meanHi": 1.8081019,
+      "medianR": -1.0677194,
+      "payoff": 3.9207305,
+      "pf": 1.8670145,
+      "mfe": 1.3951015,
+      "mae": -1,
+      "reentry": [
+       0.14516129,
+       0.31451613,
+       0.49193548
+      ],
+      "bigInGroup": 0.080645161,
+      "bigShare": 0.15384615,
+      "sumRShare": 0.21631156,
+      "lossShare": 0.19506698
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 154,
+      "share": 0.23913043,
+      "winRate": 0.31168831,
+      "winLo": 0.2438674,
+      "winHi": 0.38867527,
+      "meanR": 0.42942183,
+      "meanLo": -0.080121275,
+      "meanHi": 1.0423124,
+      "medianR": -1.0693703,
+      "payoff": 3.4008594,
+      "pf": 1.5400118,
+      "mfe": 1.223011,
+      "mae": -1,
+      "reentry": [
+       0.15584416,
+       0.37012987,
+       0.52597403
+      ],
+      "bigInGroup": 0.1038961,
+      "bigShare": 0.24615385,
+      "sumRShare": 0.17085178,
+      "lossShare": 0.24736979
+     },
+     {
+      "group": "Tendance forte",
+      "n": 256,
+      "share": 0.39751553,
+      "winRate": 0.30859375,
+      "winLo": 0.25518874,
+      "winHi": 0.3676582,
+      "meanR": 0.74299578,
+      "meanLo": 0.23085803,
+      "meanHi": 1.3239268,
+      "medianR": -1.0607763,
+      "payoff": 4.4306972,
+      "pf": 1.9775428,
+      "mfe": 1.2893331,
+      "mae": -1,
+      "reentry": [
+       0.1171875,
+       0.296875,
+       0.46875
+      ],
+      "bigInGroup": 0.10546875,
+      "bigShare": 0.41538462,
+      "sumRShare": 0.4914066,
+      "lossShare": 0.39303897
+     }
+    ],
+    "D1": {
+     "est": -0.20953925,
+     "lo": -0.91555937,
+     "hi": 0.65236593,
+     "pTwoSided": 0.5732,
+     "n0": 110,
+     "n1": 534
+    }
+   },
+   "ETH": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 667,
+    "undefinedPct": 0,
+    "bigThreshold": 3.8657736,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 126,
+      "share": 0.18890555,
+      "winRate": 0.29365079,
+      "winLo": 0.2211813,
+      "winHi": 0.37833028,
+      "meanR": 0.83234213,
+      "meanLo": 0.025783945,
+      "meanHi": 1.8391841,
+      "medianR": -1.0491482,
+      "payoff": 5.1028091,
+      "pf": 2.1213926,
+      "mfe": 1.0479038,
+      "mae": -1,
+      "reentry": [
+       0.15873016,
+       0.29365079,
+       0.53174603
+      ],
+      "bigInGroup": 0.11111111,
+      "bigShare": 0.20895522,
+      "sumRShare": 0.30071249,
+      "lossShare": 0.18994645
+     },
+     {
+      "group": "Range modéré",
+      "n": 130,
+      "share": 0.19490255,
+      "winRate": 0.33846154,
+      "winLo": 0.26279895,
+      "winHi": 0.42339694,
+      "meanR": 0.37254004,
+      "meanLo": -0.10029045,
+      "meanHi": 0.93140508,
+      "medianR": -1.0367143,
+      "payoff": 2.947147,
+      "pf": 1.5078426,
+      "mfe": 1.6367431,
+      "mae": -1,
+      "reentry": [
+       0.12307692,
+       0.23846154,
+       0.44615385
+      ],
+      "bigInGroup": 0.11538462,
+      "bigShare": 0.2238806,
+      "sumRShare": 0.13886582,
+      "lossShare": 0.19368839
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 163,
+      "share": 0.24437781,
+      "winRate": 0.25766871,
+      "winLo": 0.19665118,
+      "winHi": 0.32984541,
+      "meanR": 0.45561911,
+      "meanLo": -0.10281526,
+      "meanHi": 1.1217679,
+      "medianR": -1.0535584,
+      "payoff": 4.5344686,
+      "pf": 1.5739478,
+      "mfe": 1.1219181,
+      "mae": -1,
+      "reentry": [
+       0.09202454,
+       0.28220859,
+       0.49079755
+      ],
+      "bigInGroup": 0.079754601,
+      "bigShare": 0.19402985,
+      "sumRShare": 0.21294555,
+      "lossShare": 0.26280497
+     },
+     {
+      "group": "Tendance forte",
+      "n": 248,
+      "share": 0.37181409,
+      "winRate": 0.32258065,
+      "winLo": 0.26748941,
+      "winHi": 0.38308441,
+      "meanR": 0.4886459,
+      "meanLo": 0.086391338,
+      "meanHi": 0.93286465,
+      "medianR": -0.87493848,
+      "payoff": 3.5619021,
+      "pf": 1.6961439,
+      "mfe": 1.6108291,
+      "mae": -1,
+      "reentry": [
+       0.080645161,
+       0.22580645,
+       0.45967742
+      ],
+      "bigInGroup": 0.10080645,
+      "bigShare": 0.37313433,
+      "sumRShare": 0.34747614,
+      "lossShare": 0.35356019
+     }
+    ],
+    "D1": {
+     "est": 0.38154675,
+     "lo": -0.48542669,
+     "hi": 1.403713,
+     "pTwoSided": 0.4342,
+     "n0": 126,
+     "n1": 541
+    }
+   },
+   "long": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 1061,
+    "undefinedPct": 0,
+    "bigThreshold": 3.8382349,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 180,
+      "share": 0.16965127,
+      "winRate": 0.33333333,
+      "winLo": 0.26858416,
+      "winHi": 0.40504767,
+      "meanR": 0.73645507,
+      "meanLo": 0.10237208,
+      "meanHi": 1.4824717,
+      "medianR": -1.050549,
+      "payoff": 4.0207292,
+      "pf": 2.0103646,
+      "mfe": 1.2441146,
+      "mae": -1,
+      "reentry": [
+       0.14444444,
+       0.31666667,
+       0.50555556
+      ],
+      "bigInGroup": 0.12777778,
+      "bigShare": 0.21495327,
+      "sumRShare": 0.25627201,
+      "lossShare": 0.16218048
+     },
+     {
+      "group": "Range modéré",
+      "n": 206,
+      "share": 0.19415646,
+      "winRate": 0.35436893,
+      "winLo": 0.29226243,
+      "winHi": 0.42180742,
+      "meanR": 0.42247388,
+      "meanLo": -0.07036249,
+      "meanHi": 1.027098,
+      "medianR": -0.94069992,
+      "payoff": 2.8462059,
+      "pf": 1.5622032,
+      "mfe": 1.5120184,
+      "mae": -1,
+      "reentry": [
+       0.15533981,
+       0.29126214,
+       0.47572816
+      ],
+      "bigInGroup": 0.10194175,
+      "bigShare": 0.19626168,
+      "sumRShare": 0.16824784,
+      "lossShare": 0.19135141
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 256,
+      "share": 0.24128181,
+      "winRate": 0.27734375,
+      "winLo": 0.22610219,
+      "winHi": 0.33516874,
+      "meanR": 0.18971821,
+      "meanLo": -0.19583951,
+      "meanHi": 0.6498673,
+      "medianR": -1.0633493,
+      "payoff": 3.2044548,
+      "pf": 1.2298178,
+      "mfe": 1.1257148,
+      "mae": -1,
+      "reentry": [
+       0.13671875,
+       0.35546875,
+       0.52734375
+      ],
+      "bigInGroup": 0.08203125,
+      "bigShare": 0.19626168,
+      "sumRShare": 0.093892606,
+      "lossShare": 0.26123013
+     },
+     {
+      "group": "Tendance forte",
+      "n": 419,
+      "share": 0.39491046,
+      "winRate": 0.31026253,
+      "winLo": 0.26785997,
+      "winHi": 0.35611257,
+      "meanR": 0.59453688,
+      "meanLo": 0.20293572,
+      "meanHi": 1.0427481,
+      "medianR": -1.0337517,
+      "payoff": 4.0000308,
+      "pf": 1.7993218,
+      "mfe": 1.3996498,
+      "mae": -1,
+      "reentry": [
+       0.11217184,
+       0.28400955,
+       0.48926014
+      ],
+      "bigInGroup": 0.10023866,
+      "bigShare": 0.39252336,
+      "sumRShare": 0.48158754,
+      "lossShare": 0.38523797
+     }
+    ],
+    "D1": {
+     "est": 0.29978262,
+     "lo": -0.40342965,
+     "hi": 1.0733827,
+     "pTwoSided": 0.4232,
+     "n0": 180,
+     "n1": 881
+    }
+   },
+   "short": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 250,
+    "undefinedPct": 0,
+    "bigThreshold": 3.8452603,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 56,
+      "share": 0.224,
+      "winRate": 0.23214286,
+      "winLo": 0.14099379,
+      "winHi": 0.35768153,
+      "meanR": 0.34490496,
+      "meanLo": -0.4414944,
+      "meanHi": 1.4194825,
+      "medianR": -1.0690383,
+      "payoff": 4.7673336,
+      "pf": 1.4412869,
+      "mfe": 0.86191654,
+      "mae": -1,
+      "reentry": [
+       0.035714286,
+       0.10714286,
+       0.5
+      ],
+      "bigInGroup": 0.071428571,
+      "bigShare": 0.16,
+      "sumRShare": 0.08837593,
+      "lossShare": 0.24530111
+     },
+     {
+      "group": "Range modéré",
+      "n": 48,
+      "share": 0.192,
+      "winRate": 0.22916667,
+      "winLo": 0.13307826,
+      "winHi": 0.36539264,
+      "meanR": 0.94015611,
+      "meanLo": -0.48040337,
+      "meanHi": 3.1668655,
+      "medianR": -1.0662055,
+      "payoff": 7.451463,
+      "pf": 2.2152998,
+      "mfe": 1.0094382,
+      "mae": -1,
+      "reentry": [
+       0.041666667,
+       0.20833333,
+       0.4375
+      ],
+      "bigInGroup": 0.083333333,
+      "bigShare": 0.16,
+      "sumRShare": 0.20648464,
+      "lossShare": 0.208109
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 61,
+      "share": 0.244,
+      "winRate": 0.31147541,
+      "winLo": 0.20937433,
+      "winHi": 0.43591434,
+      "meanR": 1.5053937,
+      "meanLo": 0.27423016,
+      "meanHi": 3.0595266,
+      "medianR": -1.0456785,
+      "payoff": 7.2195537,
+      "pf": 3.2659886,
+      "mfe": 1.3166515,
+      "mae": -1,
+      "reentry": [
+       0.06557377,
+       0.19672131,
+       0.42622951
+      ],
+      "bigInGroup": 0.13114754,
+      "bigShare": 0.32,
+      "sumRShare": 0.42017138,
+      "lossShare": 0.22711995
+     },
+     {
+      "group": "Tendance forte",
+      "n": 85,
+      "share": 0.34,
+      "winRate": 0.34117647,
+      "winLo": 0.24921922,
+      "winHi": 0.44686861,
+      "meanR": 0.73270764,
+      "meanLo": -0.064235151,
+      "meanHi": 1.7381193,
+      "medianR": -1.0578398,
+      "payoff": 4.0408417,
+      "pf": 2.0925787,
+      "mfe": 1.4219275,
+      "mae": -1,
+      "reentry": [
+       0.035294118,
+       0.15294118,
+       0.34117647
+      ],
+      "bigInGroup": 0.10588235,
+      "bigShare": 0.36,
+      "sumRShare": 0.28496806,
+      "lossShare": 0.31946993
+     }
+    ],
+    "D1": {
+     "est": -0.68208813,
+     "lo": -1.703554,
+     "hi": 0.3612331,
+     "pTwoSided": 0.1808,
+     "n0": 56,
+     "n1": 194
+    }
+   }
+  },
+  "8 actifs vierges (réplication)": {
+   "XRP": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 589,
+    "undefinedPct": 0,
+    "bigThreshold": 3.1634386,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 84,
+      "share": 0.1426146,
+      "winRate": 0.30952381,
+      "winLo": 0.22081924,
+      "winHi": 0.41488809,
+      "meanR": 1.3808869,
+      "meanLo": 0.17501344,
+      "meanHi": 2.9078022,
+      "medianR": -1.063997,
+      "payoff": 6.3500971,
+      "pf": 2.8465953,
+      "mfe": 1.1997904,
+      "mae": -1.0124904,
+      "reentry": [
+       0.095238095,
+       0.21428571,
+       0.45238095
+      ],
+      "bigInGroup": 0.1547619,
+      "bigShare": 0.22033898,
+      "sumRShare": 0.62973172,
+      "lossShare": 0.13258442
+     },
+     {
+      "group": "Range modéré",
+      "n": 113,
+      "share": 0.19185059,
+      "winRate": 0.23893805,
+      "winLo": 0.16972435,
+      "winHi": 0.3253179,
+      "meanR": -0.019002247,
+      "meanLo": -0.48693488,
+      "meanHi": 0.52040731,
+      "medianR": -1.0639094,
+      "payoff": 3.1125736,
+      "pf": 0.97720335,
+      "mfe": 1.3068501,
+      "mae": -1.0125668,
+      "reentry": [
+       0.097345133,
+       0.27433628,
+       0.45132743
+      ],
+      "bigInGroup": 0.088495575,
+      "bigShare": 0.16949153,
+      "sumRShare": -0.011657397,
+      "lossShare": 0.19881041
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 168,
+      "share": 0.2852292,
+      "winRate": 0.28571429,
+      "winLo": 0.22279103,
+      "winHi": 0.35821812,
+      "meanR": 0.23668658,
+      "meanLo": -0.22754348,
+      "meanHi": 0.78930262,
+      "medianR": -1.0536631,
+      "payoff": 3.2545595,
+      "pf": 1.3018238,
+      "mfe": 1.3297853,
+      "mae": -1.0131306,
+      "reentry": [
+       0.11309524,
+       0.24404762,
+       0.47619048
+      ],
+      "bigInGroup": 0.10119048,
+      "bigShare": 0.28813559,
+      "sumRShare": 0.21587437,
+      "lossShare": 0.27807135
+     },
+     {
+      "group": "Tendance forte",
+      "n": 224,
+      "share": 0.3803056,
+      "winRate": 0.28571429,
+      "winLo": 0.23055717,
+      "winHi": 0.34809722,
+      "meanR": 0.13654509,
+      "meanLo": -0.17961059,
+      "meanHi": 0.50455231,
+      "medianR": -1.060601,
+      "payoff": 2.9132685,
+      "pf": 1.1653074,
+      "mfe": 1.2784251,
+      "mae": -1.0135368,
+      "reentry": [
+       0.13839286,
+       0.33035714,
+       0.52678571
+      ],
+      "bigInGroup": 0.084821429,
+      "bigShare": 0.3220339,
+      "sumRShare": 0.16605131,
+      "lossShare": 0.39053382
+     }
+    ],
+    "D1": {
+     "est": 1.245833,
+     "lo": -0.03395916,
+     "hi": 2.8011786,
+     "pTwoSided": 0.0568,
+     "n0": 84,
+     "n1": 505
+    }
+   },
+   "BNB": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 627,
+    "undefinedPct": 0,
+    "bigThreshold": 2.5053049,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 80,
+      "share": 0.12759171,
+      "winRate": 0.2,
+      "winLo": 0.12702844,
+      "winHi": 0.30046244,
+      "meanR": 0.74714588,
+      "meanLo": -0.34995398,
+      "meanHi": 2.3930929,
+      "medianR": -1.0676572,
+      "payoff": 7.3605073,
+      "pf": 1.8401268,
+      "mfe": 0.96665234,
+      "mae": -1.0153809,
+      "reentry": [
+       0.15,
+       0.3,
+       0.4625
+      ],
+      "bigInGroup": 0.1375,
+      "bigShare": 0.17460317,
+      "sumRShare": 0.83231333,
+      "lossShare": 0.14381102
+     },
+     {
+      "group": "Range modéré",
+      "n": 128,
+      "share": 0.20414673,
+      "winRate": 0.2578125,
+      "winLo": 0.18986902,
+      "winHi": 0.33986919,
+      "meanR": -0.14999588,
+      "meanLo": -0.47314091,
+      "meanHi": 0.19939259,
+      "medianR": -1.0740695,
+      "payoff": 2.3589613,
+      "pf": 0.81942868,
+      "mfe": 1.0801763,
+      "mae": -1.0157948,
+      "reentry": [
+       0.1484375,
+       0.296875,
+       0.5234375
+      ],
+      "bigInGroup": 0.0859375,
+      "bigShare": 0.17460317,
+      "sumRShare": -0.26735035,
+      "lossShare": 0.21492263
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 144,
+      "share": 0.22966507,
+      "winRate": 0.28472222,
+      "winLo": 0.21735703,
+      "winHi": 0.36327481,
+      "meanR": 0.14983953,
+      "meanLo": -0.28725626,
+      "meanHi": 0.68301078,
+      "medianR": -1.0558918,
+      "payoff": 3.0090791,
+      "pf": 1.1977888,
+      "mfe": 1.3839543,
+      "mae": -1.0165529,
+      "reentry": [
+       0.125,
+       0.28472222,
+       0.50694444
+      ],
+      "bigInGroup": 0.11111111,
+      "bigShare": 0.25396825,
+      "sumRShare": 0.30045564,
+      "lossShare": 0.22051029
+     },
+     {
+      "group": "Tendance forte",
+      "n": 275,
+      "share": 0.43859649,
+      "winRate": 0.27636364,
+      "winLo": 0.22686501,
+      "winHi": 0.33202412,
+      "meanR": 0.035144779,
+      "meanLo": -0.2508701,
+      "meanHi": 0.34638333,
+      "medianR": -1.0552954,
+      "payoff": 2.739996,
+      "pf": 1.0464306,
+      "mfe": 1.2055495,
+      "mae": -1.0163228,
+      "reentry": [
+       0.11636364,
+       0.27636364,
+       0.51272727
+      ],
+      "bigInGroup": 0.090909091,
+      "bigShare": 0.3968254,
+      "sumRShare": 0.13458138,
+      "lossShare": 0.42075606
+     }
+    ],
+    "D1": {
+     "est": 0.72513082,
+     "lo": -0.44614845,
+     "hi": 2.4057703,
+     "pTwoSided": 0.311,
+     "n0": 80,
+     "n1": 547
+    }
+   },
+   "DOGE": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 555,
+    "undefinedPct": 0,
+    "bigThreshold": 2.9075975,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 84,
+      "share": 0.15135135,
+      "winRate": 0.22619048,
+      "winLo": 0.14986021,
+      "winHi": 0.32646907,
+      "meanR": -0.11010558,
+      "meanLo": -0.60078199,
+      "meanHi": 0.50418044,
+      "medianR": -1.0599588,
+      "payoff": 2.9663791,
+      "pf": 0.86709543,
+      "mfe": 0.80223924,
+      "mae": -1.0114214,
+      "reentry": [
+       0.1547619,
+       0.32142857,
+       0.51190476
+      ],
+      "bigInGroup": 0.083333333,
+      "bigShare": 0.125,
+      "sumRShare": -0.1235723,
+      "lossShare": 0.15357148
+     },
+     {
+      "group": "Range modéré",
+      "n": 92,
+      "share": 0.16576577,
+      "winRate": 0.23913043,
+      "winLo": 0.16355146,
+      "winHi": 0.33562144,
+      "meanR": 0.23150674,
+      "meanLo": -0.31741764,
+      "meanHi": 0.82274424,
+      "medianR": -1.0530336,
+      "payoff": 4.0899474,
+      "pf": 1.285412,
+      "mfe": 1.102802,
+      "mae": -1.0119086,
+      "reentry": [
+       0.2173913,
+       0.42391304,
+       0.57608696
+      ],
+      "bigInGroup": 0.14130435,
+      "bigShare": 0.23214286,
+      "sumRShare": 0.28456664,
+      "lossShare": 0.16468006
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 140,
+      "share": 0.25225225,
+      "winRate": 0.2,
+      "winLo": 0.14215457,
+      "winHi": 0.27386915,
+      "meanR": -0.23861823,
+      "meanLo": -0.59266995,
+      "meanHi": 0.17615458,
+      "medianR": -1.0576457,
+      "payoff": 2.8901397,
+      "pf": 0.72253491,
+      "mfe": 1.0113004,
+      "mae": -1.0127626,
+      "reentry": [
+       0.14285714,
+       0.32142857,
+       0.52857143
+      ],
+      "bigInGroup": 0.092857143,
+      "bigShare": 0.23214286,
+      "sumRShare": -0.44633831,
+      "lossShare": 0.26569608
+     },
+     {
+      "group": "Tendance forte",
+      "n": 239,
+      "share": 0.43063063,
+      "winRate": 0.28033473,
+      "winLo": 0.22721035,
+      "winHi": 0.34040878,
+      "meanR": 0.40252137,
+      "meanLo": -0.084800543,
+      "meanHi": 1.0100929,
+      "medianR": -1.0396012,
+      "payoff": 3.877113,
+      "pf": 1.5102707,
+      "mfe": 1.3090751,
+      "mae": -1.0105075,
+      "reentry": [
+       0.10041841,
+       0.30962343,
+       0.56066946
+      ],
+      "bigInGroup": 0.09623431,
+      "bigShare": 0.41071429,
+      "sumRShare": 1.285344,
+      "lossShare": 0.41605238
+     }
+    ],
+    "D1": {
+     "est": -0.28865055,
+     "lo": -0.91556281,
+     "hi": 0.42031948,
+     "pTwoSided": 0.3916,
+     "n0": 84,
+     "n1": 471
+    }
+   },
+   "TRX": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 567,
+    "undefinedPct": 0,
+    "bigThreshold": 2.8722526,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 78,
+      "share": 0.13756614,
+      "winRate": 0.26923077,
+      "winLo": 0.18335614,
+      "winHi": 0.376769,
+      "meanR": -0.018951098,
+      "meanLo": -0.53000219,
+      "meanHi": 0.61691295,
+      "medianR": -1.079889,
+      "payoff": 2.6530106,
+      "pf": 0.97742496,
+      "mfe": 1.4716508,
+      "mae": -1.018488,
+      "reentry": [
+       0.051282051,
+       0.17948718,
+       0.3974359
+      ],
+      "bigInGroup": 0.076923077,
+      "bigShare": 0.10526316,
+      "sumRShare": -0.54211348,
+      "lossShare": 0.14110554
+     },
+     {
+      "group": "Range modéré",
+      "n": 131,
+      "share": 0.23104056,
+      "winRate": 0.2519084,
+      "winLo": 0.18536461,
+      "winHi": 0.3325878,
+      "meanR": -0.10740839,
+      "meanLo": -0.43974555,
+      "meanHi": 0.26325807,
+      "medianR": -1.0618155,
+      "payoff": 2.5888048,
+      "pf": 0.87174038,
+      "mfe": 1.4433065,
+      "mae": -1.0184113,
+      "reentry": [
+       0.12977099,
+       0.29007634,
+       0.51908397
+      ],
+      "bigInGroup": 0.091603053,
+      "bigShare": 0.21052632,
+      "sumRShare": -5.1602498,
+      "lossShare": 0.23640857
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 143,
+      "share": 0.25220459,
+      "winRate": 0.30769231,
+      "winLo": 0.23790354,
+      "winHi": 0.38754284,
+      "meanR": 0.25002144,
+      "meanLo": -0.27772859,
+      "meanHi": 1.0033213,
+      "medianR": -1.0686729,
+      "payoff": 2.9951818,
+      "pf": 1.3311919,
+      "mfe": 1.4723731,
+      "mae": -1.0146576,
+      "reentry": [
+       0.06993007,
+       0.27972028,
+       0.45454545
+      ],
+      "bigInGroup": 0.11188811,
+      "bigShare": 0.28070175,
+      "sumRShare": 13.112168,
+      "lossShare": 0.23263617
+     },
+     {
+      "group": "Tendance forte",
+      "n": 215,
+      "share": 0.37918871,
+      "winRate": 0.26511628,
+      "winLo": 0.21061371,
+      "winHi": 0.32786497,
+      "meanR": -0.081291498,
+      "meanLo": -0.36834673,
+      "meanHi": 0.22242431,
+      "medianR": -1.0679295,
+      "payoff": 2.5041288,
+      "pf": 0.90338823,
+      "mfe": 1.2619412,
+      "mae": -1.0203257,
+      "reentry": [
+       0.093023256,
+       0.29302326,
+       0.49302326
+      ],
+      "bigInGroup": 0.10697674,
+      "bigShare": 0.40350877,
+      "sumRShare": -6.4098048,
+      "lossShare": 0.38984972
+     }
+    ],
+    "D1": {
+     "est": -0.027550065,
+     "lo": -0.58108209,
+     "hi": 0.61982105,
+     "pTwoSided": 0.8974,
+     "n0": 78,
+     "n1": 489
+    }
+   },
+   "ADA": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 626,
+    "undefinedPct": 0,
+    "bigThreshold": 3.2854847,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 89,
+      "share": 0.14217252,
+      "winRate": 0.26966292,
+      "winLo": 0.18842053,
+      "winHi": 0.36996642,
+      "meanR": 0.27773894,
+      "meanLo": -0.24461744,
+      "meanHi": 0.88846263,
+      "medianR": -1.0531767,
+      "payoff": 3.6689467,
+      "pf": 1.354688,
+      "mfe": 0.82403873,
+      "mae": -1.0118266,
+      "reentry": [
+       0.14606742,
+       0.33707865,
+       0.53932584
+      ],
+      "bigInGroup": 0.13483146,
+      "bigShare": 0.19047619,
+      "sumRShare": 0.14258788,
+      "lossShare": 0.15014949
+     },
+     {
+      "group": "Range modéré",
+      "n": 112,
+      "share": 0.17891374,
+      "winRate": 0.25,
+      "winLo": 0.179003,
+      "winHi": 0.33757768,
+      "meanR": 0.33596478,
+      "meanLo": -0.26850934,
+      "meanHi": 1.1312984,
+      "medianR": -1.0481229,
+      "payoff": 4.2615265,
+      "pf": 1.4205088,
+      "mfe": 1.1066508,
+      "mae": -1.0103841,
+      "reentry": [
+       0.14285714,
+       0.36607143,
+       0.53571429
+      ],
+      "bigInGroup": 0.089285714,
+      "bigShare": 0.15873016,
+      "sumRShare": 0.21705391,
+      "lossShare": 0.1927881
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 158,
+      "share": 0.25239617,
+      "winRate": 0.24050633,
+      "winLo": 0.18053234,
+      "winHi": 0.31279897,
+      "meanR": 0.11184232,
+      "meanLo": -0.33061658,
+      "meanHi": 0.64915511,
+      "medianR": -1.0506135,
+      "payoff": 3.6303594,
+      "pf": 1.1496138,
+      "mfe": 0.95692843,
+      "mae": -1.0118279,
+      "reentry": [
+       0.13924051,
+       0.28481013,
+       0.53797468
+      ],
+      "bigInGroup": 0.082278481,
+      "bigShare": 0.20634921,
+      "sumRShare": 0.10193401,
+      "lossShare": 0.25446919
+     },
+     {
+      "group": "Tendance forte",
+      "n": 267,
+      "share": 0.42651757,
+      "winRate": 0.3071161,
+      "winLo": 0.25484588,
+      "winHi": 0.36485783,
+      "meanR": 0.34958878,
+      "meanLo": 0.00081794371,
+      "meanHi": 0.75704757,
+      "medianR": -1.040374,
+      "payoff": 3.3830452,
+      "pf": 1.4995119,
+      "mfe": 1.3035542,
+      "mae": -1.0095938,
+      "reentry": [
+       0.082397004,
+       0.29213483,
+       0.47191011
+      ],
+      "bigInGroup": 0.10486891,
+      "bigShare": 0.44444444,
+      "sumRShare": 0.53842421,
+      "lossShare": 0.40259322
+     }
+    ],
+    "D1": {
+     "est": 0.00094313412,
+     "lo": -0.60339079,
+     "hi": 0.66918745,
+     "pTwoSided": 0.9944,
+     "n0": 89,
+     "n1": 537
+    }
+   },
+   "LINK": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 523,
+    "undefinedPct": 0,
+    "bigThreshold": 2.5257571,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 99,
+      "share": 0.18929254,
+      "winRate": 0.23232323,
+      "winLo": 0.16009114,
+      "winHi": 0.3245525,
+      "meanR": -0.11566468,
+      "meanLo": -0.48343514,
+      "meanHi": 0.28813034,
+      "medianR": -1.0312471,
+      "payoff": 2.7766431,
+      "pf": 0.8402999,
+      "mfe": 1.2006811,
+      "mae": -1.0101902,
+      "reentry": [
+       0.16161616,
+       0.29292929,
+       0.53535354
+      ],
+      "bigInGroup": 0.060606061,
+      "bigShare": 0.11320755,
+      "sumRShare": -0.10168188,
+      "lossShare": 0.19171379
+     },
+     {
+      "group": "Range modéré",
+      "n": 114,
+      "share": 0.21797323,
+      "winRate": 0.26315789,
+      "winLo": 0.1909996,
+      "winHi": 0.3507576,
+      "meanR": -0.14815713,
+      "meanLo": -0.51701139,
+      "meanHi": 0.31109672,
+      "medianR": -1.0426959,
+      "payoff": 2.2462359,
+      "pf": 0.80222712,
+      "mfe": 1.1403067,
+      "mae": -1.0109133,
+      "reentry": [
+       0.096491228,
+       0.29824561,
+       0.52631579
+      ],
+      "bigInGroup": 0.061403509,
+      "bigShare": 0.13207547,
+      "sumRShare": -0.14998057,
+      "lossShare": 0.22834066
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 125,
+      "share": 0.23900574,
+      "winRate": 0.328,
+      "winLo": 0.25189963,
+      "winHi": 0.41435687,
+      "meanR": -0.0041742977,
+      "meanLo": -0.3032637,
+      "meanHi": 0.3465414,
+      "medianR": -1.037292,
+      "payoff": 2.036243,
+      "pf": 0.99388051,
+      "mfe": 1.5376498,
+      "mae": -1.0105157,
+      "reentry": [
+       0.128,
+       0.304,
+       0.464
+      ],
+      "bigInGroup": 0.08,
+      "bigShare": 0.18867925,
+      "sumRShare": -0.004633413,
+      "lossShare": 0.22798222
+     },
+     {
+      "group": "Tendance forte",
+      "n": 185,
+      "share": 0.35372849,
+      "winRate": 0.31351351,
+      "winLo": 0.25103109,
+      "winHi": 0.38358305,
+      "meanR": 0.7647379,
+      "meanLo": 0.20101825,
+      "meanHi": 1.4506227,
+      "medianR": -1.026154,
+      "payoff": 4.5429982,
+      "pf": 2.0747551,
+      "mfe": 1.2529256,
+      "mae": -1.0113695,
+      "reentry": [
+       0.097297297,
+       0.27567568,
+       0.46486486
+      ],
+      "bigInGroup": 0.16216216,
+      "bigShare": 0.56603774,
+      "sumRShare": 1.2562959,
+      "lossShare": 0.35196333
+     }
+    ],
+    "D1": {
+     "est": -0.40827037,
+     "lo": -0.92595968,
+     "hi": 0.10860204,
+     "pTwoSided": 0.1198,
+     "n0": 99,
+     "n1": 424
+    }
+   },
+   "XLM": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 575,
+    "undefinedPct": 0,
+    "bigThreshold": 2.9780067,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 85,
+      "share": 0.14782609,
+      "winRate": 0.30588235,
+      "winLo": 0.21809385,
+      "winHi": 0.41045795,
+      "meanR": 0.033819186,
+      "meanLo": -0.42748495,
+      "meanHi": 0.57083512,
+      "medianR": -1.0598873,
+      "payoff": 2.368654,
+      "pf": 1.0438136,
+      "mfe": 0.74522691,
+      "mae": -1.0111958,
+      "reentry": [
+       0.094117647,
+       0.30588235,
+       0.49411765
+      ],
+      "bigInGroup": 0.070588235,
+      "bigShare": 0.10344828,
+      "sumRShare": 0.021301532,
+      "lossShare": 0.14800419
+     },
+     {
+      "group": "Range modéré",
+      "n": 112,
+      "share": 0.19478261,
+      "winRate": 0.21428571,
+      "winLo": 0.14844068,
+      "winHi": 0.29908009,
+      "meanR": -0.168962,
+      "meanLo": -0.49747145,
+      "meanHi": 0.19849007,
+      "medianR": -1.0649744,
+      "payoff": 2.9392442,
+      "pf": 0.80161204,
+      "mfe": 0.79995186,
+      "mae": -1.0133576,
+      "reentry": [
+       0.17857143,
+       0.44642857,
+       0.60714286
+      ],
+      "bigInGroup": 0.098214286,
+      "bigShare": 0.18965517,
+      "sumRShare": -0.14022835,
+      "lossShare": 0.21517556
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 151,
+      "share": 0.2626087,
+      "winRate": 0.35099338,
+      "winLo": 0.27942337,
+      "winHi": 0.42995679,
+      "meanR": 0.5928507,
+      "meanLo": 0.05947852,
+      "meanHi": 1.3448016,
+      "medianR": -1.0285423,
+      "payoff": 3.5285238,
+      "pf": 1.9082833,
+      "mfe": 1.5630728,
+      "mae": -1.0096908,
+      "reentry": [
+       0.086092715,
+       0.1986755,
+       0.47019868
+      ],
+      "bigInGroup": 0.10596026,
+      "bigShare": 0.27586207,
+      "sumRShare": 0.6633627,
+      "lossShare": 0.22233209
+     },
+     {
+      "group": "Tendance forte",
+      "n": 227,
+      "share": 0.39478261,
+      "winRate": 0.24669604,
+      "winLo": 0.19514119,
+      "winHi": 0.3066814,
+      "meanR": 0.27082883,
+      "meanLo": -0.16461382,
+      "meanHi": 0.76336056,
+      "medianR": -1.0495627,
+      "payoff": 4.0752585,
+      "pf": 1.3345876,
+      "mfe": 1.0700646,
+      "mae": -1.0115009,
+      "reentry": [
+       0.10572687,
+       0.27753304,
+       0.46255507
+      ],
+      "bigInGroup": 0.11013216,
+      "bigShare": 0.43103448,
+      "sumRShare": 0.45556412,
+      "lossShare": 0.41448816
+     }
+    ],
+    "D1": {
+     "est": -0.23572134,
+     "lo": -0.77406172,
+     "hi": 0.34691631,
+     "pTwoSided": 0.4106,
+     "n0": 85,
+     "n1": 490
+    }
+   },
+   "LTC": {
+    "measure": "er",
+    "label": "ER 20 bougies (5 h) — principal",
+    "n": 660,
+    "undefinedPct": 0,
+    "bigThreshold": 2.5525128,
+    "rows": [
+     {
+      "group": "Range marqué",
+      "n": 102,
+      "share": 0.15454545,
+      "winRate": 0.20588235,
+      "winLo": 0.13878889,
+      "winHi": 0.2943255,
+      "meanR": -0.25529636,
+      "meanLo": -0.65293042,
+      "meanHi": 0.22105401,
+      "medianR": -1.0569836,
+      "payoff": 2.6978333,
+      "pf": 0.69943825,
+      "mfe": 0.95408179,
+      "mae": -1.0132336,
+      "reentry": [
+       0.12745098,
+       0.32352941,
+       0.50980392
+      ],
+      "bigInGroup": 0.058823529,
+      "bigShare": 0.090909091,
+      "sumRShare": -1.2595809,
+      "lossShare": 0.17639723
+     },
+     {
+      "group": "Range modéré",
+      "n": 146,
+      "share": 0.22121212,
+      "winRate": 0.26712329,
+      "winLo": 0.20199833,
+      "winHi": 0.34418868,
+      "meanR": -0.17577673,
+      "meanLo": -0.46764674,
+      "meanHi": 0.15075587,
+      "medianR": -1.053109,
+      "payoff": 2.1111824,
+      "pf": 0.76949639,
+      "mfe": 1.0021344,
+      "mae": -1.0127752,
+      "reentry": [
+       0.10958904,
+       0.24657534,
+       0.5
+      ],
+      "bigInGroup": 0.068493151,
+      "bigShare": 0.15151515,
+      "sumRShare": -1.2413536,
+      "lossShare": 0.22668208
+     },
+     {
+      "group": "Tendance modérée",
+      "n": 169,
+      "share": 0.25606061,
+      "winRate": 0.30769231,
+      "winLo": 0.24302688,
+      "winHi": 0.38090594,
+      "meanR": 0.21701295,
+      "meanLo": -0.1514425,
+      "meanHi": 0.63790104,
+      "medianR": -1.0391426,
+      "payoff": 2.9510009,
+      "pf": 1.311556,
+      "mfe": 1.4518079,
+      "mae": -1.0117287,
+      "reentry": [
+       0.094674556,
+       0.23668639,
+       0.46153846
+      ],
+      "bigInGroup": 0.1183432,
+      "bigShare": 0.3030303,
+      "sumRShare": 1.7740001,
+      "lossShare": 0.23967182
+     },
+     {
+      "group": "Tendance forte",
+      "n": 243,
+      "share": 0.36818182,
+      "winRate": 0.30452675,
+      "winLo": 0.25007767,
+      "winHi": 0.36505992,
+      "meanR": 0.1469225,
+      "meanLo": -0.12641796,
+      "meanHi": 0.44540512,
+      "medianR": -1.0455711,
+      "payoff": 2.7484695,
+      "pf": 1.2034719,
+      "mfe": 1.0618198,
+      "mae": -1.0122045,
+      "reentry": [
+       0.11522634,
+       0.27572016,
+       0.48971193
+      ],
+      "bigInGroup": 0.12345679,
+      "bigShare": 0.45454545,
+      "sumRShare": 1.7269344,
+      "lossShare": 0.35724888
+     }
+    ],
+    "D1": {
+     "est": -0.33901312,
+     "lo": -0.77792481,
+     "hi": 0.16457624,
+     "pTwoSided": 0.1588,
+     "n0": 102,
+     "n1": 558
+    }
+   }
+  }
+ },
+ "variants": {
+  "table": {
+   "portfolio": {
+    "V0": {
+     "1": {
+      "sharpe": 1.8775665,
+      "cagr": 0.61640624,
+      "maxDD": -0.19124348,
+      "pf": 1.8873839,
+      "trades": 1311,
+      "sumR": 735.82168,
+      "top5": 1.3086052,
+      "moved": 0,
+      "dropped": 0
+     },
+     "2": {
+      "sharpe": 1.6098551,
+      "cagr": 0.50179749,
+      "maxDD": -0.20728422,
+      "pf": 1.6686971,
+      "trades": 1311,
+      "sumR": 559.12506,
+      "top5": 1.7081108,
+      "moved": 0,
+      "dropped": 0
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 1.8660309,
+      "cagr": 0.59330277,
+      "maxDD": -0.18212592,
+      "pf": 2.0537785,
+      "trades": 1162,
+      "sumR": 654.93675,
+      "top5": 1.306489,
+      "moved": 0,
+      "dropped": 339
+     },
+     "2": {
+      "sharpe": 1.6217228,
+      "cagr": 0.49323436,
+      "maxDD": -0.20244296,
+      "pf": 1.8055592,
+      "trades": 1162,
+      "sumR": 497.87216,
+      "top5": 1.7051068,
+      "moved": 0,
+      "dropped": 339
+     }
+    },
+    "V2": {
+     "1": {
+      "sharpe": 1.8926432,
+      "cagr": 0.62479385,
+      "maxDD": -0.1914587,
+      "pf": 1.9624018,
+      "trades": 1284,
+      "sumR": 705.33045,
+      "top5": 1.335578,
+      "moved": 307,
+      "dropped": 32
+     },
+     "2": {
+      "sharpe": 1.6315084,
+      "cagr": 0.5125752,
+      "maxDD": -0.20282453,
+      "pf": 1.7296544,
+      "trades": 1284,
+      "sumR": 532.72078,
+      "top5": 1.7545479,
+      "moved": 307,
+      "dropped": 32
+     }
+    },
+    "V3": {
+     "1": {
+      "sharpe": 1.9129879,
+      "cagr": 0.6006551,
+      "maxDD": -0.16814919,
+      "pf": 1.9352417,
+      "trades": 1353,
+      "sumR": 719.58698,
+      "top5": 1.3060328,
+      "moved": 220,
+      "dropped": 0
+     },
+     "2": {
+      "sharpe": 1.6242347,
+      "cagr": 0.48312866,
+      "maxDD": -0.19401084,
+      "pf": 1.6871493,
+      "trades": 1353,
+      "sumR": 510.37858,
+      "top5": 1.8234923,
+      "moved": 220,
+      "dropped": 0
+     }
+    }
+   },
+   "assets": {
+    "BTC": {
+     "V0": {
+      "1": {
+       "sharpe": 1.5244785,
+       "cagr": 0.42929549,
+       "maxDD": -0.22303972,
+       "pf": 1.6698907,
+       "trades": 774,
+       "sumR": 484.23003,
+       "top5": 1.214794,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 1.2405491,
+       "cagr": 0.33103038,
+       "maxDD": -0.25692737,
+       "pf": 1.4764693,
+       "trades": 774,
+       "sumR": 365.35592,
+       "top5": 1.5942709,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 1.4243785,
+       "cagr": 0.37884905,
+       "maxDD": -0.21360393,
+       "pf": 1.8043348,
+       "trades": 692,
+       "sumR": 422.26065,
+       "top5": 1.2720333,
+       "moved": 0,
+       "dropped": 177
+      },
+      "2": {
+       "sharpe": 1.1614479,
+       "cagr": 0.29378613,
+       "maxDD": -0.25290726,
+       "pf": 1.5734051,
+       "trades": 692,
+       "sumR": 316.20153,
+       "top5": 1.6828774,
+       "moved": 0,
+       "dropped": 177
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 1.4535069,
+       "cagr": 0.40164158,
+       "maxDD": -0.24780526,
+       "pf": 1.6296389,
+       "trades": 765,
+       "sumR": 450.99942,
+       "top5": 1.2813747,
+       "moved": 166,
+       "dropped": 11
+      },
+      "2": {
+       "sharpe": 1.1715359,
+       "cagr": 0.3063484,
+       "maxDD": -0.27997499,
+       "pf": 1.4437699,
+       "trades": 765,
+       "sumR": 334.10951,
+       "top5": 1.7130354,
+       "moved": 166,
+       "dropped": 11
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 1.5638752,
+       "cagr": 0.42998626,
+       "maxDD": -0.20038653,
+       "pf": 1.8146051,
+       "trades": 792,
+       "sumR": 496.70845,
+       "top5": 1.1897815,
+       "moved": 116,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 1.2654629,
+       "cagr": 0.32946677,
+       "maxDD": -0.22954272,
+       "pf": 1.5670292,
+       "trades": 792,
+       "sumR": 357.41733,
+       "top5": 1.6360427,
+       "moved": 116,
+       "dropped": 0
+      }
+     }
+    },
+    "ETH": {
+     "V0": {
+      "1": {
+       "sharpe": 1.7507071,
+       "cagr": 0.7220455,
+       "maxDD": -0.26776651,
+       "pf": 2.0198897,
+       "trades": 667,
+       "sumR": 348.75541,
+       "top5": 1.2913638,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 1.5309945,
+       "cagr": 0.59930873,
+       "maxDD": -0.29027771,
+       "pf": 1.7814384,
+       "trades": 667,
+       "sumR": 273.28684,
+       "top5": 1.6357684,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 1.7927383,
+       "cagr": 0.70255814,
+       "maxDD": -0.22811904,
+       "pf": 2.1613477,
+       "trades": 587,
+       "sumR": 303.42312,
+       "top5": 1.2414637,
+       "moved": 0,
+       "dropped": 162
+      },
+      "2": {
+       "sharpe": 1.5892357,
+       "cagr": 0.59536023,
+       "maxDD": -0.24199027,
+       "pf": 1.9015295,
+       "trades": 587,
+       "sumR": 236.60875,
+       "top5": 1.5808006,
+       "moved": 0,
+       "dropped": 162
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 1.7750714,
+       "cagr": 0.73723421,
+       "maxDD": -0.22374555,
+       "pf": 2.1443434,
+       "trades": 647,
+       "sumR": 345.42079,
+       "top5": 1.2739865,
+       "moved": 141,
+       "dropped": 21
+      },
+      "2": {
+       "sharpe": 1.5619885,
+       "cagr": 0.61704131,
+       "maxDD": -0.24902865,
+       "pf": 1.8778355,
+       "trades": 647,
+       "sumR": 272.57171,
+       "top5": 1.603363,
+       "moved": 141,
+       "dropped": 21
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 1.7899899,
+       "cagr": 0.70005631,
+       "maxDD": -0.21449718,
+       "pf": 2.0017357,
+       "trades": 694,
+       "sumR": 319.46889,
+       "top5": 1.3305283,
+       "moved": 104,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 1.5497543,
+       "cagr": 0.57411882,
+       "maxDD": -0.23858809,
+       "pf": 1.7516305,
+       "trades": 694,
+       "sumR": 230.29388,
+       "top5": 1.8276485,
+       "moved": 104,
+       "dropped": 0
+      }
+     }
+    },
+    "XRP": {
+     "V0": {
+      "1": {
+       "sharpe": 0.77577233,
+       "cagr": 0.30072796,
+       "maxDD": -0.47973645,
+       "pf": 1.2539025,
+       "trades": 589,
+       "sumR": 184.19669,
+       "top5": 2.0937855,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.58512439,
+       "cagr": 0.19072237,
+       "maxDD": -0.55469415,
+       "pf": 1.1504739,
+       "trades": 589,
+       "sumR": 117.79988,
+       "top5": 3.246858,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 0.73791835,
+       "cagr": 0.26914736,
+       "maxDD": -0.53095006,
+       "pf": 1.2692799,
+       "trades": 531,
+       "sumR": 150.85632,
+       "top5": 2.3234891,
+       "moved": 0,
+       "dropped": 113
+      },
+      "2": {
+       "sharpe": 0.55810203,
+       "cagr": 0.17192566,
+       "maxDD": -0.62850542,
+       "pf": 1.1591689,
+       "trades": 531,
+       "sumR": 91.877079,
+       "top5": 3.7860462,
+       "moved": 0,
+       "dropped": 113
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 0.72763149,
+       "cagr": 0.27023812,
+       "maxDD": -0.47700085,
+       "pf": 1.2293321,
+       "trades": 581,
+       "sumR": 162.64503,
+       "top5": 2.2788035,
+       "moved": 101,
+       "dropped": 12
+      },
+      "2": {
+       "sharpe": 0.53797443,
+       "cagr": 0.16418502,
+       "maxDD": -0.58925289,
+       "pf": 1.1299207,
+       "trades": 581,
+       "sumR": 97.479269,
+       "top5": 3.7704326,
+       "moved": 101,
+       "dropped": 12
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 0.65947415,
+       "cagr": 0.22669128,
+       "maxDD": -0.51363774,
+       "pf": 1.212497,
+       "trades": 614,
+       "sumR": 134.01127,
+       "top5": 2.8851248,
+       "moved": 95,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.45308134,
+       "cagr": 0.11877936,
+       "maxDD": -0.62758972,
+       "pf": 1.1032798,
+       "trades": 614,
+       "sumR": 52.341937,
+       "top5": 7.3166109,
+       "moved": 95,
+       "dropped": 0
+      }
+     }
+    },
+    "BNB": {
+     "V0": {
+      "1": {
+       "sharpe": 0.58286976,
+       "cagr": 0.1375306,
+       "maxDD": -0.42430618,
+       "pf": 1.1196159,
+       "trades": 627,
+       "sumR": 71.813904,
+       "top5": 4.6967808,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.28353229,
+       "cagr": 0.042069247,
+       "maxDD": -0.61120484,
+       "pf": 1.03338,
+       "trades": 627,
+       "sumR": -17.876814,
+       "top5": -18.657947,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 0.53001529,
+       "cagr": 0.11710474,
+       "maxDD": -0.37187555,
+       "pf": 1.1297632,
+       "trades": 579,
+       "sumR": 63.636444,
+       "top5": 4.5820886,
+       "moved": 0,
+       "dropped": 103
+      },
+      "2": {
+       "sharpe": 0.24360738,
+       "cagr": 0.030242808,
+       "maxDD": -0.51811912,
+       "pf": 1.0308833,
+       "trades": 579,
+       "sumR": -18.864257,
+       "top5": -15.280938,
+       "moved": 0,
+       "dropped": 103
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 0.66961509,
+       "cagr": 0.16695809,
+       "maxDD": -0.43098591,
+       "pf": 1.1506467,
+       "trades": 614,
+       "sumR": 77.781144,
+       "top5": 4.2145492,
+       "moved": 89,
+       "dropped": 14
+      },
+      "2": {
+       "sharpe": 0.37624682,
+       "cagr": 0.070979635,
+       "maxDD": -0.57228499,
+       "pf": 1.0584059,
+       "trades": 614,
+       "sumR": -9.8723328,
+       "top5": -32.85096,
+       "moved": 89,
+       "dropped": 14
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 0.48611108,
+       "cagr": 0.10334087,
+       "maxDD": -0.44329196,
+       "pf": 1.1030797,
+       "trades": 651,
+       "sumR": 7.0204842,
+       "top5": 40.854146,
+       "moved": 70,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.16487678,
+       "cagr": 0.00739793,
+       "maxDD": -0.61148807,
+       "pf": 1.0067764,
+       "trades": 651,
+       "sumR": -95.007494,
+       "top5": -2.9721968,
+       "moved": 70,
+       "dropped": 0
+      }
+     }
+    },
+    "DOGE": {
+     "V0": {
+      "1": {
+       "sharpe": 0.53114718,
+       "cagr": 0.18426879,
+       "maxDD": -0.61622487,
+       "pf": 1.0915133,
+       "trades": 555,
+       "sumR": 74.845808,
+       "top5": 4.1099006,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.36078834,
+       "cagr": 0.072915768,
+       "maxDD": -0.74187534,
+       "pf": 1.033124,
+       "trades": 555,
+       "sumR": 21.190027,
+       "top5": 14.389425,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 0.57346811,
+       "cagr": 0.21355149,
+       "maxDD": -0.57678788,
+       "pf": 1.1091555,
+       "trades": 496,
+       "sumR": 83.363462,
+       "top5": 3.3869996,
+       "moved": 0,
+       "dropped": 104
+      },
+      "2": {
+       "sharpe": 0.4194666,
+       "cagr": 0.11105228,
+       "maxDD": -0.68810728,
+       "pf": 1.0520295,
+       "trades": 496,
+       "sumR": 36.448874,
+       "top5": 7.6825737,
+       "moved": 0,
+       "dropped": 104
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 0.52485789,
+       "cagr": 0.18004153,
+       "maxDD": -0.59408211,
+       "pf": 1.0896351,
+       "trades": 543,
+       "sumR": 75.219273,
+       "top5": 3.9780309,
+       "moved": 87,
+       "dropped": 17
+      },
+      "2": {
+       "sharpe": 0.35819325,
+       "cagr": 0.071361387,
+       "maxDD": -0.74502649,
+       "pf": 1.0324529,
+       "trades": 543,
+       "sumR": 23.356523,
+       "top5": 12.702672,
+       "moved": 87,
+       "dropped": 17
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 0.55128632,
+       "cagr": 0.19821723,
+       "maxDD": -0.57823518,
+       "pf": 1.0949709,
+       "trades": 572,
+       "sumR": 78.720881,
+       "top5": 3.9072832,
+       "moved": 83,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.37375778,
+       "cagr": 0.082336539,
+       "maxDD": -0.74148305,
+       "pf": 1.0357948,
+       "trades": 572,
+       "sumR": 13.216088,
+       "top5": 22.992336,
+       "moved": 83,
+       "dropped": 0
+      }
+     }
+    },
+    "TRX": {
+     "V0": {
+      "1": {
+       "sharpe": 0.30131233,
+       "cagr": 0.050627048,
+       "maxDD": -0.52906908,
+       "pf": 1.081171,
+       "trades": 567,
+       "sumR": 2.7267089,
+       "top5": 87.840471,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.03753531,
+       "cagr": -0.03570814,
+       "maxDD": -0.58367336,
+       "pf": 0.94864599,
+       "trades": 567,
+       "sumR": -99.576625,
+       "top5": -2.3430357,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 0.36319425,
+       "cagr": 0.071576807,
+       "maxDD": -0.47072791,
+       "pf": 1.1202893,
+       "trades": 513,
+       "sumR": -2.6472271,
+       "top5": -80.832822,
+       "moved": 0,
+       "dropped": 106
+      },
+      "2": {
+       "sharpe": 0.1195239,
+       "cagr": -0.0083921859,
+       "maxDD": -0.52685746,
+       "pf": 0.98735308,
+       "trades": 513,
+       "sumR": -94.563917,
+       "top5": -2.2054732,
+       "moved": 0,
+       "dropped": 106
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 0.29350757,
+       "cagr": 0.047973797,
+       "maxDD": -0.53252517,
+       "pf": 1.0805159,
+       "trades": 561,
+       "sumR": 1.5436144,
+       "top5": 152.59718,
+       "moved": 99,
+       "dropped": 7
+      },
+      "2": {
+       "sharpe": 0.031630047,
+       "cagr": -0.037273432,
+       "maxDD": -0.58674003,
+       "pf": 0.94396195,
+       "trades": 561,
+       "sumR": -98.334039,
+       "top5": -2.335099,
+       "moved": 99,
+       "dropped": 7
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 0.35862467,
+       "cagr": 0.069846252,
+       "maxDD": -0.4602406,
+       "pf": 1.1109591,
+       "trades": 582,
+       "sumR": -1.7801398,
+       "top5": -131.79213,
+       "moved": 80,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.080175452,
+       "cagr": -0.020179131,
+       "maxDD": -0.53742824,
+       "pf": 0.97144036,
+       "trades": 582,
+       "sumR": -122.97526,
+       "top5": -1.8540894,
+       "moved": 80,
+       "dropped": 0
+      }
+     }
+    },
+    "ADA": {
+     "V0": {
+      "1": {
+       "sharpe": 0.56849941,
+       "cagr": 0.16635844,
+       "maxDD": -0.60851159,
+       "pf": 1.1361453,
+       "trades": 626,
+       "sumR": 173.35811,
+       "top5": 1.9541988,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.34135747,
+       "cagr": 0.062258933,
+       "maxDD": -0.65278684,
+       "pf": 1.0482526,
+       "trades": 626,
+       "sumR": 111.86402,
+       "top5": 2.9972332,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 0.59134325,
+       "cagr": 0.17470736,
+       "maxDD": -0.47469849,
+       "pf": 1.1599356,
+       "trades": 567,
+       "sumR": 175.15553,
+       "top5": 1.7695277,
+       "moved": 0,
+       "dropped": 124
+      },
+      "2": {
+       "sharpe": 0.37972042,
+       "cagr": 0.079255733,
+       "maxDD": -0.61360496,
+       "pf": 1.0686641,
+       "trades": 567,
+       "sumR": 120.1369,
+       "top5": 2.5545591,
+       "moved": 0,
+       "dropped": 124
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 0.54010157,
+       "cagr": 0.15191241,
+       "maxDD": -0.56675587,
+       "pf": 1.1261564,
+       "trades": 609,
+       "sumR": 165.64316,
+       "top5": 1.9788794,
+       "moved": 106,
+       "dropped": 18
+      },
+      "2": {
+       "sharpe": 0.31665474,
+       "cagr": 0.051735013,
+       "maxDD": -0.63381265,
+       "pf": 1.0408482,
+       "trades": 609,
+       "sumR": 106.32889,
+       "top5": 3.0521556,
+       "moved": 106,
+       "dropped": 18
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 0.431887,
+       "cagr": 0.10135375,
+       "maxDD": -0.67429899,
+       "pf": 1.0836556,
+       "trades": 653,
+       "sumR": 153.14261,
+       "top5": 2.2743869,
+       "moved": 89,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.18143591,
+       "cagr": -0.00090413017,
+       "maxDD": -0.77873535,
+       "pf": 0.99930603,
+       "trades": 653,
+       "sumR": 80.16058,
+       "top5": 4.2914308,
+       "moved": 89,
+       "dropped": 0
+      }
+     }
+    },
+    "LINK": {
+     "V0": {
+      "1": {
+       "sharpe": 0.68095807,
+       "cagr": 0.20769666,
+       "maxDD": -0.39393325,
+       "pf": 1.2648468,
+       "trades": 523,
+       "sumR": 112.61401,
+       "top5": 2.4925311,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.45397336,
+       "cagr": 0.10838184,
+       "maxDD": -0.44841973,
+       "pf": 1.1334364,
+       "trades": 523,
+       "sumR": 64.010257,
+       "top5": 4.3514281,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 0.7588905,
+       "cagr": 0.23456494,
+       "maxDD": -0.42371042,
+       "pf": 1.3399704,
+       "trades": 454,
+       "sumR": 116.10139,
+       "top5": 2.1643833,
+       "moved": 0,
+       "dropped": 128
+      },
+      "2": {
+       "sharpe": 0.55107023,
+       "cagr": 0.14598062,
+       "maxDD": -0.46863138,
+       "pf": 1.2037656,
+       "trades": 454,
+       "sumR": 74.092746,
+       "top5": 3.3654069,
+       "moved": 0,
+       "dropped": 128
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 0.68322693,
+       "cagr": 0.20703526,
+       "maxDD": -0.38576414,
+       "pf": 1.2770486,
+       "trades": 505,
+       "sumR": 114.48217,
+       "top5": 2.3737258,
+       "moved": 106,
+       "dropped": 22
+      },
+      "2": {
+       "sharpe": 0.46148816,
+       "cagr": 0.11103418,
+       "maxDD": -0.46639911,
+       "pf": 1.1426614,
+       "trades": 505,
+       "sumR": 68.075024,
+       "top5": 3.9612532,
+       "moved": 106,
+       "dropped": 22
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 0.74968715,
+       "cagr": 0.23196027,
+       "maxDD": -0.38053948,
+       "pf": 1.2978726,
+       "trades": 542,
+       "sumR": 113.7541,
+       "top5": 2.4371574,
+       "moved": 80,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.50413007,
+       "cagr": 0.12722698,
+       "maxDD": -0.44744835,
+       "pf": 1.1573868,
+       "trades": 542,
+       "sumR": 55.826633,
+       "top5": 4.9237846,
+       "moved": 80,
+       "dropped": 0
+      }
+     }
+    },
+    "XLM": {
+     "V0": {
+      "1": {
+       "sharpe": 0.5064758,
+       "cagr": 0.13715067,
+       "maxDD": -0.75059778,
+       "pf": 1.2370681,
+       "trades": 575,
+       "sumR": 134.94949,
+       "top5": 2.3760646,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.29275085,
+       "cagr": 0.042216697,
+       "maxDD": -0.83182881,
+       "pf": 1.0658072,
+       "trades": 575,
+       "sumR": 78.64491,
+       "top5": 4.0389597,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 0.47940153,
+       "cagr": 0.12385666,
+       "maxDD": -0.7624026,
+       "pf": 1.2384204,
+       "trades": 518,
+       "sumR": 131.58803,
+       "top5": 2.2756945,
+       "moved": 0,
+       "dropped": 116
+      },
+      "2": {
+       "sharpe": 0.28270291,
+       "cagr": 0.038863871,
+       "maxDD": -0.83240155,
+       "pf": 1.0676458,
+       "trades": 518,
+       "sumR": 80.954125,
+       "top5": 3.6670808,
+       "moved": 0,
+       "dropped": 116
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 0.46958976,
+       "cagr": 0.1202204,
+       "maxDD": -0.77927,
+       "pf": 1.219211,
+       "trades": 565,
+       "sumR": 126.65926,
+       "top5": 2.4505164,
+       "moved": 101,
+       "dropped": 15
+      },
+      "2": {
+       "sharpe": 0.26008583,
+       "cagr": 0.028227301,
+       "maxDD": -0.84847879,
+       "pf": 1.0462577,
+       "trades": 565,
+       "sumR": 71.932812,
+       "top5": 4.2738848,
+       "moved": 101,
+       "dropped": 15
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 0.59700456,
+       "cagr": 0.17768618,
+       "maxDD": -0.72395169,
+       "pf": 1.3147488,
+       "trades": 591,
+       "sumR": 143.34409,
+       "top5": 2.2826425,
+       "moved": 94,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": 0.37245652,
+       "cagr": 0.076927105,
+       "maxDD": -0.81659386,
+       "pf": 1.1218733,
+       "trades": 591,
+       "sumR": 75.852583,
+       "top5": 4.2676996,
+       "moved": 94,
+       "dropped": 0
+      }
+     }
+    },
+    "LTC": {
+     "V0": {
+      "1": {
+       "sharpe": 0.13015455,
+       "cagr": -0.0078906125,
+       "maxDD": -0.4696139,
+       "pf": 0.99148361,
+       "trades": 660,
+       "sumR": 20.673724,
+       "top5": 12.635871,
+       "moved": 0,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": -0.15848822,
+       "cagr": -0.096305048,
+       "maxDD": -0.66552828,
+       "pf": 0.90035009,
+       "trades": 660,
+       "sumR": -45.938663,
+       "top5": -5.6186712,
+       "moved": 0,
+       "dropped": 0
+      }
+     },
+     "V1": {
+      "1": {
+       "sharpe": 0.37216406,
+       "cagr": 0.071239062,
+       "maxDD": -0.39783771,
+       "pf": 1.086837,
+       "trades": 579,
+       "sumR": 45.280289,
+       "top5": 5.0225197,
+       "moved": 0,
+       "dropped": 132
+      },
+      "2": {
+       "sharpe": 0.10852214,
+       "cagr": -0.012924106,
+       "maxDD": -0.5055083,
+       "pf": 0.98499266,
+       "trades": 579,
+       "sumR": -13.762365,
+       "top5": -16.33153,
+       "moved": 0,
+       "dropped": 132
+      }
+     },
+     "V2": {
+      "1": {
+       "sharpe": 0.23460224,
+       "cagr": 0.025986194,
+       "maxDD": -0.38934682,
+       "pf": 1.0302849,
+       "trades": 644,
+       "sumR": 42.868954,
+       "top5": 6.1338544,
+       "moved": 115,
+       "dropped": 17
+      },
+      "2": {
+       "sharpe": -0.049524898,
+       "cagr": -0.063295587,
+       "maxDD": -0.57160855,
+       "pf": 0.92963679,
+       "trades": 644,
+       "sumR": -22.013972,
+       "top5": -11.8046,
+       "moved": 115,
+       "dropped": 17
+      }
+     },
+     "V3": {
+      "1": {
+       "sharpe": 0.21020315,
+       "cagr": 0.018969809,
+       "maxDD": -0.51883036,
+       "pf": 1.0201819,
+       "trades": 668,
+       "sumR": 9.0272138,
+       "top5": 28.058542,
+       "moved": 89,
+       "dropped": 0
+      },
+      "2": {
+       "sharpe": -0.093063551,
+       "cagr": -0.072812888,
+       "maxDD": -0.62186717,
+       "pf": 0.92591408,
+       "trades": 668,
+       "sumR": -68.889289,
+       "top5": -3.6152074,
+       "moved": 89,
+       "dropped": 0
+      }
+     }
+    }
+   }
+  },
+  "confirmatory": [
+   {
+    "variant": "V1",
+    "delta": 0.041150737,
+    "lo": -0.02334549,
+    "hi": 0.1018993,
+    "lo95": -0.035117363,
+    "hi95": 0.11440106,
+    "p": 0.14288571,
+    "improved": 5,
+    "perAsset": [
+     -0.037853984,
+     -0.052854474,
+     0.042320931,
+     0.061881921,
+     0.022843836,
+     0.077932421,
+     -0.027074263,
+     0.24200951
+    ],
+    "delta2": 0.058267727,
+    "pHolm": 0.42865713,
+    "demonstrated": false
+   },
+   {
+    "variant": "V2",
+    "delta": 0.0082428867,
+    "lo": -0.035450228,
+    "hi": 0.050506996,
+    "lo95": -0.044796997,
+    "hi95": 0.059193744,
+    "p": 0.38346165,
+    "improved": 3,
+    "perAsset": [
+     -0.048140848,
+     0.086745327,
+     -0.0062892898,
+     -0.0078047617,
+     -0.028397838,
+     0.0022688534,
+     -0.036886038,
+     0.10444769
+    ],
+    "delta2": 0.012021824,
+    "pHolm": 0.76692331,
+    "demonstrated": false
+   },
+   {
+    "variant": "V3",
+    "delta": -0.0041139205,
+    "lo": -0.072263618,
+    "hi": 0.057651472,
+    "lo95": -0.086234042,
+    "hi95": 0.068147819,
+    "p": 0.5520448,
+    "improved": 5,
+    "perAsset": [
+     -0.11629819,
+     -0.096758678,
+     0.020139139,
+     0.057312343,
+     -0.13661241,
+     0.068729078,
+     0.09052876,
+     0.080048591
+    ],
+    "delta2": -0.019965435,
+    "pHolm": 0.76692331,
+    "demonstrated": false
+   }
+  ],
+  "portfolioDelta": [
+   {
+    "variant": "V1",
+    "delta": -0.011535658,
+    "lo": -0.2044933,
+    "hi": 0.15514125
+   },
+   {
+    "variant": "V2",
+    "delta": 0.015076663,
+    "lo": -0.085891458,
+    "hi": 0.10603767
+   },
+   {
+    "variant": "V3",
+    "delta": 0.035421376,
+    "lo": -0.10344467,
+    "hi": 0.15344032
+   }
+  ],
+  "years": {
+   "portfolio": [
+    {
+     "variant": "V1",
+     "years": [
+      {
+       "year": 2018,
+       "days": 122,
+       "dSharpe": 0.18464933,
+       "dReturn": -0.066463651
+      },
+      {
+       "year": 2019,
+       "days": 365,
+       "dSharpe": -0.37752967,
+       "dReturn": -0.087393209
+      },
+      {
+       "year": 2020,
+       "days": 366,
+       "dSharpe": -0.037475251,
+       "dReturn": -0.0071793368
+      },
+      {
+       "year": 2021,
+       "days": 365,
+       "dSharpe": -0.095200601,
+       "dReturn": -0.027121549
+      },
+      {
+       "year": 2022,
+       "days": 365,
+       "dSharpe": 0.073335103,
+       "dReturn": 0.043212288
+      },
+      {
+       "year": 2023,
+       "days": 365,
+       "dSharpe": 0.11564552,
+       "dReturn": 0.01609459
+      },
+      {
+       "year": 2024,
+       "days": 366,
+       "dSharpe": -0.016684797,
+       "dReturn": -0.032386256
+      },
+      {
+       "year": 2025,
+       "days": 365,
+       "dSharpe": -0.11503996,
+       "dReturn": -0.069367519
+      },
+      {
+       "year": 2026,
+       "days": 273,
+       "dSharpe": 0.26812523,
+       "dReturn": 0.069031944
+      }
+     ]
+    },
+    {
+     "variant": "V2",
+     "years": [
+      {
+       "year": 2018,
+       "days": 122,
+       "dSharpe": -0.022828531,
+       "dReturn": -0.038058038
+      },
+      {
+       "year": 2019,
+       "days": 365,
+       "dSharpe": 0.24602106,
+       "dReturn": 0.065292948
+      },
+      {
+       "year": 2020,
+       "days": 366,
+       "dSharpe": -0.058512816,
+       "dReturn": -0.022685944
+      },
+      {
+       "year": 2021,
+       "days": 365,
+       "dSharpe": -0.030734774,
+       "dReturn": 0.0028670457
+      },
+      {
+       "year": 2022,
+       "days": 365,
+       "dSharpe": -0.17131833,
+       "dReturn": -0.091615137
+      },
+      {
+       "year": 2023,
+       "days": 365,
+       "dSharpe": 0.067434863,
+       "dReturn": 0.015495064
+      },
+      {
+       "year": 2024,
+       "days": 366,
+       "dSharpe": -0.074624123,
+       "dReturn": -0.045785757
+      },
+      {
+       "year": 2025,
+       "days": 365,
+       "dSharpe": 0.14781902,
+       "dReturn": 0.073908116
+      },
+      {
+       "year": 2026,
+       "days": 273,
+       "dSharpe": 0.14308593,
+       "dReturn": 0.058591692
+      }
+     ]
+    },
+    {
+     "variant": "V3",
+     "years": [
+      {
+       "year": 2018,
+       "days": 122,
+       "dSharpe": -0.27596014,
+       "dReturn": -0.22615857
+      },
+      {
+       "year": 2019,
+       "days": 365,
+       "dSharpe": 0.20152704,
+       "dReturn": 0.04657735
+      },
+      {
+       "year": 2020,
+       "days": 366,
+       "dSharpe": 0.13347782,
+       "dReturn": 0.043044294
+      },
+      {
+       "year": 2021,
+       "days": 365,
+       "dSharpe": 0.076048613,
+       "dReturn": 0.028192952
+      },
+      {
+       "year": 2022,
+       "days": 365,
+       "dSharpe": 0.024327693,
+       "dReturn": -0.0051471975
+      },
+      {
+       "year": 2023,
+       "days": 365,
+       "dSharpe": 0.0061694496,
+       "dReturn": -0.010049334
+      },
+      {
+       "year": 2024,
+       "days": 366,
+       "dSharpe": 0.22661814,
+       "dReturn": 0.07422844
+      },
+      {
+       "year": 2025,
+       "days": 365,
+       "dSharpe": -0.25078643,
+       "dReturn": -0.14370035
+      },
+      {
+       "year": 2026,
+       "days": 273,
+       "dSharpe": 0.12959317,
+       "dReturn": 0.011497112
+      }
+     ]
+    }
+   ],
+   "unseen": [
+    {
+     "variant": "V1",
+     "years": [
+      {
+       "year": 2018,
+       "assets": 0,
+       "dSharpe": null
+      },
+      {
+       "year": 2019,
+       "assets": 6,
+       "dSharpe": -0.017588299
+      },
+      {
+       "year": 2020,
+       "assets": 8,
+       "dSharpe": 0.011573771
+      },
+      {
+       "year": 2021,
+       "assets": 8,
+       "dSharpe": 0.12660135
+      },
+      {
+       "year": 2022,
+       "assets": 8,
+       "dSharpe": 0.15218315
+      },
+      {
+       "year": 2023,
+       "assets": 8,
+       "dSharpe": -0.088272238
+      },
+      {
+       "year": 2024,
+       "assets": 8,
+       "dSharpe": 0.02772169
+      },
+      {
+       "year": 2025,
+       "assets": 8,
+       "dSharpe": -0.0017875012
+      },
+      {
+       "year": 2026,
+       "assets": 8,
+       "dSharpe": 0.11306885
+      }
+     ]
+    },
+    {
+     "variant": "V2",
+     "years": [
+      {
+       "year": 2018,
+       "assets": 0,
+       "dSharpe": null
+      },
+      {
+       "year": 2019,
+       "assets": 6,
+       "dSharpe": -0.036669483
+      },
+      {
+       "year": 2020,
+       "assets": 8,
+       "dSharpe": -0.046497731
+      },
+      {
+       "year": 2021,
+       "assets": 8,
+       "dSharpe": 0.027369636
+      },
+      {
+       "year": 2022,
+       "assets": 8,
+       "dSharpe": 0.059919323
+      },
+      {
+       "year": 2023,
+       "assets": 8,
+       "dSharpe": -0.064387937
+      },
+      {
+       "year": 2024,
+       "assets": 8,
+       "dSharpe": 0.042178187
+      },
+      {
+       "year": 2025,
+       "assets": 8,
+       "dSharpe": 0.029961589
+      },
+      {
+       "year": 2026,
+       "assets": 8,
+       "dSharpe": 0.06120154
+      }
+     ]
+    },
+    {
+     "variant": "V3",
+     "years": [
+      {
+       "year": 2018,
+       "assets": 0,
+       "dSharpe": null
+      },
+      {
+       "year": 2019,
+       "assets": 6,
+       "dSharpe": 0.082529479
+      },
+      {
+       "year": 2020,
+       "assets": 8,
+       "dSharpe": -0.038055838
+      },
+      {
+       "year": 2021,
+       "assets": 8,
+       "dSharpe": 0.13293201
+      },
+      {
+       "year": 2022,
+       "assets": 8,
+       "dSharpe": 0.040758151
+      },
+      {
+       "year": 2023,
+       "assets": 8,
+       "dSharpe": -0.21416246
+      },
+      {
+       "year": 2024,
+       "assets": 8,
+       "dSharpe": -0.15894734
+      },
+      {
+       "year": 2025,
+       "assets": 8,
+       "dSharpe": -0.0067649723
+      },
+      {
+       "year": 2026,
+       "assets": 8,
+       "dSharpe": -0.0081857003
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "assets": [
+  {
+   "key": "BTC",
+   "label": "BTC/USD · Bitstamp spot",
+   "unseen": false,
+   "from": "2017-01-01T00:00:00.000Z",
+   "to": "2026-10-04T02:45:00.000Z"
+  },
+  {
+   "key": "ETH",
+   "label": "ETH/USDT · Binance spot",
+   "unseen": false,
+   "from": "2018-09-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  },
+  {
+   "key": "XRP",
+   "label": "XRP/USDT · Binance spot",
+   "unseen": true,
+   "from": "2019-06-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  },
+  {
+   "key": "BNB",
+   "label": "BNB/USDT · Binance spot",
+   "unseen": true,
+   "from": "2018-12-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  },
+  {
+   "key": "DOGE",
+   "label": "DOGE/USDT · Binance spot",
+   "unseen": true,
+   "from": "2020-08-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  },
+  {
+   "key": "TRX",
+   "label": "TRX/USDT · Binance spot",
+   "unseen": true,
+   "from": "2019-07-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  },
+  {
+   "key": "ADA",
+   "label": "ADA/USDT · Binance spot",
+   "unseen": true,
+   "from": "2019-05-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  },
+  {
+   "key": "LINK",
+   "label": "LINK/USDT · Binance spot",
+   "unseen": true,
+   "from": "2020-02-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  },
+  {
+   "key": "XLM",
+   "label": "XLM/USDT · Binance spot",
+   "unseen": true,
+   "from": "2019-06-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  },
+  {
+   "key": "LTC",
+   "label": "LTC/USDT · Binance spot",
+   "unseen": true,
+   "from": "2019-01-01T00:00:00.000Z",
+   "to": "2026-09-30T23:45:00.000Z"
+  }
+ ]
+}
