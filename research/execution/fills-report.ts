@@ -9,7 +9,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import * as P from '../lib/portfolio.ts'
-import { BINANCE_START, KEYS, NAMES, ROOT, SEED, loadE2, monthDraws, netDaily, portfolio, q, sleeveDaily, statsOf, windowOf } from '../capacity/lib.ts'
+import { BINANCE_START, KEYS, NAMES, ROOT, SEED, loadPublished, monthDraws, netDaily, portfolio, q, sleeveDaily, statsOf, windowOf } from '../capacity/lib.ts'
 import type { Fill, Run, Sleeve, SleeveKey } from '../capacity/lib.ts'
 import { ShockStrategy } from '../../lib/strategies/shock/strategy.ts'
 import { SimBroker } from '../../lib/strategies/shock/broker.ts'
@@ -74,7 +74,7 @@ function replay(s: Sleeve, skip: Set<number>): Run {
   return { key: s.key, sleeve: s, equity, fills, positions: [] }
 }
 
-const S = loadE2()
+const S = loadPublished()
 const W = windowOf(S, 'binance', BINANCE_START)
 const base: Record<SleeveKey, Run> = { btc: replay(S.btc, new Set()), ethusdt: replay(S.ethusdt, new Set()) }
 // Rangs des fills du rejeu de base = indices `fi` des mesures (mêmes fills que l'étude de capacité).

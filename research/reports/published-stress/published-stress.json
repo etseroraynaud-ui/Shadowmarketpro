@@ -1,0 +1,113 @@
+{
+ "generatedAt": "2026-10-13T03:32:54.388Z",
+ "git": {
+  "commit": "059234c400e362eed36945e8b6a44177dc63ad4c",
+  "clean": false
+ },
+ "method": "research/shock/e2-diagnostics.ts § 3 (funding added to daily returns as a share of the previous close; slippage per order in the engine)",
+ "checks": [
+  {
+   "name": "E2, funding binance = e2-diagnostics",
+   "ok": true,
+   "detail": "Sharpe 1.813446195 / 1.813446195"
+  },
+  {
+   "name": "E2, funding hyperliquid = e2-diagnostics",
+   "ok": true,
+   "detail": "Sharpe 1.797277246 / 1.797277246"
+  },
+  {
+   "name": "E2, funding shortsPay = e2-diagnostics",
+   "ok": true,
+   "detail": "Sharpe 1.855952240 / 1.85595224"
+  },
+  {
+   "name": "E2, glissement 0 % = e2-diagnostics",
+   "ok": true,
+   "detail": "1.877566513 / 1.877566513"
+  },
+  {
+   "name": "E2, glissement 0.01 % = e2-diagnostics",
+   "ok": true,
+   "detail": "1.819588965 / 1.819588965"
+  },
+  {
+   "name": "E2, glissement 0.02 % = e2-diagnostics",
+   "ok": true,
+   "detail": "1.761575202 / 1.761575202"
+  },
+  {
+   "name": "E2, glissement 0.05 % = e2-diagnostics",
+   "ok": true,
+   "detail": "1.581793727 / 1.581793727"
+  },
+  {
+   "name": "portefeuille publié sans stress = fiche de référence",
+   "ok": true,
+   "detail": "2.024207889 / 2.024207889"
+  }
+ ],
+ "funding": [
+  {
+   "scenario": "binance",
+   "published": {
+    "sharpe": 1.966107057002634,
+    "cagr": 0.646594801982705,
+    "maxDD": -0.17914419553410077
+   },
+   "e2": {
+    "sharpe": 1.813446195070803,
+    "cagr": 0.5837928552103444,
+    "maxDD": -0.19186529422232423
+   }
+  },
+  {
+   "scenario": "hyperliquid",
+   "published": {
+    "sharpe": 1.9521597877327554,
+    "cagr": 0.6399872906174975,
+    "maxDD": -0.17914419553410077
+   },
+   "e2": {
+    "sharpe": 1.7972772464545324,
+    "cagr": 0.576414777665401,
+    "maxDD": -0.19186529422232423
+   }
+  },
+  {
+   "scenario": "shortsPay",
+   "published": {
+    "sharpe": 2.0025429925225366,
+    "cagr": 0.667142594253848,
+    "maxDD": -0.18139978653390942
+   },
+   "e2": {
+    "sharpe": 1.8559522404633664,
+    "cagr": 0.6066415516971411,
+    "maxDD": -0.19235389598472763
+   }
+  }
+ ],
+ "slippage": [
+  {
+   "slip": 0,
+   "published": 2.0242078888605257,
+   "e2": 1.877566513286129
+  },
+  {
+   "slip": 0.01,
+   "published": 1.9917910875772016,
+   "e2": 1.819588965255933
+  },
+  {
+   "slip": 0.02,
+   "published": 1.9593602260219516,
+   "e2": 1.7615752021910014
+  },
+  {
+   "slip": 0.05,
+   "published": 1.8619951415752618,
+   "e2": 1.581793727012423
+  }
+ ]
+}

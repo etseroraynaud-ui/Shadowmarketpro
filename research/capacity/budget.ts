@@ -12,7 +12,7 @@ import { join } from 'node:path'
 import { simulate } from '../../lib/strategies/shock/engine.ts'
 import { costsFor } from '../lib/frozen-shock.ts'
 import * as P from '../lib/portfolio.ts'
-import { BINANCE_START, KEYS, NAMES, OFFICIAL_SHARPE, OUT, bootSharpe, crossing, familyOf, fillDay, loadE2, monthDraws, netDaily, portfolio, q, runFills, sleeveDaily, statsOf, windowOf } from './lib.ts'
+import { BINANCE_START, KEYS, NAMES, OFFICIAL_SHARPE, OUT, SPEC, bootSharpe, crossing, familyOf, fillDay, loadPublished, monthDraws, netDaily, portfolio, q, runFills, sleeveDaily, statsOf, windowOf } from './lib.ts'
 import type { Fill, Run, SleeveKey, Stats, Window } from './lib.ts'
 
 const NREP = 2000
@@ -22,7 +22,7 @@ const checks: { name: string; ok: boolean; detail: string }[] = []
 const check = (name: string, ok: boolean, detail: string) => { checks.push({ name, ok, detail }); if (!ok) process.stderr.write(`ÉCHEC : ${name} · ${detail}\n`) }
 
 // ---------------------------------------------------------------- 1. reproduction
-const S = loadE2()
+const S = loadPublished()
 const R = {} as Record<SleeveKey, Run>
 for (const k of KEYS) {
   R[k] = runFills(S[k])
@@ -41,7 +41,7 @@ log('sleeves reproduites, exécutions relevées')
 const W: Window[] = [windowOf(S, 'official'), windowOf(S, 'binance', BINANCE_START)]
 const base = W.map(w => ({ rb: sleeveDaily(R.btc, w), re: sleeveDaily(R.ethusdt, w) }))
 const s0 = statsOf(portfolio(base[0].rb, base[0].re), W[0].days)
-check('Official E2 portfolio Sharpe reproduced', Math.abs(s0.sharpe - OFFICIAL_SHARPE) < 1e-8, `${s0.sharpe.toFixed(10)} vs ${OFFICIAL_SHARPE}`)
+check(`Official portfolio Sharpe reproduced (${SPEC})`, Math.abs(s0.sharpe - OFFICIAL_SHARPE) < 1e-8, `${s0.sharpe.toFixed(10)} vs ${OFFICIAL_SHARPE}`)
 
 // ---------------------------------------------------------------- 2. validation de la correction après coup
 // Relance du moteur avec glissement uniforme (ordres au marché et stops ; pas le TP1, ordre limite),

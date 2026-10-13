@@ -11,11 +11,11 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { KEYS, NAMES, ROOT, loadE2, q, runFills } from '../capacity/lib.ts'
+import { KEYS, NAMES, ROOT, loadPublished, q, runFills } from '../capacity/lib.ts'
 
 const DISTANCES_PCT = [1, 2, 3, 5, 8, 10, 15]
 const out: Record<string, unknown> = {}
-const S = loadE2()
+const S = loadPublished()
 for (const key of KEYS) {
   const run = runFills(S[key])
   const b = S[key].m.bars

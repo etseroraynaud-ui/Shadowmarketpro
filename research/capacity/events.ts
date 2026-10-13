@@ -12,7 +12,7 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { BINANCE_START, KEYS, NAMES, familyOf, fillDay, loadE2, runFills, windowOf } from './lib.ts'
+import { BINANCE_START, KEYS, NAMES, familyOf, fillDay, loadPublished, runFills, windowOf } from './lib.ts'
 import type { Family, FillKind, Run, SleeveKey } from './lib.ts'
 import { DATA, MIN, SYM, T0, depthAt, loadDepth, loadMinutes } from './binance.ts'
 import type { Depth, Minutes } from './binance.ts'
@@ -77,7 +77,7 @@ function median7d(d: Depth, side: 'bid1' | 'ask1', t: number): number {
 }
 
 export async function buildEvents(): Promise<{ events: Event[]; runs: Record<SleeveKey, Run>; zeroVolumeMinutes: Record<string, number> }> {
-  const S = loadE2()
+  const S = loadPublished()
   const W = windowOf(S, 'binance', BINANCE_START)
   const runs = {} as Record<SleeveKey, Run>
   const events: Event[] = []

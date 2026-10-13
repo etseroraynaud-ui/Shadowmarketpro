@@ -1,7 +1,9 @@
 // Étude de capacité du Shock Engine : socle commun (research/preregistration/capacity-p0p1.md).
 //
-// - Portefeuille E2 publié : mêmes sleeves, même masque des shorts et même période commune que
-//   research/shock/portfolio.ts --variant e2, reproduits avant tout calcul.
+// - Portefeuille publié : mêmes sleeves, même masque des shorts, mêmes entrées et même période commune
+//   que research/shock/portfolio.ts, reproduits avant tout calcul. Depuis le 2026-10-13, la
+//   spécification publiée est E2 sans nouvelles entrées en régime agité (research/lib/calm-only.ts) ;
+//   SHOCK_SPEC=e2 rejoue l'ancienne spécification (résultats publiés jusqu'au commit 059234c).
 // - Exécutions du backtest relevées une à une pendant la simulation (entrée, TP1, stop, stop
 //   suiveur, sorties à la clôture), sans toucher au moteur : les méthodes `open` et `fill` du broker
 //   simulé sont seulement observées.
@@ -23,6 +25,7 @@ import { loadBtc } from '../lib/data.ts'
 import { costsFor, loadSleeve } from '../lib/frozen-shock.ts'
 import type { Sleeve, SleeveKey } from '../lib/frozen-shock.ts'
 import { trendDown } from '../lib/e2.ts'
+import { calmOnly } from '../lib/calm-only.ts'
 import * as P from '../lib/portfolio.ts'
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
@@ -32,19 +35,25 @@ export const M15 = 15 * 60000
 export const SEED = 20261012
 export const KEYS: SleeveKey[] = ['btc', 'ethusdt']
 export const NAMES: Record<SleeveKey, string> = { btc: 'BTC', ethusdt: 'ETH' }
-/** Sharpe officiel du portefeuille E2 (research/reports/btc-eth-portfolio-e2), à reproduire. */
-export const OFFICIAL_SHARPE = 1.877566513
+/** Spécification étudiée : 'calm' (publiée) ou 'e2' (benchmark historique, deux régimes). */
+export const SPEC: 'calm' | 'e2' = process.env.SHOCK_SPEC === 'e2' ? 'e2' : 'calm'
+/** Sharpe officiel du portefeuille de la spécification (research/reports/reference/reference.json), à reproduire. */
+export const OFFICIAL_SHARPE = SPEC === 'calm' ? 2.024207889 : 1.877566513
 /** Début de la fenêtre Binance (fichiers perpétuels USDⓈ-M depuis janvier 2020). */
 export const BINANCE_START = Date.UTC(2020, 0, 1)
 
-// ---------------------------------------------------------------- sleeves E2
-/** Sleeves du portefeuille publié : celles de zero-shot.ts, shorts masqués hors tendance baissière. */
-export function loadE2(): Record<SleeveKey, Sleeve> {
+// ---------------------------------------------------------------- sleeves publiées
+/**
+ * Sleeves du portefeuille publié : celles de zero-shot.ts, shorts masqués hors tendance baissière et,
+ * pour la spécification 'calm', aucune nouvelle entrée en régime agité.
+ */
+export function loadPublished(): Record<SleeveKey, Sleeve> {
   const S = { btc: loadSleeve('btc'), ethusdt: loadSleeve('ethusdt') } as Record<SleeveKey, Sleeve>
   for (const key of KEYS) {
     const s = S[key]
     const trend = trendDown(s.bars, key === 'btc' ? resample(loadBtc(60), DAY) : resample(s.bars, DAY))
-    const signals = { long: s.signals.long, short: Uint8Array.from(s.signals.short, (x, i) => (x && trend[i] ? 1 : 0)) }
+    const e2 = { long: s.signals.long, short: Uint8Array.from(s.signals.short, (x, i) => (x && trend[i] ? 1 : 0)) }
+    const signals = SPEC === 'calm' ? calmOnly(e2, s.select) : e2
     S[key] = { ...s, signals, run: (k: number) => simulate(s.m, s.preset.sets, costsFor(key, k), s.lo, s.end, s.select, signals) }
   }
   return S

@@ -13,7 +13,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { BINANCE_START, KEYS, OUT as CAP_OUT, ROOT, bootSharpe, crossing, loadE2, monthDraws, netDaily, portfolio, q, sleeveDaily, statsOf, windowOf } from '../capacity/lib.ts'
+import { BINANCE_START, KEYS, OUT as CAP_OUT, ROOT, bootSharpe, crossing, loadPublished, monthDraws, netDaily, portfolio, q, sleeveDaily, statsOf, windowOf } from '../capacity/lib.ts'
 import type { Fill, SleeveKey } from '../capacity/lib.ts'
 import { buildEvents } from '../capacity/events.ts'
 import type { Event } from '../capacity/events.ts'
@@ -25,7 +25,7 @@ const t0 = Date.now()
 const log = (s: string) => process.stderr.write(`${s} (${((Date.now() - t0) / 1000).toFixed(0)} s)\n`)
 
 const { events, runs } = await buildEvents()
-const S = loadE2()
+const S = loadPublished()
 const W = windowOf(S, 'binance', BINANCE_START)
 const base = { btc: sleeveDaily(runs.btc, W), ethusdt: sleeveDaily(runs.ethusdt, W) }
 const pilot = JSON.parse(readFileSync(join(CAP_OUT, 'p1-pilot.json'), 'utf8'))
