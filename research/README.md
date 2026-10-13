@@ -152,6 +152,18 @@ Exploratoire (BTC/ETH et 8 cryptos déjà consultées) ; aucune variante candida
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/agitated-regime.ts
 ```
 
+Invalidation précoce (plan : `research/preregistration/early-invalidation.md`, commité avec les
+mesures et la boucle de rejeu avant tout calcul ; rapport dans `research/reports/early-invalidation/`).
+Tous les trades encore ouverts 1 à 4 bougies après l'entrée, groupés par ce qui est connu à cet
+instant (confirmation, retracement du choc, réintégration du niveau cassé, volume), avec leur issue
+et la valeur d'une sortie à cet instant ; puis une seule règle (fermer à la 4e bougie si le prix n'a
+pas dépassé l'entrée) rejouée en portefeuille complet dans une copie de la boucle de `simulate`.
+Exploratoire (BTC/ETH et 8 cryptos déjà consultées) ; pas de candidate.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/early-invalidation.ts
+```
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 
