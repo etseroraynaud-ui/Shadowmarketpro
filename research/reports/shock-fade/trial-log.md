@@ -37,5 +37,6 @@ commité (fichiers nouveaux non détectés par l'ancien marqueur) ; ce code est 
 | 2026-10-13 18:10 | eb10895 | `v1/trailing-study.ts` | Trailing de V1 : 11 variantes pré-enregistrées (apparié + rejeu complet) | 2018-09 → 2026-09 (V1) |
 | 2026-10-13 18:14 | eb10895+modif | `v1/trailing-study.ts` | Trailing de V1 : 11 variantes pré-enregistrées (apparié + rejeu complet) ; rapport seul modifié, mêmes chiffres | 2018-09 → 2026-09 (V1) |
 | 2026-10-13 18:16 | eb10895+modif | `v1/trailing-study.ts` | Trailing de V1 : 11 variantes pré-enregistrées (apparié + rejeu complet) ; rapport seul modifié, mêmes chiffres | 2018-09 → 2026-09 (V1) |
+| 2026-10-13 18:40 | cc31829+modif | `v1/exit-report.ts` | Sorties de V1 : description des 716 trades (aucun test, aucune décision ; 3 exécutions, mise en forme seulement) | 2018-09 → 2026-09 (V1) |
 
 Note : pour `shockfade/v1_hawkes.py`, les exécutions antérieures à la dernière groupaient les erreurs types sur 3 « jours » (conversion des dates en microsecondes avec pandas 3) ; corrigé, seuls les résultats de la dernière exécution sont rapportés.
