@@ -28,6 +28,11 @@ def bps(x, d=1):
     return '—' if x is None or not np.isfinite(x) else f'{1e4 * x:.{d}f}'
 
 
+def hz(h: int, delta: int) -> str:
+    m = h * delta
+    return f'{h} b ({m} min)' if m < 60 else f'{h} b ({m / 60:g} h)'
+
+
 def p2(t):
     return float(2 * norm.sf(abs(t))) if np.isfinite(t) else float('nan')
 
@@ -177,7 +182,7 @@ def main():
             for h, m in r['primary'].items():
                 n_ = r['net'][h]
                 mr = rr['primary'][h] if rr else {}
-                L.append(f"| {TF[delta]} | {k:g} | {h} b ({h * delta / 60:g} h) | {m['n']} | {bps(m['mean'])} | [{bps(m['boot']['lo95'])} ; {bps(m['boot']['hi95'])}] | "
+                L.append(f"| {TF[delta]} | {k:g} | {hz(h, delta)} | {m['n']} | {bps(m['mean'])} | [{bps(m['boot']['lo95'])} ; {bps(m['boot']['hi95'])}] | "
                          f"{m['t']:.2f} | {m['p2']:.3f} | {fam['primary'][(delta, k, f'g{h}')]:.3f} | {bps(m['mde'], 0)} | {bps(m['median'])} | {100 * m['pos']:.0f} % | "
                          f"{bps(n_['mean'])} | [{bps(n_['boot']['lo95'])} ; {bps(n_['boot']['hi95'])}] | {bps(mr.get('mean'))} ({mr.get('t', float('nan')):.2f}) |")
             rc = r['race50']
@@ -190,7 +195,7 @@ def main():
         for k in mtf.K_LEVELS:
             r = P.get(f'{delta}-{k:g}')
             for h, m in r['primary'].items():
-                L.append(f"| {TF[delta]} | {k:g} | {h} b ({h * delta / 60:g} h) | {m['n']} | {bps(m['mean'])} | {m['t']:.2f} | {r['race50']['p_retrace_first']:.3f} |")
+                L.append(f"| {TF[delta]} | {k:g} | {hz(h, delta)} | {m['n']} | {bps(m['mean'])} | {m['t']:.2f} | {r['race50']['p_retrace_first']:.3f} |")
     # ---- 2. structure par terme
     L += ['', '## 2. Structure par terme : fraction du choc reprise selon la durée du choc (P, chocs indépendants)', '',
           'Moyenne de g/|R| (positif = réversion, négatif = continuation), t entre parenthèses.', '',

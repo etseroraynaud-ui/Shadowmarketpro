@@ -30,6 +30,14 @@ python3 -m shockfade.hypotheses            # 04-hypotheses (H1–H4, Holm)
 python3 -m shockfade.identifiability       # 05-identifiability
 python3 -m shockfade.run_validation        # 06-walkforward (V) et sélection
 python3 -m shockfade.run_holdout           # 07-holdout (C), une seule fois après le commit de la sélection
+
+# Suite multi-timeframe (protocole research/preregistration/shock-fade-mtf.md)
+python3 -m shockfade.fetch --start 2017-08 --end 2019-12 --markets spot --tag pre2020   # échantillon de réplication
+python3 -m shockfade.run_mtf counts        # mtf/00-counts (aucun prix postérieur aux chocs)
+python3 -m shockfade.run_mtf events        # tables d'événements M5…H4 (P et R)
+python3 -m shockfade.mtf_report            # mtf/01-results
+python3 -m shockfade.run_mtf_control       # mtf/02-negative-control (martingale simulée)
+python3 -m shockfade.run_mtf_race_checks   # mtf/03-race-checks (a posteriori)
 ```
 
 Chaque script qui lit des rendements ou estime un modèle sur données réelles ajoute une ligne à
@@ -47,3 +55,4 @@ Chaque script qui lit des rendements ou estime un modèle sur données réelles 
 | `pipeline.py` | estimations trimestrielles, filtre continu, table d'événements et caractéristiques causales |
 | `stats.py`, `walkforward.py` | inférence (groupée, HAC, bootstrap par blocs, Holm/BH, Clark–West), modèles M1–M7 |
 | `synthetic.py` | simulateur à paramètres connus pour les contrôles du pipeline |
+| `mtf.py`, `run_mtf.py`, `mtf_report.py` | étude multi-timeframe : détection causale, régime V1, cassures, regroupement, course 50 % |

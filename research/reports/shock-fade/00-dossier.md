@@ -171,6 +171,15 @@ des 4 pb maker, mais avec des remplissages limites non garantis et probablement 
 5. Pour V1 (aucun changement) : la persistance des chocs haussiers est cohérente avec sa logique de
    continuation, mais c'est une observation descriptive, pas une validation supplémentaire.
 
+## Suite : chocs M30, H1, H4 (étude pré-enregistrée séparée)
+
+[`mtf/README.md`](mtf/README.md). Deux seuils fixés d'avance (|Z| ≥ 3, |Z| ≥ 4), volatilité strictement passée,
+chocs indépendants regroupés, régime calme/agité (règle de V1), cassures propres/rejetées, réplication sur un
+échantillon 2018–2019 jamais utilisé. Résultat : la dynamique change avec la durée, **vers la continuation** — le
+prix prolonge le choc de 50 % avant de le reprendre de 50 % dans 55 à 62 % des cas en H1/H4 (significatif après
+Holm, répliqué), surtout après une cassure propre et en régime calme. Aucun Fade M30/H1/H4 n'a d'espérance positive.
+La recommandation ci-dessus est inchangée.
+
 ## Méthode et traçabilité
 
 - Protocole figé et commité avant tout calcul de résultat (`3de57f1`), avenant 1 commité avec le verdict de V
@@ -195,4 +204,5 @@ des 4 pb maker, mais avec des remplissages limites non garantis et probablement 
 | [06-walkforward.md](06-walkforward.md) | modèles M1–M7 sur V, critères, sélection |
 | [07-holdout.md](07-holdout.md) | holdout C |
 | [trial-log.md](trial-log.md) | journal des essais |
+| [mtf/README.md](mtf/README.md) | suite multi-timeframe (M30, H1, H4) |
 | [`research/fade/`](../../fade/README.md) | code, tests, commandes pour tout reproduire |

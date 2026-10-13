@@ -26,3 +26,7 @@ Note : les lignes marquées `3de57f1` entre 15:36 et 16:01 ont été exécutées
 commité (fichiers nouveaux non détectés par l'ancien marqueur) ; ce code est celui du commit qui suit ce journal.
 | 2026-10-13 16:12 | d323780 | `shockfade/run_holdout.py` | holdout C : événements, M1–M7 + contrôle, H2b/H4a exploratoires | C = 2025-01-01 → 2026-10-01 |
 | 2026-10-13 16:38 | 40b566b+modif | `shockfade/run_mtf.py counts` | comptages M5…H4, k ∈ {3, 4}, sans résultat | P 2020-07 → 2026-09, R 2018-01 → 2019-12 |
+| 2026-10-13 16:43 | 5302de0 | `shockfade/run_mtf.py events` | événements M5…H4, k ≥ 3, rendements aux horizons du protocole MTF | P 2020-07 → 2026-09, R 2018-01 → 2019-12 |
+| 2026-10-13 16:44 | 5302de0 | `shockfade/mtf_report.py` | tests primaires et secondaires MTF, réplication | P 2020-07 → 2026-09, R 2018-01 → 2019-12 |
+| 2026-10-13 16:45 | 5302de0+modif | `shockfade/run_mtf_race_checks.py` | course 50 % par sens, régime, cassure, actif (a posteriori) | P et R |
+| 2026-10-13 16:46 | 5302de0+modif | `shockfade/mtf_report.py` | tests primaires et secondaires MTF, réplication | P 2020-07 → 2026-09, R 2018-01 → 2019-12 |
