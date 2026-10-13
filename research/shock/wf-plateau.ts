@@ -1,8 +1,13 @@
 // Walk-forward du préréglage du bot (adaptatif volatilité · 15 min), réglages choisis sur des
 // plateaux plutôt que sur le meilleur Sharpe isolé.
 //
-//   node research/shock/wf-plateau.ts [--train 36] [--test 3] [--from 2020-01-01] [--min 20]
-//                                     [--base preset|script|script-long]
+//   node research/shock/wf-plateau.ts [--train 36|exp] [--test 3] [--from 2020-01-01] [--min 20]
+//                                     [--base preset|script|script-long] [--anchor 2015-01-01]
+//
+// --train exp : fenêtre de calibration croissante, du 1er jour de --anchor jusqu'à la veille du test
+// (research/preregistration/wf-longer-windows.md). Les simulations de la grille commencent au début
+// de la plus ancienne calibration (jamais après le 2017-01-01, la date historique) ; les bougies sont
+// chargées un an plus tôt pour les indicateurs et le régime.
 //
 // --base : réglages qui ne sont pas optimisés. « preset » : ceux du préréglage du bot (choisis
 // sur tout 2017-2026, donc une fuite d'information vers les tests). « script » : les valeurs par
@@ -38,7 +43,10 @@ import { engineEntries, trendDown } from '../lib/e2.ts'
 
 const args = process.argv.slice(2)
 const opt = (k: string, d: string) => { const i = args.indexOf(`--${k}`); return i >= 0 ? args[i + 1] : d }
-const TRAIN = Number(opt('train', '36'))
+const EXPANDING = opt('train', '36') === 'exp'
+const ANCHOR = opt('anchor', '2015-01-01')
+const TRAIN = EXPANDING ? 0 : Number(opt('train', '36'))
+const TRAIN_TAG = EXPANDING ? 'exp' : String(TRAIN)
 const TEST = Number(opt('test', '3'))
 const FROM = opt('from', '2020-01-01')
 const MIN_TRADES = Number(opt('min', '20'))
@@ -71,8 +79,12 @@ function paramsOf(regime: 0 | 1, p: Point): ShockParams {
 }
 
 // ---------------------------------------------------------------- données
+const addMonths = (t: number, k: number) => { const d = new Date(t); d.setUTCMonth(d.getUTCMonth() + k); return d.getTime() }
+/** Début des simulations de la grille : la plus ancienne calibration, au plus tard le 2017-01-01. */
+const SIM_START = Math.min(Date.parse('2017-01-01'), EXPANDING ? Date.parse(ANCHOR) : addMonths(Date.parse(FROM), -TRAIN))
+if (SIM_START < Date.parse('2014-01-01')) throw new Error('calibration avant 2014 : données Bitstamp trop lacunaires')
 const all = loadBtc(15)
-const bars = sliceBars(all, Date.parse('2016-01-01'), all.t[all.n - 1])
+const bars = sliceBars(all, addMonths(SIM_START, -12), all.t[all.n - 1])
 const daily = resample(loadBtc(60), 86400000)
 const m = marketFor(bars, 15, 1)
 const preset = adaptivePreset(15, 1)
@@ -91,7 +103,7 @@ const dayIdx = (t: number) => { let lo = 0, hi = dayEnd.length; while (lo < hi) 
 
 // ---------------------------------------------------------------- 1-2. grille sur tout l'historique
 const t0 = Date.now()
-const start = idxAt(Date.parse('2017-01-01'))
+const start = idxAt(SIM_START)
 interface Cand { s1: Float64Array; s2: Float64Array; entries: number[] }
 const cands: Cand[][] = [[], []]
 for (const regime of [0, 1] as const) {
@@ -124,13 +136,13 @@ function sharpe(c: Cand, d0: number, d1: number): number {
 const tradesIn = (c: Cand, a: number, b: number) => c.entries.filter(t => t >= a && t < b).length
 
 // ---------------------------------------------------------------- 3. fenêtres
-const addMonths = (t: number, k: number) => { const d = new Date(t); d.setUTCMonth(d.getUTCMonth() + k); return d.getTime() }
 const end = bars.t[bars.n - 1] + 15 * 60000
 interface Win { a: number; b: number; trainFrom: number; plateau: (Point | null)[]; best: (Point | null)[]; score: number[] }
 const wins: Win[] = []
 for (let a = Date.parse(FROM); a < end; a = addMonths(a, TEST)) {
   const b = Math.min(addMonths(a, TEST), end)
-  const trainFrom = addMonths(a, -TRAIN)
+  const trainFrom = EXPANDING ? Date.parse(ANCHOR) : addMonths(a, -TRAIN)
+  if (trainFrom < SIM_START) throw new Error('calibration antérieure aux simulations de la grille')
   const d0 = dayIdx(trainFrom), d1 = dayIdx(a)
   const w: Win = { a, b, trainFrom, plateau: [null, null], best: [null, null], score: [0, 0] }
   for (const regime of [0, 1] as const) {
@@ -193,9 +205,9 @@ const row = (name: string, r: ReturnType<typeof simulate>) => {
 const table = (h: string[], rows: string[][]) => { out(`| ${h.join(' | ')} |`); out(`| ${h.map((_, k) => (k ? '---:' : '---')).join(' | ')} |`); for (const r of rows) out(`| ${r.join(' | ')} |`) }
 
 const BASE_TXT = { preset: 'réglages non optimisés : ceux du préréglage du bot (choisis sur 2017-2026, fuite d\'information vers les tests)', script: 'réglages non optimisés : valeurs par défaut du script (mode High Activity coupé), longs et shorts', 'script-long': 'réglages non optimisés : valeurs par défaut du script (mode High Activity coupé), longs seulement' }[BASE]
-out(`# Walk-forward ${TRAIN / 12} ans / ${TEST} mois, réglages choisis sur plateaux · adaptatif 15 min · ${BASE}${CALM ? ' · régime calme seul, shorts en régime de tendance baissier' : E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`); out()
+out(`# Walk-forward ${EXPANDING ? `fenêtre croissante depuis le ${ANCHOR}` : `${TRAIN / 12} ans`} / ${TEST} mois, réglages choisis sur plateaux · adaptatif 15 min · ${BASE}${CALM ? ' · régime calme seul, shorts en régime de tendance baissier' : E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`); out()
 out(`Base : ${BASE_TXT}.`); out()
-out(`BTC/USD Bitstamp 15 min. Calibration sur les ${TRAIN} mois précédant chaque test, test de ${TEST} mois, pas de ${TEST} mois, de ${FROM} au ${day(bars.t[last])} (${wins.length} fenêtres). Frais : 0,045 % par ordre (taker Hyperliquid), sans levier ni financement. Les régimes de volatilité (calme / agité) sont ceux du bot, calculés sur des journées closes.`); out()
+out(`BTC/USD Bitstamp 15 min. Calibration sur ${EXPANDING ? `toutes les données depuis le ${ANCHOR} jusqu'à la veille de` : `les ${TRAIN} mois précédant`} chaque test, test de ${TEST} mois, pas de ${TEST} mois, de ${FROM} au ${day(bars.t[last])} (${wins.length} fenêtres). Frais : 0,045 % par ordre (taker Hyperliquid), sans levier ni financement. Les régimes de volatilité (calme / agité) sont ceux du bot, calculés sur des journées closes.`); out()
 out(`Grille par régime : seuil du choc ${K.join(' / ')} × stop ${STOP.join(' / ')} ATR × stop suiveur ${TRAIL.map(x => (x >= 50 ? 'sans' : x)).join(' / ')} ATR, soit ${grid.length} réglages ; les autres réglages restent ceux du préréglage. Note d'un réglage : Sharpe quotidien sur la calibration (0 s'il a moins de ${MIN_TRADES} trades). Note de plateau : moyenne sur le réglage et ses voisins immédiats (jusqu'à 27). Si le meilleur plateau n'est pas positif, le régime n'est pas tradé pendant le test.`); out()
 out('## Courbe hors échantillon (segments de test seulement)'); out()
 table(['', 'rendement', 'CAGR', 'Sharpe', 'Sortino', 'pire baisse', 'profit factor', 'trades', 'gagnants', 'temps investi'], [
@@ -258,7 +270,7 @@ out()
 const changes = (r: 0 | 1) => wins.slice(1).filter((w, k) => label(w.plateau[r]) !== label(wins[k].plateau[r])).length
 out(`Changements de réglages d'une fenêtre à la suivante : ${changes(0)} sur ${wins.length - 1} en régime calme, ${changes(1)} sur ${wins.length - 1} en régime agité.`); out()
 
-const file = new URL(`../reports/shock-15m-wf-plateau-${TRAIN}-${TEST}${BASE === 'preset' ? '' : `-${BASE}`}${CALM ? '-calm' : E2 ? '-e2' : ''}.md`, import.meta.url).pathname
+const file = new URL(`../reports/shock-15m-wf-plateau-${TRAIN_TAG}-${TEST}${BASE === 'preset' ? '' : `-${BASE}`}${CALM ? '-calm' : E2 ? '-e2' : ''}.md`, import.meta.url).pathname
 writeFileSync(file, L.join('\n') + '\n')
 // Courbes quotidiennes pour le graphique.
 const curve = dayEnd.filter(i => i >= oosStart).map(i => ({ t: bars.t[i], wf: wfPlateau.equity[i] / COSTS.capital, best: wfBest.equity[i] / COSTS.capital, fixed: fixed.equity[i] / COSTS.capital, bh: bars.c[i] / bars.c[oosStart] }))
