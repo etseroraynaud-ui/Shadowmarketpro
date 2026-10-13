@@ -3,6 +3,12 @@
 Espace de travail pour tester, diagnostiquer et optimiser le Shock Engine (script Pine
 « Shock Engine Intraday 15/day ») sur BTC/USD, sans surajuster.
 
+**Référence actuelle (depuis le 2026-10-13) : Shock Engine V1, régime calme seul** — E2 sans
+nouvelles entrées en régime agité, portefeuille BTC/ETH 50/50 ; E2 (deux régimes) est son benchmark
+historique. Fiche : `research/reports/reference/shock-engine-v1.md` (générée par
+`research/shock/reference.ts`). À ne pas confondre avec la v1 historique du dépôt (miroir short sans
+condition, `research/reports/btc-eth-portfolio/`).
+
 ## Données
 
 `research/data/btcusd_{5,15,30,60}m.csv.gz` : barres BTC/USD Bitstamp, 2012 → octobre 2026,
