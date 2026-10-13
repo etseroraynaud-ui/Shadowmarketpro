@@ -1,6 +1,6 @@
 # Architecture du régime agité du Shock Engine
 
-Plan : `research/preregistration/agitated-regime.md`, commité avant toute simulation de variante. Script : `research/shock/agitated-regime.ts` (commit `74cde22`, sources modifiées). Moteur non modifié. **Exploratoire** : BTC/ETH sont les données de développement et le découpage par régime des 8 cryptos avait déjà été consulté ; aucun résultat n'est confirmatoire.
+Plan : `research/preregistration/agitated-regime.md`, commité avant toute simulation de variante. Script : `research/shock/agitated-regime.ts` (commit `4742db1`). Moteur non modifié. **Exploratoire** : BTC/ETH sont les données de développement et le découpage par régime des 8 cryptos avait déjà été consulté ; aucun résultat n'est confirmatoire.
 
 ## Réponse
 

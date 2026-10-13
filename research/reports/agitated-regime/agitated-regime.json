@@ -1,9 +1,9 @@
 {
  "plan": "research/preregistration/agitated-regime.md",
- "generatedAt": "2026-10-13T01:58:30.622Z",
+ "generatedAt": "2026-10-13T02:01:25.522Z",
  "git": {
-  "commit": "74cde2244efb03755e6238817effb8a78d17fb9f",
-  "clean": false
+  "commit": "4742db14df97c1e87332e003fa17ffa8bf3fa0d8",
+  "clean": true
  },
  "checks": [
   {
