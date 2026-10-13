@@ -1,4 +1,4 @@
-% Shock Engine institutional dossier, version 3.0.
+% Shock Engine institutional dossier, version 3.1.
 % Composed by research/dossier/build-dossier.ts, which writes numbers.tex (figures read from the
 % published research files) and data/ (figure series) next to this file before compiling.
 % Figures typed here come from the Markdown reports listed in Appendix B.
@@ -73,7 +73,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\sffamily\scriptsize\color{muted}SHOCK ENGINE\quad\textbullet\quad INSTITUTIONAL DOSSIER}
-\fancyhead[R]{\sffamily\scriptsize\color{muted}VERSION 3.0\quad\textbullet\quad 13 OCTOBER 2026}
+\fancyhead[R]{\sffamily\scriptsize\color{muted}VERSION 3.1\quad\textbullet\quad 13 OCTOBER 2026}
 \fancyfoot[L]{\sffamily\scriptsize\color{muted}Oreste Raynaud\quad\textbullet\quad ShadowMarketPro Research}
 \fancyfoot[R]{\sffamily\scriptsize\color{muted}\thepage\,/\,\pageref*{LastPage}}
 \renewcommand{\headrulewidth}{0.4pt}
@@ -115,7 +115,7 @@
   \fill[accent] ([yshift=-11.2cm]current page.north west) rectangle ([yshift=-11.45cm]current page.north east);
   \node[anchor=north west,inner sep=0,text=white!80!navy,font=\sffamily\scriptsize\bfseries]
     at ([xshift=2.5cm,yshift=-2.1cm]current page.north west)
-    {QUANTITATIVE RESEARCH\quad\textbullet\quad INSTITUTIONAL DOSSIER\quad\textbullet\quad VERSION 3.0};
+    {QUANTITATIVE RESEARCH\quad\textbullet\quad INSTITUTIONAL DOSSIER\quad\textbullet\quad VERSION 3.1};
   \node[anchor=north west,inner sep=0,text=white,font=\sffamily\bfseries\fontsize{42}{46}\selectfont]
     at ([xshift=2.45cm,yshift=-3.1cm]current page.north west) {Shock Engine};
   \node[anchor=north west,inner sep=0,text=white,font=\sffamily\Large,text width=14.5cm,align=left]
@@ -225,7 +225,8 @@ in-sample, including the two entry conditions, which were set in October~2026 wi
 The historical edge is not drift, exit shape or a knife-edge parameter: random entries lose to it 100\% of the time, every
 perturbed neighbour is profitable.
 & Net Sharpe at \$1M: \ShDeliveredOne{} [\ShLoDeliveredOne; \ShHiDeliveredOne], CAGR \CagrDeliveredOne{}, funding excluded.
-& Persistence out of sample. A walk-forward on Bitcoin keeps a Sharpe of \WfSharpe, against \WfPreset{} for the fixed rules.\\[4pt]
+& Persistence out of sample. A walk-forward on Bitcoin keeps a Sharpe of \WfSharpe{} (median \WflMedian{} over \WflN{} longer
+  window designs), against \WfPreset{} for the fixed rules.\\[4pt]
 It is not repackaged trend following: residual alpha \RaAlpha{} a year, $t=\RaT$, against six standard trend strategies
 (in-sample).
 & Capacity at Sharpe 1.5: above \$5M on Binance, the largest capital tested (central estimate, wide interval).
@@ -474,6 +475,9 @@ All parameters perturbed jointly by $\pm$20\% (300 neighbours) & Every neighbour
   a plateau, not a peak.\\
 Walk-forward, Bitcoin, \WfWindows{} quarterly windows 2020--2026 & Sharpe \WfSharpe{} against \WfPreset{} for the fixed rules;
   maximum drawdown \WfDD. A large part of the headline result on Bitcoin is a selection effect.\\
+Walk-forward with longer windows (\WflN{} designs, pre-registered after the result above) & Calibration of 36 to 60 months or
+  expanding, tests of 3 to 12 months, same test period: median Sharpe \WflMedian{} (range \WflMin{} to \WflMax), \WflBelow{}
+  below the fixed rules. Window length does not explain the gap.\\
 Selection among the \PboN{} rule variants tried (\PboSplits{} splits of the history) & Probability of backtest overfitting
   \Pbo; gain of the calm restriction not significant after deflation (\GainDsr).\\
 Regression on buy-and-hold and six trend strategies & Residual alpha \RaAlpha{} a year, Newey--West $t=\RaT$;
@@ -962,8 +966,8 @@ the depth equivalence of Section~\ref{sec:capacity}.
 \end{table}
 
 \paragraph{A haircut for selection} The record is in-sample. On Bitcoin, the walk-forward kept \WfKeep{} of the fixed rules' Sharpe
-ratio (\WfSharpe{} against \WfPreset). Applying the same ratio to the net Sharpe at \$1M gives about \Haircut. This is an order of
-magnitude to keep in mind, not an estimate; it does not cover the selection of the two entry conditions, measured separately
+ratio (\WfSharpe{} against \WfPreset); across \WflN{} longer window designs the median kept \WflKeep. Applying these ratios to
+the net Sharpe at \$1M gives about \Haircut{} to \HaircutMed. This is an order of magnitude to keep in mind, not an estimate; it does not cover the selection of the two entry conditions, measured separately
 (Section~\ref{sec:strategy}).
 
 \paragraph{Why a live Sharpe ratio takes years} For independent daily returns, the standard error of an annualised Sharpe ratio
@@ -1088,7 +1092,7 @@ allows.
 
 \begin{itemize}
 \item \textbf{Selection.} Bitcoin's parameters were selected on data covering the whole period; Ether is a transfer across markets,
-  not across time. Walk-forward: \WfSharpe{} against \WfPreset, with a maximum drawdown of \WfDD.
+  not across time. Walk-forward: \WfSharpe{} against \WfPreset, with a maximum drawdown of \WfDD; median \WflMedian{} with longer windows.
 \item \textbf{Entry conditions in-sample.} The calm-regime restriction and the short-entry condition were set in October~2026 with
   knowledge of both markets; the probability that the choice is overfitted is \Pbo. Only the forward test can validate the short
   condition out of sample, and nothing yet tests the calm restriction out of sample.
@@ -1181,6 +1185,8 @@ the portfolio's consistency checks fail.
 
 \section{Version history}
 \begin{itemize}
+\item \textbf{3.1, 13 October 2026.} Walk-forward with longer windows (\WflN{} pre-registered designs) added to the robustness
+  evidence and the selection haircut.
 \item \textbf{3.0, 13 October 2026.} Published rules updated: new positions are opened only in the calm volatility regime. Every
   figure recomputed on the new rules, including the \NExec{} executions, costs, capacity and the order-book check; selection risk
   of the rule choice reported; design history of the two entry conditions corrected, since both were adopted in October~2026.

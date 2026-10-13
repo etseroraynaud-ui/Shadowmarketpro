@@ -353,6 +353,8 @@ ${betas.map(b => `  (${b.beta.toFixed(4)},${FACTOR[b.name]}) +- (${(1.96 * Math.
 const wfPreset = need(WF.split('\n').find(l => /Préréglage fixe/.test(l)), 'ligne du préréglage fixe').split('|').map(s => s.trim())
 const wfMain = need(WF.split('\n').find(l => /\*\*Walk-forward, plateaux\*\*/.test(l)), 'ligne du walk-forward').split('|').map(s => s.trim())
 if (wfMain[4] !== P.evidence.walkForward.sharpe) throw new Error('walk-forward : rapport ≠ résumé publié')
+const WFW = P.evidence.walkForwardWindows
+if (!WFW || WFW.min > Number(wfMain[4])) throw new Error('walk-forward à fenêtres longues absent du résumé publié ou incohérent')
 const cutoff = need(FWD.match(/coupure du (\d{4}-\d{2}-\d{2})/), 'date de coupure')[1]
 const testnet = need(ACC.match(/^\s*\{\s*address:\s*'0x[0-9a-fA-F]{40}'.*network:\s*'testnet'.*since:\s*'([^']+)'/m), 'date du bot testnet')[1]
 const ta = P.falsification.randomSelection, tb = P.falsification.regimeShift
@@ -379,6 +381,9 @@ const V: Record<string, string> = {
   RA_ALPHA: pct(RA.main.alphaAnn), RA_T: fx(RA.main.t), RA_UNEXPL: pct(RA.main.unexplained, 0), RA_R2: fx(RA.main.r2),
   RA_CI_LO: pct(RA.bootstrap.p5), RA_CI_HI: pct(RA.bootstrap.p95), RA_T_GRID: fx(S.S1.t),
   WF_SR: wfMain[4], WF_PRESET: wfPreset[4], WF_WINDOWS: String(P.evidence.walkForward.windows),
+  WFL_N: String(WFW.configs), WFL_MED: fx(WFW.median), WFL_MIN: fx(WFW.min), WFL_MAX: fx(WFW.max),
+  WFL_BELOW: WFW.belowFixed === WFW.configs ? `all ${WFW.configs} remain` : `${WFW.belowFixed} of ${WFW.configs} remain`,
+  WFL_VERDICT: WFW.verdict === 'not-windows' ? ': window length does not explain the gap' : WFW.verdict === 'short-windows' ? ': part of the gap comes from short windows' : '',
   SHORTS: int(F.trades.short), TRADES: int(F.trades.trades),
   REBAL_DIFF: fx(Math.max(Math.abs(vA.B.m.sharpe - vA.A.m.sharpe), Math.abs(vA.C.m.sharpe - vA.A.m.sharpe))),
   TIME_IN_MARKET: pct(F.expo.timeInMarket, 0), WIN_RATE: pct(F.trades.winRate, 0), PAYOFF: fx(F.trades.payoff, 1),

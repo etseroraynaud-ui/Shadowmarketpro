@@ -542,11 +542,15 @@ const rob = (f0: string) => { const f = evFile(f0); const j = rd(f); return { fi
 const WF = `shock-15m-wf-plateau-36-3${SFX}.md`
 const wfMd = readFileSync(join(ROOT, 'research/reports', WF), 'utf8')
 const wfRow = wfMd.split('\n').find(l => l.startsWith('| **Walk-forward, plateaux**'))!.split('|').map(x => x.trim())
+// Règles publiées : sensibilité du walk-forward à la longueur des fenêtres (research/preregistration/wf-longer-windows.md).
+const WFL = CALM ? JSON.parse(readFileSync(join(ROOT, 'research/reports/wf-longer/wf-longer.json'), 'utf8')) : null
+if (WFL) check('walk-forward : référence 36/3 = synthèse des fenêtres longues', Number(wfRow[4]) === WFL.summary.reference.sharpe && WFL.checks.every((c: { ok: boolean }) => c.ok), `${wfRow[4]} contre ${WFL.summary.reference.sharpe}`)
 const evidence = {
   btc: zs('shock-15m-zeroshot-btc.json'), eth: zs('shock-15m-zeroshot-ethusdt.json'), ethDukascopy: zs('shock-15m-zeroshot-eth-dukascopy.json'),
   gold: zs('shock-15m-zeroshot-xauusd.json'), sol: zs('shock-15m-zeroshot-solusdt.json'), tao: zs('shock-15m-zeroshot-taousdt.json'),
   robBtc: rob('shock-15m-robustness-local.json'), robEth: rob('shock-15m-robustness-local-ethusdt.json'),
   walkForward: { file: WF, period: '2020-01-01 → 2026-10-04', windows: 28, cagr: wfRow[3], sharpe: wfRow[4], dd: wfRow[6], trades: wfRow[8] },
+  ...(WFL ? { walkForwardWindows: { file: 'wf-longer/wf-longer.md', prespec: WFL.prespec, period: WFL.period, configs: WFL.summary.configs, median: WFL.summary.median, min: WFL.summary.min, max: WFL.summary.max, minKey: WFL.summary.minKey, maxKey: WFL.summary.maxKey, fixedSharpe: WFL.summary.fixedSharpe, belowFixed: WFL.summary.belowFixed, medianRatio: WFL.summary.medianRatio, verdict: WFL.summary.verdict } } : {}),
 }
 
 // Variante E2 : recoupement avec les études précédentes (même stratégie calculée par d'autres scripts)

@@ -189,6 +189,14 @@ Object.assign(M, {
   WfSharpe: wfMain[4], WfPreset: wfPreset[4], WfWindows: String(P.evidence.walkForward.windows), WfDD: pct(Number(String(P.evidence.walkForward.dd).replace('−', '-').replace(/[^\d.-]/g, '')) / 100),
   WfKeep: pct(wfKeep, 0), Haircut: fx(wfKeep * RES[1e6][VERSIONS.delivered].sharpe, 1),
 })
+// Sensibilité à la longueur des fenêtres (research/preregistration/wf-longer-windows.md).
+const WFW = P.evidence.walkForwardWindows
+if (!WFW || WFW.verdict !== 'not-windows') throw new Error('walk-forward à fenêtres longues absent, ou verdict différent du texte du dossier')
+Object.assign(M, {
+  WflN: String(WFW.configs), WflMedian: fx(WFW.median), WflMin: fx(WFW.min), WflMax: fx(WFW.max),
+  WflBelow: WFW.belowFixed === WFW.configs ? `all ${WFW.configs}` : `${WFW.belowFixed} of ${WFW.configs}`,
+  WflKeep: pct(WFW.medianRatio, 0), HaircutMed: fx(WFW.medianRatio * RES[1e6][VERSIONS.delivered].sharpe, 1),
+})
 // Risque de sélection du choix des règles (CSCV-PBO, Sharpe dégonflé du gain).
 Object.assign(M, { Pbo: pct(CO.cscv.main.pbo, 0), PboN: String(CO.configurations.length), PboSplits: int(CO.cscv.main.splits), GainDsr: pct(CO.dsr.diff.p, 0), GainPsr: pct(CO.dsr.diff.psr0, 0) })
 // Robustesse (résumé publié).
