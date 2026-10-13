@@ -1,7 +1,8 @@
 // COPIE ISOLÉE de simulate() (lib/strategies/shock/engine.ts) avec le broker copié trail-broker.ts, pour
 // l'étude du trailing stop (research/preregistration/v1-trailing.md). La stratégie (décisions à la clôture)
 // est celle du moteur figé, importée sans modification. Seule différence : après les exécutions de la
-// clôture, le broker peut activer le stop suiveur conditionnel au régime ([trailing] regimeClose).
+// clôture, le broker peut activer le stop suiveur conditionnel au régime ([trailing] regimeClose), le point
+// mort et la sortie anticipée ([be-volume] extraClose).
 
 import type { Costs, ShockParams } from '../../../lib/strategies/shock/params.ts'
 import type { Market } from '../../../lib/strategies/shock/market.ts'
@@ -31,6 +32,7 @@ export function simulateTrail(
     const d = strategy.onClose(i, broker.view(), last)
     broker.afterClose(i, d, last)
     if (!last) broker.regimeClose(i)
+    if (!last) broker.extraClose(i)
     position[i] = broker.dir()
     equity[i] = broker.capitalNow(i)
   }

@@ -6,6 +6,12 @@
 //   position a déjà atteint un profit latent suffisant (MFE observée), testé ensuite comme les autres stops ;
 // - le plus serré des stops actifs s'applique ; conventions d'exécution, de coûts et de trajet intrabarre inchangées.
 // Contrôle : avec la spécification « v1 », résultats identiques au moteur figé (test du script d'étude).
+// Ajouts « [be-volume] » (research/preregistration/v1-be-volume.md), inactifs sans beR ni early :
+// - point mort : à la clôture d'une barre, si la MFE observée depuis l'entrée atteint beR R, un stop au prix
+//   d'entrée s'ajoute aux autres (testé à cette clôture puis dans les barres suivantes ; jamais retiré) ;
+// - sortie anticipée : une seule décision, à la première clôture située au moins horizonMs après l'entrée,
+//   sur le volume agresseur de [entrée, entrée + horizon) et / ou le gain latent à cette clôture ; sortie au
+//   marché à la clôture, comme FLIP.
 
 // Shock Engine · exécution simulée : le simulateur de TradingView (« broker emulator ») tel que
 // le script le configure. Il exécute les décisions de la stratégie (strategy.ts) dans le backtest
@@ -43,12 +49,32 @@ export interface TrailSpec {
   profitR?: number
   /** regime : régime de chaque barre (1 = agité), connu à la clôture de la barre. */
   regime?: Int8Array
+  /** [be-volume] point mort activé quand la MFE observée atteint beR R. */
+  beR?: number
+  /** [be-volume] sortie anticipée unique. */
+  early?: EarlyExit
 }
+
+/** [be-volume] Règle de sortie anticipée : toutes les conditions présentes doivent être remplies. */
+export interface EarlyExit {
+  /** Échéance après l'entrée (clôture de la bougie d'entrée), en ms. */
+  horizonMs: number
+  /** Volume : (achat − vente) / total agresseurs sur [from, to), non signé ; NaN = données insuffisantes (pas de sortie). */
+  imb?: (from: number, to: number) => number
+  /** Prix : gain latent à la clôture de décision < gainBelowR R. */
+  gainBelowR?: number
+  /** Journal des décisions (positions encore ouvertes à l'échéance). */
+  log?: EarlyDecision[]
+}
+
+export interface EarlyDecision { entryIdx: number; i: number; dir: 1 | -1; imb: number; gainR: number; exit: boolean; late: boolean }
+
+const TF = 15 * 60000
 
 /** Échéances de financement des contrats perpétuels : 00 h, 08 h et 16 h UTC. */
 export const FUNDING_MS = 8 * 3600000
 
-export type ExitTag = 'TP1' | 'SL' | 'TRAIL' | 'FLIP' | 'VWAP' | 'REV' | 'END' | 'LIQ'
+export type ExitTag = 'TP1' | 'SL' | 'TRAIL' | 'FLIP' | 'VWAP' | 'REV' | 'END' | 'LIQ' | 'BE' | 'EARLY'
 
 export interface PositionRecord {
   dir: 1 | -1
@@ -106,6 +132,9 @@ export interface SimPosition {
   xActive: boolean
   xBest: number
   xDist: number
+  // [be-volume]
+  beActive: boolean
+  earlyDone: boolean
 }
 
 export class TrailBroker {
@@ -207,7 +236,9 @@ export class TrailBroker {
     // [trailing] « TRAIL » si l'un des stops suiveurs est le niveau touché
     const t1 = q.trailActive && lvl === q.best - q.dir * q.trailDist
     const t2 = q.xActive && lvl === q.xBest - q.dir * q.xDist
-    return (t1 || t2) && lvl !== q.stop ? 'TRAIL' : 'SL'
+    if ((t1 || t2) && lvl !== q.stop) return 'TRAIL'
+    // [be-volume]
+    return q.beActive && lvl === q.avg && lvl !== q.stop ? 'BE' : 'SL'
   }
 
   private effStop(q: SimPosition): number {
@@ -215,6 +246,8 @@ export class TrailBroker {
     if (q.trailActive) { const t = q.best - q.dir * q.trailDist; s = q.dir === 1 ? Math.max(s, t) : Math.min(s, t) }
     // [trailing] stop suiveur conditionnel
     if (q.xActive) { const t = q.xBest - q.dir * q.xDist; s = q.dir === 1 ? Math.max(s, t) : Math.min(s, t) }
+    // [be-volume] point mort
+    if (q.beActive) s = q.dir === 1 ? Math.max(s, q.avg) : Math.min(s, q.avg)
     return s
   }
 
@@ -241,6 +274,38 @@ export class TrailBroker {
     const s = this.effStop(q)
     const c = this.m.bars.c[i]
     if (q.dir === 1 ? c <= s : c >= s) this.closeAll(i, c, 'TRAIL')
+  }
+
+  /**
+   * [be-volume] À la clôture de la barre i, après les exécutions du script : activation du point mort, puis
+   * décision unique de sortie anticipée. N'utilise que des données connues à cette clôture.
+   */
+  extraClose(i: number): void {
+    const sp = this.spec
+    if (sp.beR === undefined && !sp.early) return
+    const q = this.pos
+    if (!q || !q.exitsActive || i <= q.entryIdx) return
+    const { c, t } = this.m.bars
+    const R = this.riskOf(q)
+    if (sp.beR !== undefined && !q.beActive) {
+      const mfe = q.dir === 1 ? (q.hi - q.avg) / R : (q.avg - q.lo) / R
+      if (mfe >= sp.beR) {
+        q.beActive = true
+        if (q.dir === 1 ? c[i] <= q.avg : c[i] >= q.avg) { this.closeAll(i, c[i], 'BE'); return }
+      }
+    }
+    const e = sp.early
+    if (e && !q.earlyDone && t[i] >= t[q.entryIdx] + e.horizonMs) {
+      q.earlyDone = true
+      const from = t[q.entryIdx] + TF
+      const imb = e.imb ? e.imb(from, from + e.horizonMs) : NaN
+      const gainR = (q.dir * (c[i] - q.avg)) / R
+      let exit = true
+      if (e.imb) exit = imb === imb && q.dir * imb < 0
+      if (e.gainBelowR !== undefined) exit = exit && gainR < e.gainBelowR
+      e.log?.push({ entryIdx: q.entryIdx, i, dir: q.dir, imb, gainR, exit, late: t[i] > t[q.entryIdx] + e.horizonMs })
+      if (exit) this.closeAll(i, c[i], 'EARLY')
+    }
   }
 
   /** Prix auquel le capital, latent compris, tombe à la marge de maintenance ; NaN = jamais. */
@@ -348,7 +413,7 @@ export class TrailBroker {
       dir, qty, avg: px, entryIdx: i, tag, set, notional: px * qty, equityAtEntry: eq, atrAtEntry: this.atrOf(set, i), fees: fee, realized: 0,
       exitValue: 0, exitQty: 0, exits: [], exitsActive: false, stop: NaN, tp: NaN, tp1Filled: false, trailDist: NaN,
       trailActive: false, best: NaN, hi: px, lo: px,
-      actDist: NaN, xActive: false, xBest: NaN, xDist: NaN,
+      actDist: NaN, xActive: false, xBest: NaN, xDist: NaN, beActive: false, earlyDone: false,
     }
   }
 
