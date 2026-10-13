@@ -390,6 +390,8 @@ Ether & $\pm5\%$ & 2.05 & 1.91--2.19 & 2.05 & 55\% & 100\% \\
 
 On Bitcoin, re-selecting the shock threshold, stop and trailing-stop settings of the calm regime every quarter on the previous 36 months only, choosing plateaus rather than isolated optima, over 28 windows from 2020 to 2026, gives a Sharpe ratio of 0.83 (15-minute returns, 390 trades), against 1.55 for the fixed settings over the same windows. The strategy remains profitable out of sample, but clearly below the fixed preset: a large part of the headline performance on Bitcoin is a selection effect, and the forward test of Section~\ref{sec:forward} is the right place to measure it.
 
+To check whether short windows explain the gap, we pre-registered 12 further designs after seeing this result: calibration on the previous 36, 48 or 60 months or on an expanding window from January 2015, tests of 3, 6 or 12 months, over the same test period. The out-of-sample Sharpe ratio has a median of 0.97 (range 0.83 to 1.36), and all 12 remain below the fixed preset: window length does not explain the gap. The quarterly 36-month design remains the reference, because it was fixed before its result was known.
+
 \section{Selection risk of the rule choice}\label{sec:selection}
 
 The calm-regime restriction was chosen among rule variants that were all replayed on the same portfolio. To measure how much of its advantage is selection, we take the 16 variants actually tried on the portfolio with the current parameters (short-entry rules, range filters, exit changes, early invalidation and agitated-regime alternatives) and apply combinatorially symmetric cross-validation \citep{BaileyEtAl2017}: the history is cut into 16 blocks, and over all 12{,}870 ways of choosing 8 of them, the variant with the best Sharpe ratio on those blocks is ranked against all variants on the other 8. The chosen variant ranks above the median out of sample in 81\% of splits, a probability of backtest overfitting of 19\%. The current rules are the in-sample winner in 57\% of splits and rank on average at the 89th percentile out of sample; they beat the earlier rules in 8 of 9 calendar years.
@@ -581,7 +583,7 @@ Calendar blocks of $L$ days are drawn with replacement from the full history, th
 
 \section{Reproducibility}
 
-Every number in this paper is produced by versioned code from versioned data and read from the published research files (research version \texttt{shock-engine-2026.10.13}, code commit \texttt{f056418}, parameter hash \texttt{c6ac30464bce}); the portfolio pipeline runs 39 consistency checks, all passing. Pre-registration documents were committed before the corresponding computations. Data files, daily returns and the full numerical report are available at \url{https://www.shadowmarketpro.com/research}.
+Every number in this paper is produced by versioned code from versioned data and read from the published research files (research version \texttt{shock-engine-2026.10.13}, code commit \texttt{997435b}, parameter hash \texttt{c6ac30464bce}); the portfolio pipeline runs 40 consistency checks, all passing. Pre-registration documents were committed before the corresponding computations. Data files, daily returns and the full numerical report are available at \url{https://www.shadowmarketpro.com/research}.
 
 \clearpage
 \begin{thebibliography}{99}

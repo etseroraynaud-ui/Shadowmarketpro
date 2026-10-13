@@ -3767,6 +3767,11 @@
    "detail": "parameter hash c6ac30464bce14dd… identical for both sleeves"
   },
   {
+   "name": "walk-forward : référence 36/3 = synthèse des fenêtres longues",
+   "ok": true,
+   "detail": "0.83 contre 0.83"
+  },
+  {
    "name": "Stress: zero-slippage portfolio Sharpe = this report (research/shock/published-stress.ts)",
    "ok": true,
    "detail": "2.0242078889"
@@ -4075,6 +4080,21 @@
    "sharpe": "0.83",
    "dd": "-27.6 %",
    "trades": "390"
+  },
+  "walkForwardWindows": {
+   "file": "wf-longer/wf-longer.md",
+   "prespec": "research/preregistration/wf-longer-windows.md",
+   "period": "2020-01-01 → 2026-10-04",
+   "configs": 12,
+   "median": 0.97,
+   "min": 0.83,
+   "max": 1.36,
+   "minKey": "36/3",
+   "maxKey": "exp/6",
+   "fixedSharpe": 1.55,
+   "belowFixed": 12,
+   "medianRatio": 0.6258064516,
+   "verdict": "not-windows"
   }
  }
 }

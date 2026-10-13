@@ -145,7 +145,7 @@ export default function ShockEnginePage() {
               All parameters perturbed together by up to ±20 %, 300 neighbors per level: median Sharpe {num(rob20('robBtc').medianSharpe)} on BTC and {num(rob20('robEth').medianSharpe)} on ETH. On ETH the parameters sit mid-neighborhood, a plateau rather than a peak.
             </EvidenceCard>
             <EvidenceCard k="Walk-forward" stat={EV.walkForward.sharpe} sub="Sharpe out of sample" verdict={{ kind: 'partial', label: 'positive, weaker' }} href="/research#studies">
-              On Bitcoin, settings re-selected every quarter on the previous 36 months only, then traded on the next 3: {EV.walkForward.windows} windows since {EV.walkForward.period.slice(0, 4)}, CAGR {EV.walkForward.cagr.replace('-', '−')}. Positive, below the fixed rules.
+              On Bitcoin, settings re-selected every quarter on the previous 36 months only, then traded on the next 3: {EV.walkForward.windows} windows since {EV.walkForward.period.slice(0, 4)}, CAGR {EV.walkForward.cagr.replace('-', '−')}. Positive, below the fixed rules. With longer windows ({EV.walkForwardWindows.configs} designs fixed in advance): median {EV.walkForwardWindows.median.toFixed(2)}, range {EV.walkForwardWindows.min.toFixed(2)}–{EV.walkForwardWindows.max.toFixed(2)}.
             </EvidenceCard>
           </div>
         </Section>
