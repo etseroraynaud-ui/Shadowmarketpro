@@ -1,6 +1,6 @@
 # Régime directionnel avant le signal et coût des faux départs
 
-Plan : `research/preregistration/regime-fakeout.md`, commité avant tout calcul variable–résultat. Script : `research/shock/regime-fakeout.ts` (commit `a6af958`, sources modifiées). Moteur non modifié ; variantes = listes d'entrées et sélection de jeux passées à `simulate`.
+Plan : `research/preregistration/regime-fakeout.md`, commité avant tout calcul variable–résultat. Script : `research/shock/regime-fakeout.ts` (commit `56a7ac0`). Moteur non modifié ; variantes = listes d'entrées et sélection de jeux passées à `simulate`.
 
 **Statut.** BTC/ETH : données de développement de la stratégie, descriptif. 8 actifs vierges (XRP, BNB, DOGE, TRX, ADA, LINK, XLM, LTC) : jamais utilisés pour concevoir la stratégie ni ces variantes (leurs résultats v1 avaient été vus dans l'étude des shorts) ; test confirmatoire. Aucun test prospectif.
 

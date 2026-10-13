@@ -1,9 +1,9 @@
 {
  "plan": "research/preregistration/regime-fakeout.md",
- "generatedAt": "2026-10-13T01:26:32.521Z",
+ "generatedAt": "2026-10-13T01:29:28.305Z",
  "git": {
-  "commit": "a6af958feece0550b71bf40b97f2888f6d7551e6",
-  "clean": false
+  "commit": "56a7ac04bdd482f43dfe10754c28c7784634a88e",
+  "clean": true
  },
  "config": {
   "erN": 20,
