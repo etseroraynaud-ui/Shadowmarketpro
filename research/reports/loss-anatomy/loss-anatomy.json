@@ -1,0 +1,700 @@
+{
+ "plan": "research/preregistration/loss-anatomy.md",
+ "generatedAt": "2026-10-13T01:40:55.678Z",
+ "git": {
+  "commit": "89bee8d1989bb742009ea9282d577d254cc2375c",
+  "clean": false
+ },
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/market.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/strategy.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/broker.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/engine.ts"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "research/lib/frozen-shock.ts"
+  },
+  {
+   "name": "empreinte research/lib/e2.ts",
+   "ok": true,
+   "detail": "research/lib/e2.ts"
+  },
+  {
+   "name": "BTC/ETH : 1 311 trades de référence",
+   "ok": true,
+   "detail": "1311"
+  },
+  {
+   "name": "BTC/ETH (développement) : MFE ≥ 0 et MAE ≤ 0",
+   "ok": true,
+   "detail": "1311 trades"
+  },
+  {
+   "name": "8 actifs vierges (réplication) : MFE ≥ 0 et MAE ≤ 0",
+   "ok": true,
+   "detail": "4722 trades"
+  }
+ ],
+ "conclusion": "aucune cible dominante",
+ "verdicts": {
+  "BTC/ETH (développement)": {
+   "a": 0.43406529,
+   "c": 0.30439256,
+   "mostlyA": false,
+   "mostlyC": false,
+   "netPos": false
+  },
+  "8 actifs vierges (réplication)": {
+   "a": 0.47999092,
+   "c": 0.30522252,
+   "mostlyA": false,
+   "mostlyC": false,
+   "netPos": false
+  }
+ },
+ "results": {
+  "BTC/ETH (développement)": {
+   "n": 1311,
+   "losers": 905,
+   "lossSum": -987.41758,
+   "classes": [
+    {
+     "cls": "A",
+     "label": "A · sans continuation (MFE < 0,5 R)",
+     "n": 347,
+     "shareTrades": 0.26468345,
+     "sumR": -428.6037,
+     "shareLoss": 0.43406529,
+     "meanR": -1.2351692,
+     "mfe": 0.224856,
+     "mae": -1,
+     "hold": 4,
+     "firstHour": 0.56195965,
+     "exitMix": [
+      {
+       "exit": "SL",
+       "share": 0.99711816
+      },
+      {
+       "exit": "FLIP",
+       "share": 0.0028818444
+      }
+     ]
+    },
+    {
+     "cls": "B",
+     "label": "B · continuation partielle (0,5 ≤ MFE < 1 R)",
+     "n": 230,
+     "shareTrades": 0.1754386,
+     "sumR": -258.25131,
+     "shareLoss": 0.26154214,
+     "meanR": -1.1228318,
+     "mfe": 0.70941592,
+     "mae": -1,
+     "hold": 9,
+     "firstHour": 0.36086957,
+     "exitMix": [
+      {
+       "exit": "SL",
+       "share": 0.9173913
+      },
+      {
+       "exit": "TP1+SL",
+       "share": 0.069565217
+      },
+      {
+       "exit": "FLIP",
+       "share": 0.013043478
+      }
+     ]
+    },
+    {
+     "cls": "C",
+     "label": "C · gain rendu (MFE ≥ 1 R)",
+     "n": 328,
+     "shareTrades": 0.25019069,
+     "sumR": -300.56257,
+     "shareLoss": 0.30439256,
+     "meanR": -0.91634929,
+     "mfe": 1.7560649,
+     "mae": -1,
+     "hold": 20.5,
+     "firstHour": 0.16768293,
+     "exitMix": [
+      {
+       "exit": "SL",
+       "share": 0.47560976
+      },
+      {
+       "exit": "TP1+SL",
+       "share": 0.37195122
+      },
+      {
+       "exit": "FLIP",
+       "share": 0.15243902
+      }
+     ]
+    },
+    {
+     "cls": "W",
+     "label": "Gagnants (R > 0)",
+     "n": 406,
+     "shareTrades": 0.30968726,
+     "sumR": 1723.2393,
+     "shareLoss": null,
+     "meanR": 4.2444317,
+     "mfe": 5.5556327,
+     "mae": -0.38540527,
+     "hold": 68,
+     "firstHour": 0.044334975,
+     "exitMix": [
+      {
+       "exit": "FLIP",
+       "share": 0.53694581
+      },
+      {
+       "exit": "TP1+TRAIL",
+       "share": 0.45320197
+      },
+      {
+       "exit": "TRAIL",
+       "share": 0.0098522167
+      }
+     ]
+    }
+   ],
+   "buckets": [
+    {
+     "lo": null,
+     "hi": 0.25,
+     "n": 185,
+     "share": 0.20441989,
+     "shareLoss": 0.23557596
+    },
+    {
+     "lo": 0.25,
+     "hi": 0.5,
+     "n": 162,
+     "share": 0.17900552,
+     "shareLoss": 0.19848933
+    },
+    {
+     "lo": 0.5,
+     "hi": 1,
+     "n": 230,
+     "share": 0.25414365,
+     "shareLoss": 0.26154214
+    },
+    {
+     "lo": 1,
+     "hi": 2,
+     "n": 194,
+     "share": 0.21436464,
+     "shareLoss": 0.19010485
+    },
+    {
+     "lo": 2,
+     "hi": 3,
+     "n": 83,
+     "share": 0.091712707,
+     "shareLoss": 0.074207191
+    },
+    {
+     "lo": 3,
+     "hi": null,
+     "n": 51,
+     "share": 0.056353591,
+     "shareLoss": 0.040080521
+    }
+   ],
+   "winners": {
+    "n": 406,
+    "sumR": 1723.2393,
+    "sumMfe": 3130.4119,
+    "captureMedian": 0.43187159,
+    "giveback": 1407.1726,
+    "givebackMedian": 3.1311702,
+    "bigGive": 102,
+    "bigGiveback": 302.62996
+   },
+   "bounds": {
+    "entries": 428.6037,
+    "exits": 281.54589
+   },
+   "cf": {
+    "reached": 724,
+    "beHit": 368,
+    "losersSaved": 262,
+    "winnersCut": 106,
+    "bigWinnersCut": 26,
+    "gain": 227.55681,
+    "cost": -430.81589,
+    "net": -203.25907,
+    "sumR": 735.82168
+   },
+   "intervals": {
+    "shareLossA": [
+     0.39277966,
+     0.4734784
+    ],
+    "shareLossC": [
+     0.27180223,
+     0.33822501
+    ],
+    "net": [
+     -365.44746,
+     -67.403179
+    ],
+    "gain": [
+     197.65919,
+     259.24594
+    ],
+    "cost": [
+     -582.82819,
+     -303.22789
+    ]
+   },
+   "splits": {
+    "actif": [
+     {
+      "key": "BTC",
+      "n": 644,
+      "losers": 441,
+      "A": 0.45889706,
+      "B": 0.26078191,
+      "C": 0.28032103,
+      "cfNet": -128.65387,
+      "sumR": 387.06627,
+      "logRet": 2.7782903
+     },
+     {
+      "key": "ETH",
+      "n": 667,
+      "losers": 464,
+      "A": 0.40909757,
+      "B": 0.26230654,
+      "C": 0.3285959,
+      "cfNet": -74.605205,
+      "sumR": 348.75541,
+      "logRet": 4.3927443
+     }
+    ],
+    "sens": [
+     {
+      "key": "short",
+      "n": 250,
+      "losers": 178,
+      "A": 0.48411068,
+      "B": 0.26383071,
+      "C": 0.25205861,
+      "cfNet": -89.405654,
+      "sumR": 218.55134,
+      "logRet": 2.575496
+     },
+     {
+      "key": "long",
+      "n": 1061,
+      "losers": 727,
+      "A": 0.42302733,
+      "B": 0.26103738,
+      "C": 0.31593529,
+      "cfNet": -113.85342,
+      "sumR": 517.27034,
+      "logRet": 4.5955386
+     }
+    ],
+    "régime": [
+     {
+      "key": "calme (stop 3,3 ATR)",
+      "n": 714,
+      "losers": 492,
+      "A": 0.43065443,
+      "B": 0.27236351,
+      "C": 0.29698206,
+      "cfNet": -195.28909,
+      "sumR": 765.53561,
+      "logRet": 7.4297511
+     },
+     {
+      "key": "agité (stop 1,1 ATR)",
+      "n": 597,
+      "losers": 413,
+      "A": 0.43768001,
+      "B": 0.25007403,
+      "C": 0.31224596,
+      "cfNet": -7.9699887,
+      "sumR": -29.71393,
+      "logRet": -0.25871644
+     }
+    ]
+   }
+  },
+  "8 actifs vierges (réplication)": {
+   "n": 4722,
+   "losers": 3431,
+   "lossSum": -3658.2918,
+   "classes": [
+    {
+     "cls": "A",
+     "label": "A · sans continuation (MFE < 0,5 R)",
+     "n": 1474,
+     "shareTrades": 0.31215587,
+     "sumR": -1755.9468,
+     "shareLoss": 0.47999092,
+     "meanR": -1.1912801,
+     "mfe": 0.18900432,
+     "mae": -1.0198019,
+     "hold": 4,
+     "firstHour": 0.51967436,
+     "exitMix": [
+      {
+       "exit": "SL",
+       "share": 0.99185889
+      },
+      {
+       "exit": "FLIP",
+       "share": 0.0081411126
+      }
+     ]
+    },
+    {
+     "cls": "B",
+     "label": "B · continuation partielle (0,5 ≤ MFE < 1 R)",
+     "n": 719,
+     "shareTrades": 0.15226599,
+     "sumR": -785.75192,
+     "shareLoss": 0.21478656,
+     "meanR": -1.0928399,
+     "mfe": 0.71672583,
+     "mae": -1.0164139,
+     "hold": 11,
+     "firstHour": 0.31988873,
+     "exitMix": [
+      {
+       "exit": "SL",
+       "share": 0.88734353
+      },
+      {
+       "exit": "FLIP",
+       "share": 0.058414465
+      },
+      {
+       "exit": "TP1+SL",
+       "share": 0.054242003
+      }
+     ]
+    },
+    {
+     "cls": "C",
+     "label": "C · gain rendu (MFE ≥ 1 R)",
+     "n": 1238,
+     "shareTrades": 0.26217704,
+     "sumR": -1116.593,
+     "shareLoss": 0.30522252,
+     "meanR": -0.90193298,
+     "mfe": 1.76702,
+     "mae": -1.0155494,
+     "hold": 33,
+     "firstHour": 0.15185784,
+     "exitMix": [
+      {
+       "exit": "SL",
+       "share": 0.53473344
+      },
+      {
+       "exit": "TP1+SL",
+       "share": 0.3085622
+      },
+      {
+       "exit": "FLIP",
+       "share": 0.15105008
+      },
+      {
+       "exit": "TP1+TRAIL",
+       "share": 0.0056542811
+      }
+     ]
+    },
+    {
+     "cls": "W",
+     "label": "Gagnants (R > 0)",
+     "n": 1291,
+     "shareTrades": 0.2734011,
+     "sumR": 4433.4702,
+     "shareLoss": null,
+     "meanR": 3.4341365,
+     "mfe": 5.1962861,
+     "mae": -0.43964496,
+     "hold": 61,
+     "firstHour": 0.082881487,
+     "exitMix": [
+      {
+       "exit": "FLIP",
+       "share": 0.535244
+      },
+      {
+       "exit": "TP1+TRAIL",
+       "share": 0.44306739
+      },
+      {
+       "exit": "TRAIL",
+       "share": 0.017815647
+      },
+      {
+       "exit": "REV",
+       "share": 0.0038729667
+      }
+     ]
+    }
+   ],
+   "buckets": [
+    {
+     "lo": null,
+     "hi": 0.25,
+     "n": 911,
+     "share": 0.26552026,
+     "shareLoss": 0.30198393
+    },
+    {
+     "lo": 0.25,
+     "hi": 0.5,
+     "n": 563,
+     "share": 0.1640921,
+     "shareLoss": 0.17800699
+    },
+    {
+     "lo": 0.5,
+     "hi": 1,
+     "n": 719,
+     "share": 0.2095599,
+     "shareLoss": 0.21478656
+    },
+    {
+     "lo": 1,
+     "hi": 2,
+     "n": 764,
+     "share": 0.2226756,
+     "shareLoss": 0.19132818
+    },
+    {
+     "lo": 2,
+     "hi": 3,
+     "n": 323,
+     "share": 0.09414165,
+     "shareLoss": 0.077529929
+    },
+    {
+     "lo": 3,
+     "hi": null,
+     "n": 151,
+     "share": 0.044010493,
+     "shareLoss": 0.036364412
+    }
+   ],
+   "winners": {
+    "n": 1291,
+    "sumR": 4433.4702,
+    "sumMfe": 9067.103,
+    "captureMedian": 0.40056252,
+    "giveback": 4633.6327,
+    "givebackMedian": 3.095959,
+    "bigGive": 325,
+    "bigGiveback": 977.38002
+   },
+   "bounds": {
+    "entries": 1755.9468,
+    "exits": 1079.4983
+   },
+   "cf": {
+    "reached": 2509,
+    "beHit": 1440,
+    "losersSaved": 1044,
+    "winnersCut": 396,
+    "bigWinnersCut": 73,
+    "gain": 931.82604,
+    "cost": -1223.088,
+    "net": -291.262,
+    "sumR": 775.17845
+   },
+   "intervals": {
+    "shareLossA": [
+     0.46034901,
+     0.50110438
+    ],
+    "shareLossC": [
+     0.28747169,
+     0.32300808
+    ],
+    "net": [
+     -532.08641,
+     -66.922051
+    ],
+    "gain": [
+     843.50974,
+     1026.7129
+    ],
+    "cost": [
+     -1446.8264,
+     -1007.2063
+    ]
+   },
+   "splits": {
+    "actif": [
+     {
+      "key": "XRP",
+      "n": 589,
+      "losers": 424,
+      "A": 0.4361255,
+      "B": 0.22135077,
+      "C": 0.34252372,
+      "cfNet": -41.673321,
+      "sumR": 184.19669,
+      "logRet": 1.9284698
+     },
+     {
+      "key": "BNB",
+      "n": 627,
+      "losers": 461,
+      "A": 0.48627783,
+      "B": 0.20921186,
+      "C": 0.30451031,
+      "cfNet": -68.182629,
+      "sumR": 71.813904,
+      "logRet": 1.0093575
+     },
+     {
+      "key": "DOGE",
+      "n": 555,
+      "losers": 419,
+      "A": 0.51747705,
+      "B": 0.18512842,
+      "C": 0.29739452,
+      "cfNet": 29.784118,
+      "sumR": 74.845808,
+      "logRet": 1.0427671
+     },
+     {
+      "key": "TRX",
+      "n": 567,
+      "losers": 412,
+      "A": 0.45792882,
+      "B": 0.2001823,
+      "C": 0.34188888,
+      "cfNet": -23.070323,
+      "sumR": 2.7267089,
+      "logRet": 0.35818378
+     },
+     {
+      "key": "ADA",
+      "n": 626,
+      "losers": 454,
+      "A": 0.52547725,
+      "B": 0.19526367,
+      "C": 0.27925908,
+      "cfNet": -63.889041,
+      "sumR": 173.35811,
+      "logRet": 1.1417722
+     },
+     {
+      "key": "LINK",
+      "n": 523,
+      "losers": 371,
+      "A": 0.4662118,
+      "B": 0.22876154,
+      "C": 0.30502666,
+      "cfNet": -21.694568,
+      "sumR": 112.61401,
+      "logRet": 1.2575831
+     },
+     {
+      "key": "XLM",
+      "n": 575,
+      "losers": 416,
+      "A": 0.46891578,
+      "B": 0.2406535,
+      "C": 0.29043072,
+      "cfNet": -73.572886,
+      "sumR": 134.94949,
+      "logRet": 0.94269791
+     },
+     {
+      "key": "LTC",
+      "n": 660,
+      "losers": 474,
+      "A": 0.47973406,
+      "B": 0.23969179,
+      "C": 0.28057415,
+      "cfNet": -28.963349,
+      "sumR": 20.673724,
+      "logRet": -0.061379877
+     }
+    ],
+    "sens": [
+     {
+      "key": "long",
+      "n": 3521,
+      "losers": 2572,
+      "A": 0.48200341,
+      "B": 0.21559799,
+      "C": 0.3023986,
+      "cfNet": -166.3105,
+      "sumR": 373.29623,
+      "logRet": 3.553266
+     },
+     {
+      "key": "short",
+      "n": 1201,
+      "losers": 859,
+      "A": 0.47355774,
+      "B": 0.21219273,
+      "C": 0.31424953,
+      "cfNet": -124.9515,
+      "sumR": 401.88222,
+      "logRet": 4.0661855
+     }
+    ],
+    "régime": [
+     {
+      "key": "agité (stop 1,1 ATR)",
+      "n": 1935,
+      "losers": 1363,
+      "A": 0.51991884,
+      "B": 0.20969185,
+      "C": 0.27038931,
+      "cfNet": -116.89612,
+      "sumR": -93.963751,
+      "logRet": 0.24215233
+     },
+     {
+      "key": "calme (stop 3,3 ATR)",
+      "n": 2787,
+      "losers": 2068,
+      "A": 0.45073142,
+      "B": 0.21852001,
+      "C": 0.33074857,
+      "cfNet": -174.36588,
+      "sumR": 869.1422,
+      "logRet": 7.3772991
+     }
+    ]
+   }
+  }
+ }
+}

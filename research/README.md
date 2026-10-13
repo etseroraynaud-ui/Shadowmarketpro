@@ -131,6 +131,16 @@ concentre le coût des faux départs, aucune variante ne démontre d'avantage ; 
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/regime-fakeout.ts
 ```
 
+Anatomie des pertes (plan : `research/preregistration/loss-anatomy.md`, commité avant tout calcul ;
+rapport dans `research/reports/loss-anatomy/`). Perdants classés selon la MFE atteinte avant la sortie
+(sans continuation, continuation partielle, gain rendu), gains rendus des gagnants, bornes « entrées »
+et « sorties », et un contrefactuel de premier ordre (stop au point mort après +1 R), sur BTC/ETH et
+sur les 8 actifs vierges. Descriptif : aucune règle n'est modifiée.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/loss-anatomy.ts
+```
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 
