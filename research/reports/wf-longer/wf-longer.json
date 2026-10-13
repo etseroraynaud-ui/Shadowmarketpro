@@ -1,0 +1,232 @@
+{
+ "generatedAt": "2026-10-13T06:18:28.500Z",
+ "prespec": "research/preregistration/wf-longer-windows.md",
+ "period": "2020-01-01 → 2026-10-04",
+ "rule": {
+  "shortWindows": 1.2,
+  "notWindows": 1
+ },
+ "summary": {
+  "configs": 12,
+  "median": 0.97,
+  "min": 0.83,
+  "max": 1.36,
+  "minKey": "36/3",
+  "maxKey": "exp/6",
+  "medianRatio": 0.6258064516129032,
+  "fixedSharpe": 1.55,
+  "belowFixed": 12,
+  "medianMaxDD": -0.2575,
+  "worstMaxDD": -0.386,
+  "reference": {
+   "train": "36",
+   "test": 3,
+   "sharpe": 0.83
+  },
+  "verdict": "not-windows"
+ },
+ "configs": [
+  {
+   "train": "36",
+   "test": 3,
+   "file": "shock-15m-wf-plateau-36-3-calm.md",
+   "windows": 28,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 0.83,
+   "sortino": 1.2,
+   "cagr": 0.14300000000000002,
+   "maxDD": -0.276,
+   "trades": 390,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.5354838709677419
+  },
+  {
+   "train": "36",
+   "test": 6,
+   "file": "shock-15m-wf-plateau-36-6-calm.md",
+   "windows": 14,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 0.83,
+   "sortino": 1.2,
+   "cagr": 0.14300000000000002,
+   "maxDD": -0.259,
+   "trades": 382,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.5354838709677419
+  },
+  {
+   "train": "36",
+   "test": 12,
+   "file": "shock-15m-wf-plateau-36-12-calm.md",
+   "windows": 7,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 0.92,
+   "sortino": 1.34,
+   "cagr": 0.16,
+   "maxDD": -0.244,
+   "trades": 363,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.5935483870967742
+  },
+  {
+   "train": "48",
+   "test": 3,
+   "file": "shock-15m-wf-plateau-48-3-calm.md",
+   "windows": 28,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 0.91,
+   "sortino": 1.31,
+   "cagr": 0.165,
+   "maxDD": -0.239,
+   "trades": 360,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.5870967741935484
+  },
+  {
+   "train": "48",
+   "test": 6,
+   "file": "shock-15m-wf-plateau-48-6-calm.md",
+   "windows": 14,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.06,
+   "sortino": 1.53,
+   "cagr": 0.209,
+   "maxDD": -0.251,
+   "trades": 351,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.6838709677419355
+  },
+  {
+   "train": "48",
+   "test": 12,
+   "file": "shock-15m-wf-plateau-48-12-calm.md",
+   "windows": 7,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 0.95,
+   "sortino": 1.37,
+   "cagr": 0.17800000000000002,
+   "maxDD": -0.256,
+   "trades": 342,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.6129032258064515
+  },
+  {
+   "train": "60",
+   "test": 3,
+   "file": "shock-15m-wf-plateau-60-3-calm.md",
+   "windows": 28,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 0.99,
+   "sortino": 1.42,
+   "cagr": 0.182,
+   "maxDD": -0.212,
+   "trades": 352,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.6387096774193548
+  },
+  {
+   "train": "60",
+   "test": 6,
+   "file": "shock-15m-wf-plateau-60-6-calm.md",
+   "windows": 14,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1,
+   "sortino": 1.43,
+   "cagr": 0.184,
+   "maxDD": -0.212,
+   "trades": 351,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.6451612903225806
+  },
+  {
+   "train": "60",
+   "test": 12,
+   "file": "shock-15m-wf-plateau-60-12-calm.md",
+   "windows": 7,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 0.87,
+   "sortino": 1.24,
+   "cagr": 0.146,
+   "maxDD": -0.276,
+   "trades": 342,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.5612903225806452
+  },
+  {
+   "train": "exp",
+   "test": 3,
+   "file": "shock-15m-wf-plateau-exp-3-calm.md",
+   "windows": 28,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 0.99,
+   "sortino": 1.4,
+   "cagr": 0.19699999999999998,
+   "maxDD": -0.386,
+   "trades": 291,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.6387096774193548
+  },
+  {
+   "train": "exp",
+   "test": 6,
+   "file": "shock-15m-wf-plateau-exp-6-calm.md",
+   "windows": 14,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.36,
+   "sortino": 1.95,
+   "cagr": 0.304,
+   "maxDD": -0.276,
+   "trades": 280,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.8774193548387097
+  },
+  {
+   "train": "exp",
+   "test": 12,
+   "file": "shock-15m-wf-plateau-exp-12-calm.md",
+   "windows": 7,
+   "period": "2020-01-01 → 2026-10-04",
+   "sharpe": 1.35,
+   "sortino": 1.94,
+   "cagr": 0.303,
+   "maxDD": -0.28300000000000003,
+   "trades": 281,
+   "fixedSharpe": 1.55,
+   "fixedCagr": 0.365,
+   "ratio": 0.8709677419354839
+  }
+ ],
+ "checks": [
+  {
+   "name": "36/3 = résultat publié",
+   "ok": true,
+   "detail": "Sharpe 0.83, 390 trades, préréglage 1.55"
+  },
+  {
+   "name": "même période de test pour les 12",
+   "ok": true,
+   "detail": "2020-01-01 → 2026-10-04"
+  },
+  {
+   "name": "même préréglage fixe pour les 12",
+   "ok": true,
+   "detail": "1.55"
+  },
+  {
+   "name": "12 configurations",
+   "ok": true,
+   "detail": "12"
+  }
+ ]
+}
