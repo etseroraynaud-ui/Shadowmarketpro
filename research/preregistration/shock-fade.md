@@ -272,4 +272,23 @@ modèle tradable ; le meilleur modèle au sens de Clark–West (s'il est signifi
 
 ## 11. Avenants
 
-(aucun)
+### Avenant 1 — 2026-10-13, après la validation sur V, **avant toute lecture de C**
+
+Résultat de V consigné par le même commit (`research/reports/shock-fade/06-walkforward.md`) : **aucun couple
+(modèle, horizon) candidat**, aucun Clark–West significatif après Holm, donc **aucun score de recherche**. Le § 8
+prévoyait d'évaluer sur C « le modèle retenu ou, sans candidat, le meilleur score de recherche » : aucun des deux
+n'existe. C est donc utilisé **une seule fois**, à titre de réplication, pour :
+
+1. l'étude d'événements inconditionnelle (Fade après les chocs |Z| ≥ 4, 5 et 15 min, MFE/MAE, récupération et
+   extension) ;
+2. le tableau complet M1–M7 et contrôle, recalibré trimestriellement exactement comme sur V (aucun paramètre ni
+   seuil modifié) ; les critères du § 7 y sont appliqués pour mémoire, sans sélection ;
+3. à titre **exploratoire** seulement, H2b et H4a, les deux signaux bruts les plus forts sur E (aucun n'est
+   significatif après Holm) ;
+4. le coût aller-retour d'équilibre de chaque modèle (moyenne brute des événements pris). Pas de backtest : le § 8
+   le réserve à un candidat.
+
+Ajouts descriptifs faits pendant l'analyse de E, sans effet sur une décision : référence d'**extension
+symétrique** dans le tableau de récupération (`03-event-study.md`), répétition du contrôle négatif sur trois
+graines pour l'OU naïf (`02-synthetic-controls.md`), profil de vraisemblance en φ sur 9 demi-vies et ratios de
+variance (`05-identifiability.md`).
