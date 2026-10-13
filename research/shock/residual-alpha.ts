@@ -3,7 +3,8 @@
 //
 //   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/residual-alpha.ts
 //
-// Rendements du Shock Engine : CSV publié du portefeuille (version publique, --variant e2). Références :
+// Rendements du Shock Engine : CSV publié du portefeuille (spécification publiée depuis le 2026-10-13,
+// portfolio.ts --variant calm ; résultats sur E2 jusqu'au commit 059234c). Références :
 // buy & hold, TSMOM, Donchian, EMA (journalières) et Donchian 15 min, calculées sur les mêmes barres
 // que les sleeves, position décidée à la clôture t et appliquée au rendement suivant, commission de
 // 0,045 % par unité de variation de position. Régressions MCO, t de Newey–West, bootstrap par mois.
@@ -20,8 +21,8 @@ import * as P from '../lib/portfolio.ts'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const OUT = join(ROOT, 'research/reports/residual-alpha')
 const PRESPEC = 'research/preregistration/residual-alpha.md'
-const CSV = 'research/reports/btc-eth-portfolio-e2/portfolio_daily_returns.csv'
-const SUMMARY = 'research/reports/btc-eth-portfolio-e2/portfolio_summary.json'
+const CSV = 'research/reports/btc-eth-portfolio-calm/portfolio_daily_returns.csv'
+const SUMMARY = 'research/reports/btc-eth-portfolio-calm/portfolio_summary.json'
 const DAY = P.DAY, ANN = P.ANN
 const COMM = 0.045 / 100
 const SEED = 20261009

@@ -1,0 +1,174 @@
+{
+ "schema": "shock-engine-reference/1",
+ "decidedOn": "2026-10-13",
+ "status": "HISTORICAL SIMULATION · in-sample",
+ "generatedAt": "2026-10-13T03:20:20.517Z",
+ "git": {
+  "commit": "15cace177f331fdae701aee662ed2e23c0d47e91",
+  "clean": true
+ },
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/market.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/strategy.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/broker.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/engine.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/params.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/params.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/presets.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/presets.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/regimes.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/regimes.ts"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "research/lib/frozen-shock.ts"
+  },
+  {
+   "name": "empreinte research/lib/e2.ts",
+   "ok": true,
+   "detail": "research/lib/e2.ts"
+  },
+  {
+   "name": "fenêtre commune 2018-09-01 → 2026-09-30",
+   "ok": true,
+   "detail": "2952 jours"
+  },
+  {
+   "name": "E2 : Sharpe, CAGR et drawdown du portefeuille publié",
+   "ok": true,
+   "detail": "1.877566513 · 0.6164062401 · -0.1912434817"
+  },
+  {
+   "name": "E2 : trades publiés (644 + 667)",
+   "ok": true,
+   "detail": "644 + 667"
+  },
+  {
+   "name": "V1 : valeurs figées (CALM_ONLY_REFERENCE)",
+   "ok": true,
+   "detail": "2.0242078888605257 · 1.878228130093312 · 716"
+  },
+  {
+   "name": "V1 : CAGR, drawdown et profit factor publiés (étude du régime agité)",
+   "ok": true,
+   "detail": "0.6772734 · -0.17849879 · 2.4569619"
+  }
+ ],
+ "reference": {
+  "name": "Shock Engine V1 (régime calme seul)",
+  "definition": "E2 sans nouvelles entrées en régime agité (research/lib/calm-only.ts)",
+  "sharpe": 2.024207889,
+  "cagr": 0.6772734024,
+  "maxDD": -0.1784987916,
+  "totalReturn": 64.3550027,
+  "vol": 0.273534079,
+  "sortino": 4.728717568,
+  "calmar": 3.79427444,
+  "profitFactor": 2.456961941,
+  "trades": 716,
+  "winRate": 0.311452514,
+  "timeInMarket": 0.1596131984,
+  "worstMonth": {
+   "key": 24265,
+   "ret": -0.1391138576,
+   "n": 28,
+   "from": 19024,
+   "to": 19051,
+   "full": true
+  },
+  "sharpeCosts2": 1.87822813,
+  "cagrCosts2": 0.6123080126,
+  "sleeves": [
+   {
+    "key": "BTC",
+    "sharpe": 1.456496892,
+    "trades": 358,
+    "winRate": 0.2960893855
+   },
+   {
+    "key": "ETH",
+    "sharpe": 1.927275806,
+    "trades": 358,
+    "winRate": 0.3268156425
+   }
+  ]
+ },
+ "benchmark": {
+  "name": "E2 (deux régimes)",
+  "sharpe": 1.877566513,
+  "cagr": 0.6164062401,
+  "maxDD": -0.1912434817,
+  "totalReturn": 47.47675636,
+  "vol": 0.2755094529,
+  "sortino": 4.252202647,
+  "calmar": 3.223149017,
+  "profitFactor": 1.95875612,
+  "trades": 1311,
+  "winRate": 0.3096872616,
+  "timeInMarket": 0.17125462,
+  "worstMonth": {
+   "key": 24265,
+   "ret": -0.1522834059,
+   "n": 28,
+   "from": 19024,
+   "to": 19051,
+   "full": true
+  },
+  "sharpeCosts2": 1.609855067,
+  "cagrCosts2": 0.5017974902,
+  "sleeves": [
+   {
+    "key": "BTC",
+    "sharpe": 1.457987414,
+    "trades": 644,
+    "winRate": 0.3152173913
+   },
+   {
+    "key": "ETH",
+    "sharpe": 1.750707053,
+    "trades": 667,
+    "winRate": 0.3043478261
+   }
+  ]
+ },
+ "validation": {
+  "pbo": 0.19168609,
+  "verdict": "candidate fragile",
+  "dsrGain": 0.17963912,
+  "dsrGain2": 0.48473362,
+  "wfDelta": 0.1565479,
+  "ciWf": [
+   -0.029362435,
+   0.32797893
+  ],
+  "breakevenV1": 109.42749,
+  "breakevenE2": 52.809525,
+  "yearsBetter": 8,
+  "years": 9
+ }
+}

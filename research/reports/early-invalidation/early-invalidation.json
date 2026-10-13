@@ -1,0 +1,2242 @@
+{
+ "plan": "research/preregistration/early-invalidation.md",
+ "generatedAt": "2026-10-13T02:24:30.754Z",
+ "git": {
+  "commit": "60112a3127dd0b1ee33e786af11d877c27d1b9f4",
+  "clean": true
+ },
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/market.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/strategy.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/broker.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/engine.ts"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "research/lib/frozen-shock.ts"
+  },
+  {
+   "name": "empreinte research/lib/e2.ts",
+   "ok": true,
+   "detail": "research/lib/e2.ts"
+  },
+  {
+   "name": "BTC : boucle sans règle = simulate()",
+   "ok": true,
+   "detail": "774 positions"
+  },
+  {
+   "name": "XRP : boucle sans règle = simulate()",
+   "ok": true,
+   "detail": "589 positions"
+  },
+  {
+   "name": "BTC : V0 = trades publiés",
+   "ok": true,
+   "detail": "644"
+  },
+  {
+   "name": "ETH : V0 = trades publiés",
+   "ok": true,
+   "detail": "667"
+  },
+  {
+   "name": "BTC/ETH : Sharpe de V0 = Sharpe publié",
+   "ok": true,
+   "detail": "1.877566513"
+  },
+  {
+   "name": "BTC/ETH : 1 311 trades",
+   "ok": true,
+   "detail": "1311"
+  }
+ ],
+ "phase1": {
+  "BTC/ETH": [
+   {
+    "k": 1,
+    "open": 1238,
+    "openShare": 0.94431732,
+    "pLoser": 0.6720517,
+    "pBig": 0.14054927,
+    "groups": [
+     {
+      "label": "rendement ≤ 0 (non confirmé)",
+      "n": 605,
+      "share": 0.48869144,
+      "pLoser": 0.80495868,
+      "pBig": 0.090909091,
+      "bigShare": 0.31609195,
+      "meanR": 0.27406491,
+      "meanRetR": -0.31926509,
+      "meanValue": -0.72978509,
+      "sumValue": -441.51998,
+      "ci": [
+       -718.03948,
+       -207.55392
+      ],
+      "sumLosers": 290.91421,
+      "sumWinners": -732.43419,
+      "sumBig": -628.52835
+     },
+     {
+      "label": "rendement > 0",
+      "n": 633,
+      "share": 0.51130856,
+      "pLoser": 0.5450237,
+      "pBig": 0.18799368,
+      "bigShare": 0.68390805,
+      "meanR": 1.1140702,
+      "meanRetR": 0.62302802,
+      "meanValue": -0.6483762,
+      "sumValue": -410.42213,
+      "ci": [
+       -590.62662,
+       -245.53745
+      ],
+      "sumLosers": 416.85209,
+      "sumWinners": -827.27422,
+      "sumBig": -730.57672
+     },
+     {
+      "label": "réintégré sous le niveau cassé",
+      "n": 100,
+      "share": 0.080775444,
+      "pLoser": 0.9,
+      "pBig": 0.03,
+      "bigShare": 0.017241379,
+      "meanR": -0.83392061,
+      "meanRetR": -0.55806896,
+      "meanValue": 0.12692121,
+      "sumValue": 12.692121,
+      "ci": [
+       -10.070935,
+       31.397115
+      ],
+      "sumLosers": 36.559183,
+      "sumWinners": -23.867063,
+      "sumBig": -13.630071
+     },
+     {
+      "label": "au-delà du niveau cassé",
+      "n": 1138,
+      "share": 0.91922456,
+      "pLoser": 0.65202109,
+      "pBig": 0.15026362,
+      "bigShare": 0.98275862,
+      "meanR": 0.83867115,
+      "meanRetR": 0.22585963,
+      "meanValue": -0.75978403,
+      "sumValue": -864.63423,
+      "ci": [
+       -1205.882,
+       -567.80978
+      ],
+      "sumLosers": 671.20712,
+      "sumWinners": -1535.8413,
+      "sumBig": -1345.475
+     },
+     {
+      "label": "choc retracé ≥ 50 %",
+      "n": 69,
+      "share": 0.055735057,
+      "pLoser": 0.91304348,
+      "pBig": 0.014492754,
+      "bigShare": 0.0057471264,
+      "meanR": -0.92502336,
+      "meanRetR": -0.6771127,
+      "meanValue": 0.10246777,
+      "sumValue": 7.0702761,
+      "ci": [
+       -4.4549159,
+       17.098423
+      ],
+      "sumLosers": 19.265189,
+      "sumWinners": -12.194913,
+      "sumBig": -3.7019975
+     },
+     {
+      "label": "choc retracé < 50 %",
+      "n": 1169,
+      "share": 0.94426494,
+      "pLoser": 0.6578272,
+      "pBig": 0.14798973,
+      "bigShare": 0.99425287,
+      "meanR": 0.79969402,
+      "meanRetR": 0.21209764,
+      "meanValue": -0.73482668,
+      "sumValue": -859.01239,
+      "ci": [
+       -1206.1449,
+       -566.9682
+      ],
+      "sumLosers": 688.50111,
+      "sumWinners": -1547.5135,
+      "sumBig": -1355.4031
+     },
+     {
+      "label": "volume après choc < médiane",
+      "n": 619,
+      "share": 0.5,
+      "pLoser": 0.75605816,
+      "pBig": 0.1098546,
+      "bigShare": 0.3908046,
+      "meanR": 0.37687575,
+      "meanRetR": -0.098778335,
+      "meanValue": -0.61142359,
+      "sumValue": -378.4712,
+      "ci": [
+       -620.04627,
+       -172.36777
+      ],
+      "sumLosers": 349.20653,
+      "sumWinners": -727.67773,
+      "sumBig": -628.11668
+     },
+     {
+      "label": "volume après choc ≥ médiane",
+      "n": 619,
+      "share": 0.5,
+      "pLoser": 0.58804523,
+      "pBig": 0.17124394,
+      "bigShare": 0.6091954,
+      "meanR": 1.0302579,
+      "meanRetR": 0.42385323,
+      "meanValue": -0.76489646,
+      "sumValue": -473.47091,
+      "ci": [
+       -694.93275,
+       -280.41007
+      ],
+      "sumLosers": 358.55977,
+      "sumWinners": -832.03067,
+      "sumBig": -730.98839
+     }
+    ]
+   },
+   {
+    "k": 2,
+    "open": 1087,
+    "openShare": 0.82913806,
+    "pLoser": 0.62925483,
+    "pBig": 0.15823367,
+    "groups": [
+     {
+      "label": "rendement ≤ 0 (non confirmé)",
+      "n": 468,
+      "share": 0.43054278,
+      "pLoser": 0.78418803,
+      "pBig": 0.094017094,
+      "bigShare": 0.25581395,
+      "meanR": 0.2612416,
+      "meanRetR": -0.30150157,
+      "meanValue": -0.67437899,
+      "sumValue": -315.60937,
+      "ci": [
+       -506.83514,
+       -144.95824
+      ],
+      "sumLosers": 226.65193,
+      "sumWinners": -542.2613,
+      "sumBig": -455.08881
+     },
+     {
+      "label": "rendement > 0",
+      "n": 619,
+      "share": 0.56945722,
+      "pLoser": 0.51211632,
+      "pBig": 0.20678514,
+      "bigShare": 0.74418605,
+      "meanR": 1.4756018,
+      "meanRetR": 0.86751697,
+      "meanValue": -0.77889482,
+      "sumValue": -482.13589,
+      "ci": [
+       -739.15772,
+       -258.32325
+      ],
+      "sumLosers": 416.55361,
+      "sumWinners": -898.6895,
+      "sumBig": -851.05761
+     },
+     {
+      "label": "réintégré sous le niveau cassé",
+      "n": 78,
+      "share": 0.07175713,
+      "pLoser": 0.80769231,
+      "pBig": 0.064102564,
+      "bigShare": 0.029069767,
+      "meanR": -0.28624764,
+      "meanRetR": -0.48991958,
+      "meanValue": -0.32565402,
+      "sumValue": -25.401013,
+      "ci": [
+       -69.472296,
+       8.9215632
+      ],
+      "sumLosers": 28.52182,
+      "sumWinners": -53.922834,
+      "sumBig": -37.670392
+     },
+     {
+      "label": "au-delà du niveau cassé",
+      "n": 1009,
+      "share": 0.92824287,
+      "pLoser": 0.61546085,
+      "pBig": 0.16551041,
+      "bigShare": 0.97093023,
+      "meanR": 1.0485489,
+      "meanRetR": 0.43023191,
+      "meanValue": -0.76545515,
+      "sumValue": -772.34424,
+      "ci": [
+       -1097.5888,
+       -490.47939
+      ],
+      "sumLosers": 614.68372,
+      "sumWinners": -1387.028,
+      "sumBig": -1268.476
+     },
+     {
+      "label": "choc retracé ≥ 50 %",
+      "n": 64,
+      "share": 0.058877645,
+      "pLoser": 0.921875,
+      "pBig": 0.046875,
+      "bigShare": 0.01744186,
+      "meanR": -0.58643017,
+      "meanRetR": -0.58483835,
+      "meanValue": -0.10178444,
+      "sumValue": -6.5142043,
+      "ci": [
+       -50.480436,
+       20.022513
+      ],
+      "sumLosers": 23.140399,
+      "sumWinners": -29.654603,
+      "sumBig": -24.350878
+     },
+     {
+      "label": "choc retracé < 50 %",
+      "n": 1023,
+      "share": 0.94112236,
+      "pLoser": 0.61094819,
+      "pBig": 0.16520039,
+      "bigShare": 0.98255814,
+      "meanR": 1.0490617,
+      "meanRetR": 0.42357764,
+      "meanValue": -0.77344189,
+      "sumValue": -791.23105,
+      "ci": [
+       -1116.5877,
+       -511.25633
+      ],
+      "sumLosers": 620.06514,
+      "sumWinners": -1411.2962,
+      "sumBig": -1281.7955
+     },
+     {
+      "label": "volume après choc < médiane",
+      "n": 543,
+      "share": 0.49954002,
+      "pLoser": 0.73296501,
+      "pBig": 0.11418048,
+      "bigShare": 0.36046512,
+      "meanR": 0.34665819,
+      "meanRetR": -0.004310758,
+      "meanValue": -0.47493075,
+      "sumValue": -257.8874,
+      "ci": [
+       -420.22231,
+       -108.31558
+      ],
+      "sumLosers": 317.0948,
+      "sumWinners": -574.9822,
+      "sumBig": -490.93782
+     },
+     {
+      "label": "volume après choc ≥ médiane",
+      "n": 544,
+      "share": 0.50045998,
+      "pLoser": 0.52573529,
+      "pBig": 0.20220588,
+      "bigShare": 0.63953488,
+      "meanR": 1.5577631,
+      "meanRetR": 0.73204231,
+      "meanValue": -0.99238577,
+      "sumValue": -539.85786,
+      "ci": [
+       -829.64815,
+       -283.15638
+      ],
+      "sumLosers": 326.11074,
+      "sumWinners": -865.96859,
+      "sumBig": -815.20859
+     }
+    ]
+   },
+   {
+    "k": 3,
+    "open": 1010,
+    "openShare": 0.77040427,
+    "pLoser": 0.60990099,
+    "pBig": 0.16930693,
+    "groups": [
+     {
+      "label": "rendement ≤ 0 (non confirmé)",
+      "n": 401,
+      "share": 0.3970297,
+      "pLoser": 0.79551122,
+      "pBig": 0.10224439,
+      "bigShare": 0.23976608,
+      "meanR": 0.35307851,
+      "meanRetR": -0.30518469,
+      "meanValue": -0.75963179,
+      "sumValue": -304.61235,
+      "ci": [
+       -488.4125,
+       -136.29108
+      ],
+      "sumLosers": 194.46549,
+      "sumWinners": -499.07784,
+      "sumBig": -439.23923
+     },
+     {
+      "label": "rendement > 0",
+      "n": 609,
+      "share": 0.6029703,
+      "pLoser": 0.48768473,
+      "pBig": 0.2134647,
+      "bigShare": 0.76023392,
+      "meanR": 1.5678477,
+      "meanRetR": 0.99232896,
+      "meanValue": -0.75478939,
+      "sumValue": -459.66674,
+      "ci": [
+       -708.63258,
+       -251.2764
+      ],
+      "sumLosers": 399.94258,
+      "sumWinners": -859.60932,
+      "sumBig": -815.04443
+     },
+     {
+      "label": "réintégré sous le niveau cassé",
+      "n": 74,
+      "share": 0.073267327,
+      "pLoser": 0.85135135,
+      "pBig": 0.067567568,
+      "bigShare": 0.029239766,
+      "meanR": -0.25394151,
+      "meanRetR": -0.49130658,
+      "meanValue": -0.34602302,
+      "sumValue": -25.605704,
+      "ci": [
+       -72.118456,
+       8.8098382
+      ],
+      "sumLosers": 27.443341,
+      "sumWinners": -53.049045,
+      "sumBig": -42.564368
+     },
+     {
+      "label": "au-delà du niveau cassé",
+      "n": 936,
+      "share": 0.92673267,
+      "pLoser": 0.59081197,
+      "pBig": 0.17735043,
+      "bigShare": 0.97076023,
+      "meanR": 1.1914481,
+      "meanRetR": 0.55374568,
+      "meanValue": -0.78918096,
+      "sumValue": -738.67338,
+      "ci": [
+       -1088.5746,
+       -443.10453
+      ],
+      "sumLosers": 566.96473,
+      "sumWinners": -1305.6381,
+      "sumBig": -1211.7193
+     },
+     {
+      "label": "choc retracé ≥ 50 %",
+      "n": 83,
+      "share": 0.082178218,
+      "pLoser": 0.89156627,
+      "pBig": 0.060240964,
+      "bigShare": 0.029239766,
+      "meanR": -0.070633909,
+      "meanRetR": -0.57269131,
+      "meanValue": -0.60538226,
+      "sumValue": -50.246728,
+      "ci": [
+       -133.84757,
+       11.84053
+      ],
+      "sumLosers": 28.877547,
+      "sumWinners": -79.124275,
+      "sumBig": -73.961699
+     },
+     {
+      "label": "choc retracé < 50 %",
+      "n": 927,
+      "share": 0.91782178,
+      "pLoser": 0.58468177,
+      "pBig": 0.17907228,
+      "bigShare": 0.97076023,
+      "meanR": 1.1890684,
+      "meanRetR": 0.5711787,
+      "meanValue": -0.77026144,
+      "sumValue": -714.03236,
+      "ci": [
+       -1053.5707,
+       -422.77022
+      ],
+      "sumLosers": 565.53053,
+      "sumWinners": -1279.5629,
+      "sumBig": -1180.322
+     },
+     {
+      "label": "volume après choc < médiane",
+      "n": 505,
+      "share": 0.5,
+      "pLoser": 0.72475248,
+      "pBig": 0.10891089,
+      "bigShare": 0.32163743,
+      "meanR": 0.36501069,
+      "meanRetR": 0.036112305,
+      "meanValue": -0.44580184,
+      "sumValue": -225.12993,
+      "ci": [
+       -397.17772,
+       -76.715642
+      ],
+      "sumLosers": 302.27621,
+      "sumWinners": -527.40614,
+      "sumBig": -456.59335
+     },
+     {
+      "label": "volume après choc ≥ médiane",
+      "n": 505,
+      "share": 0.5,
+      "pLoser": 0.4950495,
+      "pBig": 0.22970297,
+      "bigShare": 0.67836257,
+      "meanR": 1.8060859,
+      "meanRetR": 0.91824269,
+      "meanValue": -1.0676221,
+      "sumValue": -539.14916,
+      "ci": [
+       -830.71089,
+       -288.51922
+      ],
+      "sumLosers": 292.13186,
+      "sumWinners": -831.28102,
+      "sumBig": -797.69031
+     }
+    ]
+   },
+   {
+    "k": 4,
+    "open": 960,
+    "openShare": 0.73226545,
+    "pLoser": 0.59583333,
+    "pBig": 0.17604167,
+    "groups": [
+     {
+      "label": "rendement ≤ 0 (non confirmé)",
+      "n": 371,
+      "share": 0.38645833,
+      "pLoser": 0.83018868,
+      "pBig": 0.064690027,
+      "bigShare": 0.14201183,
+      "meanR": 0.16746508,
+      "meanRetR": -0.31108827,
+      "meanValue": -0.57065679,
+      "sumValue": -211.71367,
+      "ci": [
+       -422.69067,
+       -30.037982
+      ],
+      "sumLosers": 184.88348,
+      "sumWinners": -396.59715,
+      "sumBig": -341.03388
+     },
+     {
+      "label": "rendement > 0",
+      "n": 589,
+      "share": 0.61354167,
+      "pLoser": 0.44821732,
+      "pBig": 0.24617997,
+      "bigShare": 0.85798817,
+      "meanR": 1.8029573,
+      "meanRetR": 1.090871,
+      "meanValue": -0.89974746,
+      "sumValue": -529.95125,
+      "ci": [
+       -751.62911,
+       -323.83957
+      ],
+      "sumLosers": 358.52036,
+      "sumWinners": -888.47161,
+      "sumBig": -873.63833
+     },
+     {
+      "label": "réintégré sous le niveau cassé",
+      "n": 73,
+      "share": 0.076041667,
+      "pLoser": 0.82191781,
+      "pBig": 0.068493151,
+      "bigShare": 0.029585799,
+      "meanR": -0.063951634,
+      "meanRetR": -0.49837811,
+      "meanValue": -0.53774613,
+      "sumValue": -39.255468,
+      "ci": [
+       -95.487358,
+       6.7749824
+      ],
+      "sumLosers": 26.178689,
+      "sumWinners": -65.434156,
+      "sumBig": -52.642647
+     },
+     {
+      "label": "au-delà du niveau cassé",
+      "n": 887,
+      "share": 0.92395833,
+      "pLoser": 0.57722661,
+      "pBig": 0.1848929,
+      "bigShare": 0.9704142,
+      "meanR": 1.2725365,
+      "meanRetR": 0.63527717,
+      "meanValue": -0.79189341,
+      "sumValue": -702.40946,
+      "ci": [
+       -1051.5796,
+       -404.468
+      ],
+      "sumLosers": 517.22515,
+      "sumWinners": -1219.6346,
+      "sumBig": -1162.0296
+     },
+     {
+      "label": "choc retracé ≥ 50 %",
+      "n": 84,
+      "share": 0.0875,
+      "pLoser": 0.86904762,
+      "pBig": 0.047619048,
+      "bigShare": 0.023668639,
+      "meanR": -0.13071222,
+      "meanRetR": -0.55893511,
+      "meanValue": -0.52935819,
+      "sumValue": -44.466088,
+      "ci": [
+       -127.51755,
+       14.634172
+      ],
+      "sumLosers": 29.159018,
+      "sumWinners": -73.625106,
+      "sumBig": -62.206172
+     },
+     {
+      "label": "choc retracé < 50 %",
+      "n": 876,
+      "share": 0.9125,
+      "pLoser": 0.5696347,
+      "pBig": 0.18835616,
+      "bigShare": 0.97633136,
+      "meanR": 1.2957206,
+      "meanRetR": 0.6553194,
+      "meanValue": -0.79588908,
+      "sumValue": -697.19883,
+      "ci": [
+       -1050.1336,
+       -395.89477
+      ],
+      "sumLosers": 514.24482,
+      "sumWinners": -1211.4437,
+      "sumBig": -1152.466
+     },
+     {
+      "label": "volume après choc < médiane",
+      "n": 480,
+      "share": 0.5,
+      "pLoser": 0.71458333,
+      "pBig": 0.11666667,
+      "bigShare": 0.33136095,
+      "meanR": 0.57547372,
+      "meanRetR": 0.078672308,
+      "meanValue": -0.61399537,
+      "sumValue": -294.71778,
+      "ci": [
+       -528.71515,
+       -101.07703
+      ],
+      "sumLosers": 281.31266,
+      "sumWinners": -576.03044,
+      "sumBig": -518.07811
+     },
+     {
+      "label": "volume après choc ≥ médiane",
+      "n": 480,
+      "share": 0.5,
+      "pLoser": 0.47708333,
+      "pBig": 0.23541667,
+      "bigShare": 0.66863905,
+      "meanR": 1.7663417,
+      "meanRetR": 1.019472,
+      "meanValue": -0.93113989,
+      "sumValue": -446.94715,
+      "ci": [
+       -728.0579,
+       -222.28254
+      ],
+      "sumLosers": 262.09117,
+      "sumWinners": -709.03832,
+      "sumBig": -696.59411
+     }
+    ]
+   }
+  ],
+  "8 cryptos": [
+   {
+    "k": 1,
+    "open": 4443,
+    "openShare": 0.94091487,
+    "pLoser": 0.70943056,
+    "pBig": 0.10263336,
+    "groups": [
+     {
+      "label": "rendement ≤ 0 (non confirmé)",
+      "n": 2253,
+      "share": 0.5070898,
+      "pLoser": 0.82423435,
+      "pBig": 0.06213937,
+      "bigShare": 0.30701754,
+      "meanR": -0.29149386,
+      "meanRetR": -0.33537125,
+      "meanValue": -0.13644617,
+      "sumValue": -307.41321,
+      "ci": [
+       -612.73261,
+       -14.642393
+      ],
+      "sumLosers": 1127.9632,
+      "sumWinners": -1435.3764,
+      "sumBig": -1043.3572
+     },
+     {
+      "label": "rendement > 0",
+      "n": 2190,
+      "share": 0.4929102,
+      "pLoser": 0.5913242,
+      "pBig": 0.14429224,
+      "bigShare": 0.69298246,
+      "meanR": 0.86758096,
+      "meanRetR": 0.65470171,
+      "meanValue": -0.34032933,
+      "sumValue": -745.32123,
+      "ci": [
+       -1229.4461,
+       -307.52668
+      ],
+      "sumLosers": 1637.0093,
+      "sumWinners": -2382.3305,
+      "sumBig": -2048.1312
+     },
+     {
+      "label": "réintégré sous le niveau cassé",
+      "n": 377,
+      "share": 0.084852577,
+      "pLoser": 0.89655172,
+      "pBig": 0.031830239,
+      "bigShare": 0.026315789,
+      "meanR": -0.62545363,
+      "meanRetR": -0.54369926,
+      "meanValue": -0.016260968,
+      "sumValue": -6.1303851,
+      "ci": [
+       -76.242906,
+       56.549849
+      ],
+      "sumLosers": 140.57688,
+      "sumWinners": -146.70726,
+      "sumBig": -101.33476
+     },
+     {
+      "label": "au-delà du niveau cassé",
+      "n": 4066,
+      "share": 0.91514742,
+      "pLoser": 0.69208067,
+      "pBig": 0.10919823,
+      "bigShare": 0.97368421,
+      "meanR": 0.36376356,
+      "meanRetR": 0.21721101,
+      "meanValue": -0.25740385,
+      "sumValue": -1046.6041,
+      "ci": [
+       -1630.4386,
+       -477.98299
+      ],
+      "sumLosers": 2624.3956,
+      "sumWinners": -3670.9997,
+      "sumBig": -2990.1536
+     },
+     {
+      "label": "choc retracé ≥ 50 %",
+      "n": 390,
+      "share": 0.087778528,
+      "pLoser": 0.90769231,
+      "pBig": 0.033333333,
+      "bigShare": 0.028508772,
+      "meanR": -0.70640683,
+      "meanRetR": -0.60329425,
+      "meanValue": 0.016689179,
+      "sumValue": 6.5087799,
+      "ci": [
+       -51.687687,
+       59.418174
+      ],
+      "sumLosers": 134.77583,
+      "sumWinners": -128.26705,
+      "sumBig": -84.953473
+     },
+     {
+      "label": "choc retracé < 50 %",
+      "n": 4053,
+      "share": 0.91222147,
+      "pLoser": 0.69035283,
+      "pBig": 0.10930175,
+      "bigShare": 0.97149123,
+      "meanR": 0.3747262,
+      "meanRetR": 0.22538616,
+      "meanValue": -0.26134795,
+      "sumValue": -1059.2432,
+      "ci": [
+       -1645.0269,
+       -498.94597
+      ],
+      "sumLosers": 2630.1967,
+      "sumWinners": -3689.4399,
+      "sumBig": -3006.5349
+     },
+     {
+      "label": "volume après choc < médiane",
+      "n": 2221,
+      "share": 0.49988746,
+      "pLoser": 0.78523188,
+      "pBig": 0.072940117,
+      "bigShare": 0.35526316,
+      "meanR": -0.10530722,
+      "meanRetR": -0.12231638,
+      "meanValue": -0.11103287,
+      "sumValue": -246.60401,
+      "ci": [
+       -606.25552,
+       113.62303
+      ],
+      "sumLosers": 1364.5422,
+      "sumWinners": -1611.1462,
+      "sumBig": -1209.9245
+     },
+     {
+      "label": "volume après choc ≥ médiane",
+      "n": 2222,
+      "share": 0.50011254,
+      "pLoser": 0.63366337,
+      "pBig": 0.13231323,
+      "bigShare": 0.64473684,
+      "meanR": 0.66478576,
+      "meanRetR": 0.42748426,
+      "meanValue": -0.36279497,
+      "sumValue": -806.13043,
+      "ci": [
+       -1270.6137,
+       -414.15956
+      ],
+      "sumLosers": 1400.4303,
+      "sumWinners": -2206.5607,
+      "sumBig": -1881.5639
+     }
+    ]
+   },
+   {
+    "k": 2,
+    "open": 3906,
+    "openShare": 0.82719187,
+    "pLoser": 0.67537122,
+    "pBig": 0.11392729,
+    "groups": [
+     {
+      "label": "rendement ≤ 0 (non confirmé)",
+      "n": 1761,
+      "share": 0.45084485,
+      "pLoser": 0.83021011,
+      "pBig": 0.06132879,
+      "bigShare": 0.24269663,
+      "meanR": -0.2835903,
+      "meanRetR": -0.30843959,
+      "meanValue": -0.10080998,
+      "sumValue": -177.52638,
+      "ci": [
+       -442.75821,
+       71.963041
+      ],
+      "sumLosers": 931.24071,
+      "sumWinners": -1108.7671,
+      "sumBig": -818.08595
+     },
+     {
+      "label": "rendement > 0",
+      "n": 2145,
+      "share": 0.54915515,
+      "pLoser": 0.54825175,
+      "pBig": 0.15710956,
+      "bigShare": 0.75730337,
+      "meanR": 1.0428748,
+      "meanRetR": 0.81668119,
+      "meanValue": -0.36231646,
+      "sumValue": -777.1688,
+      "ci": [
+       -1189.3984,
+       -375.61716
+      ],
+      "sumLosers": 1547.7422,
+      "sumWinners": -2324.911,
+      "sumBig": -2090.1201
+     },
+     {
+      "label": "réintégré sous le niveau cassé",
+      "n": 342,
+      "share": 0.087557604,
+      "pLoser": 0.88888889,
+      "pBig": 0.046783626,
+      "bigShare": 0.035955056,
+      "meanR": -0.56304461,
+      "meanRetR": -0.50316814,
+      "meanValue": -0.014879005,
+      "sumValue": -5.0886196,
+      "ci": [
+       -70.760655,
+       55.340437
+      ],
+      "sumLosers": 141.04235,
+      "sumWinners": -146.13097,
+      "sumBig": -109.33087
+     },
+     {
+      "label": "au-delà du niveau cassé",
+      "n": 3564,
+      "share": 0.9124424,
+      "pLoser": 0.65488215,
+      "pBig": 0.12037037,
+      "bigShare": 0.96404494,
+      "meanR": 0.5415615,
+      "meanRetR": 0.38740251,
+      "meanValue": -0.26644404,
+      "sumValue": -949.60656,
+      "ci": [
+       -1519.6473,
+       -415.12981
+      ],
+      "sumLosers": 2337.9406,
+      "sumWinners": -3287.5471,
+      "sumBig": -2798.8752
+     },
+     {
+      "label": "choc retracé ≥ 50 %",
+      "n": 402,
+      "share": 0.10291859,
+      "pLoser": 0.89800995,
+      "pBig": 0.039800995,
+      "bigShare": 0.035955056,
+      "meanR": -0.59690134,
+      "meanRetR": -0.54580712,
+      "meanValue": -0.022370272,
+      "sumValue": -8.9928495,
+      "ci": [
+       -88.048878,
+       63.734736
+      ],
+      "sumLosers": 157.44555,
+      "sumWinners": -166.4384,
+      "sumBig": -122.4873
+     },
+     {
+      "label": "choc retracé < 50 %",
+      "n": 3504,
+      "share": 0.89708141,
+      "pLoser": 0.64982877,
+      "pBig": 0.12243151,
+      "bigShare": 0.96404494,
+      "meanR": 0.56436024,
+      "meanRetR": 0.4075438,
+      "meanValue": -0.26989222,
+      "sumValue": -945.70233,
+      "ci": [
+       -1516.7181,
+       -412.58859
+      ],
+      "sumLosers": 2321.5373,
+      "sumWinners": -3267.2397,
+      "sumBig": -2785.7188
+     },
+     {
+      "label": "volume après choc < médiane",
+      "n": 1953,
+      "share": 0.5,
+      "pLoser": 0.77265745,
+      "pBig": 0.073732719,
+      "bigShare": 0.32359551,
+      "meanR": -0.076032429,
+      "meanRetR": -0.077903547,
+      "meanValue": -0.089729949,
+      "sumValue": -175.24259,
+      "ci": [
+       -487.02366,
+       137.74267
+      ],
+      "sumLosers": 1218.5384,
+      "sumWinners": -1393.781,
+      "sumBig": -1033.5737
+     },
+     {
+      "label": "volume après choc ≥ médiane",
+      "n": 1953,
+      "share": 0.5,
+      "pLoser": 0.578085,
+      "pBig": 0.15412186,
+      "bigShare": 0.67640449,
+      "meanR": 0.9657221,
+      "meanRetR": 0.69675609,
+      "meanValue": -0.39910527,
+      "sumValue": -779.45259,
+      "ci": [
+       -1220.1016,
+       -390.08679
+      ],
+      "sumLosers": 1260.4445,
+      "sumWinners": -2039.8971,
+      "sumBig": -1874.6323
+     }
+    ]
+   },
+   {
+    "k": 3,
+    "open": 3650,
+    "openShare": 0.77297755,
+    "pLoser": 0.66383562,
+    "pBig": 0.11808219,
+    "groups": [
+     {
+      "label": "rendement ≤ 0 (non confirmé)",
+      "n": 1611,
+      "share": 0.44136986,
+      "pLoser": 0.82184978,
+      "pBig": 0.062073246,
+      "bigShare": 0.23201856,
+      "meanR": -0.25623537,
+      "meanRetR": -0.32164511,
+      "meanValue": -0.13331974,
+      "sumValue": -214.77811,
+      "ci": [
+       -471.33516,
+       12.923212
+      ],
+      "sumLosers": 830.33034,
+      "sumWinners": -1045.1084,
+      "sumBig": -755.01218
+     },
+     {
+      "label": "rendement > 0",
+      "n": 2039,
+      "share": 0.55863014,
+      "pLoser": 0.5389897,
+      "pBig": 0.16233448,
+      "bigShare": 0.76798144,
+      "meanR": 1.1194985,
+      "meanRetR": 0.92866743,
+      "meanValue": -0.33152406,
+      "sumValue": -675.97757,
+      "ci": [
+       -1178.9612,
+       -217.4415
+      ],
+      "sumLosers": 1484.9137,
+      "sumWinners": -2160.8912,
+      "sumBig": -2024.9092
+     },
+     {
+      "label": "réintégré sous le niveau cassé",
+      "n": 341,
+      "share": 0.093424658,
+      "pLoser": 0.87390029,
+      "pBig": 0.04398827,
+      "bigShare": 0.034802784,
+      "meanR": -0.56670153,
+      "meanRetR": -0.51430823,
+      "meanValue": -0.016312535,
+      "sumValue": -5.5625744,
+      "ci": [
+       -66.420276,
+       48.47302
+      ],
+      "sumLosers": 137.29902,
+      "sumWinners": -142.86159,
+      "sumBig": -92.507914
+     },
+     {
+      "label": "au-delà du niveau cassé",
+      "n": 3309,
+      "share": 0.90657534,
+      "pLoser": 0.64218797,
+      "pBig": 0.12571774,
+      "bigShare": 0.96519722,
+      "meanR": 0.62348366,
+      "meanRetR": 0.46864966,
+      "meanValue": -0.26751076,
+      "sumValue": -885.1931,
+      "ci": [
+       -1480.1973,
+       -337.48068
+      ],
+      "sumLosers": 2177.945,
+      "sumWinners": -3063.1381,
+      "sumBig": -2687.4135
+     },
+     {
+      "label": "choc retracé ≥ 50 %",
+      "n": 439,
+      "share": 0.12027397,
+      "pLoser": 0.90432802,
+      "pBig": 0.029612756,
+      "bigShare": 0.030162413,
+      "meanR": -0.65749092,
+      "meanRetR": -0.55551602,
+      "meanValue": 0.032522954,
+      "sumValue": 14.277577,
+      "ci": [
+       -70.020917,
+       83.441534
+      ],
+      "sumLosers": 171.12152,
+      "sumWinners": -156.84395,
+      "sumBig": -101.32911
+     },
+     {
+      "label": "choc retracé < 50 %",
+      "n": 3211,
+      "share": 0.87972603,
+      "pLoser": 0.63095609,
+      "pBig": 0.13017751,
+      "bigShare": 0.96983759,
+      "meanR": 0.67222072,
+      "meanRetR": 0.50428344,
+      "meanValue": -0.28185402,
+      "sumValue": -905.03325,
+      "ci": [
+       -1501.1369,
+       -360.10805
+      ],
+      "sumLosers": 2144.1225,
+      "sumWinners": -3049.1557,
+      "sumBig": -2678.5923
+     },
+     {
+      "label": "volume après choc < médiane",
+      "n": 1825,
+      "share": 0.5,
+      "pLoser": 0.76712329,
+      "pBig": 0.075068493,
+      "bigShare": 0.31786543,
+      "meanR": -0.035717237,
+      "meanRetR": -0.060148595,
+      "meanValue": -0.10794241,
+      "sumValue": -196.9949,
+      "ci": [
+       -551.47483,
+       139.79202
+      ],
+      "sumLosers": 1140.0366,
+      "sumWinners": -1337.0315,
+      "sumBig": -1003.9646
+     },
+     {
+      "label": "volume après choc ≥ médiane",
+      "n": 1825,
+      "share": 0.5,
+      "pLoser": 0.56054795,
+      "pBig": 0.16109589,
+      "bigShare": 0.68213457,
+      "meanR": 1.0602993,
+      "meanRetR": 0.8137829,
+      "meanValue": -0.38014289,
+      "sumValue": -693.76078,
+      "ci": [
+       -1103.6169,
+       -321.08857
+      ],
+      "sumLosers": 1175.2074,
+      "sumWinners": -1868.9682,
+      "sumBig": -1775.9568
+     }
+    ]
+   },
+   {
+    "k": 4,
+    "open": 3431,
+    "openShare": 0.7265989,
+    "pLoser": 0.6549111,
+    "pBig": 0.12299621,
+    "groups": [
+     {
+      "label": "rendement ≤ 0 (non confirmé)",
+      "n": 1485,
+      "share": 0.43281842,
+      "pLoser": 0.83434343,
+      "pBig": 0.053872054,
+      "bigShare": 0.18957346,
+      "meanR": -0.33143949,
+      "meanRetR": -0.3318858,
+      "meanValue": -0.064247379,
+      "sumValue": -95.407358,
+      "ci": [
+       -326.97069,
+       102.98274
+      ],
+      "sumLosers": 763.66178,
+      "sumWinners": -859.06914,
+      "sumBig": -598.38295
+     },
+     {
+      "label": "rendement > 0",
+      "n": 1946,
+      "share": 0.56718158,
+      "pLoser": 0.51798561,
+      "pBig": 0.17574512,
+      "bigShare": 0.81042654,
+      "meanR": 1.2528951,
+      "meanRetR": 0.9945066,
+      "meanValue": -0.40368066,
+      "sumValue": -785.56256,
+      "ci": [
+       -1248.0531,
+       -338.39248
+      ],
+      "sumLosers": 1396.0085,
+      "sumWinners": -2181.5711,
+      "sumBig": -2089.1218
+     },
+     {
+      "label": "réintégré sous le niveau cassé",
+      "n": 358,
+      "share": 0.10434276,
+      "pLoser": 0.87709497,
+      "pBig": 0.047486034,
+      "bigShare": 0.04028436,
+      "meanR": -0.50735122,
+      "meanRetR": -0.5207696,
+      "meanValue": -0.082871199,
+      "sumValue": -29.667889,
+      "ci": [
+       -115.47995,
+       39.642894
+      ],
+      "sumLosers": 139.70643,
+      "sumWinners": -169.37432,
+      "sumBig": -126.07065
+     },
+     {
+      "label": "au-delà du niveau cassé",
+      "n": 3073,
+      "share": 0.89565724,
+      "pLoser": 0.62902701,
+      "pBig": 0.13179304,
+      "bigShare": 0.95971564,
+      "meanR": 0.69234557,
+      "meanRetR": 0.53006669,
+      "meanValue": -0.27702637,
+      "sumValue": -851.30203,
+      "ci": [
+       -1448.6855,
+       -314.86288
+      ],
+      "sumLosers": 2019.9639,
+      "sumWinners": -2871.2659,
+      "sumBig": -2561.4341
+     },
+     {
+      "label": "choc retracé ≥ 50 %",
+      "n": 457,
+      "share": 0.13319732,
+      "pLoser": 0.89496718,
+      "pBig": 0.039387309,
+      "bigShare": 0.042654028,
+      "meanR": -0.58273983,
+      "meanRetR": -0.55342073,
+      "meanValue": -0.040029675,
+      "sumValue": -18.293562,
+      "ci": [
+       -114.97893,
+       62.778197
+      ],
+      "sumLosers": 171.73558,
+      "sumWinners": -190.02914,
+      "sumBig": -140.67717
+     },
+     {
+      "label": "choc retracé < 50 %",
+      "n": 2974,
+      "share": 0.86680268,
+      "pLoser": 0.61802286,
+      "pBig": 0.13584398,
+      "bigShare": 0.95734597,
+      "meanR": 0.74386628,
+      "meanRetR": 0.57006479,
+      "meanValue": -0.29007275,
+      "sumValue": -862.67635,
+      "ci": [
+       -1448.4298,
+       -327.8561
+      ],
+      "sumLosers": 1987.9347,
+      "sumWinners": -2850.6111,
+      "sumBig": -2546.8276
+     },
+     {
+      "label": "volume après choc < médiane",
+      "n": 1715,
+      "share": 0.49985427,
+      "pLoser": 0.75976676,
+      "pBig": 0.074635569,
+      "bigShare": 0.30331754,
+      "meanR": -0.018707883,
+      "meanRetR": -0.053505201,
+      "meanValue": -0.11580785,
+      "sumValue": -198.61046,
+      "ci": [
+       -533.57627,
+       105.83154
+      ],
+      "sumLosers": 1037.604,
+      "sumWinners": -1236.2145,
+      "sumBig": -919.65827
+     },
+     {
+      "label": "volume après choc ≥ médiane",
+      "n": 1716,
+      "share": 0.50014573,
+      "pLoser": 0.55011655,
+      "pBig": 0.17132867,
+      "bigShare": 0.69668246,
+      "meanR": 1.1526983,
+      "meanRetR": 0.89406809,
+      "meanValue": -0.39764537,
+      "sumValue": -682.35945,
+      "ci": [
+       -1085.237,
+       -315.73668
+      ],
+      "sumLosers": 1122.0663,
+      "sumWinners": -1804.4257,
+      "sumBig": -1767.8465
+     }
+    ]
+   }
+  ]
+ },
+ "table": {
+  "portfolio": {
+   "V0": {
+    "sharpe": 1.8775665,
+    "cagr": 0.61640624,
+    "maxDD": -0.19124348,
+    "total": 47.476756,
+    "pf": 1.9587561,
+    "trades": 1311,
+    "early": 0,
+    "timeInMarket": 0.16600494,
+    "bestKept": 1,
+    "bestCut": 0,
+    "bestRetKept": 1
+   },
+   "V1": {
+    "sharpe": 1.9077079,
+    "cagr": 0.555662,
+    "maxDD": -0.1772277,
+    "total": 34.570093,
+    "pf": 2.0284151,
+    "trades": 1408,
+    "early": 413,
+    "timeInMarket": 0.13028299,
+    "bestKept": 1,
+    "bestCut": 0.25757576,
+    "bestRetKept": 0.72646885
+   },
+   "S2": {
+    "sharpe": 1.7192486,
+    "cagr": 0.48904354,
+    "maxDD": -0.23234555,
+    "total": 23.972442,
+    "pf": 1.8890025,
+    "trades": 1463,
+    "early": 532,
+    "timeInMarket": 0.12875166,
+    "bestKept": 1,
+    "bestCut": 0.33333333,
+    "bestRetKept": 0.67105774
+   },
+   "S8": {
+    "sharpe": 1.7926057,
+    "cagr": 0.51939693,
+    "maxDD": -0.18406011,
+    "total": 28.39623,
+    "pf": 1.9614511,
+    "trades": 1384,
+    "early": 305,
+    "timeInMarket": 0.13972284,
+    "bestKept": 1,
+    "bestCut": 0.27272727,
+    "bestRetKept": 0.71295275
+   }
+  },
+  "portfolio2": {
+   "V0": {
+    "sharpe": 1.6098551,
+    "cagr": 0.50179749,
+    "maxDD": -0.20728422,
+    "total": 25.754514,
+    "pf": 1.7505148,
+    "trades": 1311,
+    "early": 0,
+    "timeInMarket": 0.16600494,
+    "bestKept": 1,
+    "bestCut": 0,
+    "bestRetKept": 1
+   },
+   "V1": {
+    "sharpe": 1.5875167,
+    "cagr": 0.43753877,
+    "maxDD": -0.20968474,
+    "total": 17.788958,
+    "pf": 1.7613008,
+    "trades": 1408,
+    "early": 413,
+    "timeInMarket": 0.13028299,
+    "bestKept": 1,
+    "bestCut": 0.25757576,
+    "bestRetKept": 0.72474578
+   }
+  },
+  "assets": {
+   "BTC": {
+    "V0": {
+     "sharpe": 1.5244785,
+     "cagr": 0.42929549,
+     "maxDD": -0.22303972,
+     "total": 31.599392,
+     "pf": 1.8425521,
+     "trades": 644,
+     "early": 0,
+     "timeInMarket": 0.14838753,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 1.5013628,
+     "cagr": 0.39002434,
+     "maxDD": -0.19458069,
+     "total": 23.84152,
+     "pf": 1.9004803,
+     "trades": 691,
+     "early": 189,
+     "timeInMarket": 0.11697458,
+     "bestKept": 1,
+     "bestCut": 0.3125,
+     "bestRetKept": 0.66410786
+    },
+    "S2": {
+     "sharpe": 1.2994752,
+     "cagr": 0.31570529,
+     "maxDD": -0.24425346,
+     "total": 13.53409,
+     "pf": 1.7080681,
+     "trades": 727,
+     "early": 264,
+     "timeInMarket": 0.10764515,
+     "bestKept": 1,
+     "bestCut": 0.40625,
+     "bestRetKept": 0.63325179
+    },
+    "S8": {
+     "sharpe": 1.5645484,
+     "cagr": 0.42553318,
+     "maxDD": -0.1972091,
+     "total": 30.77189,
+     "pf": 1.9428018,
+     "trades": 677,
+     "early": 140,
+     "timeInMarket": 0.12514001,
+     "bestKept": 1,
+     "bestCut": 0.25,
+     "bestRetKept": 0.72548619
+    }
+   },
+   "ETH": {
+    "V0": {
+     "sharpe": 1.7507071,
+     "cagr": 0.7220455,
+     "maxDD": -0.26776651,
+     "total": 79.862026,
+     "pf": 2.0477286,
+     "trades": 667,
+     "early": 0,
+     "timeInMarket": 0.18362236,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 1.7444163,
+     "cagr": 0.64935572,
+     "maxDD": -0.25403591,
+     "total": 56.064218,
+     "pf": 2.1305715,
+     "trades": 717,
+     "early": 224,
+     "timeInMarket": 0.14359141,
+     "bestKept": 1,
+     "bestCut": 0.24242424,
+     "bestRetKept": 0.75268104
+    },
+    "S2": {
+     "sharpe": 1.6313863,
+     "cagr": 0.58885418,
+     "maxDD": -0.27228016,
+     "total": 41.187955,
+     "pf": 2.0318746,
+     "trades": 736,
+     "early": 268,
+     "timeInMarket": 0.14985817,
+     "bestKept": 1,
+     "bestCut": 0.3030303,
+     "bestRetKept": 0.68169818
+    },
+    "S8": {
+     "sharpe": 1.6211745,
+     "cagr": 0.59003549,
+     "maxDD": -0.25260827,
+     "total": 41.442133,
+     "pf": 1.975265,
+     "trades": 707,
+     "early": 165,
+     "timeInMarket": 0.15430566,
+     "bestKept": 1,
+     "bestCut": 0.27272727,
+     "bestRetKept": 0.71131086
+    }
+   },
+   "XRP": {
+    "V0": {
+     "sharpe": 0.77577233,
+     "cagr": 0.30072796,
+     "maxDD": -0.47973645,
+     "total": 5.8789761,
+     "pf": 1.4600267,
+     "trades": 589,
+     "early": 0,
+     "timeInMarket": 0.14312843,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.50434144,
+     "cagr": 0.1445749,
+     "maxDD": -0.64993488,
+     "total": 1.6923893,
+     "pf": 1.3096358,
+     "trades": 657,
+     "early": 220,
+     "timeInMarket": 0.096202413,
+     "bestKept": 1,
+     "bestCut": 0.27586207,
+     "bestRetKept": 0.77534032
+    },
+    "S2": {
+     "sharpe": 0.71718791,
+     "cagr": 0.25097682,
+     "maxDD": -0.43805307,
+     "total": 4.1676653,
+     "pf": 1.462522,
+     "trades": 662,
+     "early": 252,
+     "timeInMarket": 0.098101401,
+     "bestKept": 1,
+     "bestCut": 0.27586207,
+     "bestRetKept": 0.7511728
+    },
+    "S8": {
+     "sharpe": 0.56687942,
+     "cagr": 0.17774661,
+     "maxDD": -0.57058824,
+     "total": 2.3200471,
+     "pf": 1.3480524,
+     "trades": 645,
+     "early": 176,
+     "timeInMarket": 0.1029695,
+     "bestKept": 1,
+     "bestCut": 0.20689655,
+     "bestRetKept": 0.87016976
+    }
+   },
+   "BNB": {
+    "V0": {
+     "sharpe": 0.58286976,
+     "cagr": 0.1375306,
+     "maxDD": -0.42430618,
+     "total": 1.7438374,
+     "pf": 1.2736274,
+     "trades": 627,
+     "early": 0,
+     "timeInMarket": 0.16667335,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.41758069,
+     "cagr": 0.080075737,
+     "maxDD": -0.39655226,
+     "total": 0.82829608,
+     "pf": 1.1964665,
+     "trades": 694,
+     "early": 225,
+     "timeInMarket": 0.12745866,
+     "bestKept": 1,
+     "bestCut": 0.19354839,
+     "bestRetKept": 0.7832351
+    },
+    "S2": {
+     "sharpe": 0.26258948,
+     "cagr": 0.035678067,
+     "maxDD": -0.52431189,
+     "total": 0.315999,
+     "pf": 1.1184232,
+     "trades": 711,
+     "early": 272,
+     "timeInMarket": 0.11792468,
+     "bestKept": 1,
+     "bestCut": 0.38709677,
+     "bestRetKept": 0.59985565
+    },
+    "S8": {
+     "sharpe": 0.44234745,
+     "cagr": 0.087683404,
+     "maxDD": -0.48565945,
+     "total": 0.93162925,
+     "pf": 1.2060145,
+     "trades": 680,
+     "early": 153,
+     "timeInMarket": 0.13380736,
+     "bestKept": 1,
+     "bestCut": 0.22580645,
+     "bestRetKept": 0.77072972
+    }
+   },
+   "DOGE": {
+    "V0": {
+     "sharpe": 0.53114718,
+     "cagr": 0.18426879,
+     "maxDD": -0.61622487,
+     "total": 1.8370567,
+     "pf": 1.272256,
+     "trades": 555,
+     "early": 0,
+     "timeInMarket": 0.15832558,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.51105307,
+     "cagr": 0.17152389,
+     "maxDD": -0.65103969,
+     "total": 1.6539628,
+     "pf": 1.2851267,
+     "trades": 610,
+     "early": 203,
+     "timeInMarket": 0.12148136,
+     "bestKept": 1,
+     "bestCut": 0.071428571,
+     "bestRetKept": 0.94888191
+    },
+    "S2": {
+     "sharpe": 0.61667282,
+     "cagr": 0.24306216,
+     "maxDD": -0.5456517,
+     "total": 2.8248012,
+     "pf": 1.3690778,
+     "trades": 611,
+     "early": 231,
+     "timeInMarket": 0.12025044,
+     "bestKept": 1,
+     "bestCut": 0.071428571,
+     "bestRetKept": 0.94934136
+    },
+    "S8": {
+     "sharpe": 0.61855124,
+     "cagr": 0.24242916,
+     "maxDD": -0.56035925,
+     "total": 2.8128082,
+     "pf": 1.3379381,
+     "trades": 585,
+     "early": 152,
+     "timeInMarket": 0.12721947,
+     "bestKept": 1,
+     "bestCut": 0.10714286,
+     "bestRetKept": 0.80775533
+    }
+   },
+   "TRX": {
+    "V0": {
+     "sharpe": 0.30131233,
+     "cagr": 0.050627048,
+     "maxDD": -0.52906908,
+     "total": 0.43072853,
+     "pf": 1.2073204,
+     "trades": 567,
+     "early": 0,
+     "timeInMarket": 0.1520958,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.22926281,
+     "cagr": 0.027837827,
+     "maxDD": -0.52139736,
+     "total": 0.22034868,
+     "pf": 1.1793341,
+     "trades": 617,
+     "early": 195,
+     "timeInMarket": 0.11563421,
+     "bestKept": 1,
+     "bestCut": 0.10714286,
+     "bestRetKept": 0.90705698
+    },
+    "S2": {
+     "sharpe": 0.13118346,
+     "cagr": -0.0020569577,
+     "maxDD": -0.54879894,
+     "total": -0.014822634,
+     "pf": 1.1272504,
+     "trades": 629,
+     "early": 232,
+     "timeInMarket": 0.11052998,
+     "bestKept": 1,
+     "bestCut": 0.32142857,
+     "bestRetKept": 0.67719381
+    },
+    "S8": {
+     "sharpe": 0.2878495,
+     "cagr": 0.046143081,
+     "maxDD": -0.49040204,
+     "total": 0.3870294,
+     "pf": 1.2205157,
+     "trades": 601,
+     "early": 171,
+     "timeInMarket": 0.12061644,
+     "bestKept": 1,
+     "bestCut": 0.14285714,
+     "bestRetKept": 0.86680009
+    }
+   },
+   "ADA": {
+    "V0": {
+     "sharpe": 0.56849941,
+     "cagr": 0.16635844,
+     "maxDD": -0.60851159,
+     "total": 2.1323145,
+     "pf": 1.2490787,
+     "trades": 626,
+     "early": 0,
+     "timeInMarket": 0.15632803,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.59137277,
+     "cagr": 0.16711339,
+     "maxDD": -0.48001098,
+     "total": 2.1473887,
+     "pf": 1.2824206,
+     "trades": 679,
+     "early": 228,
+     "timeInMarket": 0.112456,
+     "bestKept": 1,
+     "bestCut": 0.22580645,
+     "bestRetKept": 0.77334361
+    },
+    "S2": {
+     "sharpe": 0.63252068,
+     "cagr": 0.18253384,
+     "maxDD": -0.45060824,
+     "total": 2.4693319,
+     "pf": 1.3118576,
+     "trades": 691,
+     "early": 281,
+     "timeInMarket": 0.10741973,
+     "bestKept": 1,
+     "bestCut": 0.29032258,
+     "bestRetKept": 0.7054694
+    },
+    "S8": {
+     "sharpe": 0.56174736,
+     "cagr": 0.15668177,
+     "maxDD": -0.56936136,
+     "total": 1.9445589,
+     "pf": 1.2614314,
+     "trades": 667,
+     "early": 179,
+     "timeInMarket": 0.12563723,
+     "bestKept": 1,
+     "bestCut": 0.25806452,
+     "bestRetKept": 0.7308953
+    }
+   },
+   "LINK": {
+    "V0": {
+     "sharpe": 0.68095807,
+     "cagr": 0.20769666,
+     "maxDD": -0.39393325,
+     "total": 2.5169111,
+     "pf": 1.3176984,
+     "trades": 523,
+     "early": 0,
+     "timeInMarket": 0.15341824,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.9068706,
+     "cagr": 0.29989353,
+     "maxDD": -0.34882218,
+     "total": 4.7421344,
+     "pf": 1.4817457,
+     "trades": 560,
+     "early": 168,
+     "timeInMarket": 0.12878996,
+     "bestKept": 1,
+     "bestCut": 0.076923077,
+     "bestRetKept": 0.88914209
+    },
+    "S2": {
+     "sharpe": 0.67169459,
+     "cagr": 0.19258853,
+     "maxDD": -0.3853531,
+     "total": 2.2339112,
+     "pf": 1.3432223,
+     "trades": 577,
+     "early": 220,
+     "timeInMarket": 0.11950564,
+     "bestKept": 1,
+     "bestCut": 0.15384615,
+     "bestRetKept": 0.82748731
+    },
+    "S8": {
+     "sharpe": 0.74124069,
+     "cagr": 0.22755459,
+     "maxDD": -0.41573408,
+     "total": 2.9206822,
+     "pf": 1.3660465,
+     "trades": 553,
+     "early": 127,
+     "timeInMarket": 0.13305526,
+     "bestKept": 1,
+     "bestCut": 0.076923077,
+     "bestRetKept": 0.88741753
+    }
+   },
+   "XLM": {
+    "V0": {
+     "sharpe": 0.5064758,
+     "cagr": 0.13715067,
+     "maxDD": -0.75059778,
+     "total": 1.5668973,
+     "pf": 1.2497526,
+     "trades": 575,
+     "early": 0,
+     "timeInMarket": 0.15721518,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.51201768,
+     "cagr": 0.13640022,
+     "maxDD": -0.61383929,
+     "total": 1.5544984,
+     "pf": 1.2797481,
+     "trades": 630,
+     "early": 209,
+     "timeInMarket": 0.11522731,
+     "bestKept": 1,
+     "bestCut": 0.24137931,
+     "bestRetKept": 0.78699903
+    },
+    "S2": {
+     "sharpe": 0.25062657,
+     "cagr": 0.031800061,
+     "maxDD": -0.7744201,
+     "total": 0.258112,
+     "pf": 1.1248302,
+     "trades": 641,
+     "early": 243,
+     "timeInMarket": 0.1064406,
+     "bestKept": 1,
+     "bestCut": 0.31034483,
+     "bestRetKept": 0.61229702
+    },
+    "S8": {
+     "sharpe": 0.37673574,
+     "cagr": 0.078863947,
+     "maxDD": -0.77773025,
+     "total": 0.74502151,
+     "pf": 1.2001671,
+     "trades": 614,
+     "early": 151,
+     "timeInMarket": 0.12572623,
+     "bestKept": 1,
+     "bestCut": 0.24137931,
+     "bestRetKept": 0.82163922
+    }
+   },
+   "LTC": {
+    "V0": {
+     "sharpe": 0.13015455,
+     "cagr": -0.0078906125,
+     "maxDD": -0.4696139,
+     "total": -0.059534089,
+     "pf": 1.0476392,
+     "trades": 660,
+     "early": 0,
+     "timeInMarket": 0.15400997,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.041219046,
+     "cagr": -0.027471128,
+     "maxDD": -0.53232543,
+     "total": -0.19412595,
+     "pf": 1.0104377,
+     "trades": 709,
+     "early": 231,
+     "timeInMarket": 0.11424371,
+     "bestKept": 1,
+     "bestCut": 0.27272727,
+     "bestRetKept": 0.65841205
+    },
+    "S2": {
+     "sharpe": -0.026205454,
+     "cagr": -0.045252573,
+     "maxDD": -0.57490944,
+     "total": -0.30148827,
+     "pf": 0.98998385,
+     "trades": 724,
+     "early": 273,
+     "timeInMarket": 0.11141037,
+     "bestKept": 1,
+     "bestCut": 0.27272727,
+     "bestRetKept": 0.72198061
+    },
+    "S8": {
+     "sharpe": 0.089922786,
+     "cagr": -0.015420611,
+     "maxDD": -0.4323357,
+     "total": -0.11344448,
+     "pf": 1.0286481,
+     "trades": 698,
+     "early": 174,
+     "timeInMarket": 0.1252639,
+     "bestKept": 1,
+     "bestCut": 0.21212121,
+     "bestRetKept": 0.7120975
+    }
+   }
+  },
+  "assets2": {
+   "XRP": {
+    "V0": {
+     "sharpe": 0.58512439,
+     "cagr": 0.19072237,
+     "maxDD": -0.55469415,
+     "total": 2.5978872,
+     "pf": 1.3263934,
+     "trades": 589,
+     "early": 0,
+     "timeInMarket": 0.14314399,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.28174914,
+     "cagr": 0.038556014,
+     "maxDD": -0.74039705,
+     "total": 0.31980147,
+     "pf": 1.1664291,
+     "trades": 658,
+     "early": 224,
+     "timeInMarket": 0.094260621,
+     "bestKept": 1,
+     "bestCut": 0.27586207,
+     "bestRetKept": 0.7738671
+    }
+   },
+   "BNB": {
+    "V0": {
+     "sharpe": 0.28353229,
+     "cagr": 0.042069247,
+     "maxDD": -0.61120484,
+     "total": 0.38096842,
+     "pf": 1.1208575,
+     "trades": 627,
+     "early": 0,
+     "timeInMarket": 0.16667335,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.063294034,
+     "cagr": -0.018575406,
+     "maxDD": -0.60801901,
+     "total": -0.13659321,
+     "pf": 1.025453,
+     "trades": 694,
+     "early": 227,
+     "timeInMarket": 0.12739306,
+     "bestKept": 1,
+     "bestCut": 0.19354839,
+     "bestRetKept": 0.78115451
+    }
+   },
+   "DOGE": {
+    "V0": {
+     "sharpe": 0.36078834,
+     "cagr": 0.072915768,
+     "maxDD": -0.74187534,
+     "total": 0.5433224,
+     "pf": 1.1702995,
+     "trades": 555,
+     "early": 0,
+     "timeInMarket": 0.15832558,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.3257344,
+     "cagr": 0.05529404,
+     "maxDD": -0.79801584,
+     "total": 0.39351772,
+     "pf": 1.1648538,
+     "trades": 610,
+     "early": 204,
+     "timeInMarket": 0.12147673,
+     "bestKept": 1,
+     "bestCut": 0.071428571,
+     "bestRetKept": 0.94853059
+    }
+   },
+   "TRX": {
+    "V0": {
+     "sharpe": 0.03753531,
+     "cagr": -0.03570814,
+     "maxDD": -0.58367336,
+     "total": -0.23180567,
+     "pf": 1.0547679,
+     "trades": 567,
+     "early": 0,
+     "timeInMarket": 0.1520958,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": -0.065185259,
+     "cagr": -0.061409057,
+     "maxDD": -0.59913731,
+     "total": -0.36848604,
+     "pf": 1.0098225,
+     "trades": 617,
+     "early": 197,
+     "timeInMarket": 0.11550434,
+     "bestKept": 1,
+     "bestCut": 0.10714286,
+     "bestRetKept": 0.90602213
+    }
+   },
+   "ADA": {
+    "V0": {
+     "sharpe": 0.34135747,
+     "cagr": 0.062258933,
+     "maxDD": -0.65278684,
+     "total": 0.56537494,
+     "pf": 1.1394497,
+     "trades": 626,
+     "early": 0,
+     "timeInMarket": 0.15633573,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.27083794,
+     "cagr": 0.036468888,
+     "maxDD": -0.56160339,
+     "total": 0.30443044,
+     "pf": 1.1188699,
+     "trades": 681,
+     "early": 229,
+     "timeInMarket": 0.11197507,
+     "bestKept": 1,
+     "bestCut": 0.25806452,
+     "bestRetKept": 0.74120036
+    }
+   },
+   "LINK": {
+    "V0": {
+     "sharpe": 0.45397336,
+     "cagr": 0.10838184,
+     "maxDD": -0.44841973,
+     "total": 0.98521245,
+     "pf": 1.2019303,
+     "trades": 523,
+     "early": 0,
+     "timeInMarket": 0.15341824,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.66100377,
+     "cagr": 0.19125327,
+     "maxDD": -0.40868034,
+     "total": 2.2098589,
+     "pf": 1.326222,
+     "trades": 560,
+     "early": 171,
+     "timeInMarket": 0.12788208,
+     "bestKept": 1,
+     "bestCut": 0.076923077,
+     "bestRetKept": 0.88837
+    }
+   },
+   "XLM": {
+    "V0": {
+     "sharpe": 0.29275085,
+     "cagr": 0.042216697,
+     "maxDD": -0.83182881,
+     "total": 0.35430593,
+     "pf": 1.1428667,
+     "trades": 575,
+     "early": 0,
+     "timeInMarket": 0.15724242,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": 0.26214876,
+     "cagr": 0.032362871,
+     "maxDD": -0.77554978,
+     "total": 0.26315418,
+     "pf": 1.1411363,
+     "trades": 632,
+     "early": 211,
+     "timeInMarket": 0.11466307,
+     "bestKept": 1,
+     "bestCut": 0.24137931,
+     "bestRetKept": 0.78544269
+    }
+   },
+   "LTC": {
+    "V0": {
+     "sharpe": -0.15848822,
+     "cagr": -0.096305048,
+     "maxDD": -0.66552828,
+     "total": -0.54369822,
+     "pf": 0.94379665,
+     "trades": 660,
+     "early": 0,
+     "timeInMarket": 0.15400997,
+     "bestKept": 1,
+     "bestCut": 0,
+     "bestRetKept": 1
+    },
+    "V1": {
+     "sharpe": -0.30457525,
+     "cagr": -0.12028311,
+     "maxDD": -0.68589537,
+     "total": -0.62952196,
+     "pf": 0.88495068,
+     "trades": 709,
+     "early": 231,
+     "timeInMarket": 0.11424371,
+     "bestKept": 1,
+     "bestCut": 0.27272727,
+     "bestRetKept": 0.65515061
+    }
+   }
+  }
+ },
+ "reading": {
+  "dPort": 0.030141396,
+  "ciP": [
+   -0.18882637,
+   0.22429373
+  ],
+  "dUn": -0.045433919,
+  "ciU": [
+   -0.15194824,
+   0.043296777
+  ],
+  "improved": 3,
+  "per": [
+   -0.2714309,
+   -0.16528907,
+   -0.020094109,
+   -0.072049519,
+   0.022873354,
+   0.22591253,
+   0.0055418798,
+   -0.088935509
+  ],
+  "dPort2": -0.02233839,
+  "dUn2": -0.087695782,
+  "candidate": false
+ }
+}

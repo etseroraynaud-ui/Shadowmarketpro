@@ -1,0 +1,136 @@
+{
+ "version": "shock-proba-1.0.0",
+ "generatedAt": "2026-10-12T23:55:23.221Z",
+ "prereg": "research/preregistration/probabilistic-layer.md",
+ "git": {
+  "commit": "26a4d8e0913726e5c6378ccfa14d6169221a763b",
+  "sourcesClean": true,
+  "dirtyFiles": []
+ },
+ "runtime": {
+  "node": "v22.22.0",
+  "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/proba/run.ts"
+ },
+ "data": [
+  {
+   "file": "research/data/btcusd_15m.csv.gz",
+   "sha256": "f5c3e0231748c757c61c44fc95af489608362e6f4b0820067c5943e83dcf48bb"
+  },
+  {
+   "file": "research/data/ethusdt_15m.csv.gz",
+   "sha256": "875b3defedeecc7b9b089cd5949c8ff371761a4c2c6d2ebe4fa16386dcf36454"
+  },
+  {
+   "file": "research/data/btcusd_60m.csv.gz",
+   "sha256": "83fe0a5ed963ab22930da8799810507e39b8e3d02ad160e9adb2f70bf711fe8d"
+  }
+ ],
+ "model": {
+  "file": "research/reports/proba/model.json",
+  "sha256": "e1da2cda9e78992f1acaabd7fac4f04b310396c31c50e281029b756bdb86e4d3"
+ },
+ "outputs": [
+  {
+   "file": "research/reports/proba/dataset.csv",
+   "sha256": "e3029e16698e3cd4e192c38c12e0361d770ab733fb9a6a94a8a97ca697d722bc"
+  },
+  {
+   "file": "research/reports/proba/dataset-schema.json",
+   "sha256": "7d62214a4a77ecf77544cf4caddc0a29597edd74abbd988bf1e39f418e522635"
+  },
+  {
+   "file": "research/reports/proba/predictions.csv",
+   "sha256": "fa1048aa1dc7e4c5b244e2449125e1dd00fa1e838e75d342500698326144ac4f"
+  },
+  {
+   "file": "research/reports/proba/walkforward.json",
+   "sha256": "279c8f2de5c625e0fd6e8eff5f01b89745953104e93920f3c50c4514dacd5481"
+  },
+  {
+   "file": "research/reports/proba/metrics.json",
+   "sha256": "7e4c07fc6a5b2bd1c74b6059a6ddd999cdc8e6b1d02ac5f086019eb81a75277b"
+  },
+  {
+   "file": "research/reports/proba/diagnostics.json",
+   "sha256": "909cbb51492409387e2e56b552d2d917e0dc71a65bb17f1aeccd7099bb9957de"
+  },
+  {
+   "file": "research/reports/proba/model.json",
+   "sha256": "e1da2cda9e78992f1acaabd7fac4f04b310396c31c50e281029b756bdb86e4d3"
+  },
+  {
+   "file": "research/reports/proba/report.html",
+   "sha256": "1757442895e6cba558f3106edf44d7ee106eeacf97d7eac10e4269714d655e13"
+  },
+  {
+   "file": "research/reports/proba/cards/examples.html",
+   "sha256": "6d5a4a7fc6790a5410d55f32c993e602b0defa417e7c0443f42132a9ede0c6fc"
+  },
+  {
+   "file": "research/reports/proba/cards/examples.txt",
+   "sha256": "2b6cea4ea414846696ba48cad22df5b0e3938d8435d27a654fcf2af80c3e7a1d"
+  }
+ ],
+ "verdict": {
+  "primary": {
+   "test": "P(R > 0) : complet contre naïf, Δ log-loss",
+   "dLogLoss": {
+    "est": -0.0006192855387155971,
+    "lo": -0.003128337981812359,
+    "hi": 0.001849137886119826,
+    "p": 0.679160419790105,
+    "reps": 2000
+   },
+   "dBrier": -0.0003072046672429052,
+   "demonstrated": false
+  },
+  "secondary": [
+   {
+    "test": "E[R] ridge contre naïf",
+    "demonstrated": false,
+    "pHolm": 0.7451274362818591
+   },
+   {
+    "test": "E[R] decompConst contre naïf",
+    "demonstrated": false,
+    "pHolm": 1
+   },
+   {
+    "test": "E[R] decompRidge contre naïf",
+    "demonstrated": false,
+    "pHolm": 0.6316841579210395
+   },
+   {
+    "test": "P(R ≥ 2) reduced contre naïf",
+    "demonstrated": false,
+    "pHolm": 1
+   },
+   {
+    "test": "continuation 1 bougie : complet contre naïf",
+    "demonstrated": false,
+    "pHolm": 1
+   },
+   {
+    "test": "continuation 4 bougies : complet contre naïf",
+    "demonstrated": false,
+    "pHolm": 1
+   },
+   {
+    "test": "continuation 16 bougies : complet contre naïf",
+    "demonstrated": false,
+    "pHolm": 1
+   },
+   {
+    "test": "continuation 64 bougies : complet contre naïf",
+    "demonstrated": false,
+    "pHolm": 1
+   }
+  ]
+ },
+ "horizons": [
+  1,
+  4,
+  16,
+  64
+ ]
+}

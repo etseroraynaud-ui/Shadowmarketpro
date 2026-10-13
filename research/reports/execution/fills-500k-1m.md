@@ -1,5 +1,28 @@
 # Shock Engine — exécutabilité des ordres à 500 k$ et 1 M$
 
+> **Mise à jour du 2026-10-13 — règles publiées (entrées en régime calme seulement).** Les résultats
+> `fills-500k-1m.json` et `fills-2m-5m.json` ont été recalculés sur les règles publiées, protocole
+> inchangé. Les sections suivantes, rédigées le 2026-10-12, décrivent le calcul sur les règles
+> précédentes (deux régimes, 2 474 exécutions) ; elles restent comme trace. Chiffres des règles publiées :
+>
+> - **1 150 exécutions** (BTC 600, ETH 550) : 575 entrées (300 / 275), 222 fermetures sur choc
+>   opposé (103 / 119), 353 stops et stops suiveurs (197 / 156), aucune prise de profit partielle.
+>   Par année : 148 (2020), 104 (2021), 233 (2022), 249 (2023), 94 (2024), 185 (2025), 137 (2026,
+>   janvier–septembre). 805 journées de transactions (BTC 406, ETH 399), sommes SHA-256 vérifiées ;
+>   franchissement retrouvé pour les 353 stops ; prix de référence pour 1 149 exécutions.
+> - Modèle de coût (0,5 s) : R² 0,41 BTC, 0,32 ETH ; élasticité à la taille 0,82 et 0,70.
+> - Rapprochement (bot actuel) : à 500 k$, 1 113 démontrées à < 50 pb (96,8 %), 2 à < 1 %, 35 non
+>   démontrées (dont 30 ETH) ; à 1 M$, 1 054 (91,7 %), 8, 88 (dont 63 ETH) ; à 2 M$, 77,8 % à < 50 pb ;
+>   à 5 M$, aucune (ordres de 2,5 M$), 54,4 % à < 1 %.
+> - Sharpe (Binance, 2020-01 → 2026-09, backtest 2,00) : bot actuel 1,85 / 1,83 / 1,81 / 1,75 à
+>   0,5 / 1 / 2 / 5 M$ ; bot livré (entrées à 0,5 s) 1,93 / 1,92 / 1,90 / 1,83 ; entrées et stops à
+>   0,5 s 1,95 / 1,94 / 1,91 / 1,85. **Aucun passage sous 1,5 jusqu'à 5 M$**, plus grand capital testé
+>   (point à 5 M$ estimé). Gain apparié actuel → livré à 1 M$ : +0,08 [+0,06 ; +0,10].
+> - Coût moyen par exécution à 1 M$ : 4,65 pb (bot actuel), 2,27 pb (bot livré), pour un budget de
+>   14,7 pb au Sharpe 1,5 (`capacity-report.md`). Décomposition (1 M$, bot actuel, médianes) :
+>   demi-spread 0,02 pb, dérive 2,30 pb (entrées : 2,76 BTC, 4,14 ETH), profondeur 0,40 pb.
+> - Premier ordre réel de 500 k$ après notre arrivée : 5,7 s (BTC) et 10,7 s (ETH) en médiane.
+
 Rédigé le 2026-10-12. Pré-enregistrement : `research/preregistration/execution-fills-500k-1m.md`
 (commité avant tout calcul). Résultats : `fills-500k-1m.json`. Signaux, logique prédictive et
 paramètres inchangés.

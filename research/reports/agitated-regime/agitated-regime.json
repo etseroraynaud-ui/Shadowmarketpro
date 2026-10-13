@@ -1,0 +1,1856 @@
+{
+ "plan": "research/preregistration/agitated-regime.md",
+ "generatedAt": "2026-10-13T02:01:25.522Z",
+ "git": {
+  "commit": "4742db14df97c1e87332e003fa17ffa8bf3fa0d8",
+  "clean": true
+ },
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/market.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/strategy.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/broker.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/engine.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/params.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/params.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/presets.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/presets.ts"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "research/lib/frozen-shock.ts"
+  },
+  {
+   "name": "empreinte research/lib/e2.ts",
+   "ok": true,
+   "detail": "research/lib/e2.ts"
+  },
+  {
+   "name": "BTC : boucle à taille par jeu = simulate()",
+   "ok": true,
+   "detail": "max |Δequity| 0"
+  },
+  {
+   "name": "XRP : boucle à taille par jeu = simulate()",
+   "ok": true,
+   "detail": "max |Δequity| 0"
+  },
+  {
+   "name": "BTC : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "724 positions"
+  },
+  {
+   "name": "ETH : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "619 positions"
+  },
+  {
+   "name": "XRP : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "563 positions"
+  },
+  {
+   "name": "BNB : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "583 positions"
+  },
+  {
+   "name": "DOGE : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "524 positions"
+  },
+  {
+   "name": "TRX : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "537 positions"
+  },
+  {
+   "name": "ADA : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "590 positions"
+  },
+  {
+   "name": "LINK : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "482 positions"
+  },
+  {
+   "name": "XLM : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "540 positions"
+  },
+  {
+   "name": "LTC : V2b = V2a hors taille",
+   "ok": true,
+   "detail": "623 positions"
+  },
+  {
+   "name": "BTC : V0 = trades du portefeuille E2 publié",
+   "ok": true,
+   "detail": "644 / 644"
+  },
+  {
+   "name": "ETH : V0 = trades du portefeuille E2 publié",
+   "ok": true,
+   "detail": "667 / 667"
+  },
+  {
+   "name": "BTC/ETH : Sharpe de V0 = Sharpe publié",
+   "ok": true,
+   "detail": "1.877566513286129 / 1.877566513"
+  }
+ ],
+ "diagnostics": {
+  "BTC/ETH": [
+   {
+    "set": 0,
+    "n": 464,
+    "cont": [
+     {
+      "h": 1,
+      "mean": 0.21439725,
+      "ci": [
+       0.016370833,
+       0.43783458
+      ],
+      "median": 0.0016874213,
+      "pos": 0.5
+     },
+     {
+      "h": 4,
+      "mean": 0.52201391,
+      "ci": [
+       0.17203934,
+       0.89227273
+      ],
+      "median": 0.058148772,
+      "pos": 0.51293103
+     },
+     {
+      "h": 16,
+      "mean": 0.56639369,
+      "ci": [
+       0.12965387,
+       0.99182187
+      ],
+      "median": 0.071040892,
+      "pos": 0.50862069
+     },
+     {
+      "h": 64,
+      "mean": 1.8585067,
+      "ci": [
+       0.76974806,
+       2.9356808
+      ],
+      "median": 0.8251592,
+      "pos": 0.52801724
+     }
+    ],
+    "stopped": 284,
+    "post": [
+     {
+      "h": 16,
+      "n": 284,
+      "above11": 0.084507042,
+      "above33": 0.042253521,
+      "median": -2.79822
+     },
+     {
+      "h": 64,
+      "n": 284,
+      "above11": 0.1971831,
+      "above33": 0.11267606,
+      "median": -3.2520233
+     }
+    ],
+    "mfe": [
+     1.5972783,
+     4.5424835,
+     13.7737
+    ],
+    "mae": [
+     -3.3,
+     -3.3,
+     -1.7805765
+    ]
+   },
+   {
+    "set": 1,
+    "n": 597,
+    "cont": [
+     {
+      "h": 1,
+      "mean": 0.052690422,
+      "ci": [
+       -0.047914492,
+       0.16644428
+      ],
+      "median": -0.023103699,
+      "pos": 0.48241206
+     },
+     {
+      "h": 4,
+      "mean": 0.12021526,
+      "ci": [
+       -0.062338534,
+       0.29523537
+      ],
+      "median": -0.062746287,
+      "pos": 0.48241206
+     },
+     {
+      "h": 16,
+      "mean": 0.14436539,
+      "ci": [
+       -0.15160425,
+       0.43996776
+      ],
+      "median": -0.34709292,
+      "pos": 0.45561139
+     },
+     {
+      "h": 64,
+      "mean": 0.64763819,
+      "ci": [
+       0.036738961,
+       1.2325053
+      ],
+      "median": -0.20134879,
+      "pos": 0.49078727
+     }
+    ],
+    "stopped": 275,
+    "post": [
+     {
+      "h": 16,
+      "n": 275,
+      "above11": 0.13818182,
+      "above33": 0.036363636,
+      "median": -1.4953726
+     },
+     {
+      "h": 64,
+      "n": 275,
+      "above11": 0.28363636,
+      "above33": 0.19272727,
+      "median": -1.8350328
+     }
+    ],
+    "mfe": [
+     0.53616405,
+     1.438076,
+     3.7347175
+    ],
+    "mae": [
+     -1.1,
+     -1.1,
+     -0.91307773
+    ]
+   }
+  ],
+  "8 cryptos": [
+   {
+    "set": 0,
+    "n": 1586,
+    "cont": [
+     {
+      "h": 1,
+      "mean": 0.16324842,
+      "ci": [
+       0.035332992,
+       0.30323328
+      ],
+      "median": -0.046280478,
+      "pos": 0.48171501
+     },
+     {
+      "h": 4,
+      "mean": 0.25060366,
+      "ci": [
+       0.055046214,
+       0.48375028
+      ],
+      "median": -0.18667159,
+      "pos": 0.46406053
+     },
+     {
+      "h": 16,
+      "mean": 0.37763351,
+      "ci": [
+       0.044299625,
+       0.7642424
+      ],
+      "median": -0.27856917,
+      "pos": 0.45964691
+     },
+     {
+      "h": 64,
+      "mean": 0.94366795,
+      "ci": [
+       0.42911585,
+       1.5098055
+      ],
+      "median": -0.02010897,
+      "pos": 0.49873897
+     }
+    ],
+    "stopped": 1074,
+    "post": [
+     {
+      "h": 16,
+      "n": 1074,
+      "above11": 0.092178771,
+      "above33": 0.032588454,
+      "median": -3.1022979
+     },
+     {
+      "h": 64,
+      "n": 1074,
+      "above11": 0.20484171,
+      "above33": 0.12476723,
+      "median": -3.2702688
+     }
+    ],
+    "mfe": [
+     1.2213107,
+     3.6492808,
+     9.8840971
+    ],
+    "mae": [
+     -3.3521122,
+     -3.3329899,
+     -2.4136913
+    ]
+   },
+   {
+    "set": 1,
+    "n": 1935,
+    "cont": [
+     {
+      "h": 1,
+      "mean": 0.043091636,
+      "ci": [
+       -0.016590517,
+       0.10162751
+      ],
+      "median": -0.1187692,
+      "pos": 0.43669251
+     },
+     {
+      "h": 4,
+      "mean": 0.11111374,
+      "ci": [
+       0.0028134722,
+       0.21284765
+      ],
+      "median": -0.15125362,
+      "pos": 0.46511628
+     },
+     {
+      "h": 16,
+      "mean": 0.18525922,
+      "ci": [
+       -0.0062385154,
+       0.37020767
+      ],
+      "median": -0.15125362,
+      "pos": 0.48010336
+     },
+     {
+      "h": 64,
+      "mean": 1.0528962,
+      "ci": [
+       0.46902188,
+       1.5649618
+      ],
+      "median": 0.14217643,
+      "pos": 0.51111111
+     }
+    ],
+    "stopped": 935,
+    "post": [
+     {
+      "h": 16,
+      "n": 935,
+      "above11": 0.19144385,
+      "above33": 0.080213904,
+      "median": -1.2707921
+     },
+     {
+      "h": 64,
+      "n": 935,
+      "above11": 0.32513369,
+      "above33": 0.20748663,
+      "median": -1.2959738
+     }
+    ],
+    "mfe": [
+     0.38002599,
+     1.392453,
+     3.8077288
+    ],
+    "mae": [
+     -1.1912739,
+     -1.1273803,
+     -1.0092509
+    ]
+   }
+  ]
+ },
+ "table": {
+  "portfolio": {
+   "V0": {
+    "1": {
+     "sharpe": 1.8775665,
+     "cagr": 0.61640624,
+     "maxDD": -0.19124348,
+     "total": 47.476756,
+     "pf": 1.9587561,
+     "trades": 1311,
+     "agitated": 597,
+     "timeInMarket": 0.16600494,
+     "avgGross": 0.15828446,
+     "bestN": 66,
+     "bestKept": 1,
+     "bestRetKept": 1
+    },
+    "2": {
+     "sharpe": 1.6098551,
+     "cagr": 0.50179749,
+     "maxDD": -0.20728422,
+     "total": 25.754514,
+     "pf": 1.7505148,
+     "trades": 1311,
+     "agitated": 597,
+     "timeInMarket": 0.16600494,
+     "avgGross": 0.15835332,
+     "bestN": 66,
+     "bestKept": 1,
+     "bestRetKept": 1
+    }
+   },
+   "V1": {
+    "1": {
+     "sharpe": 2.0242079,
+     "cagr": 0.6772734,
+     "maxDD": -0.17849879,
+     "total": 64.355003,
+     "pf": 2.4569619,
+     "trades": 716,
+     "agitated": 0,
+     "timeInMarket": 0.1536167,
+     "avgGross": 0.14782547,
+     "bestN": 66,
+     "bestKept": 0.98484848,
+     "bestRetKept": 0.99242427
+    },
+    "2": {
+     "sharpe": 1.8782281,
+     "cagr": 0.61230801,
+     "maxDD": -0.19693132,
+     "total": 46.492272,
+     "pf": 2.2509042,
+     "trades": 716,
+     "agitated": 0,
+     "timeInMarket": 0.1536167,
+     "avgGross": 0.14788897,
+     "bestN": 66,
+     "bestKept": 0.98484848,
+     "bestRetKept": 0.992474
+    }
+   },
+   "V2a": {
+    "1": {
+     "sharpe": 1.8595614,
+     "cagr": 0.65001021,
+     "maxDD": -0.20935291,
+     "total": 56.247488,
+     "pf": 1.8735853,
+     "trades": 1227,
+     "agitated": 515,
+     "timeInMarket": 0.18516867,
+     "avgGross": 0.17443215,
+     "bestN": 66,
+     "bestKept": 1,
+     "bestRetKept": 1
+    },
+    "2": {
+     "sharpe": 1.6244047,
+     "cagr": 0.54086233,
+     "maxDD": -0.22748995,
+     "total": 31.92553,
+     "pf": 1.7111698,
+     "trades": 1227,
+     "agitated": 515,
+     "timeInMarket": 0.18516867,
+     "avgGross": 0.17450936,
+     "bestN": 66,
+     "bestKept": 1,
+     "bestRetKept": 1
+    }
+   },
+   "V2b": {
+    "1": {
+     "sharpe": 1.9978611,
+     "cagr": 0.66902547,
+     "maxDD": -0.17660988,
+     "total": 61.802341,
+     "pf": 2.1983172,
+     "trades": 1227,
+     "agitated": 515,
+     "timeInMarket": 0.18516867,
+     "avgGross": 0.1565095,
+     "bestN": 66,
+     "bestKept": 1,
+     "bestRetKept": 0.99501042
+    },
+    "2": {
+     "sharpe": 1.8182868,
+     "cagr": 0.58921533,
+     "maxDD": -0.19414668,
+     "total": 41.265519,
+     "pf": 2.0124231,
+     "trades": 1227,
+     "agitated": 515,
+     "timeInMarket": 0.18516867,
+     "avgGross": 0.1565744,
+     "bestN": 66,
+     "bestKept": 1,
+     "bestRetKept": 0.99504243
+    }
+   }
+  },
+  "assets": {
+   "BTC": {
+    "V0": {
+     "1": {
+      "sharpe": 1.5244785,
+      "cagr": 0.42929549,
+      "maxDD": -0.22303972,
+      "total": 31.599392,
+      "pf": 1.8671591,
+      "trades": 774,
+      "agitated": 378,
+      "timeInMarket": 0.14838753,
+      "avgGross": 0.142398,
+      "bestN": 39,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 1.2405491,
+      "cagr": 0.33103038,
+      "maxDD": -0.25692737,
+      "total": 15.2723,
+      "pf": 1.6451805,
+      "trades": 774,
+      "agitated": 378,
+      "timeInMarket": 0.14838753,
+      "avgGross": 0.1424605,
+      "bestN": 39,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 1.5210854,
+      "cagr": 0.40995833,
+      "maxDD": -0.24764948,
+      "total": 27.543131,
+      "pf": 2.274341,
+      "trades": 396,
+      "agitated": 0,
+      "timeInMarket": 0.13633532,
+      "avgGross": 0.13221068,
+      "bestN": 39,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 1.3685977,
+      "cagr": 0.35965764,
+      "maxDD": -0.26408603,
+      "total": 19.026286,
+      "pf": 2.0643861,
+      "trades": 396,
+      "agitated": 0,
+      "timeInMarket": 0.13633532,
+      "avgGross": 0.13226795,
+      "bestN": 39,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 1.5297604,
+      "cagr": 0.44673548,
+      "maxDD": -0.24743501,
+      "total": 35.693568,
+      "pf": 1.8002846,
+      "trades": 724,
+      "agitated": 330,
+      "timeInMarket": 0.16652287,
+      "avgGross": 0.15763031,
+      "bestN": 39,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 1.273152,
+      "cagr": 0.35351224,
+      "maxDD": -0.27832153,
+      "total": 18.160582,
+      "pf": 1.6247705,
+      "trades": 724,
+      "agitated": 330,
+      "timeInMarket": 0.16652287,
+      "avgGross": 0.15770071,
+      "bestN": 39,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 1.5609017,
+      "cagr": 0.42712107,
+      "maxDD": -0.24727163,
+      "total": 31.118811,
+      "pf": 2.0678907,
+      "trades": 724,
+      "agitated": 330,
+      "timeInMarket": 0.16652287,
+      "avgGross": 0.14058994,
+      "bestN": 39,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 1.3690169,
+      "cagr": 0.3625559,
+      "maxDD": -0.26856284,
+      "total": 19.446615,
+      "pf": 1.8732435,
+      "trades": 724,
+      "agitated": 330,
+      "timeInMarket": 0.16652287,
+      "avgGross": 0.14064862,
+      "bestN": 39,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    }
+   },
+   "ETH": {
+    "V0": {
+     "1": {
+      "sharpe": 1.7507071,
+      "cagr": 0.7220455,
+      "maxDD": -0.26776651,
+      "total": 79.862026,
+      "pf": 2.0477286,
+      "trades": 667,
+      "agitated": 311,
+      "timeInMarket": 0.18362236,
+      "avgGross": 0.17417092,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 1.5309945,
+      "cagr": 0.59930873,
+      "maxDD": -0.29027771,
+      "total": 43.484483,
+      "pf": 1.851513,
+      "trades": 667,
+      "agitated": 311,
+      "timeInMarket": 0.18362236,
+      "avgGross": 0.17424614,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 1.9272758,
+      "cagr": 0.80047835,
+      "maxDD": -0.24148615,
+      "total": 114.89899,
+      "pf": 2.67954,
+      "trades": 358,
+      "agitated": 0,
+      "timeInMarket": 0.17089808,
+      "avgGross": 0.16344027,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 1.804965,
+      "cagr": 0.73078115,
+      "maxDD": -0.26147469,
+      "total": 83.237488,
+      "pf": 2.4808907,
+      "trades": 358,
+      "agitated": 0,
+      "timeInMarket": 0.17089808,
+      "avgGross": 0.16350998,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 1.7651262,
+      "cagr": 0.76513903,
+      "maxDD": -0.27268463,
+      "total": 97.741714,
+      "pf": 1.9707785,
+      "trades": 619,
+      "agitated": 263,
+      "timeInMarket": 0.20381446,
+      "avgGross": 0.19123399,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 1.569866,
+      "cagr": 0.64813999,
+      "maxDD": -0.29504698,
+      "total": 55.725157,
+      "pf": 1.8204157,
+      "trades": 619,
+      "agitated": 263,
+      "timeInMarket": 0.20381446,
+      "avgGross": 0.19131802,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 1.8958414,
+      "cagr": 0.78889707,
+      "maxDD": -0.2519009,
+      "total": 109.00921,
+      "pf": 2.3537315,
+      "trades": 619,
+      "agitated": 263,
+      "timeInMarket": 0.20381446,
+      "avgGross": 0.17242905,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 1.7459716,
+      "cagr": 0.70331145,
+      "maxDD": -0.27270588,
+      "total": 73.020156,
+      "pf": 2.1784758,
+      "trades": 619,
+      "agitated": 263,
+      "timeInMarket": 0.20381446,
+      "avgGross": 0.17250018,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    }
+   },
+   "XRP": {
+    "V0": {
+     "1": {
+      "sharpe": 0.77577233,
+      "cagr": 0.30072796,
+      "maxDD": -0.47973645,
+      "total": 5.8789761,
+      "pf": 1.4600267,
+      "trades": 589,
+      "agitated": 213,
+      "timeInMarket": 0.14312843,
+      "avgGross": 0.13802423,
+      "bestN": 29,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.58512439,
+      "cagr": 0.19072237,
+      "maxDD": -0.55469415,
+      "total": 2.5978872,
+      "pf": 1.3263934,
+      "trades": 589,
+      "agitated": 213,
+      "timeInMarket": 0.14314399,
+      "avgGross": 0.13811013,
+      "bestN": 29,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 0.72317663,
+      "cagr": 0.25514708,
+      "maxDD": -0.48768007,
+      "total": 4.2953619,
+      "pf": 1.5441783,
+      "trades": 376,
+      "agitated": 0,
+      "timeInMarket": 0.13670767,
+      "avgGross": 0.13252877,
+      "bestN": 29,
+      "bestKept": 0.89655172,
+      "bestRetKept": 0.8984287
+     },
+     "2": {
+      "sharpe": 0.59142701,
+      "cagr": 0.18640237,
+      "maxDD": -0.52566239,
+      "total": 2.5032382,
+      "pf": 1.4207818,
+      "trades": 376,
+      "agitated": 0,
+      "timeInMarket": 0.13670767,
+      "avgGross": 0.13259888,
+      "bestN": 29,
+      "bestKept": 0.89655172,
+      "bestRetKept": 0.89846005
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 0.7759224,
+      "cagr": 0.30586709,
+      "maxDD": -0.43041717,
+      "total": 6.0808352,
+      "pf": 1.4262244,
+      "trades": 563,
+      "agitated": 189,
+      "timeInMarket": 0.15386082,
+      "avgGross": 0.14718734,
+      "bestN": 29,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.61666376,
+      "cagr": 0.21046036,
+      "maxDD": -0.47981361,
+      "total": 3.0589878,
+      "pf": 1.324487,
+      "trades": 561,
+      "agitated": 187,
+      "timeInMarket": 0.15424218,
+      "avgGross": 0.14756602,
+      "bestN": 29,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 0.76545521,
+      "cagr": 0.28071568,
+      "maxDD": -0.43261673,
+      "total": 5.1395105,
+      "pf": 1.499389,
+      "trades": 563,
+      "agitated": 189,
+      "timeInMarket": 0.15386082,
+      "avgGross": 0.13733233,
+      "bestN": 29,
+      "bestKept": 1,
+      "bestRetKept": 0.93468462
+     },
+     "2": {
+      "sharpe": 0.62090873,
+      "cagr": 0.20294752,
+      "maxDD": -0.48596781,
+      "total": 2.8778009,
+      "pf": 1.38523,
+      "trades": 561,
+      "agitated": 187,
+      "timeInMarket": 0.15424218,
+      "avgGross": 0.13750377,
+      "bestN": 29,
+      "bestKept": 1,
+      "bestRetKept": 0.93469654
+     }
+    }
+   },
+   "BNB": {
+    "V0": {
+     "1": {
+      "sharpe": 0.58286976,
+      "cagr": 0.1375306,
+      "maxDD": -0.42430618,
+      "total": 1.7438374,
+      "pf": 1.2736274,
+      "trades": 627,
+      "agitated": 279,
+      "timeInMarket": 0.16667335,
+      "avgGross": 0.16017842,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.28353229,
+      "cagr": 0.042069247,
+      "maxDD": -0.61120484,
+      "total": 0.38096842,
+      "pf": 1.1208575,
+      "trades": 627,
+      "agitated": 279,
+      "timeInMarket": 0.16667335,
+      "avgGross": 0.16026401,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 0.8437539,
+      "cagr": 0.21507842,
+      "maxDD": -0.29511741,
+      "total": 3.5994383,
+      "pf": 1.5679817,
+      "trades": 348,
+      "agitated": 0,
+      "timeInMarket": 0.15895432,
+      "avgGross": 0.15351611,
+      "bestN": 31,
+      "bestKept": 0.87096774,
+      "bestRetKept": 0.91660751
+     },
+     "2": {
+      "sharpe": 0.66405578,
+      "cagr": 0.1572819,
+      "maxDD": -0.35308266,
+      "total": 2.1399186,
+      "pf": 1.4132523,
+      "trades": 348,
+      "agitated": 0,
+      "timeInMarket": 0.15895432,
+      "avgGross": 0.15359761,
+      "bestN": 31,
+      "bestKept": 0.87096774,
+      "bestRetKept": 0.9170457
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 0.54364472,
+      "cagr": 0.12786587,
+      "maxDD": -0.54529538,
+      "total": 1.5664463,
+      "pf": 1.2339946,
+      "trades": 583,
+      "agitated": 236,
+      "timeInMarket": 0.18347808,
+      "avgGross": 0.17438688,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.27687889,
+      "cagr": 0.039723494,
+      "maxDD": -0.68703424,
+      "total": 0.35680497,
+      "pf": 1.1116103,
+      "trades": 583,
+      "agitated": 236,
+      "timeInMarket": 0.18347808,
+      "avgGross": 0.17448123,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 0.76522613,
+      "cagr": 0.19120264,
+      "maxDD": -0.34870205,
+      "total": 2.9372674,
+      "pf": 1.420253,
+      "trades": 583,
+      "agitated": 236,
+      "timeInMarket": 0.18347808,
+      "avgGross": 0.16004056,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 0.94851132
+     },
+     "2": {
+      "sharpe": 0.5497011,
+      "cagr": 0.12240277,
+      "maxDD": -0.46454928,
+      "total": 1.4706689,
+      "pf": 1.2806802,
+      "trades": 583,
+      "agitated": 236,
+      "timeInMarket": 0.18347808,
+      "avgGross": 0.16012319,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 0.94882536
+     }
+    }
+   },
+   "DOGE": {
+    "V0": {
+     "1": {
+      "sharpe": 0.53114718,
+      "cagr": 0.18426879,
+      "maxDD": -0.61622487,
+      "total": 1.8370567,
+      "pf": 1.272256,
+      "trades": 555,
+      "agitated": 219,
+      "timeInMarket": 0.15832558,
+      "avgGross": 0.15140253,
+      "bestN": 28,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.36078834,
+      "cagr": 0.072915768,
+      "maxDD": -0.74187534,
+      "total": 0.5433224,
+      "pf": 1.1702995,
+      "trades": 555,
+      "agitated": 219,
+      "timeInMarket": 0.15832558,
+      "avgGross": 0.15148302,
+      "bestN": 28,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 0.13572772,
+      "cagr": -0.019809598,
+      "maxDD": -0.61379056,
+      "total": -0.11605889,
+      "pf": 1.0907093,
+      "trades": 336,
+      "agitated": 0,
+      "timeInMarket": 0.15151389,
+      "avgGross": 0.14553117,
+      "bestN": 28,
+      "bestKept": 0.57142857,
+      "bestRetKept": 0.59877655
+     },
+     "2": {
+      "sharpe": -0.0098268441,
+      "cagr": -0.076954258,
+      "maxDD": -0.65711618,
+      "total": -0.38965005,
+      "pf": 1.0122879,
+      "trades": 336,
+      "agitated": 0,
+      "timeInMarket": 0.15151389,
+      "avgGross": 0.14560812,
+      "bestN": 28,
+      "bestKept": 0.57142857,
+      "bestRetKept": 0.59900158
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 0.57720195,
+      "cagr": 0.21793092,
+      "maxDD": -0.681555,
+      "total": 2.37224,
+      "pf": 1.2812285,
+      "trades": 524,
+      "agitated": 188,
+      "timeInMarket": 0.16948713,
+      "avgGross": 0.16098231,
+      "bestN": 28,
+      "bestKept": 0.96428571,
+      "bestRetKept": 0.97064144
+     },
+     "2": {
+      "sharpe": 0.42529672,
+      "cagr": 0.10964134,
+      "maxDD": -0.78018307,
+      "total": 0.89923989,
+      "pf": 1.1951191,
+      "trades": 524,
+      "agitated": 188,
+      "timeInMarket": 0.16948713,
+      "avgGross": 0.16106866,
+      "bestN": 28,
+      "bestKept": 0.96428571,
+      "bestRetKept": 0.97068583
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 0.34600681,
+      "cagr": 0.066894732,
+      "maxDD": -0.62196117,
+      "total": 0.49069049,
+      "pf": 1.1750202,
+      "trades": 524,
+      "agitated": 188,
+      "timeInMarket": 0.16948713,
+      "avgGross": 0.15068997,
+      "bestN": 28,
+      "bestKept": 0.96428571,
+      "bestRetKept": 0.73080064
+     },
+     "2": {
+      "sharpe": 0.18214093,
+      "cagr": -0.0063501547,
+      "maxDD": -0.6846905,
+      "total": -0.038516245,
+      "pf": 1.0928123,
+      "trades": 524,
+      "agitated": 188,
+      "timeInMarket": 0.16948713,
+      "avgGross": 0.15076797,
+      "bestN": 28,
+      "bestKept": 0.96428571,
+      "bestRetKept": 0.73092878
+     }
+    }
+   },
+   "TRX": {
+    "V0": {
+     "1": {
+      "sharpe": 0.30131233,
+      "cagr": 0.050627048,
+      "maxDD": -0.52906908,
+      "total": 0.43072853,
+      "pf": 1.2073204,
+      "trades": 567,
+      "agitated": 220,
+      "timeInMarket": 0.1520958,
+      "avgGross": 0.1476627,
+      "bestN": 28,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.03753531,
+      "cagr": -0.03570814,
+      "maxDD": -0.58367336,
+      "total": -0.23180567,
+      "pf": 1.0547679,
+      "trades": 567,
+      "agitated": 220,
+      "timeInMarket": 0.1520958,
+      "avgGross": 0.14774234,
+      "bestN": 28,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 0.32339181,
+      "cagr": 0.057749321,
+      "maxDD": -0.50940226,
+      "total": 0.50257985,
+      "pf": 1.2941127,
+      "trades": 347,
+      "agitated": 0,
+      "timeInMarket": 0.1430601,
+      "avgGross": 0.1400116,
+      "bestN": 28,
+      "bestKept": 0.78571429,
+      "bestRetKept": 0.81008793
+     },
+     "2": {
+      "sharpe": 0.15256968,
+      "cagr": 0.0034752695,
+      "maxDD": -0.55525853,
+      "total": 0.025480136,
+      "pf": 1.1512982,
+      "trades": 347,
+      "agitated": 0,
+      "timeInMarket": 0.1430601,
+      "avgGross": 0.14008655,
+      "bestN": 28,
+      "bestKept": 0.78571429,
+      "bestRetKept": 0.81036653
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 0.33770779,
+      "cagr": 0.063266577,
+      "maxDD": -0.54012781,
+      "total": 0.56035732,
+      "pf": 1.2092076,
+      "trades": 537,
+      "agitated": 190,
+      "timeInMarket": 0.16376036,
+      "avgGross": 0.15779422,
+      "bestN": 28,
+      "bestKept": 0.96428571,
+      "bestRetKept": 0.98289085
+     },
+     "2": {
+      "sharpe": 0.098442644,
+      "cagr": -0.019586053,
+      "maxDD": -0.59299157,
+      "total": -0.13364341,
+      "pf": 1.0794776,
+      "trades": 537,
+      "agitated": 190,
+      "timeInMarket": 0.16376036,
+      "avgGross": 0.15788,
+      "bestN": 28,
+      "bestKept": 0.96428571,
+      "bestRetKept": 0.9830924
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 0.33705259,
+      "cagr": 0.062317407,
+      "maxDD": -0.51961835,
+      "total": 0.55028322,
+      "pf": 1.2563318,
+      "trades": 537,
+      "agitated": 190,
+      "timeInMarket": 0.16376036,
+      "avgGross": 0.14594684,
+      "bestN": 28,
+      "bestKept": 0.96428571,
+      "bestRetKept": 0.87038732
+     },
+     "2": {
+      "sharpe": 0.13773004,
+      "cagr": -0.0016992999,
+      "maxDD": -0.56797887,
+      "total": -0.012259008,
+      "pf": 1.1195811,
+      "trades": 537,
+      "agitated": 190,
+      "timeInMarket": 0.16376036,
+      "avgGross": 0.146023,
+      "bestN": 28,
+      "bestKept": 0.96428571,
+      "bestRetKept": 0.87062779
+     }
+    }
+   },
+   "ADA": {
+    "V0": {
+     "1": {
+      "sharpe": 0.56849941,
+      "cagr": 0.16635844,
+      "maxDD": -0.60851159,
+      "total": 2.1323145,
+      "pf": 1.2490787,
+      "trades": 626,
+      "agitated": 255,
+      "timeInMarket": 0.15632803,
+      "avgGross": 0.14801068,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.34135747,
+      "cagr": 0.062258933,
+      "maxDD": -0.65278684,
+      "total": 0.56537494,
+      "pf": 1.1394497,
+      "trades": 626,
+      "agitated": 255,
+      "timeInMarket": 0.15633573,
+      "avgGross": 0.14809576,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 0.39726877,
+      "cagr": 0.086789158,
+      "maxDD": -0.65360836,
+      "total": 0.85431182,
+      "pf": 1.2180441,
+      "trades": 371,
+      "agitated": 0,
+      "timeInMarket": 0.14695574,
+      "avgGross": 0.14005761,
+      "bestN": 31,
+      "bestKept": 0.87096774,
+      "bestRetKept": 0.90129945
+     },
+     "2": {
+      "sharpe": 0.25575845,
+      "cagr": 0.028676347,
+      "maxDD": -0.6861825,
+      "total": 0.23339773,
+      "pf": 1.1317282,
+      "trades": 371,
+      "agitated": 0,
+      "timeInMarket": 0.14695574,
+      "avgGross": 0.14013169,
+      "bestN": 31,
+      "bestKept": 0.87096774,
+      "bestRetKept": 0.90155672
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 0.53376646,
+      "cagr": 0.15170186,
+      "maxDD": -0.54970002,
+      "total": 1.8517883,
+      "pf": 1.2156882,
+      "trades": 590,
+      "agitated": 220,
+      "timeInMarket": 0.17222554,
+      "avgGross": 0.16159122,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.32577989,
+      "cagr": 0.05366633,
+      "maxDD": -0.59702971,
+      "total": 0.47382997,
+      "pf": 1.124854,
+      "trades": 590,
+      "agitated": 220,
+      "timeInMarket": 0.17223708,
+      "avgGross": 0.16168768,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 0.46225671,
+      "cagr": 0.11479512,
+      "maxDD": -0.61957876,
+      "total": 1.2395837,
+      "pf": 1.2202027,
+      "trades": 590,
+      "agitated": 220,
+      "timeInMarket": 0.17222554,
+      "avgGross": 0.14724597,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 0.93553503
+     },
+     "2": {
+      "sharpe": 0.29348968,
+      "cagr": 0.043392685,
+      "maxDD": -0.65640375,
+      "total": 0.37048648,
+      "pf": 1.1316849,
+      "trades": 590,
+      "agitated": 220,
+      "timeInMarket": 0.17223708,
+      "avgGross": 0.14732457,
+      "bestN": 31,
+      "bestKept": 1,
+      "bestRetKept": 0.93569257
+     }
+    }
+   },
+   "LINK": {
+    "V0": {
+     "1": {
+      "sharpe": 0.68095807,
+      "cagr": 0.20769666,
+      "maxDD": -0.39393325,
+      "total": 2.5169111,
+      "pf": 1.3176984,
+      "trades": 523,
+      "agitated": 239,
+      "timeInMarket": 0.15341824,
+      "avgGross": 0.14537269,
+      "bestN": 26,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.45397336,
+      "cagr": 0.10838184,
+      "maxDD": -0.44841973,
+      "total": 0.98521245,
+      "pf": 1.2019303,
+      "trades": 523,
+      "agitated": 239,
+      "timeInMarket": 0.15341824,
+      "avgGross": 0.14544955,
+      "bestN": 26,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 0.82461424,
+      "cagr": 0.26296327,
+      "maxDD": -0.29886147,
+      "total": 3.7387145,
+      "pf": 1.5203435,
+      "trades": 284,
+      "agitated": 0,
+      "timeInMarket": 0.14322176,
+      "avgGross": 0.13656287,
+      "bestN": 26,
+      "bestKept": 0.88461538,
+      "bestRetKept": 0.90560846
+     },
+     "2": {
+      "sharpe": 0.69299236,
+      "cagr": 0.20536445,
+      "maxDD": -0.31901288,
+      "total": 2.4718991,
+      "pf": 1.4168006,
+      "trades": 284,
+      "agitated": 0,
+      "timeInMarket": 0.14322176,
+      "avgGross": 0.13663426,
+      "bestN": 26,
+      "bestKept": 0.88461538,
+      "bestRetKept": 0.90577246
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 0.55767062,
+      "cagr": 0.15560071,
+      "maxDD": -0.482136,
+      "total": 1.621481,
+      "pf": 1.2367873,
+      "trades": 482,
+      "agitated": 198,
+      "timeInMarket": 0.16710062,
+      "avgGross": 0.15712426,
+      "bestN": 26,
+      "bestKept": 0.96153846,
+      "bestRetKept": 0.97877273
+     },
+     "2": {
+      "sharpe": 0.35766037,
+      "cagr": 0.0678383,
+      "maxDD": -0.55093002,
+      "total": 0.54866891,
+      "pf": 1.1485419,
+      "trades": 482,
+      "agitated": 198,
+      "timeInMarket": 0.16710062,
+      "avgGross": 0.1572083,
+      "bestN": 26,
+      "bestKept": 0.96153846,
+      "bestRetKept": 0.97889609
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 0.75313057,
+      "cagr": 0.23312621,
+      "maxDD": -0.32792164,
+      "total": 3.0408031,
+      "pf": 1.3959722,
+      "trades": 482,
+      "agitated": 198,
+      "timeInMarket": 0.16710062,
+      "avgGross": 0.14291347,
+      "bestN": 26,
+      "bestKept": 0.96153846,
+      "bestRetKept": 0.93527245
+     },
+     "2": {
+      "sharpe": 0.5937173,
+      "cagr": 0.16432109,
+      "maxDD": -0.35216311,
+      "total": 1.7561586,
+      "pf": 1.2995884,
+      "trades": 482,
+      "agitated": 198,
+      "timeInMarket": 0.16710062,
+      "avgGross": 0.14298594,
+      "bestN": 26,
+      "bestKept": 0.96153846,
+      "bestRetKept": 0.93544515
+     }
+    }
+   },
+   "XLM": {
+    "V0": {
+     "1": {
+      "sharpe": 0.5064758,
+      "cagr": 0.13715067,
+      "maxDD": -0.75059778,
+      "total": 1.5668973,
+      "pf": 1.2497526,
+      "trades": 575,
+      "agitated": 227,
+      "timeInMarket": 0.15721518,
+      "avgGross": 0.14925781,
+      "bestN": 29,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": 0.29275085,
+      "cagr": 0.042216697,
+      "maxDD": -0.83182881,
+      "total": 0.35430593,
+      "pf": 1.1428667,
+      "trades": 575,
+      "agitated": 227,
+      "timeInMarket": 0.15724242,
+      "avgGross": 0.14935857,
+      "bestN": 29,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 0.58481569,
+      "cagr": 0.16709092,
+      "maxDD": -0.71329098,
+      "total": 2.105939,
+      "pf": 1.3801537,
+      "trades": 348,
+      "agitated": 0,
+      "timeInMarket": 0.15524615,
+      "avgGross": 0.1467943,
+      "bestN": 29,
+      "bestKept": 0.86206897,
+      "bestRetKept": 0.90415824
+     },
+     "2": {
+      "sharpe": 0.447669,
+      "cagr": 0.10787596,
+      "maxDD": -0.77691114,
+      "total": 1.1199678,
+      "pf": 1.2810907,
+      "trades": 348,
+      "agitated": 0,
+      "timeInMarket": 0.15524615,
+      "avgGross": 0.14687147,
+      "bestN": 29,
+      "bestKept": 0.86206897,
+      "bestRetKept": 0.90449081
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": 0.5605154,
+      "cagr": 0.17107602,
+      "maxDD": -0.75609929,
+      "total": 2.1845729,
+      "pf": 1.271433,
+      "trades": 540,
+      "agitated": 192,
+      "timeInMarket": 0.16904105,
+      "avgGross": 0.1594699,
+      "bestN": 29,
+      "bestKept": 0.96551724,
+      "bestRetKept": 0.96572357
+     },
+     "2": {
+      "sharpe": 0.3828784,
+      "cagr": 0.080465808,
+      "maxDD": -0.829427,
+      "total": 0.76411496,
+      "pf": 1.1820555,
+      "trades": 540,
+      "agitated": 192,
+      "timeInMarket": 0.16904105,
+      "avgGross": 0.15955516,
+      "bestN": 29,
+      "bestKept": 0.96551724,
+      "bestRetKept": 0.96573421
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 0.59160656,
+      "cagr": 0.17186549,
+      "maxDD": -0.72968823,
+      "total": 2.2003532,
+      "pf": 1.3271308,
+      "trades": 540,
+      "agitated": 192,
+      "timeInMarket": 0.16904105,
+      "avgGross": 0.14923885,
+      "bestN": 29,
+      "bestKept": 0.96551724,
+      "bestRetKept": 0.920124
+     },
+     "2": {
+      "sharpe": 0.43246699,
+      "cagr": 0.10190724,
+      "maxDD": -0.79701333,
+      "total": 1.0376111,
+      "pf": 1.2328347,
+      "trades": 540,
+      "agitated": 192,
+      "timeInMarket": 0.16904105,
+      "avgGross": 0.14931582,
+      "bestN": 29,
+      "bestKept": 0.96551724,
+      "bestRetKept": 0.9202965
+     }
+    }
+   },
+   "LTC": {
+    "V0": {
+     "1": {
+      "sharpe": 0.13015455,
+      "cagr": -0.0078906125,
+      "maxDD": -0.4696139,
+      "total": -0.059534089,
+      "pf": 1.0476392,
+      "trades": 660,
+      "agitated": 283,
+      "timeInMarket": 0.15400997,
+      "avgGross": 0.14471215,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": -0.15848822,
+      "cagr": -0.096305048,
+      "maxDD": -0.66552828,
+      "total": -0.54369822,
+      "pf": 0.94379665,
+      "trades": 660,
+      "agitated": 283,
+      "timeInMarket": 0.15400997,
+      "avgGross": 0.14478936,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V1": {
+     "1": {
+      "sharpe": 0.36547964,
+      "cagr": 0.06874285,
+      "maxDD": -0.40462533,
+      "total": 0.67383685,
+      "pf": 1.1844256,
+      "trades": 377,
+      "agitated": 0,
+      "timeInMarket": 0.14492043,
+      "avgGross": 0.1368987,
+      "bestN": 33,
+      "bestKept": 0.90909091,
+      "bestRetKept": 0.92055509
+     },
+     "2": {
+      "sharpe": 0.19089079,
+      "cagr": 0.013097597,
+      "maxDD": -0.49249875,
+      "total": 0.10608072,
+      "pf": 1.088361,
+      "trades": 377,
+      "agitated": 0,
+      "timeInMarket": 0.14492043,
+      "avgGross": 0.13697104,
+      "bestN": 33,
+      "bestKept": 0.90909091,
+      "bestRetKept": 0.92067513
+     }
+    },
+    "V2a": {
+     "1": {
+      "sharpe": -0.010011813,
+      "cagr": -0.058863495,
+      "maxDD": -0.65855998,
+      "total": -0.37503256,
+      "pf": 0.99476329,
+      "trades": 623,
+      "agitated": 246,
+      "timeInMarket": 0.17117582,
+      "avgGross": 0.15937244,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     },
+     "2": {
+      "sharpe": -0.26359393,
+      "cagr": -0.13815799,
+      "maxDD": -0.79246329,
+      "total": -0.68400087,
+      "pf": 0.91198216,
+      "trades": 623,
+      "agitated": 246,
+      "timeInMarket": 0.17117582,
+      "avgGross": 0.15945865,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 1
+     }
+    },
+    "V2b": {
+     "1": {
+      "sharpe": 0.25522943,
+      "cagr": 0.033179821,
+      "maxDD": -0.41184937,
+      "total": 0.28776513,
+      "pf": 1.1066995,
+      "trades": 623,
+      "agitated": 246,
+      "timeInMarket": 0.17117582,
+      "avgGross": 0.14364537,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 0.95973346
+     },
+     "2": {
+      "sharpe": 0.04661839,
+      "cagr": -0.031779874,
+      "maxDD": -0.50931508,
+      "total": -0.2213797,
+      "pf": 1.0166148,
+      "trades": 623,
+      "agitated": 246,
+      "timeInMarket": 0.17117582,
+      "avgGross": 0.14371876,
+      "bestN": 33,
+      "bestKept": 1,
+      "bestRetKept": 0.95992603
+     }
+    }
+   }
+  }
+ },
+ "reading": [
+  {
+   "variant": "V1",
+   "dPort": 0.14664138,
+   "ciP": [
+    -0.0030464844,
+    0.28455228
+   ],
+   "dUn": 0.015129871,
+   "ciU": [
+    -0.099328511,
+    0.11700475
+   ],
+   "improved": 5,
+   "per": [
+    -0.052595701,
+    0.26088414,
+    -0.39541946,
+    0.022079483,
+    -0.17123064,
+    0.14365617,
+    0.078339892,
+    0.23532509
+   ],
+   "dPort2": 0.26837306,
+   "dUn2": 0.098620305,
+   "candidate": false
+  },
+  {
+   "variant": "V2a",
+   "dPort": -0.018005133,
+   "ciP": [
+    -0.16886354,
+    0.14303241
+   ],
+   "dUn": -0.025096488,
+   "ciU": [
+    -0.10231665,
+    0.059536822
+   ],
+   "improved": 4,
+   "per": [
+    0.00015006471,
+    -0.039225038,
+    0.046054775,
+    0.036395466,
+    -0.034732955,
+    -0.12328745,
+    0.054039605,
+    -0.14016637
+   ],
+   "dPort2": 0.014549645,
+   "dUn2": 0.0029291173,
+   "candidate": false
+  },
+  {
+   "variant": "V2b",
+   "dPort": 0.12029457,
+   "ciP": [
+    0.022388186,
+    0.21655073
+   ],
+   "dUn": 0.02484682,
+   "ciU": [
+    -0.05094018,
+    0.10080892
+   ],
+   "improved": 5,
+   "per": [
+    -0.010317128,
+    0.18235637,
+    -0.18514037,
+    0.035740261,
+    -0.1062427,
+    0.072172494,
+    0.085130763,
+    0.12507487
+   ],
+   "dPort2": 0.20843178,
+   "dUn2": 0.082524921,
+   "candidate": false
+  }
+ ],
+ "hypotheses": {
+  "A": "non soutenue",
+  "B": "indices, non démontrée"
+ }
+}

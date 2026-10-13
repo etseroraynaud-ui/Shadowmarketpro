@@ -3,6 +3,12 @@
 Espace de travail pour tester, diagnostiquer et optimiser le Shock Engine (script Pine
 « Shock Engine Intraday 15/day ») sur BTC/USD, sans surajuster.
 
+**Référence actuelle (depuis le 2026-10-13) : Shock Engine V1, régime calme seul** — E2 sans
+nouvelles entrées en régime agité, portefeuille BTC/ETH 50/50 ; E2 (deux régimes) est son benchmark
+historique. Fiche : `research/reports/reference/shock-engine-v1.md` (générée par
+`research/shock/reference.ts`). À ne pas confondre avec la v1 historique du dépôt (miroir short sans
+condition, `research/reports/btc-eth-portfolio/`).
+
 ## Données
 
 `research/data/btcusd_{5,15,30,60}m.csv.gz` : barres BTC/USD Bitstamp, 2012 → octobre 2026,
@@ -104,6 +110,75 @@ Newey–West et bootstrap par mois :
 
 ```
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/residual-alpha.ts
+```
+
+Couche probabiliste (plan : `research/preregistration/probabilistic-layer.md`, commité avant tout
+calcul ; module indépendant `research/proba/`, désactivé pour toute décision de trading ; rapport dans
+`research/reports/proba/`). Probabilité de gain, espérance en R, P(R ≥ 2) et continuation à 15 min,
+1 h, 4 h, 16 h des 1 311 trades E2, walk-forward trimestriel purgé contre une prévision naïve ; modèle
+figé et journal prospectif. Résultat : aucun apport démontré hors entraînement. Détails et commandes :
+[`proba/README.md`](proba/README.md).
+
+```
+npm run research:proba
+npm run research:proba:score -- --asset btc --at 2026-09-21T20:30:00Z
+```
+
+Régime directionnel avant le signal et coût des faux départs (plan :
+`research/preregistration/regime-fakeout.md`, commité avant tout calcul ; rapport dans
+`research/reports/regime-fakeout/`). Efficiency Ratio 5 h (et 24 h), ADX et fréquence historique des
+faux départs avant chaque entrée, en percentile causal sur 90 jours ; matrice de rendement
+conditionnel sur les 1 311 trades BTC/ETH et sur les 8 actifs vierges ; variantes figées d'avance
+(anti-range, confirmation retardée, sorties du jeu agité en range) rejouées en portefeuille complet
+sans modifier le moteur, test confirmatoire sur les actifs vierges. Résultat : aucun régime ne
+concentre le coût des faux départs, aucune variante ne démontre d'avantage ; V0 reste la référence.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/regime-fakeout.ts
+```
+
+Anatomie des pertes (plan : `research/preregistration/loss-anatomy.md`, commité avant tout calcul ;
+rapport dans `research/reports/loss-anatomy/`). Perdants classés selon la MFE atteinte avant la sortie
+(sans continuation, continuation partielle, gain rendu), gains rendus des gagnants, bornes « entrées »
+et « sorties », et un contrefactuel de premier ordre (stop au point mort après +1 R), sur BTC/ETH et
+sur les 8 actifs vierges. Descriptif : aucune règle n'est modifiée.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/loss-anatomy.ts
+```
+
+Architecture du régime agité (plan : `research/preregistration/agitated-regime.md`, commité avant
+toute simulation ; rapport dans `research/reports/agitated-regime/`). Diagnostics (continuation après
+le signal, reprise après le stop, excursions en ATR) et trois variantes rejouées en portefeuille
+complet : sans entrées en régime agité, stop agité à 3,3 ATR à taille inchangée, et à risque monétaire
+égal (taille par jeu ajustée dans une copie de la boucle de `simulate`, sans modifier le moteur).
+Exploratoire (BTC/ETH et 8 cryptos déjà consultées) ; aucune variante candidate.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/agitated-regime.ts
+```
+
+Invalidation précoce (plan : `research/preregistration/early-invalidation.md`, commité avec les
+mesures et la boucle de rejeu avant tout calcul ; rapport dans `research/reports/early-invalidation/`).
+Tous les trades encore ouverts 1 à 4 bougies après l'entrée, groupés par ce qui est connu à cet
+instant (confirmation, retracement du choc, réintégration du niveau cassé, volume), avec leur issue
+et la valeur d'une sortie à cet instant ; puis une seule règle (fermer à la 4e bougie si le prix n'a
+pas dépassé l'entrée) rejouée en portefeuille complet dans une copie de la boucle de `simulate`.
+Exploratoire (BTC/ETH et 8 cryptos déjà consultées) ; pas de candidate.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/early-invalidation.ts
+```
+
+V1-calme figée et surajustement de sélection (plan : `research/preregistration/calm-only.md`, commité
+avec la règle figée `research/lib/calm-only.ts` et les mesures `research/lib/overfit.ts` avant tout
+calcul ; rapport dans `research/reports/calm-only/`). Les 16 configurations réellement rejouées en
+portefeuille BTC/ETH sont rejouées à nouveau (chacune redonne son Sharpe publié) ; CSCV-PBO sur 16 blocs,
+walk-forward à recalage annuel, Sharpe dégonflé du Sharpe absolu (avec la lignée des 206 candidats
+de la recherche des réglages) et du gain sur E2. Verdict : candidate fragile ; E2 reste la référence.
+
+```
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/calm-only.ts
 ```
 
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement

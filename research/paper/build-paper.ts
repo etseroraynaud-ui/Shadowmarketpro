@@ -3,7 +3,8 @@
 // - lib/research/btc-eth-portfolio.json (résumé publié par research/shock/publish-portfolio.ts) ;
 // - research/reports/residual-alpha/residual-alpha.json ;
 // - research/reports/e2-falsification/test-c.json (test C, marchés synthétiques) ;
-// - research/reports/shock-15m-wf-plateau-36-3-e2.md (walk-forward, ligne du préréglage fixe) ;
+// - research/reports/shock-15m-wf-plateau-36-3-calm.md (walk-forward, ligne du préréglage fixe) ;
+// - research/reports/calm-only/calm-only.json (risque de sélection des règles : CSCV-PBO, Sharpe dégonflé) ;
 // - research/preregistration/e2-forward.md (date de coupure du test prospectif) ;
 // - app/live/accounts.ts (date de départ du bot testnet).
 //
@@ -29,18 +30,24 @@ const text = (f: string) => readFileSync(join(ROOT, f), 'utf8')
 const P = json('lib/research/btc-eth-portfolio.json')
 const RA = json('research/reports/residual-alpha/residual-alpha.json')
 const TC = json('research/reports/e2-falsification/test-c.json')
-const WF = text('research/reports/shock-15m-wf-plateau-36-3-e2.md')
+const WF = text('research/reports/shock-15m-wf-plateau-36-3-calm.md')
+const CO = json('research/reports/calm-only/calm-only.json')
+// Test C (marchés synthétiques) compare la condition de tendance sur les shorts dans les règles d'avant la
+// restriction au régime calme : son chemin identité se rapproche du benchmark de ces règles.
+const PREV = json('research/reports/btc-eth-portfolio-e2/portfolio_summary.json')
 const FWD = text('research/preregistration/e2-forward.md')
 const ACC = text('app/live/accounts.ts')
 
 // Refus de composer : résultats d'une autre variante, contrôles en échec, ou sources désaccordées.
-if (P.variant !== 'e2') throw new Error('le résumé publié n\'est pas celui de la spécification E2')
+if (P.variant !== 'calm') throw new Error('le résumé publié n\'est pas celui de la spécification publiée (calm)')
+if (!CO.checks.every((c: { ok: boolean }) => c.ok)) throw new Error('contrôles de l\'étude de sélection en échec')
+if (Math.abs(CO.configurations.find((c: { key: string }) => c.key === 'calm').sharpe - P.series.portfolio.m.sharpe) > 1e-6) throw new Error('étude de sélection ≠ portefeuille publié')
 if (P.manifest.checksPassed !== P.manifest.checksTotal) throw new Error('contrôles du portefeuille en échec')
 if (!RA.checks.every((c: { ok: boolean }) => c.ok)) throw new Error('contrôles de l\'alpha résiduel en échec')
 if (RA.period[0] !== P.commonPeriod.start || RA.period[1] !== P.commonPeriod.end) throw new Error('période de l\'alpha résiduel ≠ période du portefeuille')
 if (Math.abs(RA.main.alphaAnn - P.residualAlpha.alphaAnn) > 1e-9) throw new Error('alpha résiduel publié ≠ rapport')
 const tcId = TC.identity.pf.e2
-if (Math.abs(tcId.sharpe - P.series.portfolio.m.sharpe) > 0.01) throw new Error('chemin identité du test C ≠ portefeuille publié')
+if (Math.abs(tcId.sharpe - PREV.series.portfolio.m.sharpe) > 0.01) throw new Error('chemin identité du test C ≠ benchmark des règles testées')
 
 // ---------------------------------------------------------------- mise en forme
 const minus = (s: string) => s.replace(/^-/, '\\ensuremath{-}')
@@ -117,7 +124,7 @@ const TABLE_HEADLINE = table({
     row('Median holding time (hours)', fx(F.trades.holdMedianH, 1), fx(B.trades.holdMedianH, 1), fx(E.trades.holdMedianH, 1), NA),
     row('Time in market', pct(F.expo.timeInMarket, 0), pct(B.expo.timeInMarket, 0), pct(E.expo.timeInMarket, 0), '100\\%'),
   ].join('\n'),
-  notes: `Historical simulation of specification E2 after modelled transaction costs; not live performance. Daily UTC close-to-close returns, annualised with $\\sqrt{365.25}$, zero risk-free rate. Commission 0.045\\% per order; no slippage, funding or leverage. Bitcoin and Ether columns are the two halves of the portfolio, each measured on its own capital. Buy-and-hold: half of the capital in each coin on ${longDate(BH.from)}, no rebalancing, no costs. Win rate, payoff and profit factor are computed on closed trades; the portfolio column pools the trades of both markets.`,
+  notes: `Historical simulation after modelled transaction costs; not live performance. Daily UTC close-to-close returns, annualised with $\\sqrt{365.25}$, zero risk-free rate. Commission 0.045\\% per order; no slippage, funding or leverage. Bitcoin and Ether columns are the two halves of the portfolio, each measured on its own capital. Buy-and-hold: half of the capital in each coin on ${longDate(BH.from)}, no rebalancing, no costs. Win rate, payoff and profit factor are computed on closed trades; the portfolio column pools the trades of both markets.`,
 })
 
 const BHI = (iso: string) => C.eqBuyHold[Math.round((Date.parse(`${iso}T00:00:00Z`) - d0) / 864e5)] as number
@@ -327,6 +334,9 @@ ${tcRows.map(r => row(r.L, fx(r.pPos), fx(r.p95, 3), fx(r.hist, 3), pct(r.pct, 1
 \end{table}`
 
 const betas = RA.main.betas as { name: string; beta: number; t: number }[]
+const closest = betas.reduce((a, b) => (Math.abs(b.t) > Math.abs(a.t) ? b : a))
+const closestBench = (RA.benchmarks as { id: string; '50/50': { sharpe: number } }[]).find(b => b.id === closest.name)
+const closestUse = closestBench ? (closestBench['50/50'].sharpe < 0 ? 'loses money' : closestBench['50/50'].sharpe < 0.1 ? `barely breaks even (Sharpe ${fx(closestBench['50/50'].sharpe)})` : `is profitable (Sharpe ${fx(closestBench['50/50'].sharpe)})`) : ''
 const FIGURE_BETAS = String.raw`\begin{figure}[tbp]
 \centering
 \begin{tikzpicture}
@@ -336,7 +346,7 @@ ${betas.map(b => `  (${b.beta.toFixed(4)},${FACTOR[b.name]}) +- (${(1.96 * Math.
 };
 \end{axis}
 \end{tikzpicture}
-\caption{Factor loadings of the portfolio in the pre-set model M2. The largest loading is on the intraday breakout ($t=${fx(betas.find(b => b.name === 'DONCH15 96/48')!.t)}$), which loses money on its own after costs.}\label{fig:betas}
+\caption{Factor loadings of the portfolio in the pre-set model M2. The largest loading is on ${FACTOR[closest.name].toLowerCase().replace('ether', 'Ether').replace('bitcoin', 'Bitcoin')} ($t=${fx(closest.t)}$)${closestBench ? `, which ${closestUse} on its own after costs` : ''}.}\label{fig:betas}
 \end{figure}`
 
 // ---------------------------------------------------------------- valeurs du texte
@@ -350,6 +360,13 @@ const tests = json('research/reports/e2-falsification/tests-ab.json')
 const tbMain = need((tests.testB as { kmin: number; btc: { p: number }; eth: { p: number }; eq: { p: number } }[]).find(x => x.kmin === tb.minShiftDays), 'test B, décalage minimal')
 if (Math.abs(tbMain.eq.p - tb.p) > 1e-12) throw new Error('test B : rapport ≠ résumé publié')
 const sub = P.stability.subPeriods
+// Transferts zéro-shot hors BTC/ETH : phrase tirée des verdicts (même règle que la table de transfert).
+const others = ([['sol', 'Solana'], ['gold', 'gold'], ['tao', 'TAO']] as const).map(([k, name]) => ({ name, v: verdictOf(P.evidence[k] as Ev) }))
+const byV = (v: string) => others.filter(o => o.v === v).map(o => o.name)
+const list = (xs: string[]) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`)
+const zsParts = [byV('partial').length ? `partial on ${list(byV('partial'))} (strategy criteria met, event study not)` : '', byV('fail').length ? `fail on ${list(byV('fail'))}` : '', byV('pass').length ? `pass on ${list(byV('pass'))}` : ''].filter(Boolean)
+const zsSentence = `they are ${list(zsParts)}, and we report these results`
+const zsAbstract = `${[byV('fail').length ? list(byV('fail')) : '', byV('partial').length ? `partial results on ${list(byV('partial'))}` : ''].filter(Boolean).join('; ')}`
 const vA = P.variants
 
 const V: Record<string, string> = {
@@ -360,7 +377,7 @@ const V: Record<string, string> = {
   SR_PF: fx(F.m.sharpe), CAGR_PF: pct(F.m.cagr), MDD_PF: pct(F.m.maxDD),
   SR_BH: fx(BH.sharpe), CAGR_BH: pct(BH.cagr), MDD_BH: pct(BH.maxDD),
   RA_ALPHA: pct(RA.main.alphaAnn), RA_T: fx(RA.main.t), RA_UNEXPL: pct(RA.main.unexplained, 0), RA_R2: fx(RA.main.r2),
-  RA_BOOT_N: int(RA.bootstrap.reps), RA_CI_LO: pct(RA.bootstrap.p5), RA_CI_HI: pct(RA.bootstrap.p95), RA_T_GRID: fx(S.S1.t),
+  RA_CI_LO: pct(RA.bootstrap.p5), RA_CI_HI: pct(RA.bootstrap.p95), RA_T_GRID: fx(S.S1.t),
   WF_SR: wfMain[4], WF_PRESET: wfPreset[4], WF_WINDOWS: String(P.evidence.walkForward.windows),
   SHORTS: int(F.trades.short), TRADES: int(F.trades.trades),
   REBAL_DIFF: fx(Math.max(Math.abs(vA.B.m.sharpe - vA.A.m.sharpe), Math.abs(vA.C.m.sharpe - vA.A.m.sharpe))),
@@ -379,6 +396,20 @@ const V: Record<string, string> = {
   FWD_START: longDate(P.forward.start), FWD_CUTOFF: longDate(cutoff), TESTNET_SINCE: longDate(testnet),
   TRADES_PER_YEAR: fx(P.capacity.tradesPerYear.total, 0),
   COMMIT: P.manifest.commit.slice(0, 7), PARAM_HASH: P.parametersSha256.slice(0, 12), CHECKS_TOTAL: String(P.manifest.checksTotal),
+  ZS_ABSTRACT: zsAbstract, ZS_SENTENCE: zsSentence,
+  H2_CMP: sub.secondHalf.portfolio.sharpe < sub.firstHalf.portfolio.sharpe ? 'weaker' : 'stronger', CORR_CMP: sub.secondHalf.corr > sub.firstHalf.corr ? 'rises' : 'falls',
+  RA_CLOSEST: `The largest loading is on ${FACTOR[closest.name].toLowerCase().replace('ether', 'Ether').replace('bitcoin', 'Bitcoin')}${closestBench ? `, which shares part of the timing of the strategy but ${closestUse} on its own after costs` : ''}.`,
+  RA_BOOT_SENT: RA.bootstrap.pNonPositive === 0 ? `no bootstrap history out of ${int(RA.bootstrap.reps)} produced $\\hat\\alpha\\le0$` : `${pct(RA.bootstrap.pNonPositive, 1)} of ${int(RA.bootstrap.reps)} bootstrap histories produced $\\hat\\alpha\\le0$`,
+  RA_GRID_SENT: S.S1.t >= 3 ? 'leaves the conclusion unchanged' : 'weakens the conclusion',
+  RA_VERDICT: P.residualAlpha.verdict === 'demonstrated' ? 'residual alpha demonstrated, in-sample' : P.residualAlpha.verdict === 'indicative' ? 'indicative' : 'not demonstrated',
+  WF_TRADES: P.evidence.walkForward.trades,
+  PBO: pct(CO.cscv.main.pbo, 0), PBO_N: String(CO.configurations.length), PBO_SPLITS: int(CO.cscv.main.splits), PBO_ABOVE: pct(1 - CO.cscv.main.pbo, 0),
+  CALM_CHOSEN: pct(CO.cscv.main.chosen.find((c: { id: number }) => c.id === 11).share, 0), CALM_RANK: `${Math.round(CO.cscv.main.chosen.find((c: { id: number }) => c.id === 11).meanOosRank * 100)}th`,
+  YEARS_BETTER: `${(CO.walkForward.years as { calm: number; e2: number }[]).filter(y => y.calm > y.e2).length} of ${CO.walkForward.years.length}`,
+  GAIN_IR: fx(CO.dsr.diff.ir), GAIN_PSR: pct(CO.dsr.diff.psr0, 1), GAIN_DSR: pct(CO.dsr.diff.p, 0), GAIN_DSR2: pct(CO.dsr.diff2.p, 0), GAIN_N: String(CO.dsr.diff.N),
+  GAIN_WF: fx(CO.walkForward.oos.calm - CO.walkForward.oos.e2), GAIN_WF_LO: fx(CO.walkForward.ciCalm[0]), GAIN_WF_HI: fx(CO.walkForward.ciCalm[1]),
+  DSR_SD: fx(CO.dsr.sdB), DSR_BREAKEVEN: int(CO.dsr.calm.breakevenB), DSR_N222: pct(CO.dsr.calm.B.find((b: { N: number }) => b.N === 222).p, 0),
+  TESTNET_RULES: 'it applies the short-entry condition but not yet the calm-regime restriction',
   TABLE_HEADLINE, TABLE_ANNUAL, TABLE_FRICTIONS, TABLE_TRANSFER, TABLE_NEIGH, TABLE_ALPHA,
   FIGURE_EQUITY, FIGURE_DRAWDOWN, FIGURE_ROLLING, FIGURE_TESTC, FIGURE_BETAS,
 }

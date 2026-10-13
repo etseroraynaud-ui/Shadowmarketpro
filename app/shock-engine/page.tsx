@@ -5,12 +5,12 @@ import SiteHeader from '../_site/SiteHeader'
 import HeroChart from '../_site/HeroChart'
 import { CountUp, SeriesPanel, SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Kpis, Metrics, Section, SimNote, SiteFooter, StatusList, Table, Verdict } from '../_site/ui'
-import { BH, BH_NAME, COLORS, DOSSIER, DOWNLOADS, P, PAPER, RA, SIM, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
+import { BH, BH_NAME, COLORS, DOSSIER, DOWNLOADS, P, PAPER, EXECUTIONS, RA, SIM, TESTNET_RULES_PENDING, TESTNET_SINCE, longestDrawdown, raVerdict, sample, sampleStart, series, verdictOf } from '../_site/data'
 import { int, month, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
   title: 'Shock Engine — ShadowMarketPro™',
-  description: 'A systematic 15-minute strategy that trades the continuation after abnormal moves on Bitcoin and Ethereum, with short positions only in bearish daily trends. Historical simulation after modeled transaction costs, not live performance.',
+  description: 'A systematic 15-minute strategy that trades the continuation after abnormal moves on Bitcoin and Ethereum, entering only in calm volatility regimes, with short positions only in bearish daily trends. Historical simulation after modeled transaction costs, not live performance.',
 }
 
 const EV = P.evidence
@@ -98,8 +98,8 @@ export default function ShockEnginePage() {
             {[
               { n: '01', t: 'Shock', p: 'Detects an abnormal directional move: a 15-minute return far outside its recent distribution, breaking the recent range.', d: 'M3 17l5-5 4 4 8-9' },
               { n: '02', t: 'Trend', p: 'Confirms that the move is aligned with the higher-timeframe structure, with a decisive candle and active volume.', d: 'M4 19h16M7 15l3-4 3 2 4-6' },
-              { n: '03', t: 'Regime', p: 'Short positions are only enabled when the daily trend regime is bearish. Long and short parameter sets also adapt to calm or agitated volatility.', d: 'M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5' },
-              { n: '04', t: 'Risk', p: 'One position per market, no leverage. Stops and exits scale with volatility; an opposite shock closes the trade.', d: 'M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z' },
+              { n: '03', t: 'Regime', p: 'New positions are only opened when daily volatility is calm, and short positions only when the daily trend regime is bearish.', d: 'M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5' },
+              { n: '04', t: 'Risk', p: 'One position per market, no leverage. The stop scales with volatility; an opposite shock closes the trade.', d: 'M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z' },
             ].map(s => (
               <div className="s-pipe-step s-reveal" key={s.n}>
                 <div className="s-card s-card-hover">
@@ -213,10 +213,10 @@ export default function ShockEnginePage() {
             { label: 'Modeled transaction costs', state: 'ok', note: 'commission 0.045 % per order; cost stress published' },
             { label: 'BTC / ETH evidence', state: 'ok', note: 'event study, placebo entries, delayed entries, two ETH data sources' },
             { label: 'Robustness testing', state: 'ok', note: 'parameter neighborhoods, cost stress, resampled histories' },
-            { label: 'Forward validation', state: 'wait', note: `pre-registered; observation starts ${P.forward.start}` },
-            ...(TESTNET_SINCE ? [{ label: 'Testnet bot', state: 'wait' as const, note: <>public version, play money, since {TESTNET_SINCE} · <Link className="s-link" href="/live">live page</Link></> }] : []),
+            { label: 'Forward validation', state: 'wait', note: `short-entry condition pre-registered, observation from ${P.forward.start}; calm-regime restriction not yet` },
+            ...(TESTNET_SINCE ? [{ label: 'Testnet bot', state: 'wait' as const, note: <>play money, since {TESTNET_SINCE}{TESTNET_RULES_PENDING ? '; does not yet apply the calm-regime restriction' : ''} · <Link className="s-link" href="/live">live page</Link></> }] : []),
             { label: 'Live track record', state: 'no', note: 'not available' },
-            { label: 'Capacity / market impact', state: 'wait', note: <>execution costs measured on Binance for all 2,474 executions · <a className="s-link" href={DOSSIER} download>dossier</a>; Hyperliquid and own impact need live trading</> },
+            { label: 'Capacity / market impact', state: 'wait', note: <>execution costs measured on Binance for all {EXECUTIONS} executions · <a className="s-link" href={DOSSIER} download>dossier</a>; Hyperliquid and own impact need live trading</> },
           ]} />
           <p className="s-small">Slippage and perpetual funding are not in the headline figures.</p>
         </Section>

@@ -1,7 +1,9 @@
 // Publie les résultats du portefeuille BTC/ETH du Shock Engine pour le site, sans rien recalculer.
-// Spécification publique depuis octobre 2026 : variante E2 (shorts seulement en régime de tendance
-// journalier baissier), produite par `research/shock/portfolio.ts --variant e2`. Les résultats de la
-// v1 restent dans research/reports/btc-eth-portfolio/ et ne sont plus publiés.
+// Spécification publique depuis le 2026-10-13 : nouvelles positions seulement en régime de volatilité
+// calme, shorts seulement en régime de tendance journalier baissier (research/lib/calm-only.ts),
+// produite par `research/shock/portfolio.ts --variant calm`. Les résultats de E2 (deux régimes,
+// research/reports/btc-eth-portfolio-e2/) et de la v1 (research/reports/btc-eth-portfolio/) restent
+// comme benchmarks et ne sont plus publiés.
 // - lib/research/btc-eth-portfolio.json : résumé et séries des graphiques, lus par les pages
 //   /, /shock-engine, /shock-engine/portfolio, /research et /institutional ;
 // - public/research/btc-eth-portfolio/ : papier de recherche (PDF, research/paper/build-paper.ts),
@@ -20,7 +22,7 @@ import * as PL from '../lib/portfolio.ts'
 import { DEFAULT_PARAMS } from '../../lib/strategies/shock/params.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
-const SRC = join(ROOT, 'research/reports/btc-eth-portfolio-e2')
+const SRC = join(ROOT, 'research/reports/btc-eth-portfolio-calm')
 const PUB = join(ROOT, 'public/research/btc-eth-portfolio')
 const LIB = join(ROOT, 'lib/research')
 
@@ -28,7 +30,7 @@ const summary = JSON.parse(readFileSync(join(SRC, 'portfolio_summary.json'), 'ut
 const manifest = JSON.parse(readFileSync(join(SRC, 'shock-engine-manifest.json'), 'utf8'))
 // Refus de publier : contrôle de reproduction ou de cohérence en échec, ou résultats d'une autre variante.
 if (manifest.sanityChecks.failed.length) throw new Error(`contrôles en échec : ${manifest.sanityChecks.failed.join(', ')}`)
-if (summary.variant !== 'e2' || manifest.variant !== 'e2') throw new Error('les résultats à publier ne sont pas ceux de la spécification publique (variante e2)')
+if (summary.variant !== 'calm' || manifest.variant !== 'calm') throw new Error('les résultats à publier ne sont pas ceux de la spécification publique (variante calm)')
 if (!manifest.validatedReference.every((r: { reproduced: boolean }) => r.reproduced)) throw new Error('sleeves non reproduites à l\'identique')
 
 const csv = (f: string) => {

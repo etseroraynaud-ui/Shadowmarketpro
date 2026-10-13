@@ -16,6 +16,8 @@
     "research:compare-tv": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/compare-tv.ts",
     "research:regimes": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/regime-wf.ts",
     "research:pine": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/export-pine.ts",
+    "research:proba": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/proba/run.ts",
+    "research:proba:score": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/proba/score.ts",
     "research:publish": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/data/publish-site.ts && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/export-presets.ts && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/export-pine.ts"
   },
   "dependencies": {

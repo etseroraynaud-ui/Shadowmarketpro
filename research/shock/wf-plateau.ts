@@ -45,7 +45,10 @@ const MIN_TRADES = Number(opt('min', '20'))
 const BASE = opt('base', 'preset') as 'preset' | 'script' | 'script-long'
 // --e2 : shorts autorisés seulement en régime de tendance journalier baissier (research/lib/e2.ts),
 // pour toutes les configurations de la grille et le préréglage. Sans l'option, rien ne change.
-const E2 = args.includes('--e2')
+// --calm : spécification publiée depuis le 2026-10-13, E2 sans nouvelles entrées en régime agité
+// (research/lib/calm-only.ts) : le régime agité n'est jamais tradé ; implique --e2.
+const CALM = args.includes('--calm')
+const E2 = args.includes('--e2') || CALM
 const COSTS: Costs = { capital: 10000, qtyPct: 100, commissionPct: 0.045, slippageTicks: 0, slippagePct: 0, mintick: 1, leverage: 1, maintenancePct: 0.5, fundingPct: 0 }
 
 const K = [2.0, 2.4, 2.8, 3.2]
@@ -75,7 +78,8 @@ const m = marketFor(bars, 15, 1)
 const preset = adaptivePreset(15, 1)
 const { select: presetSelect, agitated } = selectFor(preset, m, daily)
 const TREND = E2 ? trendDown(bars, daily) : null
-const ov = (sets: ShockParams[], sel: Int8Array | null) => (TREND ? engineEntries(m, sets, sel, TREND) : undefined)
+const dropAgitated = (o: { long: Uint8Array; short: Uint8Array }) => ({ long: o.long.map((x, i) => (x && regimeOf(i) === 1 ? 0 : x)), short: o.short.map((x, i) => (x && regimeOf(i) === 1 ? 0 : x)) })
+const ov = (sets: ShockParams[], sel: Int8Array | null) => (TREND ? (CALM ? dropAgitated(engineEntries(m, sets, sel, TREND)) : engineEntries(m, sets, sel, TREND)) : undefined)
 const regimeOf = (i: number): 0 | 1 | -1 => (Number.isFinite(agitated![i]) ? (agitated![i] ? 1 : 0) : -1)
 const day = (t: number) => new Date(t).toISOString().slice(0, 10)
 const idxAt = (t: number) => { let lo = 0, hi = bars.n; while (lo < hi) { const md = (lo + hi) >> 1; if (bars.t[md] < t) lo = md + 1; else hi = md } return lo }
@@ -189,7 +193,7 @@ const row = (name: string, r: ReturnType<typeof simulate>) => {
 const table = (h: string[], rows: string[][]) => { out(`| ${h.join(' | ')} |`); out(`| ${h.map((_, k) => (k ? '---:' : '---')).join(' | ')} |`); for (const r of rows) out(`| ${r.join(' | ')} |`) }
 
 const BASE_TXT = { preset: 'réglages non optimisés : ceux du préréglage du bot (choisis sur 2017-2026, fuite d\'information vers les tests)', script: 'réglages non optimisés : valeurs par défaut du script (mode High Activity coupé), longs et shorts', 'script-long': 'réglages non optimisés : valeurs par défaut du script (mode High Activity coupé), longs seulement' }[BASE]
-out(`# Walk-forward ${TRAIN / 12} ans / ${TEST} mois, réglages choisis sur plateaux · adaptatif 15 min · ${BASE}${E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`); out()
+out(`# Walk-forward ${TRAIN / 12} ans / ${TEST} mois, réglages choisis sur plateaux · adaptatif 15 min · ${BASE}${CALM ? ' · régime calme seul, shorts en régime de tendance baissier' : E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`); out()
 out(`Base : ${BASE_TXT}.`); out()
 out(`BTC/USD Bitstamp 15 min. Calibration sur les ${TRAIN} mois précédant chaque test, test de ${TEST} mois, pas de ${TEST} mois, de ${FROM} au ${day(bars.t[last])} (${wins.length} fenêtres). Frais : 0,045 % par ordre (taker Hyperliquid), sans levier ni financement. Les régimes de volatilité (calme / agité) sont ceux du bot, calculés sur des journées closes.`); out()
 out(`Grille par régime : seuil du choc ${K.join(' / ')} × stop ${STOP.join(' / ')} ATR × stop suiveur ${TRAIL.map(x => (x >= 50 ? 'sans' : x)).join(' / ')} ATR, soit ${grid.length} réglages ; les autres réglages restent ceux du préréglage. Note d'un réglage : Sharpe quotidien sur la calibration (0 s'il a moins de ${MIN_TRADES} trades). Note de plateau : moyenne sur le réglage et ses voisins immédiats (jusqu'à 27). Si le meilleur plateau n'est pas positif, le régime n'est pas tradé pendant le test.`); out()
@@ -254,7 +258,7 @@ out()
 const changes = (r: 0 | 1) => wins.slice(1).filter((w, k) => label(w.plateau[r]) !== label(wins[k].plateau[r])).length
 out(`Changements de réglages d'une fenêtre à la suivante : ${changes(0)} sur ${wins.length - 1} en régime calme, ${changes(1)} sur ${wins.length - 1} en régime agité.`); out()
 
-const file = new URL(`../reports/shock-15m-wf-plateau-${TRAIN}-${TEST}${BASE === 'preset' ? '' : `-${BASE}`}${E2 ? '-e2' : ''}.md`, import.meta.url).pathname
+const file = new URL(`../reports/shock-15m-wf-plateau-${TRAIN}-${TEST}${BASE === 'preset' ? '' : `-${BASE}`}${CALM ? '-calm' : E2 ? '-e2' : ''}.md`, import.meta.url).pathname
 writeFileSync(file, L.join('\n') + '\n')
 // Courbes quotidiennes pour le graphique.
 const curve = dayEnd.filter(i => i >= oosStart).map(i => ({ t: bars.t[i], wf: wfPlateau.equity[i] / COSTS.capital, best: wfBest.equity[i] / COSTS.capital, fixed: fixed.equity[i] / COSTS.capital, bh: bars.c[i] / bars.c[oosStart] }))

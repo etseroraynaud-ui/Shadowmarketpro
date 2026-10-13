@@ -1,5 +1,28 @@
 # Carnets L2 historiques Binance USDⓈ-M contre Hyperliquid, aux instants du Shock Engine
 
+> **Mise à jour du 2026-10-13 — règles publiées (entrées en régime calme seulement).** Sur les jours
+> gratuits, les règles publiées comptent **9 exécutions** (BTC : entrée du 2025-05-01 et stop du
+> 2025-11-01 ; ETH : les 7 mêmes qu'avant). Reconstruction par fenêtre de 10 min, 1 rupture sur 9
+> (ETH, 2026-05-01, entrée). Médianes à T + 0,5 s :
+>
+> | | BTC Binance | BTC Hyperliquid | ETH Binance | ETH Hyperliquid |
+> |---|---|---|---|---|
+> | spread | 0,01 pb | 0,10 pb | 0,05 pb | 0,44 pb |
+> | profondeur < 3 pb (médiane, min.) | 5,8 M$ (4,7) | 0,2 M$ (0) | 2,3 M$ (0,4) | 0,7 M$ (0,01) |
+> | profondeur < 5 pb | 8,7 M$ (6,9) | 0,2 M$ (0) | 3,0 M$ (1,0) | 2,3 M$ (0,3) |
+> | profondeur < 10 pb | 22,1 M$ (14,9) | 0,2 M$ (0) | 6,5 M$ (2,5) | 5,8 M$ (2,1) |
+> | IOC 250 k$ : rempli, coût | 2/2, 0,00 pb | 1/2, 1,05 pb | 7/7, 0,17 pb | 7/7, 0,60 pb |
+> | IOC 500 k$ | 2/2, 0,00 pb | 0/2 | 7/7, 0,54 pb | 7/7, 0,97 pb |
+> | IOC 1 M$ | 2/2, 0,20 pb | 0/2 | 7/7, 1,09 pb | 7/7, 2,05 pb |
+> | IOC 2,5 M$ | 2/2, 0,67 pb | 0/2 | 7/7, 1,47 pb | 6/7, 3,02 pb |
+> | retrait de 50 %, IOC 1 M$ | 0,59 pb | — | 1,38 pb | — |
+> | milieu Binance − milieu Hyperliquid | médiane −2,9 pb (−4,8 ; −1,0) | | −1,5 pb (−8,3 ; +0,3) | |
+>
+> Sur BTC, les 20 niveaux visibles de Hyperliquid couvrent 1,7 à 2,1 pb et contenaient au plus
+> 0,44 M$ : ρ n'est pas mesurable pour BTC. ETH : ρ ≈ 0,77 à 5 pb (inchangé). Les colonnes BTC, sur
+> deux cas, illustrent sans estimer. Les sections suivantes décrivent les 13 exécutions des règles
+> précédentes (rédigé le 2026-10-12).
+
 Rédigé le 2026-10-12. Jours gratuits de Tardis (1er du mois), mêmes 13 exécutions que
 `hl-books-feasibility.md` : mêmes instants, sens et tailles. Script :
 `research/execution/binance-l2-free-days.ts`. Lignes par exécution hors dépôt. Aucun abonnement,

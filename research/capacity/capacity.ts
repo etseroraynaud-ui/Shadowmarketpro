@@ -15,7 +15,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import * as P from '../lib/portfolio.ts'
-import { BINANCE_START, KEYS, NAMES, OUT, crossing, loadE2, monthDraws, netDaily, portfolio, q, sleeveDaily, statsOf, windowOf } from './lib.ts'
+import { BINANCE_START, KEYS, NAMES, OUT, crossing, loadPublished, monthDraws, netDaily, portfolio, q, sleeveDaily, statsOf, windowOf } from './lib.ts'
 import type { Family, Fill, Run, SleeveKey, Stats } from './lib.ts'
 import { buildEvents } from './events.ts'
 import type { Event } from './events.ts'
@@ -31,7 +31,7 @@ const log = (s: string) => process.stderr.write(`${s} (${((Date.now() - t0) / 10
 
 // ---------------------------------------------------------------- entrées
 const { events, runs } = await buildEvents()
-const S = loadE2()
+const S = loadPublished()
 const W = windowOf(S, 'binance', BINANCE_START)
 const base = { btc: sleeveDaily(runs.btc, W), ethusdt: sleeveDaily(runs.ethusdt, W) }
 const baseStats = statsOf(portfolio(base.btc, base.ethusdt), W.days)

@@ -1,0 +1,331 @@
+{
+ "note": "Diagnostics ajoutés après les résultats, descriptifs (pas de test pré-spécifié).",
+ "positiveControl": [
+  {
+   "beta": 0,
+   "reps": 10,
+   "detectionRate": 0,
+   "meanDLogLoss": -0.00039750389,
+   "meanAuc": 0.47488034,
+   "meanOracleAuc": 0.5,
+   "runs": [
+    {
+     "dLogLoss": -0.00027403484,
+     "p": 0.92215569,
+     "auc": 0.44853385,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.0001226097,
+     "p": 0.80439122,
+     "auc": 0.4637543,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.00022887479,
+     "p": 0.68862275,
+     "auc": 0.47323074,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.00014963797,
+     "p": 0.77844311,
+     "auc": 0.50783097,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.0000038865998,
+     "p": 0.53493014,
+     "auc": 0.50507796,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.00012544014,
+     "p": 0.59281437,
+     "auc": 0.46387502,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.0013270782,
+     "p": 0.92015968,
+     "auc": 0.46615417,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.00018687771,
+     "p": 0.8742515,
+     "auc": 0.47427451,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.0012647592,
+     "p": 0.86826347,
+     "auc": 0.47836164,
+     "oracleAuc": 0.5,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.00029183975,
+     "p": 0.94810379,
+     "auc": 0.46771022,
+     "oracleAuc": 0.5,
+     "detected": false
+    }
+   ]
+  },
+  {
+   "beta": 0.2,
+   "reps": 10,
+   "detectionRate": 0.2,
+   "meanDLogLoss": 0.0031025627,
+   "meanAuc": 0.54096762,
+   "meanOracleAuc": 0.56652796,
+   "runs": [
+    {
+     "dLogLoss": 0.0025510493,
+     "p": 0.075848303,
+     "auc": 0.53821314,
+     "oracleAuc": 0.57309759,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0043853027,
+     "p": 0.14770459,
+     "auc": 0.56146565,
+     "oracleAuc": 0.59615111,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.00052256327,
+     "p": 0.33932136,
+     "auc": 0.50990349,
+     "oracleAuc": 0.53849954,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0037778595,
+     "p": 0.18762475,
+     "auc": 0.55545856,
+     "oracleAuc": 0.5559731,
+     "detected": false
+    },
+    {
+     "dLogLoss": -0.0011926313,
+     "p": 0.82834331,
+     "auc": 0.48200398,
+     "oracleAuc": 0.54311202,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0064083846,
+     "p": 0.001996008,
+     "auc": 0.57058946,
+     "oracleAuc": 0.59691997,
+     "detected": true
+    },
+    {
+     "dLogLoss": -0.0013929412,
+     "p": 0.64071856,
+     "auc": 0.51938993,
+     "oracleAuc": 0.57213846,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.010724182,
+     "p": 0.003992016,
+     "auc": 0.58735644,
+     "oracleAuc": 0.60083356,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.000096494835,
+     "p": 0.48502994,
+     "auc": 0.53266213,
+     "oracleAuc": 0.54373704,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0051453633,
+     "p": 0.055888224,
+     "auc": 0.55263348,
+     "oracleAuc": 0.54481722,
+     "detected": false
+    }
+   ]
+  },
+  {
+   "beta": 0.35,
+   "reps": 10,
+   "detectionRate": 0.1,
+   "meanDLogLoss": 0.0055345118,
+   "meanAuc": 0.56261183,
+   "meanOracleAuc": 0.5824688,
+   "runs": [
+    {
+     "dLogLoss": 0.0088286196,
+     "p": 0.071856287,
+     "auc": 0.5740461,
+     "oracleAuc": 0.58516606,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0063255541,
+     "p": 0.20359281,
+     "auc": 0.56964318,
+     "oracleAuc": 0.58189984,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0037595811,
+     "p": 0.089820359,
+     "auc": 0.54835942,
+     "oracleAuc": 0.57316991,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0085881028,
+     "p": 0.031936128,
+     "auc": 0.58577469,
+     "oracleAuc": 0.62611181,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.0030638987,
+     "p": 0.29341317,
+     "auc": 0.56451658,
+     "oracleAuc": 0.55368815,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0075721283,
+     "p": 0.073852295,
+     "auc": 0.56487522,
+     "oracleAuc": 0.61058111,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.004483101,
+     "p": 0.15768463,
+     "auc": 0.55748587,
+     "oracleAuc": 0.57884733,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0036119438,
+     "p": 0.1257485,
+     "auc": 0.54729261,
+     "oracleAuc": 0.56194483,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0029123756,
+     "p": 0.1756487,
+     "auc": 0.54392233,
+     "oracleAuc": 0.55353286,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.0061998131,
+     "p": 0.087824351,
+     "auc": 0.5702023,
+     "oracleAuc": 0.59974608,
+     "detected": false
+    }
+   ]
+  },
+  {
+   "beta": 0.5,
+   "reps": 10,
+   "detectionRate": 0.9,
+   "meanDLogLoss": 0.019959742,
+   "meanAuc": 0.61845406,
+   "meanOracleAuc": 0.63703884,
+   "runs": [
+    {
+     "dLogLoss": 0.026473767,
+     "p": 0.001996008,
+     "auc": 0.63958898,
+     "oracleAuc": 0.65667475,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.01875776,
+     "p": 0.001996008,
+     "auc": 0.61280439,
+     "oracleAuc": 0.63060277,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.035246513,
+     "p": 0.001996008,
+     "auc": 0.66288463,
+     "oracleAuc": 0.67709502,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.020567201,
+     "p": 0.001996008,
+     "auc": 0.62115122,
+     "oracleAuc": 0.64606551,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.021179051,
+     "p": 0.0079840319,
+     "auc": 0.62152376,
+     "oracleAuc": 0.63548793,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.013447664,
+     "p": 0.011976048,
+     "auc": 0.59000221,
+     "oracleAuc": 0.61154441,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.016242415,
+     "p": 0.031936128,
+     "auc": 0.6044467,
+     "oracleAuc": 0.63466734,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.016958923,
+     "p": 0.001996008,
+     "auc": 0.6162569,
+     "oracleAuc": 0.63256874,
+     "detected": true
+    },
+    {
+     "dLogLoss": 0.010973384,
+     "p": 0.051896208,
+     "auc": 0.60020112,
+     "oracleAuc": 0.6082626,
+     "detected": false
+    },
+    {
+     "dLogLoss": 0.019750739,
+     "p": 0.003992016,
+     "auc": 0.61568065,
+     "oracleAuc": 0.63741929,
+     "detected": true
+    }
+   ]
+  }
+ ],
+ "inSample": {
+  "winDLogLoss": 0.0041558022,
+  "winAuc": 0.56614049,
+  "ridgeR2": 0.022997407,
+  "ridgeSpearman": 0.070447488
+ }
+}

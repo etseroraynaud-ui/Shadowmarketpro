@@ -7,12 +7,12 @@
 //
 //   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/capacity/budget.ts
 
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { simulate } from '../../lib/strategies/shock/engine.ts'
 import { costsFor } from '../lib/frozen-shock.ts'
 import * as P from '../lib/portfolio.ts'
-import { BINANCE_START, KEYS, NAMES, OFFICIAL_SHARPE, OUT, bootSharpe, crossing, familyOf, fillDay, loadE2, monthDraws, netDaily, portfolio, q, runFills, sleeveDaily, statsOf, windowOf } from './lib.ts'
+import { BINANCE_START, KEYS, NAMES, OFFICIAL_SHARPE, OUT, ROOT, SPEC, bootSharpe, crossing, familyOf, fillDay, loadPublished, monthDraws, netDaily, portfolio, q, runFills, sleeveDaily, statsOf, windowOf } from './lib.ts'
 import type { Fill, Run, SleeveKey, Stats, Window } from './lib.ts'
 
 const NREP = 2000
@@ -22,7 +22,7 @@ const checks: { name: string; ok: boolean; detail: string }[] = []
 const check = (name: string, ok: boolean, detail: string) => { checks.push({ name, ok, detail }); if (!ok) process.stderr.write(`ÉCHEC : ${name} · ${detail}\n`) }
 
 // ---------------------------------------------------------------- 1. reproduction
-const S = loadE2()
+const S = loadPublished()
 const R = {} as Record<SleeveKey, Run>
 for (const k of KEYS) {
   R[k] = runFills(S[k])
@@ -41,12 +41,15 @@ log('sleeves reproduites, exécutions relevées')
 const W: Window[] = [windowOf(S, 'official'), windowOf(S, 'binance', BINANCE_START)]
 const base = W.map(w => ({ rb: sleeveDaily(R.btc, w), re: sleeveDaily(R.ethusdt, w) }))
 const s0 = statsOf(portfolio(base[0].rb, base[0].re), W[0].days)
-check('Official E2 portfolio Sharpe reproduced', Math.abs(s0.sharpe - OFFICIAL_SHARPE) < 1e-8, `${s0.sharpe.toFixed(10)} vs ${OFFICIAL_SHARPE}`)
+check(`Official portfolio Sharpe reproduced (${SPEC})`, Math.abs(s0.sharpe - OFFICIAL_SHARPE) < 1e-8, `${s0.sharpe.toFixed(10)} vs ${OFFICIAL_SHARPE}`)
 
 // ---------------------------------------------------------------- 2. validation de la correction après coup
 // Relance du moteur avec glissement uniforme (ordres au marché et stops ; pas le TP1, ordre limite),
-// comparée à la correction appliquée aux mêmes exécutions ; référence publiée : e2-diagnostics.
-const PUBLISHED: Record<number, number> = { 0.01: 1.819588965, 0.02: 1.761575202, 0.05: 1.581793727 }
+// comparée à la correction appliquée aux mêmes exécutions ; référence publiée : e2-diagnostics pour E2,
+// published-stress pour la spécification publiée.
+const PUBLISHED: Record<number, number> = SPEC === 'e2'
+  ? { 0.01: 1.819588965, 0.02: 1.761575202, 0.05: 1.581793727 }
+  : Object.fromEntries((JSON.parse(readFileSync(join(ROOT, 'research/reports/published-stress/published-stress.json'), 'utf8')).slippage as { slip: number; published: number }[]).filter(x => x.slip > 0).map(x => [x.slip, x.published]))
 const validation = Object.entries(PUBLISHED).map(([slip, pub]) => {
   const s = +slip
   const rr = KEYS.map(k => {

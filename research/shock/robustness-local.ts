@@ -37,6 +37,7 @@ import { adaptivePreset, marketFor, selectFor } from '../../lib/strategies/shock
 import { simulate } from '../../lib/strategies/shock/engine.ts'
 import type { Costs, ShockParams } from '../../lib/strategies/shock/params.ts'
 import { engineEntries, trendDown } from '../lib/e2.ts'
+import { calmOnly } from '../lib/calm-only.ts'
 
 // Actif (lu aussi par les workers, qui reçoivent les mêmes arguments).
 const ARGV = process.argv.slice(2)
@@ -59,8 +60,11 @@ const SPLITS = AC.splits
 const FULL = SPLITS[0][0]
 // --e2 : shorts autorisés seulement en régime de tendance journalier baissier (research/lib/e2.ts),
 // pour chaque configuration voisine. Sans l'option, rien ne change.
-const E2 = ARGV.includes('--e2')
-const SUFFIX = (ASSET === 'btc' ? '' : `-${ASSET}`) + (E2 ? '-e2' : '')
+// --calm : spécification publiée depuis le 2026-10-13, E2 sans nouvelles entrées en régime agité
+// (research/lib/calm-only.ts) ; implique --e2.
+const CALM = ARGV.includes('--calm')
+const E2 = ARGV.includes('--e2') || CALM
+const SUFFIX = (ASSET === 'btc' ? '' : `-${ASSET}`) + (CALM ? '-calm' : E2 ? '-e2' : '')
 
 function loadCsv(path: string): Bars {
   const lines = gunzipSync(readFileSync(path)).toString('latin1').split('\n')
@@ -94,7 +98,7 @@ interface Res { key: string; w: Pack[]; eq: Float32Array | null }
 if (!isMainThread) {
   const S = setup()
   parentPort!.on('message', (job: Job) => {
-    const r = simulate(S.m, job.sets, COSTS, S.lo, S.bars.n - 1, S.select, S.trend ? engineEntries(S.m, job.sets, S.select, S.trend) : undefined)
+    const r = simulate(S.m, job.sets, COSTS, S.lo, S.bars.n - 1, S.select, S.trend ? (CALM ? calmOnly(engineEntries(S.m, job.sets, S.select, S.trend), S.select!) : engineEntries(S.m, job.sets, S.select, S.trend)) : undefined)
     const w = S.wins.map(([a, b]) => {
       const x = metricsOf(S.bars, r, a, b)
       return [x.totalReturn, x.cagr, x.sharpe, x.sortino, x.profitFactor, x.maxDrawdown, x.trades]
@@ -380,9 +384,9 @@ async function main() {
   const lastDay = new Date(bars.t[bars.n - 1]).toISOString().slice(0, 10)
 
   lines.push(
-    `# Robustesse locale du préréglage · Shock Engine 15 min${E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`,
+    `# Robustesse locale du préréglage · Shock Engine 15 min${CALM ? ' · régime calme seul, shorts en régime de tendance baissier' : E2 ? ' · shorts en régime de tendance baissier (E2)' : ''}`,
     '',
-    `${AC.label} 15 min, ${firstDay} → ${lastDay}, préréglage du bot (adaptatif volatilité, régime recalculé en ligne comme en réel), commission 0,045 % par ordre, sans levier. Produit par \`node research/shock/robustness-local.ts${ASSET === 'btc' ? '' : ` --asset ${ASSET}`} --n ${N} --n-ext ${NEXT} --seed ${SEED}\` (${jobs.size} simulations).`,
+    `${AC.label} 15 min, ${firstDay} → ${lastDay}, préréglage du bot (adaptatif volatilité, régime recalculé en ligne comme en réel), commission 0,045 % par ordre, sans levier. Produit par \`node research/shock/robustness-local.ts${ASSET === 'btc' ? '' : ` --asset ${ASSET}`} --n ${N} --n-ext ${NEXT} --seed ${SEED}${CALM ? ' --calm' : E2 ? ' --e2' : ''}\` (${jobs.size} simulations).`,
     '',
     '**But : mesurer la robustesse du préréglage actuel, pas en choisir un autre.** Aucune configuration voisine n\'est retenue ni proposée, même quand elle fait mieux.',
     '',

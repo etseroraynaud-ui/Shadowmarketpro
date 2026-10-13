@@ -1,0 +1,1435 @@
+{
+ "plan": "research/preregistration/calm-only.md",
+ "generatedAt": "2026-10-13T03:06:17.247Z",
+ "git": {
+  "commit": "c3fe6a8b251648469875e81de768919eac47bdfe",
+  "clean": true
+ },
+ "checks": [
+  {
+   "name": "empreinte lib/strategies/shock/market.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/market.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/strategy.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/strategy.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/broker.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/broker.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/engine.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/engine.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/params.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/params.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/presets.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/presets.ts"
+  },
+  {
+   "name": "empreinte lib/strategies/shock/regimes.ts",
+   "ok": true,
+   "detail": "lib/strategies/shock/regimes.ts"
+  },
+  {
+   "name": "empreinte research/lib/frozen-shock.ts",
+   "ok": true,
+   "detail": "research/lib/frozen-shock.ts"
+  },
+  {
+   "name": "empreinte research/lib/e2.ts",
+   "ok": true,
+   "detail": "research/lib/e2.ts"
+  },
+  {
+   "name": "n° 1 v1 (live, sans filtre E2) : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.7260527 / 1.726052721"
+  },
+  {
+   "name": "n° 2 shorts : symétrie de bougie : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.6909173 / 1.690917266"
+  },
+  {
+   "name": "n° 3 shorts : symétrie tendance 60 min : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.6795267 / 1.679526666"
+  },
+  {
+   "name": "n° 4 shorts : V1 + V2 : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.6241519 / 1.62415195"
+  },
+  {
+   "name": "n° 5 sans shorts : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.5180763 / 1.518076326"
+  },
+  {
+   "name": "n° 6 shorts : lambda + volume miroir : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.6722839 / 1.672283877"
+  },
+  {
+   "name": "n° 7 E2 (référence) : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.8775665 / 1.877566513"
+  },
+  {
+   "name": "n° 7 E2 (référence) : Sharpe publié (commissions × 2) retrouvé",
+   "ok": true,
+   "detail": "1.6098551 / 1.6098551"
+  },
+  {
+   "name": "n° 8 E2, entrées en range retirées : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.8660309 / 1.8660309"
+  },
+  {
+   "name": "n° 8 E2, entrées en range retirées : Sharpe publié (commissions × 2) retrouvé",
+   "ok": true,
+   "detail": "1.6217228 / 1.6217228"
+  },
+  {
+   "name": "n° 9 E2, confirmation retardée en range : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.8926432 / 1.8926432"
+  },
+  {
+   "name": "n° 9 E2, confirmation retardée en range : Sharpe publié (commissions × 2) retrouvé",
+   "ok": true,
+   "detail": "1.6315084 / 1.6315084"
+  },
+  {
+   "name": "n° 10 E2, sorties agitées en range : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.9129879 / 1.9129879"
+  },
+  {
+   "name": "n° 10 E2, sorties agitées en range : Sharpe publié (commissions × 2) retrouvé",
+   "ok": true,
+   "detail": "1.6242347 / 1.6242347"
+  },
+  {
+   "name": "n° 11 V1-calme : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "2.0242079 / 2.0242079"
+  },
+  {
+   "name": "n° 11 V1-calme : Sharpe publié (commissions × 2) retrouvé",
+   "ok": true,
+   "detail": "1.8782281 / 1.8782281"
+  },
+  {
+   "name": "n° 12 E2, stop agité 3,3 ATR, taille inchangée : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.8595614 / 1.8595614"
+  },
+  {
+   "name": "n° 12 E2, stop agité 3,3 ATR, taille inchangée : Sharpe publié (commissions × 2) retrouvé",
+   "ok": true,
+   "detail": "1.6244047 / 1.6244047"
+  },
+  {
+   "name": "n° 13 E2, stop agité 3,3 ATR, même risque : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.9978611 / 1.9978611"
+  },
+  {
+   "name": "n° 13 E2, stop agité 3,3 ATR, même risque : Sharpe publié (commissions × 2) retrouvé",
+   "ok": true,
+   "detail": "1.8182868 / 1.8182868"
+  },
+  {
+   "name": "n° 14 E2, invalidation à 4 bougies : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.9077079 / 1.9077079"
+  },
+  {
+   "name": "n° 14 E2, invalidation à 4 bougies : Sharpe publié (commissions × 2) retrouvé",
+   "ok": true,
+   "detail": "1.5875167 / 1.5875167"
+  },
+  {
+   "name": "n° 15 E2, invalidation à 2 bougies : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.7192486 / 1.7192486"
+  },
+  {
+   "name": "n° 16 E2, invalidation à 8 bougies : Sharpe publié retrouvé",
+   "ok": true,
+   "detail": "1.7926057 / 1.7926057"
+  },
+  {
+   "name": "E2 : Sharpe du portefeuille publié",
+   "ok": true,
+   "detail": "1.877566513"
+  },
+  {
+   "name": "V1-calme : valeurs figées (CALM_ONLY_REFERENCE)",
+   "ok": true,
+   "detail": "2.0242079 / 1.8782281"
+  },
+  {
+   "name": "fenêtre commune 2018-09-01 → 2026-09-30",
+   "ok": true,
+   "detail": "2018-09-01 → 2026-09-30, 2952 jours"
+  },
+  {
+   "name": "univers B : 206 candidats (graine 5)",
+   "ok": true,
+   "detail": "206"
+  },
+  {
+   "name": "dates de recalage dans la fenêtre",
+   "ok": true,
+   "detail": "487, 853, 1218, 1583, 1948, 2314, 2679"
+  }
+ ],
+ "configurations": [
+  {
+   "id": 1,
+   "key": "v1",
+   "label": "v1 (live, sans filtre E2)",
+   "source": "short-entry V0",
+   "sharpe": 1.7260527,
+   "sharpe2": 1.4056583
+  },
+  {
+   "id": 2,
+   "key": "se-v1",
+   "label": "shorts : symétrie de bougie",
+   "source": "short-entry V1",
+   "sharpe": 1.6909173,
+   "sharpe2": 1.3971381
+  },
+  {
+   "id": 3,
+   "key": "se-v2",
+   "label": "shorts : symétrie tendance 60 min",
+   "source": "short-entry V2",
+   "sharpe": 1.6795267,
+   "sharpe2": 1.3971567
+  },
+  {
+   "id": 4,
+   "key": "se-v3",
+   "label": "shorts : V1 + V2",
+   "source": "short-entry V3",
+   "sharpe": 1.6241519,
+   "sharpe2": 1.3543242
+  },
+  {
+   "id": 5,
+   "key": "se-v4",
+   "label": "sans shorts",
+   "source": "short-entry V4",
+   "sharpe": 1.5180763,
+   "sharpe2": 1.2265479
+  },
+  {
+   "id": 6,
+   "key": "se-e1",
+   "label": "shorts : lambda + volume miroir",
+   "source": "short-entry E1",
+   "sharpe": 1.6722839,
+   "sharpe2": 1.3530155
+  },
+  {
+   "id": 7,
+   "key": "e2",
+   "label": "E2 (référence)",
+   "source": "short-entry E2",
+   "sharpe": 1.8775665,
+   "sharpe2": 1.6098551
+  },
+  {
+   "id": 8,
+   "key": "rf-v1",
+   "label": "E2, entrées en range retirées",
+   "source": "regime-fakeout V1",
+   "sharpe": 1.8660309,
+   "sharpe2": 1.6217228
+  },
+  {
+   "id": 9,
+   "key": "rf-v2",
+   "label": "E2, confirmation retardée en range",
+   "source": "regime-fakeout V2",
+   "sharpe": 1.8926432,
+   "sharpe2": 1.6315084
+  },
+  {
+   "id": 10,
+   "key": "rf-v3",
+   "label": "E2, sorties agitées en range",
+   "source": "regime-fakeout V3",
+   "sharpe": 1.9129879,
+   "sharpe2": 1.6242347
+  },
+  {
+   "id": 11,
+   "key": "calm",
+   "label": "V1-calme",
+   "source": "agitated-regime V1",
+   "sharpe": 2.0242079,
+   "sharpe2": 1.8782281
+  },
+  {
+   "id": 12,
+   "key": "ag-v2a",
+   "label": "E2, stop agité 3,3 ATR, taille inchangée",
+   "source": "agitated-regime V2a",
+   "sharpe": 1.8595614,
+   "sharpe2": 1.6244047
+  },
+  {
+   "id": 13,
+   "key": "ag-v2b",
+   "label": "E2, stop agité 3,3 ATR, même risque",
+   "source": "agitated-regime V2b",
+   "sharpe": 1.9978611,
+   "sharpe2": 1.8182868
+  },
+  {
+   "id": 14,
+   "key": "ei-4",
+   "label": "E2, invalidation à 4 bougies",
+   "source": "early-invalidation V1",
+   "sharpe": 1.9077079,
+   "sharpe2": 1.5875167
+  },
+  {
+   "id": 15,
+   "key": "ei-2",
+   "label": "E2, invalidation à 2 bougies",
+   "source": "early-invalidation S2",
+   "sharpe": 1.7192486,
+   "sharpe2": 1.3905975
+  },
+  {
+   "id": 16,
+   "key": "ei-8",
+   "label": "E2, invalidation à 8 bougies",
+   "source": "early-invalidation S8",
+   "sharpe": 1.7926057,
+   "sharpe2": 1.4812725
+  }
+ ],
+ "universeB": {
+  "n": 206,
+  "sharpe": [
+   -1.7490286,
+   -1.2740165,
+   -0.54118578,
+   -1.5526762,
+   -0.21054682,
+   -1.0547541,
+   0.4567537,
+   -1.0864828,
+   -0.094800999,
+   0.14144661,
+   -0.65147205,
+   -0.45852637,
+   -0.020790258,
+   -0.64677585,
+   -0.0091019916,
+   -0.80717418,
+   0.46260368,
+   -1.2891343,
+   -1.5955167,
+   -0.041286165,
+   0.28381316,
+   0,
+   -1.765095,
+   0.5510939,
+   -0.40878584,
+   0.18704115,
+   -0.15005451,
+   0.11263413,
+   -0.69541047,
+   -0.93292036,
+   -0.050401989,
+   0.30455592,
+   -0.79186945,
+   -0.054282055,
+   -0.19265956,
+   0.094118275,
+   -0.2068308,
+   -1.1282227,
+   -0.0015821227,
+   0.40395802,
+   -0.052549508,
+   0.93653925,
+   0.447244,
+   -0.44863799,
+   -0.034276773,
+   0.067375706,
+   -0.66811112,
+   0.48975781,
+   -0.75719392,
+   0.49419931,
+   0.93435997,
+   -0.9259686,
+   -0.077905975,
+   -1.0876828,
+   -1.321552,
+   -0.19953727,
+   -0.66537083,
+   -0.21801172,
+   -1.3487974,
+   -0.86610496,
+   0.47818645,
+   1.071549,
+   -1.3445966,
+   0.24083791,
+   -0.60810353,
+   -0.47733913,
+   -0.046594155,
+   -0.35181189,
+   -0.74860397,
+   -0.040634964,
+   -0.24428692,
+   -0.39918331,
+   -0.092570509,
+   0.63471111,
+   -0.5130027,
+   -0.23040243,
+   0.11795884,
+   0.10924638,
+   -0.51655334,
+   0.21385996,
+   0.078561641,
+   -1.053316,
+   -0.53959244,
+   0.91171572,
+   -0.31963883,
+   -0.68392106,
+   -0.25554381,
+   -0.17207357,
+   -1.1032609,
+   -0.64174082,
+   0.076299244,
+   -0.50281785,
+   -0.51435981,
+   0.14672366,
+   -0.82231342,
+   -0.17891207,
+   -0.15912333,
+   0.8064722,
+   -1.0034947,
+   -0.10002854,
+   -0.73500801,
+   0.35966344,
+   -0.73610102,
+   -0.2820865,
+   0.60673505,
+   0.74644831,
+   0.56148477,
+   -0.22627241,
+   -0.10813656,
+   -0.53726403,
+   -0.11913772,
+   0.010172743,
+   -0.74108284,
+   -0.25660975,
+   0.057760099,
+   -0.20054759,
+   -0.31619239,
+   0.24520378,
+   0.31025731,
+   -0.12518969,
+   -1.0485298,
+   -0.46974218,
+   0.18029679,
+   -0.15283441,
+   1.1835702,
+   -0.41621739,
+   -0.080859393,
+   0.7645018,
+   -0.99055946,
+   -0.44749695,
+   -0.21435288,
+   -0.26486303,
+   1.0566393,
+   -0.86381073,
+   -0.82793189,
+   -1.2448165,
+   -0.38668032,
+   0.023909014,
+   0.14031362,
+   0.23985699,
+   -1.1105673,
+   -0.37861267,
+   -1.3372109,
+   -0.421191,
+   -0.28353181,
+   0.24399905,
+   0.3363527,
+   0.064070042,
+   -0.44970734,
+   -0.11581332,
+   -0.070592925,
+   0.067755633,
+   -0.82386751,
+   -0.0074314097,
+   -2.2930034,
+   0.32559217,
+   -0.25915927,
+   -1.1577331,
+   0.12718645,
+   -0.18913557,
+   -0.68126526,
+   0.35728911,
+   -0.83025411,
+   -0.36407154,
+   -0.29493711,
+   -1.3567601,
+   -0.77619564,
+   -0.89199683,
+   0.63682003,
+   -0.2360044,
+   0.46184814,
+   -0.18155618,
+   -0.21256195,
+   -0.94391987,
+   0.12035299,
+   0.28901759,
+   -0.81284701,
+   0.55174343,
+   1.0417002,
+   0.38672056,
+   -0.67463473,
+   0.65189212,
+   -0.20820463,
+   0.13966487,
+   -0.10654676,
+   -0.80655092,
+   0.74251031,
+   -0.27746097,
+   -0.43886509,
+   1.0581237,
+   -0.093162203,
+   -0.68193852,
+   -0.092531265,
+   -0.31323585,
+   -0.041597578,
+   -0.068003321,
+   -0.12144702,
+   -0.96750021,
+   -0.79133999,
+   0.40800689,
+   -0.5612446,
+   -0.41158194,
+   -0.71171606,
+   -0.44911547,
+   0.56305483,
+   -0.43383446
+  ]
+ },
+ "cscv": {
+  "main": {
+   "S": 16,
+   "splits": 12870,
+   "pbo": 0.19168609,
+   "probLoss": 0,
+   "slope": -0.94865744,
+   "intercept": 0.20053983,
+   "lambda": {
+    "q10": -0.87546874,
+    "q50": 1.540445,
+    "q90": 2.7725887
+   },
+   "chosen": [
+    {
+     "id": 1,
+     "count": 389,
+     "share": 0.03022533,
+     "meanOosRank": 0.4009324
+    },
+    {
+     "id": 2,
+     "count": 3,
+     "share": 0.00023310023,
+     "meanOosRank": 0.31248686
+    },
+    {
+     "id": 3,
+     "count": 2,
+     "share": 0.00015540016,
+     "meanOosRank": 0.28670415
+    },
+    {
+     "id": 4,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.20151287
+    },
+    {
+     "id": 5,
+     "count": 120,
+     "share": 0.0093240093,
+     "meanOosRank": 0.20369304
+    },
+    {
+     "id": 6,
+     "count": 153,
+     "share": 0.011888112,
+     "meanOosRank": 0.28683669
+    },
+    {
+     "id": 7,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.61122538
+    },
+    {
+     "id": 8,
+     "count": 350,
+     "share": 0.027195027,
+     "meanOosRank": 0.58866493
+    },
+    {
+     "id": 9,
+     "count": 46,
+     "share": 0.0035742036,
+     "meanOosRank": 0.65237442
+    },
+    {
+     "id": 10,
+     "count": 561,
+     "share": 0.043589744,
+     "meanOosRank": 0.69966635
+    },
+    {
+     "id": 11,
+     "count": 7359,
+     "share": 0.57179487,
+     "meanOosRank": 0.88681384
+    },
+    {
+     "id": 12,
+     "count": 421,
+     "share": 0.032711733,
+     "meanOosRank": 0.57857763
+    },
+    {
+     "id": 13,
+     "count": 2404,
+     "share": 0.18679099,
+     "meanOosRank": 0.86590795
+    },
+    {
+     "id": 14,
+     "count": 1047,
+     "share": 0.081351981,
+     "meanOosRank": 0.67113214
+    },
+    {
+     "id": 15,
+     "count": 4,
+     "share": 0.00031080031,
+     "meanOosRank": 0.31054893
+    },
+    {
+     "id": 16,
+     "count": 11,
+     "share": 0.00085470085,
+     "meanOosRank": 0.44292244
+    }
+   ],
+   "oosSharpeChosen": {
+    "mean": 1.9001882,
+    "q10": 1.4555723
+   }
+  },
+  "s10": {
+   "S": 10,
+   "splits": 252,
+   "pbo": 0.18253968,
+   "probLoss": 0,
+   "slope": -0.94473103,
+   "intercept": 0.20031834,
+   "lambda": {
+    "q10": -0.6061358,
+    "q50": 2.014903,
+    "q90": 2.7725887
+   },
+   "chosen": [
+    {
+     "id": 1,
+     "count": 9,
+     "share": 0.035714286,
+     "meanOosRank": 0.42413632
+    },
+    {
+     "id": 2,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.32026144
+    },
+    {
+     "id": 3,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.30812325
+    },
+    {
+     "id": 4,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.20471522
+    },
+    {
+     "id": 5,
+     "count": 4,
+     "share": 0.015873016,
+     "meanOosRank": 0.20751634
+    },
+    {
+     "id": 6,
+     "count": 2,
+     "share": 0.0079365079,
+     "meanOosRank": 0.29925303
+    },
+    {
+     "id": 7,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.60550887
+    },
+    {
+     "id": 8,
+     "count": 8,
+     "share": 0.031746032,
+     "meanOosRank": 0.57446312
+    },
+    {
+     "id": 9,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.65289449
+    },
+    {
+     "id": 10,
+     "count": 8,
+     "share": 0.031746032,
+     "meanOosRank": 0.69631186
+    },
+    {
+     "id": 11,
+     "count": 148,
+     "share": 0.58730159,
+     "meanOosRank": 0.89519141
+    },
+    {
+     "id": 12,
+     "count": 4,
+     "share": 0.015873016,
+     "meanOosRank": 0.56932773
+    },
+    {
+     "id": 13,
+     "count": 52,
+     "share": 0.20634921,
+     "meanOosRank": 0.85550887
+    },
+    {
+     "id": 14,
+     "count": 17,
+     "share": 0.067460317,
+     "meanOosRank": 0.660831
+    },
+    {
+     "id": 15,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.30275444
+    },
+    {
+     "id": 16,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.42320261
+    }
+   ],
+   "oosSharpeChosen": {
+    "mean": 1.9066459,
+    "q10": 1.460373
+   }
+  },
+  "costs2": {
+   "S": 16,
+   "splits": 12870,
+   "pbo": 0.018803419,
+   "probLoss": 0,
+   "slope": -0.96896659,
+   "intercept": 0.19140293,
+   "lambda": {
+    "q10": 2.014903,
+    "q50": 2.7725887,
+    "q90": 2.7725887
+   },
+   "chosen": [
+    {
+     "id": 1,
+     "count": 50,
+     "share": 0.0038850039,
+     "meanOosRank": 0.35173911
+    },
+    {
+     "id": 2,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.31949815
+    },
+    {
+     "id": 3,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.30732666
+    },
+    {
+     "id": 4,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.24112619
+    },
+    {
+     "id": 5,
+     "count": 6,
+     "share": 0.00046620047,
+     "meanOosRank": 0.2105992
+    },
+    {
+     "id": 6,
+     "count": 32,
+     "share": 0.0024864025,
+     "meanOosRank": 0.25091183
+    },
+    {
+     "id": 7,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.62639517
+    },
+    {
+     "id": 8,
+     "count": 86,
+     "share": 0.0066822067,
+     "meanOosRank": 0.6474199
+    },
+    {
+     "id": 9,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.67440011
+    },
+    {
+     "id": 10,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.65186709
+    },
+    {
+     "id": 11,
+     "count": 11292,
+     "share": 0.87738928,
+     "meanOosRank": 0.932049
+    },
+    {
+     "id": 12,
+     "count": 73,
+     "share": 0.0056721057,
+     "meanOosRank": 0.64826546
+    },
+    {
+     "id": 13,
+     "count": 1331,
+     "share": 0.1034188,
+     "meanOosRank": 0.88544266
+    },
+    {
+     "id": 14,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.57695964
+    },
+    {
+     "id": 15,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.27475662
+    },
+    {
+     "id": 16,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.4012432
+    }
+   ],
+   "oosSharpeChosen": {
+    "mean": 1.8425457,
+    "q10": 1.42649
+   }
+  },
+  "e2only": {
+   "S": 16,
+   "splits": 12870,
+   "pbo": 0.22727273,
+   "probLoss": 0,
+   "slope": -0.97642445,
+   "intercept": 0.20512553,
+   "lambda": {
+    "q10": -1.5040774,
+    "q50": 1.5040774,
+    "q90": 2.3025851
+   },
+   "chosen": [
+    {
+     "id": 7,
+     "count": 0,
+     "share": 0,
+     "meanOosRank": 0.45703186
+    },
+    {
+     "id": 8,
+     "count": 414,
+     "share": 0.032167832,
+     "meanOosRank": 0.43266229
+    },
+    {
+     "id": 9,
+     "count": 51,
+     "share": 0.003962704,
+     "meanOosRank": 0.50827153
+    },
+    {
+     "id": 10,
+     "count": 618,
+     "share": 0.048018648,
+     "meanOosRank": 0.57570813
+    },
+    {
+     "id": 11,
+     "count": 7533,
+     "share": 0.58531469,
+     "meanOosRank": 0.83742318
+    },
+    {
+     "id": 12,
+     "count": 461,
+     "share": 0.035819736,
+     "meanOosRank": 0.42194674
+    },
+    {
+     "id": 13,
+     "count": 2657,
+     "share": 0.20644911,
+     "meanOosRank": 0.80503638
+    },
+    {
+     "id": 14,
+     "count": 1115,
+     "share": 0.086635587,
+     "meanOosRank": 0.54732641
+    },
+    {
+     "id": 15,
+     "count": 4,
+     "share": 0.00031080031,
+     "meanOosRank": 0.15559087
+    },
+    {
+     "id": 16,
+     "count": 17,
+     "share": 0.0013209013,
+     "meanOosRank": 0.25900261
+    }
+   ],
+   "oosSharpeChosen": {
+    "mean": 1.9340687,
+    "q10": 1.5225906
+   }
+  }
+ },
+ "walkForward": {
+  "cuts": [
+   "2020-01-01",
+   "2021-01-01",
+   "2022-01-01",
+   "2023-01-01",
+   "2024-01-01",
+   "2025-01-01",
+   "2026-01-01"
+  ],
+  "a": [
+   {
+    "from": "2020-01-01",
+    "id": 6,
+    "trainSharpe": 2.3859951
+   },
+   {
+    "from": "2021-01-01",
+    "id": 13,
+    "trainSharpe": 2.0962052
+   },
+   {
+    "from": "2022-01-01",
+    "id": 13,
+    "trainSharpe": 2.0626959
+   },
+   {
+    "from": "2023-01-01",
+    "id": 13,
+    "trainSharpe": 2.0142482
+   },
+   {
+    "from": "2024-01-01",
+    "id": 13,
+    "trainSharpe": 1.8960476
+   },
+   {
+    "from": "2025-01-01",
+    "id": 13,
+    "trainSharpe": 2.0231489
+   },
+   {
+    "from": "2026-01-01",
+    "id": 11,
+    "trainSharpe": 2.0398014
+   }
+  ],
+  "b": [
+   {
+    "from": "2020-01-01",
+    "id": 11,
+    "trainSharpe": 2.2303337
+   },
+   {
+    "from": "2021-01-01",
+    "id": 11,
+    "trainSharpe": 2.065033
+   },
+   {
+    "from": "2022-01-01",
+    "id": 11,
+    "trainSharpe": 1.9876596
+   },
+   {
+    "from": "2023-01-01",
+    "id": 11,
+    "trainSharpe": 1.9857217
+   },
+   {
+    "from": "2024-01-01",
+    "id": 11,
+    "trainSharpe": 1.882485
+   },
+   {
+    "from": "2025-01-01",
+    "id": 11,
+    "trainSharpe": 2.0058547
+   },
+   {
+    "from": "2026-01-01",
+    "id": 11,
+    "trainSharpe": 2.0398014
+   }
+  ],
+  "oos": {
+   "a": 1.8762717,
+   "b": 1.9815956,
+   "e2": 1.8250477,
+   "calm": 1.9815956
+  },
+  "ciA": [
+   -0.16278076,
+   0.26498105
+  ],
+  "ciB": [
+   -0.029362435,
+   0.32797893
+  ],
+  "ciCalm": [
+   -0.029362435,
+   0.32797893
+  ],
+  "metrics": {
+   "a": {
+    "sharpe": 1.8762717,
+    "cagr": 0.61059107,
+    "maxDD": -0.18777184
+   },
+   "b": {
+    "sharpe": 1.9815956,
+    "cagr": 0.63382677,
+    "maxDD": -0.17849879
+   },
+   "e2": {
+    "sharpe": 1.8250477,
+    "cagr": 0.57039405,
+    "maxDD": -0.19124348
+   },
+   "calm": {
+    "sharpe": 1.9815956,
+    "cagr": 0.63382677,
+    "maxDD": -0.17849879
+   }
+  },
+  "years": [
+   {
+    "year": 2018,
+    "days": 122,
+    "e2": 4.9714198,
+    "calm": 5.2157584,
+    "e2x2": 4.8276963,
+    "calmx2": 5.1076408
+   },
+   {
+    "year": 2019,
+    "days": 365,
+    "e2": 0.42731514,
+    "calm": 0.45233494,
+    "e2x2": 0.11141254,
+    "calmx2": 0.23645931
+   },
+   {
+    "year": 2020,
+    "days": 366,
+    "e2": 1.6612859,
+    "calm": 1.8234217,
+    "e2x2": 1.3424458,
+    "calmx2": 1.6893913
+   },
+   {
+    "year": 2021,
+    "days": 365,
+    "e2": 1.8441927,
+    "calm": 1.7953007,
+    "e2x2": 1.5716317,
+    "calmx2": 1.6948231
+   },
+   {
+    "year": 2022,
+    "days": 365,
+    "e2": 1.7518132,
+    "calm": 1.9954397,
+    "e2x2": 1.509261,
+    "calmx2": 1.8429872
+   },
+   {
+    "year": 2023,
+    "days": 365,
+    "e2": 1.0919775,
+    "calm": 1.3508717,
+    "e2x2": 0.74433113,
+    "calmx2": 1.0796033
+   },
+   {
+    "year": 2024,
+    "days": 366,
+    "e2": 3.0689077,
+    "calm": 3.1324946,
+    "e2x2": 2.7228701,
+    "calmx2": 3.0345853
+   },
+   {
+    "year": 2025,
+    "days": 365,
+    "e2": 1.9117691,
+    "calm": 2.2449793,
+    "e2x2": 1.6502233,
+    "calmx2": 2.1091941
+   },
+   {
+    "year": 2026,
+    "days": 273,
+    "e2": 1.7753645,
+    "calm": 1.9471434,
+    "e2x2": 1.55975,
+    "calmx2": 1.8107315
+   }
+  ]
+ },
+ "dsr": {
+  "sdA": 0.13724314,
+  "sdB": 0.60226761,
+  "bSharpe": {
+   "mean": -0.25245407,
+   "min": -2.2930034,
+   "max": 1.1835702,
+   "q90": 0.49197856
+  },
+  "calm": {
+   "psr0": {
+    "sr": 0.10591562,
+    "z": 6.9204467,
+    "p": 1,
+    "skew": 3.6515372,
+    "kurt": 28.805816,
+    "n": 2952
+   },
+   "sr": 2.0242079,
+   "A": {
+    "N": 16,
+    "sd": 0.13724314,
+    "sr0": 0.24709999,
+    "p": 1,
+    "z": 6.0756509
+   },
+   "B": [
+    {
+     "N": 16,
+     "sd": 0.60226761,
+     "sr0": 1.0843553,
+     "p": 0.99934369,
+     "z": 3.2132075
+    },
+    {
+     "N": 222,
+     "sd": 0.60226761,
+     "sr0": 1.686026,
+     "p": 0.87619833,
+     "z": 1.1561903
+    },
+    {
+     "N": 6266,
+     "sd": 0.60226761,
+     "sr0": 2.2553762,
+     "p": 0.21466815,
+     "z": -0.79032786
+    },
+    {
+     "N": 128547,
+     "sd": 0.60226761,
+     "sr0": 2.6771673,
+     "p": 0.012795427,
+     "z": -2.2323649
+    }
+   ],
+   "breakevenA": "Infinity",
+   "breakevenB": 109.42749
+  },
+  "e2": {
+   "psr0": {
+    "sr": 0.098242684,
+    "z": 6.2510114,
+    "p": 1,
+    "skew": 3.3670147,
+    "kurt": 25.736324,
+    "n": 2952
+   },
+   "sr": 1.8775665,
+   "A": {
+    "N": 16,
+    "sd": 0.13724314,
+    "sr0": 0.24709999,
+    "p": 0.99999997,
+    "z": 5.4283376
+   },
+   "B": [
+    {
+     "N": 16,
+     "sd": 0.60226761,
+     "sr0": 1.0843553,
+     "p": 0.99586509,
+     "z": 2.6408505
+    },
+    {
+     "N": 222,
+     "sd": 0.60226761,
+     "sr0": 1.686026,
+     "p": 0.73816511,
+     "z": 0.63769873
+    },
+    {
+     "N": 6266,
+     "sd": 0.60226761,
+     "sr0": 2.2553762,
+     "p": 0.10422344,
+     "z": -1.2578476
+    },
+    {
+     "N": 128547,
+     "sd": 0.60226761,
+     "sr0": 2.6771673,
+     "p": 0.003882472,
+     "z": -2.6621232
+    }
+   ],
+   "breakevenA": "Infinity",
+   "breakevenB": 52.809525
+  },
+  "diff": {
+   "N": 15,
+   "sdD": 0.50314215,
+   "ir": 0.5575614,
+   "psr0": 0.9374075,
+   "sr0": 0.89090554,
+   "p": 0.17963912,
+   "skew": -1.962111,
+   "kurt": 52.708936,
+   "meanDaily": 0.000099664662,
+   "others": [
+    {
+     "id": 1,
+     "ir": 0.16027689
+    },
+    {
+     "id": 2,
+     "ir": 0.133448
+    },
+    {
+     "id": 3,
+     "ir": 0.058667342
+    },
+    {
+     "id": 4,
+     "ir": -0.11935303
+    },
+    {
+     "id": 5,
+     "ir": -1.2391423
+    },
+    {
+     "id": 6,
+     "ir": 0.0089460456
+    },
+    {
+     "id": 8,
+     "ir": -0.24217849
+    },
+    {
+     "id": 9,
+     "ir": 0.13381147
+    },
+    {
+     "id": 10,
+     "ir": -0.2222837
+    },
+    {
+     "id": 11,
+     "ir": 0.5575614
+    },
+    {
+     "id": 12,
+     "ir": 0.34421444
+    },
+    {
+     "id": 13,
+     "ir": 0.65455309
+    },
+    {
+     "id": 14,
+     "ir": -0.43722053
+    },
+    {
+     "id": 15,
+     "ir": -0.89228899
+    },
+    {
+     "id": 16,
+     "ir": -0.66053038
+    }
+   ]
+  },
+  "diff2": {
+   "N": 15,
+   "sdD": 0.61375355,
+   "ir": 1.072654,
+   "psr0": 0.99819249,
+   "sr0": 1.0867633,
+   "p": 0.48473362,
+   "skew": -1.0708359,
+   "kurt": 48.893647,
+   "meanDaily": 0.00019303939,
+   "others": [
+    {
+     "id": 1,
+     "ir": 0.012797969
+    },
+    {
+     "id": 2,
+     "ir": 0.019412402
+    },
+    {
+     "id": 3,
+     "ir": -0.029594969
+    },
+    {
+     "id": 4,
+     "ir": -0.17439622
+    },
+    {
+     "id": 5,
+     "ir": -1.1543018
+    },
+    {
+     "id": 6,
+     "ir": -0.12585416
+    },
+    {
+     "id": 8,
+     "ir": -0.10891129
+    },
+    {
+     "id": 9,
+     "ir": 0.18043649
+    },
+    {
+     "id": 10,
+     "ir": -0.26684863
+    },
+    {
+     "id": 11,
+     "ir": 1.072654
+    },
+    {
+     "id": 12,
+     "ir": 0.40859029
+    },
+    {
+     "id": 13,
+     "ir": 1.1363176
+    },
+    {
+     "id": 14,
+     "ir": -0.4857818
+    },
+    {
+     "id": 15,
+     "ir": -0.95842621
+    },
+    {
+     "id": 16,
+     "ir": -0.69454694
+    }
+   ]
+  },
+  "e0": {
+   "16": 0.24709999
+  }
+ },
+ "reading": {
+  "pbo": 0.19168609,
+  "pboLevel": "faible",
+  "calmPicks": 7,
+  "wfDelta": 0.051223945,
+  "wfOk": true,
+  "dsrDiff": 0.17963912,
+  "dsrOk": false,
+  "verdict": "candidate fragile"
+ }
+}
