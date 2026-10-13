@@ -51,10 +51,10 @@
 \vspace{18pt}
 {\large ShadowMarketPro Research\par}
 \vspace{4pt}
-{\small Working paper v1.1 \textperiodcentered{} October 2026 \textperiodcentered{} specification E2 \textperiodcentered{} \texttt{shock-engine-2026.10}\par}
+{\small Working paper \textperiodcentered{} October 2026 \textperiodcentered{} \texttt{shock-engine-2026.10.13}\par}
 \vspace{22pt}
 \begin{abstract}
-\noindent We study a systematic strategy that trades the continuation of abnormal 15-minute price moves in Bitcoin (BTC) and Ether (ETH). A position is opened when a return that is extreme relative to its local volatility breaks the recent range and is confirmed by higher-timeframe structure, candle quality, participation and a price-impact filter; risk is managed with volatility-scaled exits. Shock Engine is defined by its specification E2, the reference version studied here, in which the short side is a \emph{conditional mirror} of the long side: short entries reproduce the long logic in the opposite direction and are admitted only when the daily trend regime is bearish. The rules were calibrated on Bitcoin and applied unchanged to Ether. Over 1~September 2018 to 30~September 2026, a 50/50 BTC/ETH portfolio shows a Sharpe ratio of 1.88, a compound annual growth rate of 61.6\% and a maximum drawdown of \ensuremath{-}19.1\% after transaction costs, against 0.78, 34.1\% and \ensuremath{-}76.9\% for buy-and-hold. Random-entry placebos, delayed entries, parameter neighbourhoods, cross-asset transfer, a Monte Carlo falsification battery for the short-entry condition and a regression on six standard trend-following strategies (residual alpha of 41.0\% a year, Newey--West $t=4.56$) do not explain the result away. The evidence is nonetheless in-sample: the rules, the short-entry condition included, were set on Bitcoin data covering the period. We report the failures (Solana, gold, TAO; a walk-forward Sharpe of 1.11) and pre-register a forward test.
+\noindent We study a systematic strategy that trades the continuation of abnormal 15-minute price moves in Bitcoin (BTC) and Ether (ETH). A position is opened when a return that is extreme relative to its local volatility breaks the recent range and is confirmed by higher-timeframe structure, candle quality, participation and a price-impact filter; risk is managed with volatility-scaled exits. New positions are opened only when the daily volatility regime is calm, and the short side is a \emph{conditional mirror} of the long side: short entries reproduce the long logic in the opposite direction and are admitted only when the daily trend regime is bearish. The parameters were calibrated on Bitcoin and applied unchanged to Ether; the two entry conditions were set with knowledge of both markets. Over 1~September 2018 to 30~September 2026, a 50/50 BTC/ETH portfolio shows a Sharpe ratio of 2.02, a compound annual growth rate of 67.7\% and a maximum drawdown of \ensuremath{-}17.8\% after transaction costs, against 0.78, 34.1\% and \ensuremath{-}76.9\% for buy-and-hold. Random-entry placebos, delayed entries, parameter neighbourhoods, cross-asset transfer, a Monte Carlo falsification battery for the short-entry condition and a regression on six standard trend-following strategies (residual alpha of 44.8\% a year, Newey--West $t=4.94$) do not explain the result away. The evidence is nonetheless in-sample: the parameters were set on Bitcoin data covering the period and the entry conditions with knowledge of both markets. We report the selection risk of the rule choice (probability of backtest overfitting 19\%), the failures (TAO; partial results on Solana and gold; a walk-forward Sharpe of 0.83) and pre-register a forward test.
 \end{abstract}
 \vspace{8pt}
 \noindent{\small\textbf{Keywords:} cryptocurrency, intraday momentum, time-series momentum, jumps, regime conditioning, backtest overfitting, pre-registration, residual alpha.\\
@@ -71,11 +71,11 @@ Cryptocurrency markets trade continuously, are dominated by a small number of li
 This paper documents a rule-based strategy, \emph{Shock Engine}, built on the first view: it enters in the direction of an abnormal 15-minute move once the move has been qualified by a small set of filters, and exits through volatility-scaled risk management. Our contribution is less the rule itself than the way it is tested. We make five points.
 
 \begin{enumerate}[label=(\roman*)]
-\item The rules were set on Bitcoin and transferred \emph{without recalibration} to Ether, where they meet every pre-set criterion on two independent price feeds; they fail on Solana, gold and TAO, and we report these failures.
+\item The parameters were set on Bitcoin and transferred \emph{without recalibration} to Ether, where they meet every pre-set criterion on two independent price feeds; on other markets they are partial on Solana and gold (strategy criteria met, event study not) and fail on TAO, and we report these results.
 \item Random-entry placebos with identical exits and one-bar entry delays show that the edge lies in the timing of entries rather than in market drift or in the shape of the exits.
-\item In specification E2, the reference version of Shock Engine, the short side is a \emph{conditional mirror} of the long side: short entries are allowed only in a bearish daily trend regime. Because its historical benefit is measured on the same data that were used to build the strategy, we subject it to three Monte Carlo falsification tests specified before they were run.
-\item A regression of the daily returns on buy-and-hold and on six standard trend-following strategies leaves 79\% of the average return unexplained, with a Newey--West $t$-statistic of 4.56.
-\item We pre-register a forward test of the short-entry condition with interim analyses, and run the strategy on Hyperliquid's test network so that its decisions are timestamped by a third party.
+\item New positions are opened only in the calm volatility regime, and the short side is a \emph{conditional mirror} of the long side: short entries are allowed only in a bearish daily trend regime. Both conditions were chosen on the same data that are used to evaluate them, so we measure the probability that the choice among the rule variants we tried is overfitted, and subject the short condition to three Monte Carlo falsification tests specified before they were run.
+\item A regression of the daily returns on buy-and-hold and on six standard trend-following strategies leaves 81\% of the average return unexplained, with a Newey--West $t$-statistic of 4.94.
+\item We pre-register a forward test of the short-entry condition with interim analyses, and run the engine on Hyperliquid's test network so that its decisions are timestamped by a third party.
 \end{enumerate}
 
 The headline numbers are strong, which is precisely why they deserve suspicion. Throughout, we try to separate what the data can establish (the result is not a simple artefact of drift, exits, costs, a single parameter choice or a generic trend factor) from what it cannot (that the result will persist out of sample).
@@ -98,7 +98,7 @@ Daily returns are close-to-close on UTC days, the close of a day being the close
 
 \section{The strategy}\label{sec:strategy}
 
-We describe the logic of the rules and the mathematics of their building blocks. Thresholds, window lengths, timeframes and exit multiples are proprietary and are not disclosed; none of the tests below depends on knowing them. The specification is called E2: it is the reference version of Shock Engine, the one reported on the public website, run on the test network and covered by the pre-registration of Section~\ref{sec:forward}.
+We describe the logic of the rules and the mathematics of their building blocks. Thresholds, window lengths, timeframes and exit multiples are proprietary and are not disclosed; none of the tests below depends on knowing them. The rules described here are those reported on the public website; the pre-registration of Section~\ref{sec:forward} covers the short-entry condition.
 
 \subsection{Shock detection}
 
@@ -126,29 +126,29 @@ A short cooling-off period follows each trade.
 
 \subsection{Volatility regimes}
 
-Daily realised volatility over a short window is ranked against its own trailing one-year distribution. The market is \emph{calm} below the median and \emph{agitated} above. Each regime has its own parameter set (shock threshold, filters, exits, and the directions it may trade), and the active set is read from the last closed day, so that the rule never uses information from the current day.
+Daily realised volatility over a short window is ranked against its own trailing one-year distribution. The market is \emph{calm} below the median and \emph{agitated} above, and the regime is read from the last closed day, so that the rule never uses information from the current day. New positions are opened only when the market is calm; a position opened in a calm market keeps its exits if the regime turns agitated. The rules were first designed with a second parameter set for the agitated regime, which only allowed long entries; it no longer opens positions.
 
 \subsection{Exits and risk}
 
-At entry the strategy records the average true range $A$. The initial stop is placed at $P_{\text{entry}}\mp m_s A$. Depending on the regime, part of the position may be taken off at $P_{\text{entry}}\pm m_p A$ and the remainder protected by a stop that trails the best price by $m_r A$. A position is also closed when price crosses back through a moving reference price, or when a qualified shock occurs in the opposite direction (flip exit). Each market holds at most one position, sized to its capital, with no pyramiding, no averaging down and no leverage.
+At entry the strategy records the average true range $A$. The initial stop is placed at $P_{\text{entry}}\mp m_s A$. A position is otherwise closed when a qualified shock occurs in the opposite direction (flip exit); a stop that trails the best price by $m_r A$ is set wide and rarely triggers, and there is no partial take-profit. Each market holds at most one position, sized to its capital, with no pyramiding, no averaging down and no leverage.
 
 \subsection{The short side: a conditional mirror}\label{sec:mirror}
 
 Short entries reproduce the long logic in the opposite direction: a down-shock that breaks the recent low, closes near its low, occurs below the higher-timeframe average and is accompanied by abnormal volume. The long side carries additional qualification (rising structure and shock clustering), which reflects the asymmetry of crypto markets, whose long-run drift has been strongly positive.
 
-In specification E2 the mirror is \emph{conditional} on the daily trend regime. With $D(t)$ the last UTC day closed before bar $t$, $P^{\mathrm{d}}_D$ the daily close, $\bar P^{(n)}_D$ a medium-term moving average of daily closes and $k$ a slope horizon in days,
+The mirror is \emph{conditional} on the daily trend regime. With $D(t)$ the last UTC day closed before bar $t$, $P^{\mathrm{d}}_D$ the daily close, $\bar P^{(n)}_D$ a medium-term moving average of daily closes and $k$ a slope horizon in days,
 \begin{equation}
 T_t=\1\Big\{P^{\mathrm{d}}_{D(t)}<\bar P^{(n)}_{D(t)}\ \text{and}\ \bar P^{(n)}_{D(t)}<\bar P^{(n)}_{D(t)-k}\Big\},
 \qquad
 \text{Short}_t=\text{Mirror}_t\times T_t .
 \end{equation}
-Long entries, exits and the flip rule do not depend on $T_t$; the condition only decides whether a new short position may be opened. The economic motivation is the state dependence of momentum \citep{DanielMoskowitz2016}: selling a downside shock is a continuation trade in a falling market and a counter-trend trade in a rising one. Over the sample, 250 of the 1{,}311 trades are shorts.
+Long entries, exits and the flip rule do not depend on $T_t$; the condition only decides whether a new short position may be opened. The economic motivation is the state dependence of momentum \citep{DanielMoskowitz2016}: selling a downside shock is a continuation trade in a falling market and a counter-trend trade in a rising one. Over the sample, 250 of the 716 trades are shorts.
 
-\textbf{Design and implementation history.} The conditional mirror is part of the strategy's design. For part of the research, the code ran a simpler unconditional (symmetric) mirror; the trend condition was written into the research code in October 2026, its definition fixed in a pre-registered protocol before its results were computed. Like every other rule, it is evaluated on data already used to build the strategy, so every historical figure in this paper is in-sample with respect to it. Section~\ref{sec:falsification} asks whether a condition of the same kind chosen at random would have done as well, and Section~\ref{sec:forward} tests it prospectively.
+\textbf{Design history.} For most of the research the strategy traded both volatility regimes with an unconditional (symmetric) short side. The trend condition on shorts was adopted in October 2026 after a pre-registered study of short entries in which it was one of several candidate rules, not the primary hypothesis; the calm-regime restriction was adopted later the same month after an exploratory study of the agitated regime. Both were chosen with knowledge of the 2017--2026 Bitcoin and Ether data, so every historical figure in this paper is in-sample with respect to them. Section~\ref{sec:selection} measures the selection risk of the rule choice, Section~\ref{sec:falsification} asks whether a trend condition chosen at random would have done as well, and Section~\ref{sec:forward} tests the short condition prospectively.
 
 \subsection{Portfolio}
 
-The portfolio allocates half of the capital to the Bitcoin strategy and half to the Ether strategy on the first day and never rebalances. Rebalancing monthly or weighting by risk changes the Sharpe ratio by at most 0.08 and is not part of the specification.
+The portfolio allocates half of the capital to the Bitcoin strategy and half to the Ether strategy on the first day and never rebalances. Rebalancing monthly or weighting by risk changes the Sharpe ratio by at most 0.06 and is not part of the specification.
 
 \section{Statistical framework}\label{sec:stats}
 
@@ -202,26 +202,26 @@ Table~\ref{tab:headline} reports the two markets, the portfolio and a buy-and-ho
 \toprule
  & Portfolio 50/50 & Bitcoin & Ether & Buy-and-hold \\
 \midrule
-Final value of 100 & 4{,}848 & 1{,}609 & 8{,}086 & 1{,}073 \\
-CAGR & 61.6\% & 41.0\% & 72.2\% & 34.1\% \\
-Annualised volatility & 27.6\% & 25.8\% & 34.3\% & 69.0\% \\
-Sharpe ratio & 1.88 & 1.46 & 1.75 & 0.78 \\
-Sortino ratio & 4.25 & 3.18 & 4.04 & -- \\
-Maximum drawdown & \ensuremath{-}19.1\% & \ensuremath{-}22.3\% & \ensuremath{-}26.8\% & \ensuremath{-}76.9\% \\
-Calmar ratio & 3.22 & 1.84 & 2.70 & 0.44 \\
-Skewness of daily returns & 3.37 & 3.90 & 3.77 & -- \\
+Final value of 100 & 6{,}536 & 1{,}481 & 11{,}590 & 1{,}073 \\
+CAGR & 67.7\% & 39.6\% & 80.0\% & 34.1\% \\
+Annualised volatility & 27.4\% & 25.0\% & 33.3\% & 69.0\% \\
+Sharpe ratio & 2.02 & 1.46 & 1.93 & 0.78 \\
+Sortino ratio & 4.73 & 3.23 & 4.62 & -- \\
+Maximum drawdown & \ensuremath{-}17.8\% & \ensuremath{-}24.8\% & \ensuremath{-}24.1\% & \ensuremath{-}76.9\% \\
+Calmar ratio & 3.79 & 1.60 & 3.31 & 0.44 \\
+Skewness of daily returns & 3.65 & 4.25 & 4.09 & -- \\
 \midrule
-Trades (long / short) & 1{,}311 (1{,}061 / 250) & 644 (508 / 136) & 667 (553 / 114) & -- \\
-Trades per year & 162 & 80 & 83 & -- \\
-Win rate & 31\% & 32\% & 30\% & -- \\
-Average win / average loss & 4.37 & 4.00 & 4.68 & -- \\
-Profit factor & 1.94 & 1.66 & 2.02 & -- \\
-Median holding time (hours) & 4.0 & 3.5 & 4.5 & -- \\
-Time in market & 26\% & 16\% & 18\% & 100\% \\
+Trades (long / short) & 716 (466 / 250) & 358 (222 / 136) & 358 (244 / 114) & -- \\
+Trades per year & 89 & 44 & 44 & -- \\
+Win rate & 31\% & 30\% & 33\% & -- \\
+Average win / average loss & 5.58 & 5.18 & 5.52 & -- \\
+Profit factor & 2.59 & 1.93 & 2.73 & -- \\
+Median holding time (hours) & 13.0 & 11.5 & 14.9 & -- \\
+Time in market & 25\% & 15\% & 17\% & 100\% \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
-\item Historical simulation of specification E2 after modelled transaction costs; not live performance. Daily UTC close-to-close returns, annualised with $\sqrt{365.25}$, zero risk-free rate. Commission 0.045\% per order; no slippage, funding or leverage. Bitcoin and Ether columns are the two halves of the portfolio, each measured on its own capital. Buy-and-hold: half of the capital in each coin on 1~September 2018, no rebalancing, no costs. Win rate, payoff and profit factor are computed on closed trades; the portfolio column pools the trades of both markets.
+\item Historical simulation after modelled transaction costs; not live performance. Daily UTC close-to-close returns, annualised with $\sqrt{365.25}$, zero risk-free rate. Commission 0.045\% per order; no slippage, funding or leverage. Bitcoin and Ether columns are the two halves of the portfolio, each measured on its own capital. Buy-and-hold: half of the capital in each coin on 1~September 2018, no rebalancing, no costs. Win rate, payoff and profit factor are computed on closed trades; the portfolio column pools the trades of both markets.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -240,7 +240,7 @@ Time in market & 26\% & 16\% & 18\% & 100\% \\
 \caption{Equity curves, 1~September 2018 to 30~September 2026, daily closes. Historical simulation after modelled transaction costs; buy-and-hold without costs.}\label{fig:equity}
 \end{figure}
 
-The return distribution is strongly right-skewed: the strategy is in the market 26\% of the time, wins 31\% of its trades, and its average winner is 4.4 times its average loser. The best 5\% of trades account for 136\% of the portfolio's log growth; without them the CAGR would be \ensuremath{-}17.2\%. This is the profile of a convex, trend-capturing strategy, and it implies that the result is sensitive to whether a few large moves are captured.
+The return distribution is strongly right-skewed: the strategy is in the market 25\% of the time, wins 31\% of its trades, and its average winner is 5.6 times its average loser. The best 5\% of trades account for 99\% of the portfolio's log growth; without them the CAGR would be \ensuremath{-}0.3\%. This is the profile of a convex, trend-capturing strategy, and it implies that the result is sensitive to whether a few large moves are captured.
 
 \subsection{Drawdowns and stability}
 
@@ -253,10 +253,10 @@ The return distribution is strongly right-skewed: the strategy is in the market 
 \legend{Buy-and-hold 50/50, Portfolio 50/50}
 \end{axis}
 \end{tikzpicture}
-\caption{Drawdowns from the running peak, daily closes. Maximum: \ensuremath{-}19.1\% for the portfolio, \ensuremath{-}76.9\% for buy-and-hold.}\label{fig:dd}
+\caption{Drawdowns from the running peak, daily closes. Maximum: \ensuremath{-}17.8\% for the portfolio, \ensuremath{-}76.9\% for buy-and-hold.}\label{fig:dd}
 \end{figure}
 
-The deepest portfolio drawdown is \ensuremath{-}19.1\%, against \ensuremath{-}76.9\% for buy-and-hold (Figure~\ref{fig:dd}). Split in two halves, the portfolio Sharpe ratio is 2.03 (Sep.~2018--Sep.~2022) and 1.78 (Sep.~2022--Sep.~2026); the second half is weaker and the correlation between the two markets' strategy returns rises from 0.31 to 0.45. The rolling one-year Sharpe ratio (Figure~\ref{fig:rolling}) is positive in 100\% of windows and above one in 92\%, with a minimum of 0.28. A month-block bootstrap of 5{,}000 resampled histories gives a 90\% interval of 1.38 to 2.37 for the Sharpe ratio; a bootstrap resamples history and is not a forecast. Calendar-year results are in Table~\ref{tab:annual}.
+The deepest portfolio drawdown is \ensuremath{-}17.8\%, against \ensuremath{-}76.9\% for buy-and-hold (Figure~\ref{fig:dd}). Split in two halves, the portfolio Sharpe ratio is 2.12 (Sep.~2018--Sep.~2022) and 1.98 (Sep.~2022--Sep.~2026); the second half is weaker and the correlation between the two markets' strategy returns rises from 0.31 to 0.44. The rolling one-year Sharpe ratio (Figure~\ref{fig:rolling}) is positive in 100\% of windows and above one in 93\%, with a minimum of 0.27. A month-block bootstrap of 5{,}000 resampled histories gives a 90\% interval of 1.53 to 2.51 for the Sharpe ratio; a bootstrap resamples history and is not a forecast. Calendar-year results are in Table~\ref{tab:annual}.
 
 \begin{figure}[tbp]
 \centering
@@ -266,7 +266,7 @@ The deepest portfolio drawdown is \ensuremath{-}19.1\%, against \ensuremath{-}76
 \addplot[pfcol, thick] table[x=x, y=pf] {data/rolling.dat};
 \end{axis}
 \end{tikzpicture}
-\caption{Rolling 365-day Sharpe ratio of the portfolio (2{,}588 windows). Positive in 100\% of windows, above one (dashed) in 92\%; median 1.76, minimum 0.28.}\label{fig:rolling}
+\caption{Rolling 365-day Sharpe ratio of the portfolio (2{,}588 windows). Positive in 100\% of windows, above one (dashed) in 93\%; median 1.94, minimum 0.27.}\label{fig:rolling}
 \end{figure}
 
 \begin{table}[tbp]
@@ -277,15 +277,15 @@ The deepest portfolio drawdown is \ensuremath{-}19.1\%, against \ensuremath{-}76
 \toprule
 Year & Bitcoin & Ether & Portfolio & Sharpe & Max.~drawdown & Buy-and-hold \\
 \midrule
-2018\tnote{a} & 18.8\% & 210.1\% & 114.5\% & 4.97 & \ensuremath{-}6.4\% & \ensuremath{-}50.3\% \\
-2019 & 64.5\% & \ensuremath{-}14.3\% & 7.5\% & 0.43 & \ensuremath{-}15.1\% & 49.0\% \\
-2020 & 15.5\% & 76.2\% & 50.5\% & 1.66 & \ensuremath{-}12.8\% & 355.8\% \\
-2021 & 33.6\% & 65.8\% & 55.3\% & 1.84 & \ensuremath{-}9.3\% & 191.2\% \\
-2022 & 46.1\% & 75.9\% & 67.6\% & 1.75 & \ensuremath{-}19.1\% & \ensuremath{-}66.4\% \\
-2023 & 52.5\% & 12.9\% & 22.5\% & 1.09 & \ensuremath{-}7.3\% & 113.9\% \\
-2024 & 114.0\% & 68.0\% & 81.9\% & 3.07 & \ensuremath{-}5.4\% & 78.1\% \\
-2025 & \ensuremath{-}4.0\% & 99.1\% & 62.3\% & 1.91 & \ensuremath{-}10.5\% & \ensuremath{-}8.5\% \\
-2026\tnote{a} & 16.7\% & 56.9\% & 48.4\% & 1.78 & \ensuremath{-}15.4\% & \ensuremath{-}6.8\% \\
+2018\tnote{a} & 16.2\% & 224.3\% & 120.3\% & 5.22 & \ensuremath{-}6.4\% & \ensuremath{-}50.3\% \\
+2019 & 55.5\% & \ensuremath{-}9.0\% & 8.0\% & 0.45 & \ensuremath{-}14.3\% & 49.0\% \\
+2020 & 21.2\% & 77.5\% & 56.1\% & 1.82 & \ensuremath{-}12.8\% & 355.8\% \\
+2021 & 28.3\% & 60.4\% & 50.9\% & 1.80 & \ensuremath{-}11.1\% & 191.2\% \\
+2022 & 40.1\% & 94.5\% & 80.9\% & 2.00 & \ensuremath{-}17.8\% & \ensuremath{-}66.4\% \\
+2023 & 59.3\% & 22.3\% & 29.5\% & 1.35 & \ensuremath{-}7.1\% & 113.9\% \\
+2024 & 105.2\% & 66.3\% & 75.6\% & 3.13 & \ensuremath{-}4.7\% & 78.1\% \\
+2025 & 1.2\% & 112.7\% & 81.6\% & 2.24 & \ensuremath{-}8.6\% & \ensuremath{-}8.5\% \\
+2026\tnote{a} & 13.8\% & 63.9\% & 56.1\% & 1.95 & \ensuremath{-}14.3\% & \ensuremath{-}6.8\% \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
@@ -309,17 +309,17 @@ Bitcoin and Ether prices are highly correlated (daily correlation 0.82), but the
 Scenario & Sharpe & CAGR & Max.~drawdown \\
 \midrule
 \multicolumn{4}{l}{\textit{Commission per order}}\\
-\quad 0.000\% & 2.14 & 74.0\% & \ensuremath{-}18.0\% \\
-\quad 0.045\% (base case) & 1.88 & 61.6\% & \ensuremath{-}19.1\% \\
-\quad 0.090\% & 1.61 & 50.2\% & \ensuremath{-}20.7\% \\
+\quad 0.000\% & 2.17 & 74.5\% & \ensuremath{-}17.2\% \\
+\quad 0.045\% (base case) & 2.02 & 67.7\% & \ensuremath{-}17.8\% \\
+\quad 0.090\% & 1.88 & 61.2\% & \ensuremath{-}19.7\% \\
 \multicolumn{4}{l}{\textit{Slippage per order, on top of the base commission}}\\
-\quad 0.01\% & 1.82 & -- & -- \\
-\quad 0.02\% & 1.76 & -- & -- \\
-\quad 0.05\% & 1.58 & -- & -- \\
+\quad 0.01\% & 1.99 & -- & -- \\
+\quad 0.02\% & 1.96 & -- & -- \\
+\quad 0.05\% & 1.86 & -- & -- \\
 \multicolumn{4}{l}{\textit{Perpetual funding, on top of the base commission}}\\
-\quad Historical perpetual funding (Binance) & 1.81 & 58.4\% & \ensuremath{-}19.2\% \\
-\quad \quad with Hyperliquid funding from May 2023 & 1.80 & 57.6\% & \ensuremath{-}19.2\% \\
-\quad Stress: shorts pay 0.01\% per 8 hours throughout & 1.86 & 60.7\% & \ensuremath{-}19.2\% \\
+\quad Historical perpetual funding (Binance) & 1.97 & 64.7\% & \ensuremath{-}17.9\% \\
+\quad \quad with Hyperliquid funding from May 2023 & 1.95 & 64.0\% & \ensuremath{-}17.9\% \\
+\quad Stress: shorts pay 0.01\% per 8 hours throughout & 2.00 & 66.7\% & \ensuremath{-}18.1\% \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
@@ -328,7 +328,7 @@ Scenario & Sharpe & CAGR & Max.~drawdown \\
 \end{threeparttable}
 \end{table}
 
-Turnover is high, about 157 times the capital a year, so costs matter. Doubling commissions, which is equivalent to adding 0.045\% of slippage on every fill, lowers the Sharpe ratio to 1.61. Historical perpetual funding, with the correct sign for long and short positions, lowers it to 1.81 (Table~\ref{tab:frictions}). Capacity and market impact are not modelled here: the strategy enters precisely when liquidity is thinnest, which is the first thing a larger account would pay for. A separate study replays every execution since 2020 on real Binance perpetual-futures trades and reports the measured execution costs and capacity (institutional dossier).
+Turnover is high, about 87 times the capital a year, so costs matter. Doubling commissions, which is equivalent to adding 0.045\% of slippage on every fill, lowers the Sharpe ratio to 1.88. Historical perpetual funding, with the correct sign for long and short positions, lowers it to 1.97 (Table~\ref{tab:frictions}). Capacity and market impact are not modelled here: the strategy enters precisely when liquidity is thinnest, which is the first thing a larger account would pay for. A separate study replays every execution since 2020 on real Binance perpetual-futures trades and reports the measured execution costs and capacity (institutional dossier).
 
 \section{Robustness}\label{sec:robustness}
 
@@ -344,12 +344,12 @@ For each market we fix pass/fail criteria before the result is seen: a positive 
 \toprule
 Market & Feed & Period & Trades & Sharpe & CAGR & Max.~DD & Random & Delay & Verdict \\
 \midrule
-Bitcoin & Bitstamp & 2017--2026 & 774 & 1.56 & 42.9\% & \ensuremath{-}24.1\% & 100\% & 83\% & pass (in-sample) \\
-Ether & Binance & 2018--2026 & 667 & 1.84 & 72.2\% & \ensuremath{-}29.5\% & 100\% & 94\% & pass \\
-Ether & Dukascopy & 2019--2026 & 412 & 1.87 & 63.2\% & \ensuremath{-}26.4\% & 100\% & 72\% & pass \\
-Solana & Binance & 2021--2026 & 398 & 0.35 & 6.1\% & \ensuremath{-}62.0\% & 87\% & 48\% & fail \\
-Gold & Dukascopy & 2013--2026 & 663 & \ensuremath{-}0.07 & \ensuremath{-}0.5\% & \ensuremath{-}18.6\% & 100\% & n.m. & fail \\
-TAO & Binance & 2024--2026 & 172 & \ensuremath{-}0.01 & \ensuremath{-}8.7\% & \ensuremath{-}50.4\% & 70\% & n.m. & fail \\
+Bitcoin & Bitstamp & 2017--2026 & 396 & 1.59 & 41.0\% & \ensuremath{-}26.5\% & 100\% & 97\% & pass (in-sample) \\
+Ether & Binance & 2018--2026 & 358 & 2.05 & 80.0\% & \ensuremath{-}26.7\% & 100\% & 94\% & pass \\
+Ether & Dukascopy & 2019--2026 & 206 & 1.82 & 57.5\% & \ensuremath{-}23.6\% & 100\% & 73\% & pass \\
+Solana & Binance & 2021--2026 & 251 & 0.57 & 16.0\% & \ensuremath{-}54.0\% & 93\% & 80\% & partial \\
+Gold & Dukascopy & 2013--2026 & 319 & 0.39 & 1.8\% & \ensuremath{-}11.8\% & 100\% & 115\% & partial \\
+TAO & Binance & 2024--2026 & 95 & 0.01 & \ensuremath{-}7.3\% & \ensuremath{-}39.2\% & 55\% & n.m. & fail \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
@@ -358,7 +358,7 @@ TAO & Binance & 2024--2026 & 172 & \ensuremath{-}0.01 & \ensuremath{-}8.7\% & \e
 \end{threeparttable}
 \end{table}
 
-The random-entry placebo is the most informative test: with the exits held fixed, random entry times do much worse, so the edge is not a by-product of market drift or of the exit structure. Delaying every entry by one bar keeps most of the average trade, so the result does not depend on a perfect fill. Ether, never used for calibration, passes on two independent feeds. Solana, gold and TAO do not: the rules are not a universal law of markets, and we see no reason to hide it.
+The random-entry placebo is the most informative test: with the exits held fixed, random entry times do much worse, so the edge is not a by-product of market drift or of the exit structure. Delaying every entry by one bar keeps most of the average trade, so the result does not depend on a perfect fill. Ether, never used to calibrate the parameters (although the two entry conditions were set with knowledge of it), passes on two independent feeds. On the other markets they are partial on Solana and gold (strategy criteria met, event study not) and fail on TAO, and we report these results: the rules are not a universal law of markets, and we see no reason to hide it.
 
 \subsection{Parameter neighbourhoods}
 
@@ -372,12 +372,12 @@ All parameters are perturbed together by up to $\pm5\%$, $\pm10\%$ and $\pm20\%$
 \toprule
 Market & Perturbation & Median Sharpe & P10--P90 & Chosen & Rank of chosen & Profitable \\
 \midrule
-Bitcoin & $\pm5\%$ & 1.45 & 1.35--1.53 & 1.56 & 95\% & 100\% \\
- & $\pm10\%$ & 1.38 & 1.24--1.51 & 1.56 & 97\% & 100\% \\
- & $\pm20\%$ & 1.32 & 1.17--1.47 & 1.56 & 99\% & 100\% \\
-Ether & $\pm5\%$ & 1.85 & 1.70--2.01 & 1.84 & 47\% & 100\% \\
- & $\pm10\%$ & 1.86 & 1.62--2.02 & 1.84 & 45\% & 100\% \\
- & $\pm20\%$ & 1.77 & 1.55--1.97 & 1.84 & 68\% & 100\% \\
+Bitcoin & $\pm5\%$ & 1.49 & 1.42--1.58 & 1.59 & 92\% & 100\% \\
+ & $\pm10\%$ & 1.42 & 1.32--1.52 & 1.59 & 99\% & 100\% \\
+ & $\pm20\%$ & 1.35 & 1.23--1.47 & 1.59 & 100\% & 100\% \\
+Ether & $\pm5\%$ & 2.05 & 1.91--2.19 & 2.05 & 55\% & 100\% \\
+ & $\pm10\%$ & 2.03 & 1.81--2.21 & 2.05 & 55\% & 100\% \\
+ & $\pm20\%$ & 1.94 & 1.76--2.14 & 2.05 & 76\% & 100\% \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
@@ -388,11 +388,19 @@ Ether & $\pm5\%$ & 1.85 & 1.70--2.01 & 1.84 & 47\% & 100\% \\
 
 \subsection{Walk-forward}
 
-On Bitcoin, re-selecting the shock threshold, stop and trailing-stop settings of each regime every quarter on the previous 36 months only, choosing plateaus rather than isolated optima, over 28 windows from 2020 to 2026, gives a Sharpe ratio of 1.11 (15-minute returns), against 1.49 for the fixed settings over the same windows. The strategy remains profitable out of sample, but clearly below the fixed preset: part of the headline performance is a selection effect, and the forward test of Section~\ref{sec:forward} is the right place to measure it.
+On Bitcoin, re-selecting the shock threshold, stop and trailing-stop settings of the calm regime every quarter on the previous 36 months only, choosing plateaus rather than isolated optima, over 28 windows from 2020 to 2026, gives a Sharpe ratio of 0.83 (15-minute returns, 390 trades), against 1.55 for the fixed settings over the same windows. The strategy remains profitable out of sample, but clearly below the fixed preset: a large part of the headline performance on Bitcoin is a selection effect, and the forward test of Section~\ref{sec:forward} is the right place to measure it.
+
+\section{Selection risk of the rule choice}\label{sec:selection}
+
+The calm-regime restriction was chosen among rule variants that were all replayed on the same portfolio. To measure how much of its advantage is selection, we take the 16 variants actually tried on the portfolio with the current parameters (short-entry rules, range filters, exit changes, early invalidation and agitated-regime alternatives) and apply combinatorially symmetric cross-validation \citep{BaileyEtAl2017}: the history is cut into 16 blocks, and over all 12{,}870 ways of choosing 8 of them, the variant with the best Sharpe ratio on those blocks is ranked against all variants on the other 8. The chosen variant ranks above the median out of sample in 81\% of splits, a probability of backtest overfitting of 19\%. The current rules are the in-sample winner in 57\% of splits and rank on average at the 89th percentile out of sample; they beat the earlier rules in 8 of 9 calendar years.
+
+The size of the gain is another matter. The daily return difference between the current and the earlier rules has an annualised information ratio of 0.56; without any correction its one-sided probabilistic Sharpe ratio is 93.7\%, and deflated for the 15 alternatives tried \citep{BaileyLopezdePrado2014} it falls to 18\% (48\% with doubled commissions). A chronological selection, re-made each January on past data only, would have chosen the current rules every year from 2020, for an out-of-sample Sharpe gain of 0.16 (95\% interval \ensuremath{-}0.03 to 0.33). The choice is consistent over time, but its advantage over the earlier rules is not demonstrated beyond selection.
+
+Deflating the absolute Sharpe ratio for the whole parameter search is more severe. With the dispersion of Sharpe ratios among the 206 random parameter sets from which the current ones were selected (standard deviation 0.60), the deflated Sharpe ratio falls below 95\% beyond about 109 independent trials, and is 88\% at 222. The search involved more trials than that, although the parameters were selected on Bitcoin only and the trials are far from independent. The historical Sharpe ratio should therefore not be read as an estimate of future performance.
 
 \section{Falsification of the short-entry condition}\label{sec:falsification}
 
-The conditional mirror is evaluated on the same history that was used to build the strategy, so its in-sample improvement is not evidence by itself. We pre-registered three tests asking whether the historical advantage is exceptional relative to counterfactuals with comparable properties. The condition itself is frozen; no parameter was changed after the results.
+The conditional mirror is evaluated on the same history that was used to build the strategy, so its in-sample improvement is not evidence by itself. We pre-registered three tests asking whether the historical advantage is exceptional relative to counterfactuals with comparable properties. The condition itself is frozen; no parameter was changed after the results. The tests were run before the calm-regime restriction, on rules that also traded agitated-regime longs. Every short entry comes from the calm regime under both rule sets, so the short-trade statistics carry over; the portfolio-level statistics include those longs.
 
 \paragraph{Test A: random selection.} Keep exactly as many of the original short trades as the condition keeps, chosen at random within each market and year, 50{,}000 times. The average risk-normalised return of the shorts actually kept ranks at the 96.8th percentile of the draws ($p=0.032$); the portfolio Sharpe ratio at the 94.5th percentile ($p=0.055$).
 
@@ -454,22 +462,22 @@ A natural objection is that a strategy entering in the direction of large moves 
 \toprule
  & M0 & M1 & M2 (pre-set) \\
 \midrule
-$\alpha$ (annualised) & \makecell[r]{49.6\%\\[-1pt]{\scriptsize(4.48)}} & \makecell[r]{40.3\%\\[-1pt]{\scriptsize(4.18)}} & \makecell[r]{41.0\%\\[-1pt]{\scriptsize(4.56)}} \\
+$\alpha$ (annualised) & \makecell[r]{53.8\%\\[-1pt]{\scriptsize(4.85)}} & \makecell[r]{44.2\%\\[-1pt]{\scriptsize(4.60)}} & \makecell[r]{44.8\%\\[-1pt]{\scriptsize(4.94)}} \\
 \addlinespace
-Buy-and-hold Bitcoin & \makecell[r]{\ensuremath{-}0.054\\[-1pt]{\scriptsize(\ensuremath{-}1.92)}} & \makecell[r]{\ensuremath{-}0.044\\[-1pt]{\scriptsize(\ensuremath{-}1.81)}} & \makecell[r]{\ensuremath{-}0.036\\[-1pt]{\scriptsize(\ensuremath{-}1.55)}} \\
-Buy-and-hold Ether & \makecell[r]{0.077\\[-1pt]{\scriptsize(2.91)}} & \makecell[r]{0.073\\[-1pt]{\scriptsize(3.12)}} & \makecell[r]{0.077\\[-1pt]{\scriptsize(3.50)}} \\
-TSMOM 30 days &  & \makecell[r]{0.089\\[-1pt]{\scriptsize(2.92)}} & \makecell[r]{0.066\\[-1pt]{\scriptsize(2.39)}} \\
-TSMOM 90 days &  & \makecell[r]{0.046\\[-1pt]{\scriptsize(1.76)}} & \makecell[r]{0.051\\[-1pt]{\scriptsize(1.46)}} \\
-TSMOM 180 days &  & \makecell[r]{\ensuremath{-}0.047\\[-1pt]{\scriptsize(\ensuremath{-}1.60)}} & \makecell[r]{\ensuremath{-}0.063\\[-1pt]{\scriptsize(\ensuremath{-}2.18)}} \\
-Breakout 55/20 days &  & \makecell[r]{0.078\\[-1pt]{\scriptsize(1.94)}} & \makecell[r]{0.051\\[-1pt]{\scriptsize(1.35)}} \\
-Moving averages 20/100 days &  & \makecell[r]{\ensuremath{-}0.001\\[-1pt]{\scriptsize(\ensuremath{-}0.04)}} & \makecell[r]{0.031\\[-1pt]{\scriptsize(1.09)}} \\
-Intraday breakout 24h/12h &  &  & \makecell[r]{0.162\\[-1pt]{\scriptsize(5.89)}} \\
+Buy-and-hold Bitcoin & \makecell[r]{\ensuremath{-}0.054\\[-1pt]{\scriptsize(\ensuremath{-}1.89)}} & \makecell[r]{\ensuremath{-}0.043\\[-1pt]{\scriptsize(\ensuremath{-}1.67)}} & \makecell[r]{\ensuremath{-}0.035\\[-1pt]{\scriptsize(\ensuremath{-}1.41)}} \\
+Buy-and-hold Ether & \makecell[r]{0.069\\[-1pt]{\scriptsize(2.48)}} & \makecell[r]{0.065\\[-1pt]{\scriptsize(2.58)}} & \makecell[r]{0.069\\[-1pt]{\scriptsize(2.81)}} \\
+TSMOM 30 days &  & \makecell[r]{0.095\\[-1pt]{\scriptsize(3.11)}} & \makecell[r]{0.073\\[-1pt]{\scriptsize(2.52)}} \\
+TSMOM 90 days &  & \makecell[r]{0.039\\[-1pt]{\scriptsize(1.43)}} & \makecell[r]{0.043\\[-1pt]{\scriptsize(1.18)}} \\
+TSMOM 180 days &  & \makecell[r]{\ensuremath{-}0.055\\[-1pt]{\scriptsize(\ensuremath{-}1.90)}} & \makecell[r]{\ensuremath{-}0.070\\[-1pt]{\scriptsize(\ensuremath{-}2.44)}} \\
+Breakout 55/20 days &  & \makecell[r]{0.073\\[-1pt]{\scriptsize(1.84)}} & \makecell[r]{0.048\\[-1pt]{\scriptsize(1.22)}} \\
+Moving averages 20/100 days &  & \makecell[r]{0.010\\[-1pt]{\scriptsize(0.31)}} & \makecell[r]{0.040\\[-1pt]{\scriptsize(1.36)}} \\
+Intraday breakout 24h/12h &  &  & \makecell[r]{0.150\\[-1pt]{\scriptsize(5.59)}} \\
 \midrule
-$R^2$ & 0.022 & 0.152 & 0.266 \\
-Residual information ratio & 1.82 & 1.59 & 1.74 \\
-Share of mean return unexplained & 96\% & 78\% & 79\% \\
+$R^2$ & 0.016 & 0.151 & 0.251 \\
+Residual information ratio & 1.98 & 1.75 & 1.89 \\
+Share of mean return unexplained & 97\% & 80\% & 81\% \\
 Bootstrap $P(\alpha\le0)$ & -- & -- & 0.0000 \\
-Bootstrap 90\% interval of $\alpha$ & -- & -- & 26.1\% to 55.8\% \\
+Bootstrap 90\% interval of $\alpha$ & -- & -- & 29.7\% to 60.0\% \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
@@ -486,22 +494,22 @@ Bootstrap 90\% interval of $\alpha$ & -- & -- & 26.1\% to 55.8\% \\
 \toprule
 Benchmark (50/50, after costs) & Sharpe & CAGR & Max.~drawdown & Corr.~with SE \\
 \midrule
-Buy-and-hold 50/50 & 0.82 & 37.7\% & \ensuremath{-}76.3\% & 0.11 \\
-TSMOM 30 days & 0.96 & 50.9\% & \ensuremath{-}52.2\% & 0.33 \\
-TSMOM 90 days & 0.45 & 7.9\% & \ensuremath{-}90.6\% & 0.21 \\
-TSMOM 180 days & 0.36 & 2.7\% & \ensuremath{-}89.3\% & 0.09 \\
+Buy-and-hold 50/50 & 0.82 & 37.7\% & \ensuremath{-}76.3\% & 0.09 \\
+TSMOM 30 days & 0.96 & 50.9\% & \ensuremath{-}52.2\% & 0.34 \\
+TSMOM 90 days & 0.45 & 7.9\% & \ensuremath{-}90.6\% & 0.20 \\
+TSMOM 180 days & 0.36 & 2.7\% & \ensuremath{-}89.3\% & 0.08 \\
 Breakout 55/20 days & 0.84 & 35.4\% & \ensuremath{-}59.1\% & 0.33 \\
-Moving averages 20/100 days & 0.64 & 22.6\% & \ensuremath{-}69.9\% & 0.21 \\
-Intraday breakout 24h/12h & 0.02 & \ensuremath{-}14.8\% & \ensuremath{-}88.6\% & 0.38 \\
-Shock Engine portfolio & 1.88 & 61.6\% & \ensuremath{-}19.1\% & 1.00 \\
+Moving averages 20/100 days & 0.64 & 22.6\% & \ensuremath{-}69.9\% & 0.20 \\
+Intraday breakout 24h/12h & 0.02 & \ensuremath{-}14.8\% & \ensuremath{-}88.6\% & 0.36 \\
+Shock Engine portfolio & 2.02 & 67.7\% & \ensuremath{-}17.8\% & 1.00 \\
 \midrule
 \textit{Sensitivity of M2} & $\alpha$ & $t$ & $R^2$ & IR \\
 \midrule
-19 trend strategies (full grid) & 40.7\% & 4.73 & 0.343 & 1.82 \\
-First half (Sep.~2018--Sep.~2022) & 46.2\% & 3.21 & 0.219 & 1.75 \\
-Second half (Sep.~2022--Sep.~2026) & 38.1\% & 3.90 & 0.423 & 2.01 \\
-Weekly returns & 42.6\% & 4.37 & 0.346 & 1.66 \\
-Benchmarks without costs & 36.0\% & 4.17 & 0.266 & 1.52 \\
+19 trend strategies (full grid) & 44.3\% & 5.07 & 0.325 & 1.97 \\
+First half (Sep.~2018--Sep.~2022) & 48.6\% & 3.39 & 0.202 & 1.85 \\
+Second half (Sep.~2022--Sep.~2026) & 44.1\% & 4.41 & 0.405 & 2.28 \\
+Weekly returns & 45.7\% & 4.70 & 0.325 & 1.75 \\
+Benchmarks without costs & 40.2\% & 4.62 & 0.251 & 1.70 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}[flushleft]\footnotesize
@@ -515,35 +523,35 @@ Benchmarks without costs & 36.0\% & 4.17 & 0.266 & 1.52 \\
 \begin{tikzpicture}
 \begin{axis}[width=\textwidth, axis lines*=left, grid=major, grid style={gray!20}, tick label style={font=\footnotesize}, label style={font=\footnotesize}, legend style={font=\footnotesize, draw=none, fill=white, fill opacity=0.85, text opacity=1}, legend cell align=left, width=0.8\textwidth, height=6.4cm, xbar, bar width=7pt, y dir=reverse, symbolic y coords={Buy-and-hold Bitcoin,Buy-and-hold Ether,TSMOM 30 days,TSMOM 90 days,TSMOM 180 days,Breakout 55/20 days,Moving averages 20/100 days,Intraday breakout 24h/12h}, ytick=data, xlabel={Loading $\beta$ in M2, with 95\% Newey--West interval}, enlarge y limits=0.08, xmajorgrids, ymajorgrids=false, scaled x ticks=false, xticklabel style={/pgf/number format/fixed, /pgf/number format/precision=2}]
 \addplot[fill=btccol!55, draw=btccol, error bars/.cd, x dir=both, x explicit, error bar style={black}] coordinates {
-  (-0.0357,Buy-and-hold Bitcoin) +- (0.0452,0)
-  (0.0771,Buy-and-hold Ether) +- (0.0432,0)
-  (0.0656,TSMOM 30 days) +- (0.0539,0)
-  (0.0506,TSMOM 90 days) +- (0.0680,0)
-  (-0.0629,TSMOM 180 days) +- (0.0565,0)
-  (0.0514,Breakout 55/20 days) +- (0.0743,0)
-  (0.0311,Moving averages 20/100 days) +- (0.0561,0)
-  (0.1616,Intraday breakout 24h/12h) +- (0.0538,0)
+  (-0.0348,Buy-and-hold Bitcoin) +- (0.0484,0)
+  (0.0689,Buy-and-hold Ether) +- (0.0481,0)
+  (0.0732,TSMOM 30 days) +- (0.0569,0)
+  (0.0426,TSMOM 90 days) +- (0.0710,0)
+  (-0.0700,TSMOM 180 days) +- (0.0563,0)
+  (0.0481,Breakout 55/20 days) +- (0.0775,0)
+  (0.0395,Moving averages 20/100 days) +- (0.0572,0)
+  (0.1500,Intraday breakout 24h/12h) +- (0.0526,0)
 };
 \end{axis}
 \end{tikzpicture}
-\caption{Factor loadings of the portfolio in the pre-set model M2. The largest loading is on the intraday breakout ($t=5.89$), which loses money on its own after costs.}\label{fig:betas}
+\caption{Factor loadings of the portfolio in the pre-set model M2. The largest loading is on intraday breakout 24h/12h ($t=5.59$), which barely breaks even (Sharpe 0.02) on its own after costs.}\label{fig:betas}
 \end{figure}
 
-The residual alpha is 41.0\% a year with $t=4.56$; no bootstrap history out of 5{,}000 produced $\hat\alpha\le0$, and the 90\% interval is 26.1\% to 55.8\%. The factors explain $R^2=0.27$ of the daily variance and leave 79\% of the average return unexplained. The largest loading is on the intraday breakout, which shares part of the timing of the strategy but loses money on its own after costs. Using 19 trend strategies at once, which deliberately favours the benchmarks, leaves the conclusion unchanged ($t=4.73$). The verdict is ``residual alpha demonstrated, in-sample'': simple trend strategies do not reproduce the historical result. The regression cannot tell whether the alpha will persist.
+The residual alpha is 44.8\% a year with $t=4.94$; no bootstrap history out of 5{,}000 produced $\hat\alpha\le0$, and the 90\% interval is 29.7\% to 60.0\%. The factors explain $R^2=0.25$ of the daily variance and leave 81\% of the average return unexplained. The largest loading is on intraday breakout 24h/12h, which shares part of the timing of the strategy but barely breaks even (Sharpe 0.02) on its own after costs. Using 19 trend strategies at once, which deliberately favours the benchmarks, leaves the conclusion unchanged ($t=5.07$). The verdict is ``residual alpha demonstrated, in-sample'': simple trend strategies do not reproduce the historical result. The regression cannot tell whether the alpha will persist.
 
 \section{Forward validation and live deployment}\label{sec:forward}
 
-\paragraph{Pre-registered forward test.} The hypothesis $H_1:\ \E[R\mid T=1]>\E[R\mid T=0]$ for short signals is tested prospectively from 12~October 2026, with the definition, statistic, thresholds and stopping date committed before the first observation. Interim analyses occur when 25, 50 and 75 shorts have closed in the bearish regime, each at $p<0.001$; the final analysis occurs when both groups reach 100 closed shorts, at $p<0.047$, and no later than 1~October 2031, for a total type-I error of at most 0.05 \citep{Haybittle1971,PetoEtAl1976}. With roughly 162 trades a year across both markets, few of them shorts, the test will take years rather than months.
+\paragraph{Pre-registered forward test.} The hypothesis $H_1:\ \E[R\mid T=1]>\E[R\mid T=0]$ for short signals is tested prospectively from 12~October 2026, with the definition, statistic, thresholds and stopping date committed before the first observation. Interim analyses occur when 25, 50 and 75 shorts have closed in the bearish regime, each at $p<0.001$; the final analysis occurs when both groups reach 100 closed shorts, at $p<0.047$, and no later than 1~October 2031, for a total type-I error of at most 0.05 \citep{Haybittle1971,PetoEtAl1976}. With roughly 89 trades a year across both markets, few of them shorts, the test will take years rather than months.
 
 \paragraph{Why live Sharpe ratios take time.} By Equation~\eqref{eq:lo}, a Sharpe ratio measured over one year of daily returns has a standard error of about 1.0: for a true Sharpe ratio of 1.5, the 95\% interval of a one-year estimate runs from about $-0.5$ to $3.5$, so a single year of live trading cannot reliably distinguish it from zero. What a first year can establish is \emph{implementation fidelity}: that the live system takes the same decisions as the simulation on the same bars, at a measurable execution cost.
 
-\paragraph{Deployment.} The live engine shares its decision code with the backtester and is tested for decision-by-decision parity. Since 9~October 2026 it runs the public specification on Hyperliquid's test network, where every order is publicly timestamped by the exchange; testnet funds are fictitious and its market differs from the real one, so these results check mechanics, not performance.
+\paragraph{Deployment.} The live engine shares its decision code with the backtester and is tested for decision-by-decision parity. Since 9~October 2026 a bot has run it on Hyperliquid's test network, where every order is publicly timestamped by the exchange; it applies the short-entry condition but not yet the calm-regime restriction; testnet funds are fictitious and its market differs from the real one, so these results check mechanics, not performance.
 
 \section{Limitations}
 
 \begin{itemize}
-\item \textbf{Selection.} The Bitcoin rules were selected on 2017--2026 data, which contains the whole portfolio period; Ether is a transfer across markets, not across time. The walk-forward Sharpe ratio (1.11) is clearly below the fixed preset.
-\item \textbf{Short condition in-sample.} Like every rule, the short-entry condition is evaluated on data already used to build the strategy; Section~\ref{sec:falsification} measures how unusual its benefit is but does not make it out-of-sample.
+\item \textbf{Selection.} The parameters were selected on 2017--2026 Bitcoin data, which contains the whole portfolio period; Ether is a transfer across markets, not across time. The walk-forward Sharpe ratio (0.83) is clearly below the fixed preset, and the deflated Sharpe ratio does not survive the full parameter search.
+\item \textbf{Entry conditions in-sample.} The calm-regime restriction and the short-entry condition were chosen with knowledge of both markets; Sections~\ref{sec:selection} and~\ref{sec:falsification} measure the selection risk and how unusual the short condition's benefit is, but neither makes them out-of-sample.
 \item \textbf{Frictions.} Slippage and funding are excluded from the headline figures. Capacity and market impact are not modelled here; execution costs are measured on Binance in a separate study, while the depth of Hyperliquid, the intended venue, is not yet measured. The strategy trades when order books are thinnest.
 \item \textbf{Right tail.} A small number of large trades drive the long-run growth; missing a few of them in live trading would change the outcome materially.
 \item \textbf{Venues.} Data venues (Bitstamp, Binance spot) differ from the intended execution venue (Hyperliquid perpetuals) in prices, fees, funding and stop mechanics.
@@ -552,7 +560,7 @@ The residual alpha is 41.0\% a year with $t=4.56$; no bootstrap history out of 5
 
 \section{Conclusion}
 
-Shock Engine trades the continuation of qualified 15-minute shocks in Bitcoin and Ether, with a short side that mirrors the long side only in bearish daily regimes. On eight years of data the 50/50 portfolio delivers a Sharpe ratio of 1.88 with a maximum drawdown of \ensuremath{-}19.1\%, survives placebo, delay, cost, parameter and cross-asset tests, and is not spanned by standard trend strategies. The same evidence is in-sample, depends on a convex right tail, and leaves capacity to a separate execution study. The decisive tests are the pre-registered forward analysis and a live track record, both under way and reported as they arrive, whatever they show.
+Shock Engine trades the continuation of qualified 15-minute shocks in Bitcoin and Ether, entering only in calm volatility regimes, with a short side that mirrors the long side only in bearish daily regimes. On eight years of data the 50/50 portfolio delivers a Sharpe ratio of 2.02 with a maximum drawdown of \ensuremath{-}17.8\%, survives placebo, delay, cost, parameter and cross-asset tests, and is not spanned by standard trend strategies. The same evidence is in-sample, depends on a convex right tail, and leaves capacity to a separate execution study. The decisive tests are the pre-registered forward analysis and a live track record, both under way and reported as they arrive, whatever they show.
 
 \clearpage
 \appendix
@@ -569,11 +577,11 @@ Long-only versions are not added: with positions $\pm1$ their returns are, up to
 
 \section{Synthetic markets (Test C)}
 
-Calendar blocks of $L$ days are drawn with replacement from the full history, the same blocks for both coins. Within a block, 15-minute bars are rescaled so that the synthetic path is continuous at block boundaries; volumes are normalised by their trailing mean; the price grid follows a fixed rule. The engine, the volatility regimes and the trend condition are recomputed from scratch on each path. On the identity path the construction reproduces the original strategy exactly (identical regimes and equity bar by bar), which validates the pipeline.
+Calendar blocks of $L$ days are drawn with replacement from the full history, the same blocks for both coins. Within a block, 15-minute bars are rescaled so that the synthetic path is continuous at block boundaries; volumes are normalised by their trailing mean; the price grid follows a fixed rule. The engine, the volatility regimes and the trend condition are recomputed from scratch on each path. On the identity path the construction reproduces the rules under test exactly (identical regimes and equity bar by bar), which validates the pipeline.
 
 \section{Reproducibility}
 
-Every number in this paper is produced by versioned code from versioned data and read from the published research files (research version \texttt{shock-engine-2026.10}, code commit \texttt{d5162ee}, parameter hash \texttt{c6ac30464bce}); the portfolio pipeline runs 40 consistency checks, all passing. Pre-registration documents were committed before the corresponding computations. Data files, daily returns and the full numerical report are available at \url{https://www.shadowmarketpro.com/research}.
+Every number in this paper is produced by versioned code from versioned data and read from the published research files (research version \texttt{shock-engine-2026.10.13}, code commit \texttt{f056418}, parameter hash \texttt{c6ac30464bce}); the portfolio pipeline runs 39 consistency checks, all passing. Pre-registration documents were committed before the corresponding computations. Data files, daily returns and the full numerical report are available at \url{https://www.shadowmarketpro.com/research}.
 
 \clearpage
 \begin{thebibliography}{99}
