@@ -27,7 +27,7 @@ const sha256 = (p: string) => createHash('sha256').update(readFileSync(p)).diges
 
 function curlTo(url: string, dest: string): Promise<'ok' | 'missing'> {
   return new Promise((resolve, reject) => {
-    const p = spawn('curl', ['-sS', '-f', '--retry', '4', '--retry-delay', '2', '-o', dest, url])
+    const p = spawn('curl', ['-sS', '-f', '--retry', '4', '--retry-delay', '2', '--retry-all-errors', '-o', dest, url])
     let err = ''
     p.stderr.on('data', d => { err += d })
     p.on('close', code => (code === 0 ? resolve('ok') : code === 22 && /404/.test(err) ? resolve('missing') : reject(new Error(`curl ${code} ${url}: ${err.trim()}`))))
