@@ -25,3 +25,4 @@ modèle sur données réelles (ajoutée automatiquement par `shockfade/trial_log
 Note : les lignes marquées `3de57f1` entre 15:36 et 16:01 ont été exécutées avec le code de `research/fade/` encore non
 commité (fichiers nouveaux non détectés par l'ancien marqueur) ; ce code est celui du commit qui suit ce journal.
 | 2026-10-13 16:12 | d323780 | `shockfade/run_holdout.py` | holdout C : événements, M1–M7 + contrôle, H2b/H4a exploratoires | C = 2025-01-01 → 2026-10-01 |
+| 2026-10-13 16:38 | 40b566b+modif | `shockfade/run_mtf.py counts` | comptages M5…H4, k ∈ {3, 4}, sans résultat | P 2020-07 → 2026-09, R 2018-01 → 2019-12 |

@@ -1,6 +1,7 @@
 """Bougies 1 min Binance (perpétuel USDⓈ-M et comptant) BTCUSDT et ETHUSDT, depuis data.binance.vision.
 
     cd research/fade && python3 -m shockfade.fetch [--start 2020-01] [--end 2026-09] [--jobs 6]
+    cd research/fade && python3 -m shockfade.fetch --start 2017-08 --end 2019-12 --markets spot --tag pre2020
 
 Chaque archive mensuelle est vérifiée contre la somme SHA-256 publiée par Binance (.CHECKSUM) ; une
 archive dont la somme diffère est rejetée. Les colonnes conservées : ouverture (ms UTC), OHLC, volume
@@ -115,11 +116,14 @@ def main() -> None:
     ap.add_argument('--start', default='2020-01')
     ap.add_argument('--end', default='2026-09')
     ap.add_argument('--jobs', type=int, default=6)
+    ap.add_argument('--markets', default='um,spot', help='marchés à télécharger (um, spot)')
+    ap.add_argument('--tag', default='', help='suffixe des sorties (ex. pre2020) : ne remplace pas la série principale')
     a = ap.parse_args()
+    sfx = f'-{a.tag}' if a.tag else ''
     DERIVED.mkdir(parents=True, exist_ok=True)
     REPORTS.mkdir(parents=True, exist_ok=True)
     manifest: dict = {'source': BASE, 'start': a.start, 'end': a.end, 'series': {}}
-    for market in MARKETS:
+    for market in a.markets.split(','):
         for sym in SYMBOLS:
             jobs = [(market, sym, ym) for ym in months(a.start, a.end)]
             with ThreadPoolExecutor(a.jobs) as ex:
@@ -131,7 +135,7 @@ def main() -> None:
                     continue
                 frames.append(parse_zip(RAW / r['rel']))
             df = pd.concat(frames, ignore_index=True).drop_duplicates('t').sort_values('t').reset_index(drop=True)
-            out = DERIVED / f'{market}-{sym}-1m.parquet'
+            out = DERIVED / f'{market}-{sym}-1m{sfx}.parquet'
             df.to_parquet(out, index=False)
             key = f'{market}-{sym}'
             manifest['series'][key] = {
@@ -142,7 +146,7 @@ def main() -> None:
                 'archives': [{'rel': r['rel'], 'sha256': r['sha256']} for r in res],
             }
             print(f'{key} : {len(df)} minutes, {pd.to_datetime(df["t"].iloc[0], unit="ms")} → {pd.to_datetime(df["t"].iloc[-1], unit="ms")}', file=sys.stderr)
-    (REPORTS / 'data-manifest.json').write_text(json.dumps(manifest, indent=1))
+    (REPORTS / f'data-manifest{sfx}.json').write_text(json.dumps(manifest, indent=1))
 
 
 if __name__ == '__main__':

@@ -1,0 +1,572 @@
+{
+ "P-5-3": {
+  "raw": {
+   "BTCUSDT": 10691,
+   "ETHUSDT": 10359
+  },
+  "independent": {
+   "BTCUSDT": 7283,
+   "ETHUSDT": 7302
+  },
+  "xclusters": 9899,
+  "regime": {
+   "calme": 8152,
+   "agit\u00e9": 6433,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 11072,
+   "rejet\u00e9e": 583,
+   "sans": 2930
+  },
+  "n2": 24007,
+  "by_year": {
+   "2020": 1097,
+   "2021": 2099,
+   "2022": 2643,
+   "2023": 2492,
+   "2024": 2054,
+   "2025": 2196,
+   "2026": 2004
+  }
+ },
+ "P-5-4": {
+  "raw": {
+   "BTCUSDT": 4463,
+   "ETHUSDT": 4357
+  },
+  "independent": {
+   "BTCUSDT": 3458,
+   "ETHUSDT": 3439
+  },
+  "xclusters": 4860,
+  "regime": {
+   "calme": 4013,
+   "agit\u00e9": 2884,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 5966,
+   "rejet\u00e9e": 195,
+   "sans": 736
+  },
+  "n2": 10088,
+  "by_year": {
+   "2020": 531,
+   "2021": 890,
+   "2022": 1339,
+   "2023": 1312,
+   "2024": 889,
+   "2025": 947,
+   "2026": 989
+  }
+ },
+ "P-15-3": {
+  "raw": {
+   "BTCUSDT": 3803,
+   "ETHUSDT": 3799
+  },
+  "independent": {
+   "BTCUSDT": 3116,
+   "ETHUSDT": 3201
+  },
+  "xclusters": 4356,
+  "regime": {
+   "calme": 3585,
+   "agit\u00e9": 2732,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 4916,
+   "rejet\u00e9e": 326,
+   "sans": 1075
+  },
+  "n2": 8361,
+  "by_year": {
+   "2020": 492,
+   "2021": 914,
+   "2022": 1140,
+   "2023": 1107,
+   "2024": 882,
+   "2025": 904,
+   "2026": 878
+  }
+ },
+ "P-15-4": {
+  "raw": {
+   "BTCUSDT": 1582,
+   "ETHUSDT": 1587
+  },
+  "independent": {
+   "BTCUSDT": 1399,
+   "ETHUSDT": 1441
+  },
+  "xclusters": 2070,
+  "regime": {
+   "calme": 1696,
+   "agit\u00e9": 1144,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 2501,
+   "rejet\u00e9e": 95,
+   "sans": 244
+  },
+  "n2": 3741,
+  "by_year": {
+   "2020": 226,
+   "2021": 379,
+   "2022": 506,
+   "2023": 561,
+   "2024": 370,
+   "2025": 406,
+   "2026": 392
+  }
+ },
+ "P-30-3": {
+  "raw": {
+   "BTCUSDT": 1978,
+   "ETHUSDT": 2033
+  },
+  "independent": {
+   "BTCUSDT": 1550,
+   "ETHUSDT": 1614
+  },
+  "xclusters": 2114,
+  "regime": {
+   "calme": 1820,
+   "agit\u00e9": 1344,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 2509,
+   "rejet\u00e9e": 149,
+   "sans": 506
+  },
+  "n2": 4806,
+  "by_year": {
+   "2020": 254,
+   "2021": 467,
+   "2022": 563,
+   "2023": 568,
+   "2024": 461,
+   "2025": 464,
+   "2026": 387
+  }
+ },
+ "P-30-4": {
+  "raw": {
+   "BTCUSDT": 907,
+   "ETHUSDT": 877
+  },
+  "independent": {
+   "BTCUSDT": 784,
+   "ETHUSDT": 770
+  },
+  "xclusters": 1097,
+  "regime": {
+   "calme": 929,
+   "agit\u00e9": 625,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 1364,
+   "rejet\u00e9e": 57,
+   "sans": 133
+  },
+  "n2": 2146,
+  "by_year": {
+   "2020": 134,
+   "2021": 187,
+   "2022": 282,
+   "2023": 333,
+   "2024": 219,
+   "2025": 223,
+   "2026": 176
+  }
+ },
+ "P-60-3": {
+  "raw": {
+   "BTCUSDT": 1085,
+   "ETHUSDT": 1041
+  },
+  "independent": {
+   "BTCUSDT": 749,
+   "ETHUSDT": 747
+  },
+  "xclusters": 938,
+  "regime": {
+   "calme": 880,
+   "agit\u00e9": 616,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 1177,
+   "rejet\u00e9e": 96,
+   "sans": 223
+  },
+  "n2": 2399,
+  "by_year": {
+   "2020": 115,
+   "2021": 207,
+   "2022": 260,
+   "2023": 281,
+   "2024": 236,
+   "2025": 216,
+   "2026": 181
+  }
+ },
+ "P-60-4": {
+  "raw": {
+   "BTCUSDT": 488,
+   "ETHUSDT": 475
+  },
+  "independent": {
+   "BTCUSDT": 410,
+   "ETHUSDT": 401
+  },
+  "xclusters": 549,
+  "regime": {
+   "calme": 499,
+   "agit\u00e9": 312,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 710,
+   "rejet\u00e9e": 39,
+   "sans": 62
+  },
+  "n2": 1040,
+  "by_year": {
+   "2020": 60,
+   "2021": 83,
+   "2022": 148,
+   "2023": 178,
+   "2024": 120,
+   "2025": 132,
+   "2026": 90
+  }
+ },
+ "P-240-3": {
+  "raw": {
+   "BTCUSDT": 301,
+   "ETHUSDT": 269
+  },
+  "independent": {
+   "BTCUSDT": 215,
+   "ETHUSDT": 195
+  },
+  "xclusters": 265,
+  "regime": {
+   "calme": 262,
+   "agit\u00e9": 148,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 322,
+   "rejet\u00e9e": 21,
+   "sans": 67
+  },
+  "n2": 610,
+  "by_year": {
+   "2020": 30,
+   "2021": 51,
+   "2022": 68,
+   "2023": 82,
+   "2024": 60,
+   "2025": 76,
+   "2026": 43
+  }
+ },
+ "P-240-4": {
+  "raw": {
+   "BTCUSDT": 122,
+   "ETHUSDT": 118
+  },
+  "independent": {
+   "BTCUSDT": 105,
+   "ETHUSDT": 100
+  },
+  "xclusters": 149,
+  "regime": {
+   "calme": 140,
+   "agit\u00e9": 65,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 177,
+   "rejet\u00e9e": 9,
+   "sans": 19
+  },
+  "n2": 235,
+  "by_year": {
+   "2020": 16,
+   "2021": 17,
+   "2022": 37,
+   "2023": 52,
+   "2024": 26,
+   "2025": 36,
+   "2026": 21
+  }
+ },
+ "R-5-3": {
+  "raw": {
+   "BTCUSDT": 3063,
+   "ETHUSDT": 3632
+  },
+  "independent": {
+   "BTCUSDT": 2069,
+   "ETHUSDT": 2316
+  },
+  "xclusters": 3018,
+  "regime": {
+   "calme": 2803,
+   "agit\u00e9": 1582,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 3349,
+   "rejet\u00e9e": 167,
+   "sans": 869
+  },
+  "n2": 7240,
+  "by_year": {
+   "2018": 2279,
+   "2019": 2106
+  }
+ },
+ "R-5-4": {
+  "raw": {
+   "BTCUSDT": 1422,
+   "ETHUSDT": 1632
+  },
+  "independent": {
+   "BTCUSDT": 1087,
+   "ETHUSDT": 1211
+  },
+  "xclusters": 1635,
+  "regime": {
+   "calme": 1500,
+   "agit\u00e9": 798,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 1967,
+   "rejet\u00e9e": 65,
+   "sans": 266
+  },
+  "n2": 3286,
+  "by_year": {
+   "2018": 1184,
+   "2019": 1114
+  }
+ },
+ "R-15-3": {
+  "raw": {
+   "BTCUSDT": 1134,
+   "ETHUSDT": 1309
+  },
+  "independent": {
+   "BTCUSDT": 935,
+   "ETHUSDT": 1051
+  },
+  "xclusters": 1394,
+  "regime": {
+   "calme": 1279,
+   "agit\u00e9": 707,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 1616,
+   "rejet\u00e9e": 94,
+   "sans": 276
+  },
+  "n2": 2477,
+  "by_year": {
+   "2018": 1053,
+   "2019": 933
+  }
+ },
+ "R-15-4": {
+  "raw": {
+   "BTCUSDT": 571,
+   "ETHUSDT": 662
+  },
+  "independent": {
+   "BTCUSDT": 502,
+   "ETHUSDT": 576
+  },
+  "xclusters": 771,
+  "regime": {
+   "calme": 693,
+   "agit\u00e9": 385,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 959,
+   "rejet\u00e9e": 34,
+   "sans": 85
+  },
+  "n2": 1223,
+  "by_year": {
+   "2018": 579,
+   "2019": 499
+  }
+ },
+ "R-30-3": {
+  "raw": {
+   "BTCUSDT": 644,
+   "ETHUSDT": 723
+  },
+  "independent": {
+   "BTCUSDT": 520,
+   "ETHUSDT": 574
+  },
+  "xclusters": 725,
+  "regime": {
+   "calme": 701,
+   "agit\u00e9": 393,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 879,
+   "rejet\u00e9e": 54,
+   "sans": 161
+  },
+  "n2": 1370,
+  "by_year": {
+   "2018": 593,
+   "2019": 501
+  }
+ },
+ "R-30-4": {
+  "raw": {
+   "BTCUSDT": 338,
+   "ETHUSDT": 340
+  },
+  "independent": {
+   "BTCUSDT": 301,
+   "ETHUSDT": 299
+  },
+  "xclusters": 427,
+  "regime": {
+   "calme": 382,
+   "agit\u00e9": 218,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 534,
+   "rejet\u00e9e": 17,
+   "sans": 49
+  },
+  "n2": 712,
+  "by_year": {
+   "2018": 324,
+   "2019": 276
+  }
+ },
+ "R-60-3": {
+  "raw": {
+   "BTCUSDT": 337,
+   "ETHUSDT": 363
+  },
+  "independent": {
+   "BTCUSDT": 246,
+   "ETHUSDT": 250
+  },
+  "xclusters": 317,
+  "regime": {
+   "calme": 313,
+   "agit\u00e9": 183,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 408,
+   "rejet\u00e9e": 20,
+   "sans": 68
+  },
+  "n2": 694,
+  "by_year": {
+   "2018": 257,
+   "2019": 239
+  }
+ },
+ "R-60-4": {
+  "raw": {
+   "BTCUSDT": 169,
+   "ETHUSDT": 180
+  },
+  "independent": {
+   "BTCUSDT": 147,
+   "ETHUSDT": 152
+  },
+  "xclusters": 205,
+  "regime": {
+   "calme": 196,
+   "agit\u00e9": 103,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 267,
+   "rejet\u00e9e": 6,
+   "sans": 26
+  },
+  "n2": 372,
+  "by_year": {
+   "2018": 154,
+   "2019": 145
+  }
+ },
+ "R-240-3": {
+  "raw": {
+   "BTCUSDT": 78,
+   "ETHUSDT": 90
+  },
+  "independent": {
+   "BTCUSDT": 64,
+   "ETHUSDT": 60
+  },
+  "xclusters": 85,
+  "regime": {
+   "calme": 90,
+   "agit\u00e9": 34,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 104,
+   "rejet\u00e9e": 4,
+   "sans": 16
+  },
+  "n2": 204,
+  "by_year": {
+   "2018": 62,
+   "2019": 62
+  }
+ },
+ "R-240-4": {
+  "raw": {
+   "BTCUSDT": 36,
+   "ETHUSDT": 36
+  },
+  "independent": {
+   "BTCUSDT": 31,
+   "ETHUSDT": 32
+  },
+  "xclusters": 45,
+  "regime": {
+   "calme": 48,
+   "agit\u00e9": 15,
+   "inconnu": 0
+  },
+  "breakout": {
+   "propre": 55,
+   "rejet\u00e9e": 3,
+   "sans": 5
+  },
+  "n2": 76,
+  "by_year": {
+   "2018": 31,
+   "2019": 32
+  }
+ }
+}

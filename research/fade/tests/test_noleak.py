@@ -65,3 +65,30 @@ def test_naive_ar1_uses_past_only(assets):
     a, b, cut = assets
     T = cut - 1
     assert ou.naive_ar1(a.x, T) == ou.naive_ar1(b.x, T)
+
+
+def test_mtf_shocks_and_regime_are_causal(assets):
+    from shockfade import mtf
+    a, b, cut = assets
+    for delta in (30, 60, 240):
+        za, zb = mtf.bar_z(a, delta), mtf.bar_z(b, delta)
+        nb = cut // delta
+        np.testing.assert_array_equal(za.Z[:nb], zb.Z[:nb])
+        np.testing.assert_array_equal(za.Z2[:nb], zb.Z2[:nb])
+    ra, rb = mtf.regime_v1(a), mtf.regime_v1(b)
+    nd = cut // 1440
+    np.testing.assert_array_equal(ra[0][:nd], rb[0][:nd])
+    np.testing.assert_array_equal(ra[1][:nd], rb[1][:nd])
+
+
+def test_mtf_detect_uses_nothing_after_T(assets):
+    """Les caractéristiques d'un choc décidé avant la coupure sont identiques avec et sans les données postérieures."""
+    import pandas as pd
+    from shockfade import mtf
+    a, b, cut = assets
+    end = pd.Timestamp(b.t0 + cut * 60_000, unit='ms', tz='UTC').strftime('%Y-%m-%d %H:%M')
+    for delta in (30, 60):
+        ea = mtf.detect(a, mtf.bar_z(a, delta), '2020-02-15', end, mtf.regime_v1(a), None, k_min=2.5)
+        eb = mtf.detect(b, mtf.bar_z(b, delta), '2020-02-15', end, mtf.regime_v1(b), None, k_min=2.5)
+        assert len(ea) > 0
+        pd.testing.assert_frame_equal(ea.reset_index(drop=True), eb.reset_index(drop=True))
