@@ -59,3 +59,15 @@ script modifié ; sinon rien n'est publié.
   n'explique pas la faiblesse ; entre les deux, le résultat est mitigé.
 - Dans tous les cas, un walk-forward reste un test sur l'historique déjà utilisé pour concevoir la
   stratégie : il mesure le coût de la re-sélection des réglages, pas la performance future.
+
+## 6. Addendum du 2026-10-13 — mêmes configurations sur les règles à deux régimes (E2)
+
+Ajouté et commité **avant tout calcul** de ces configurations, à la demande : les 12 configurations
+du § 2, à l'identique, sur les règles précédentes à deux régimes (`--e2` : régimes calme et agité
+tradés, chacun avec ses réglages re-sélectionnés ; shorts en tendance baissière). Même période de
+test, même méthode, mêmes mesures. Contrôle bloquant : 36/3 doit redonner le rapport publié
+(`research/reports/shock-15m-wf-plateau-36-3-e2.md` : Sharpe 1,11, 502 trades, préréglage fixe
+1,49). Même règle de lecture (§ 5 : médiane ≥ 1,20, ≤ 1,00 ou entre les deux), appliquée à E2
+seule. La comparaison avec les règles publiées est descriptive : elle ne sert pas à choisir des
+règles, et le walk-forward ne re-sélectionne que les trois réglages de la grille, pas les règles
+d'entrée. Rapport : `research/reports/wf-longer/wf-longer-e2.{md,json}`.
