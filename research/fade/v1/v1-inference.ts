@@ -272,6 +272,9 @@ const fr = (s: string) => s.replace(/(\d)\.(\d)/g, '$1,$2')
 const n = (x: number, d = 2) => (Number.isFinite(x) ? fr((x < 0 ? '−' : '') + Math.abs(x).toFixed(d)) : '—')
 const sg = (x: number, d = 2) => (Number.isFinite(x) ? fr((x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(d)) : '—')
 const pc = (x: number, d = 1) => (Number.isFinite(x) ? fr((x < 0 ? '−' : '') + Math.abs(100 * x).toFixed(d) + ' %') : '—')
+/** Probabilité : « > 99,99 % » plutôt qu'un 100 % arrondi. */
+const pp = (x: number) => (x > 0.9999 ? '> 99,99 %' : pc(x, 2))
+const bg = (h: number) => `${h} bougie${h > 1 ? 's' : ''}`
 const iv = (b: { lo: number; hi: number }, d = 2, f = sg) => `[${f(b.lo, d)} ; ${f(b.hi, d)}]`
 const tb = (h: string[], rows: (string | number)[][]) => [`| ${h.join(' | ')} |`, `|${h.map((_, k) => (k ? '---:' : '---')).join('|')}|`, ...rows.map(r => `| ${r.join(' | ')} |`)]
 const b21 = (xs: { L: number; lo: number; hi: number }[]) => xs.find(x => x.L === 21)!
@@ -282,26 +285,26 @@ L.push('# Shock Engine V1 — inférence statistique : IC, IR, appraisal ratio, 
   'Contrôles : ' + CONTROLS.join(' ; ') + '.', '',
   '## Résumé', '',
   ...tb(['mesure', 'estimation', 'intervalle à 95 % (blocs de 21 jours)', 'lecture'], [
-    ['Sharpe de V1 (annualisé)', n(SRV1.sr), iv(b21(SRV1.boot)), `PSR(0) ${pc(PSR[0].hac, 2)} (erreur type non iid) ; PSR(SR* = buy & hold ${n(srBH)}) ${pc(PSR[1].hac)}`],
+    ['Sharpe de V1 (annualisé)', n(SRV1.sr), iv(b21(SRV1.boot), 2, n), `PSR(0) ${pp(PSR[0].hac)} ; PSR(SR* = buy & hold ${n(srBH)}) ${pp(PSR[1].hac)} (erreur type non iid)`],
     ['IR contre le buy & hold 50/50', n(irPoint), iv(b21(IRB)), `t de Newey–West ${n(irT)}`],
-    ['Appraisal ratio (M2)', n(M2.ar), iv(b21(ARB)), `α ${pc(M2.alphaAnn)} par an, t ${n(M2.tAlpha)}`],
-    [`IC du score |z|, horizon ${HORIZONS[3]} bougies (tous signaux)`, sg(IC[0].h[3].ic.est, 3), iv(IC[0].h[3].ic, 3), `p ${n(IC[0].h[3].ic.p, 3)} (Holm sur 4 horizons : ${n(holmIC[3], 3)})`],
+    ['Appraisal ratio (M2)', n(M2.ar), iv(b21(ARB), 2, n), `α ${pc(M2.alphaAnn)} par an, t ${n(M2.tAlpha)}`],
+    [`IC du score |z|, horizon ${bg(HORIZONS[3])} (tous signaux)`, sg(IC[0].h[3].ic.est, 3), iv(IC[0].h[3].ic, 3), `p ${n(IC[0].h[3].ic.p, 3)} (Holm sur 4 horizons : ${n(holmIC[3], 3)})`],
   ]), '', `DSR (scénario prudent, \`dsr-reeval\`) : 98,9 %, non recalculé ici.`, '',
   '## 1. Coefficient d\'information du score du signal', '',
   `${EV.length} signaux d'entrée de V1 (${IC[1].n} longs, ${IC[2].n} shorts ; BTC ${IC[3].n}, ETH ${IC[4].n}), exécutés ou non ; ${gaps} fenêtres traversant un trou exclues. Score S = |z| du choc ; R_h = rendement log dans le sens du trade sur h bougies de 15 min, en ATR. `
   + 'IC = corrélation de Spearman ; intervalle à 95 % et p bilatéral par bootstrap des mois d\'événements (5 000 tirages).', '',
-  ...tb(['événements', 'n', ...HORIZONS.map(h => `IC à ${h} bougies [IC 95 %] · p`)], IC.map(g => [g.lab, g.n, ...g.h.map(x => `${sg(x.ic.est, 3)} ${iv(x.ic, 3)} · ${n(x.ic.p, 3)}`)])), '',
+  ...tb(['événements', 'n', ...HORIZONS.map(h => `IC à ${bg(h)} [IC 95 %] · p`)], IC.map(g => [g.lab, g.n, ...g.h.map(x => `${sg(x.ic.est, 3)} ${iv(x.ic, 3)} · ${n(x.ic.p, 3)}`)])), '',
   `Holm sur les 4 horizons (tous événements) : ${HORIZONS.map((h, k) => `${h} : ${n(holmIC[k], 3)}`).join(' ; ')}.`, '',
   '**Rendement moyen dans le sens du trade (en ATR) et par quintile du score** : un IC nul n\'exclut pas une continuation moyenne positive.', '',
-  ...tb(['événements', ...HORIZONS.map(h => `R moyen à ${h} [IC 95 %]`)], IC.map(g => [g.lab, ...g.h.map(x => `${sg(x.mean.est, 3)} ${iv(x.mean, 3)}`)])), '',
-  ...tb(['quintile de |z|', 'n', '|z| médian', ...HORIZONS.map(h => `R moyen à ${h}`)], QUINT.map(q => [q.q + 1, q.n, n(q.sMed), ...q.mean.map(v => sg(v, 3))])), '',
+  ...tb(['événements', ...HORIZONS.map(h => `R moyen à ${bg(h)} [IC 95 %]`)], IC.map(g => [g.lab, ...g.h.map(x => `${sg(x.mean.est, 3)} ${iv(x.mean, 3)}`)])), '',
+  ...tb(['quintile de |z|', 'n', '|z| médian', ...HORIZONS.map(h => `R moyen à ${bg(h)}`)], QUINT.map(q => [q.q + 1, q.n, n(q.sMed), ...q.mean.map(v => sg(v, 3))])), '',
   `Secondaire — ${TR.length} trades exécutés, |z| à l'entrée contre R final du trade : IC ${sg(ICT.est, 3)} ${iv(ICT, 3)}, p ${n(ICT.p, 3)}.`, '',
   '## 2. Ratio d\'information contre le buy & hold BTC/ETH 50/50', '',
   `Rendement actif a = r_V1 − r_BH (mêmes jours ; BH sans rebalancement, Sharpe ${n(srBH)}). IR ${n(irPoint)}, t de Newey–West ${n(irT)} (retard ${LAG}). Tracking error ${pc(te)} par an ; bêta de V1 sur le BH ${n(beta, 3)}.`, '',
   ...tb(['blocs', 'IC à 95 % de l\'IR'], IRB.map(x => [blockLabel(x.L), iv(x)])), '',
   '## 3. Appraisal ratio (alpha par unité de risque résiduel)', '',
   ...tb(['modèle', 'α par an', 't (Newey–West)', 'appraisal ratio'], [['M0 : buy & hold BTC, ETH', pc(M0.alphaAnn), n(M0.tAlpha), n(M0.ar)], ['M1 : + 5 tendances journalières', pc(M1.alphaAnn), n(M1.tAlpha), n(M1.ar)], ['**M2 : + Donchian 15 min (principal)**', pc(M2.alphaAnn), n(M2.tAlpha), `**${n(M2.ar)}**`]]), '',
-  ...tb(['blocs (régression réestimée à chaque tirage, 2 000 tirages)', 'IC à 95 % de l\'appraisal ratio M2'], ARB.map(x => [blockLabel(x.L), iv(x)])), '',
+  ...tb(['blocs (régression réestimée à chaque tirage, 2 000 tirages)', 'IC à 95 % de l\'appraisal ratio M2'], ARB.map(x => [blockLabel(x.L), iv(x, 2, n)])), '',
   '## 4. Intervalle de confiance et significativité du Sharpe de V1', '',
   `Rendements journaliers : asymétrie ${n(SRV1.skew)}, kurtosis ${n(SRV1.kurt, 1)} ; autocorrélations des retards 1 à 5 : ${SRV1.rho.map(r => sg(r, 3)).join(', ')} ; Q de Ljung–Box (10) = ${n(SRV1.lb, 1)}, p = ${n(SRV1.lbP, 3)}.`, '',
   ...tb(['estimation du Sharpe annualisé', 'valeur'], [['journalier × √365,25', n(SRV1.sr)], ['hebdomadaire × √52,18', n(SRV1.srWeekly)], ['mensuel × √12', n(SRV1.srMonthly)], [`journalier, annualisation corrigée de Lo (2002), retards 1 à 10 (η = ${n(SRV1.eta, 2)} contre √365 = ${n(Math.sqrt(365), 2)})`, n(SRV1.srLo)]]), '',
@@ -311,8 +314,15 @@ L.push('# Shock Engine V1 — inférence statistique : IC, IR, appraisal ratio, 
     ...SRV1.se.hac.map(h => [`non iid, Newey–West retard ${h.L}${h.L === LAG ? ' (principal)' : ''}`, n(h.se, 3), iv({ lo: SRV1.sr - 1.96 * h.se, hi: SRV1.sr + 1.96 * h.se }, 2, n)]),
     ...SRV1.boot.map(b => [`bootstrap par blocs, ${blockLabel(b.L)}${b.L === 21 ? ' (principal)' : ''}`, n(b.sd, 3), iv(b, 2, n)]),
   ]), '',
-  ...tb(['PSR : P(vrai Sharpe > SR*)', 'erreur type de Mertens (PSR standard)', 'erreur type non iid (Newey–West)'], PSR.map(p => [p.ref === 0 ? 'SR* = 0' : `SR* = ${n(p.ref)} (buy & hold 50/50, même période)`, pc(p.std, 2), pc(p.hac, 2)])), '',
+  ...tb(['PSR : P(vrai Sharpe > SR*)', 'erreur type de Mertens (PSR standard)', 'erreur type non iid (Newey–West)'], PSR.map(p => [p.ref === 0 ? 'SR* = 0' : `SR* = ${n(p.ref)} (buy & hold 50/50, même période)`, pp(p.std), pp(p.hac)])), '',
   'DSR : 98,9 % dans le scénario prudent (essais réellement en concurrence, corrélations mesurées, sélection supposée sur le portefeuille, 7 fois plus de procédures) ; 87,6 % avec le décompte pré-enregistré initial (222 essais, σ 0,602). Voir `research/reports/shock-fade/dsr-reeval/`.', '',
+  '## Lecture', '',
+  `- **Sharpe.** ${n(SRV1.sr)} sur les rendements journaliers, intervalle à 95 % ${iv(b21(SRV1.boot), 2, n)} ; toutes les méthodes (analytiques non iid, bootstrap de 5 à 126 jours, mois) donnent entre ${n(Math.min(...SRV1.boot.map(b => b.lo), ...SRV1.se.hac.map(h => SRV1.sr - 1.96 * h.se)))} et ${n(Math.max(...SRV1.boot.map(b => b.hi), ...SRV1.se.hac.map(h => SRV1.sr + 1.96 * h.se)))}. `
+  + `Les rendements journaliers sont positivement autocorrélés (Ljung–Box p ${n(SRV1.lbP, 3)}) : l'annualisation par √365 surestime le Sharpe annuel. Corrigé (Lo) ou mesuré sur semaines ou mois, il vaut ${n(Math.min(SRV1.srLo, SRV1.srWeekly, SRV1.srMonthly))} à ${n(Math.max(SRV1.srLo, SRV1.srWeekly, SRV1.srMonthly))}, toujours nettement au-dessus de 0 et du buy & hold (${n(srBH)}).`,
+  `- **Alpha.** Après neutralisation du buy & hold et des six facteurs de tendance, l'appraisal ratio vaut ${n(M2.ar)} ${iv(b21(ARB), 2, n)}, stable quelle que soit la longueur des blocs : l'alpha par unité de risque résiduel est la mesure la plus solide de l'étude.`,
+  `- **IR contre le buy & hold : ≈ 0** (${n(irPoint)} ${iv(b21(IRB))}). V1 obtient un rendement moyen comparable à celui du buy & hold avec un bêta de ${n(beta, 2)} et beaucoup moins de risque ; la différence de rendements est dominée par la volatilité du buy & hold (tracking error ${pc(te, 0)}). Ce n'est pas la bonne mesure pour une stratégie peu exposée, mais le résultat est conservé tel quel.`,
+  `- **IC du score : ≈ 0** à tous les horizons (de ${sg(Math.min(...IC[0].h.map(x => x.ic.est)), 3)} à ${sg(Math.max(...IC[0].h.map(x => x.ic.est)), 3)}, aucun significatif après Holm). Un choc plus fort que le seuil n'annonce pas une meilleure continuation. `
+  + `En revanche, la continuation moyenne après un signal est nettement positive à tous les horizons (${sg(IC[0].h[0].mean.est, 2)} ATR à 1 bougie, ${sg(IC[0].h[3].mean.est, 2)} ATR à 64 bougies, intervalles hors de zéro) : la valeur vient de l'occurrence du signal, pas de l'intensité du score. Il n'y a donc pas lieu de moduler la taille des positions selon |z|.`, '',
   '## Limites', '',
   '- Historique unique, déjà utilisé pour concevoir V1 : ces intervalles mesurent l\'incertitude d\'échantillonnage du résultat historique, pas le biais de sélection (traité par le DSR) ni la persistance.',
   '- L\'IC porte sur le score de déclenchement (|z|) parmi des signaux déjà filtrés par ce score : il mesure si un choc plus fort annonce une meilleure continuation, pas si le signal a de la valeur (mesuré par les rendements moyens et l\'alpha).',
