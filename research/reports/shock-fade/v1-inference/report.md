@@ -108,11 +108,35 @@ Rendements journaliers : asymétrie 3,65, kurtosis 28,8 ; autocorrélations des 
 
 DSR : 98,9 % dans le scénario prudent (essais réellement en concurrence, corrélations mesurées, sélection supposée sur le portefeuille, 7 fois plus de procédures) ; 87,6 % avec le décompte pré-enregistré initial (222 essais, σ 0,602). Voir `research/reports/shock-fade/dsr-reeval/`.
 
+## 5. Croissance composée contre le buy & hold (addendum)
+
+Δg = écart des rendements logarithmiques annualisés = ln((1 + CAGR V1) / (1 + CAGR BH)). CAGR V1 67,7 %, BH 34,1 % : Δg = 22,4 % par an, soit une croissance relative de 25,1 % par an. t de Newey–West 0,86.
+
+| blocs | IC à 95 % de Δg | P(Δg ≤ 0) | IC à 95 % de l'écart de Sharpe V1 − BH | P(écart ≤ 0) |
+|---|---:|---:|---:|---:|
+| 5 jours | [−27,4 % ; 71,4 %] | 0,197 | [+0,36 ; +2,13] | 0,0030 |
+| 21 jours | [−27,1 % ; 75,6 %] | 0,196 | [+0,36 ; +2,09] | 0,0018 |
+| 63 jours | [−32,0 % ; 80,5 %] | 0,211 | [+0,30 ; +2,20] | 0,0042 |
+| 126 jours | [−37,2 % ; 81,3 %] | 0,228 | [+0,31 ; +2,19] | 0,0054 |
+| mois calendaires | [−25,9 % ; 74,2 %] | 0,199 | [+0,39 ; +2,11] | 0,0018 |
+
+Écart de Sharpe V1 − BH : +1,25.
+
+| décomposition (annualisée) | V1 | buy & hold | écart |
+|---|---:|---:|---:|
+| rendement arithmétique moyen | 55,4 % | 53,6 % | 1,7 % |
+| volatilité | 27,4 % | 69,0 % | −41,6 % |
+| frein de volatilité (½ variance) | 3,7 % | 23,8 % | −20,1 % |
+| croissance logarithmique | 51,7 % | 29,4 % | 22,4 % |
+
+L'écart de croissance vient surtout de la moindre volatilité (moindre frein de volatilité), pas d'un rendement moyen plus élevé ; son incertitude est dominée par la volatilité du buy & hold.
+
 ## Lecture
 
 - **Sharpe.** 2,02 sur les rendements journaliers, intervalle à 95 % [1,42 ; 2,59] ; toutes les méthodes (analytiques non iid, bootstrap de 5 à 126 jours, mois) donnent entre 1,41 et 2,63. Les rendements journaliers sont positivement autocorrélés (Ljung–Box p 0,000) : l'annualisation par √365 surestime le Sharpe annuel. Corrigé (Lo) ou mesuré sur semaines ou mois, il vaut 1,72 à 1,77, toujours nettement au-dessus de 0 et du buy & hold (0,78).
 - **Alpha.** Après neutralisation du buy & hold et des six facteurs de tendance, l'appraisal ratio vaut 1,89 [1,26 ; 2,56], stable quelle que soit la longueur des blocs : l'alpha par unité de risque résiduel est la mesure la plus solide de l'étude.
 - **IR contre le buy & hold : ≈ 0** (0,02 [−0,71 ; +0,69]). V1 obtient un rendement moyen comparable à celui du buy & hold avec un bêta de 0,03 et beaucoup moins de risque ; la différence de rendements est dominée par la volatilité du buy & hold (tracking error 72 %). Ce n'est pas la bonne mesure pour une stratégie peu exposée, mais le résultat est conservé tel quel.
+- **Croissance composée contre le buy & hold : grande mais incertaine.** CAGR 67,7 % contre 34,1 %, soit 22,4 % par an d'écart logarithmique ; intervalle à 95 % [−27,1 % ; 75,6 %], P(écart ≤ 0) = 0,20. Le rendement moyen est le même (55,4 % contre 53,6 %) : tout l'écart vient du moindre frein de volatilité, et la volatilité du buy & hold rend l'écart de croissance statistiquement non significatif sur 8 ans. Ce qui est significatif, c'est l'écart de rendement ajusté du risque : Sharpe +1,25 [+0,36 ; +2,09], P(≤ 0) = 0,002.
 - **IC du score : ≈ 0** à tous les horizons (de −0,029 à +0,044, aucun significatif après Holm). Un choc plus fort que le seuil n'annonce pas une meilleure continuation. En revanche, la continuation moyenne après un signal est nettement positive à tous les horizons (+0,20 ATR à 1 bougie, +1,50 ATR à 64 bougies, intervalles hors de zéro) : la valeur vient de l'occurrence du signal, pas de l'intensité du score. Il n'y a donc pas lieu de moduler la taille des positions selon |z|.
 
 ## Limites

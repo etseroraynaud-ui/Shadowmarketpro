@@ -267,6 +267,16 @@ const TR = S.flatMap((s, j) => v1Trades[j].map(p => {
 }))
 const ICT = monthBoot(TR, xs => spearman(xs.map(x => x.s), xs.map(x => x.R)))
 
+// ================================================================ 6. addendum : croissance composée contre le buy & hold
+const lv = V1.map(r => Math.log(1 + r)), lb = BH.map(r => Math.log(1 + r)), dl = lv.map((v, t) => v - lb[t])
+const meanIdx = (x: ArrayLike<number>, idx: ArrayLike<number>) => { let s = 0; for (let k = 0; k < idx.length; k++) s += x[idx[k]]; return s / idx.length }
+const dg = meanIdx(dl, ALL) * ANN
+const dgT = ols(dl, [], ALL, true).tAlpha
+const DGB = BLOCKS.map(L => { const xs: number[] = []; for (let b = 0; b < B; b++) xs.push(meanIdx(dl, draw(L)) * ANN); return { L, ...ci(xs), pNeg: xs.filter(v => v <= 0).length / B } })
+const DSB = BLOCKS.map(L => { const xs: number[] = []; for (let b = 0; b < B; b++) { const d = draw(L); xs.push(shIdx(V1, d) - shIdx(BH, d)) } return { L, ...ci(xs), pNeg: xs.filter(v => v <= 0).length / B } })
+const dec = (x: number[]) => { const m = m0(x); return { arith: m.mean * ANN, drag: 0.5 * m.sd * m.sd * ANN, vol: m.sd * ANNF, logg: P.mean(x.map(r => Math.log(1 + r))) * ANN } }
+const DEC = { v1: dec(V1), bh: dec(BH), cagrV1: Math.exp(P.mean(lv) * ANN) - 1, cagrBH: Math.exp(P.mean(lb) * ANN) - 1 }
+
 // ================================================================ rapport
 const fr = (s: string) => s.replace(/(\d)\.(\d)/g, '$1,$2')
 const n = (x: number, d = 2) => (Number.isFinite(x) ? fr((x < 0 ? '−' : '') + Math.abs(x).toFixed(d)) : '—')
@@ -316,11 +326,25 @@ L.push('# Shock Engine V1 — inférence statistique : IC, IR, appraisal ratio, 
   ]), '',
   ...tb(['PSR : P(vrai Sharpe > SR*)', 'erreur type de Mertens (PSR standard)', 'erreur type non iid (Newey–West)'], PSR.map(p => [p.ref === 0 ? 'SR* = 0' : `SR* = ${n(p.ref)} (buy & hold 50/50, même période)`, pp(p.std), pp(p.hac)])), '',
   'DSR : 98,9 % dans le scénario prudent (essais réellement en concurrence, corrélations mesurées, sélection supposée sur le portefeuille, 7 fois plus de procédures) ; 87,6 % avec le décompte pré-enregistré initial (222 essais, σ 0,602). Voir `research/reports/shock-fade/dsr-reeval/`.', '',
+  '## 5. Croissance composée contre le buy & hold (addendum)', '',
+  `Δg = écart des rendements logarithmiques annualisés = ln((1 + CAGR V1) / (1 + CAGR BH)). CAGR V1 ${pc(DEC.cagrV1)}, BH ${pc(DEC.cagrBH)} : Δg = ${pc(dg)} par an, soit une croissance relative de ${pc(Math.exp(dg) - 1)} par an. t de Newey–West ${n(dgT)}.`, '',
+  ...tb(['blocs', 'IC à 95 % de Δg', 'P(Δg ≤ 0)', 'IC à 95 % de l\'écart de Sharpe V1 − BH', 'P(écart ≤ 0)'], BLOCKS.map((L, k) => [blockLabel(L), iv(DGB[k], 1, (x: number) => pc(x)).replace(/[+]/g, ''), n(DGB[k].pNeg, 3), iv(DSB[k]), n(DSB[k].pNeg, 4)])), '',
+  `Écart de Sharpe V1 − BH : ${sg(SRV1.sr - srBH)}.`, '',
+  ...tb(['décomposition (annualisée)', 'V1', 'buy & hold', 'écart'], [
+    ['rendement arithmétique moyen', pc(DEC.v1.arith), pc(DEC.bh.arith), pc(DEC.v1.arith - DEC.bh.arith)],
+    ['volatilité', pc(DEC.v1.vol), pc(DEC.bh.vol), pc(DEC.v1.vol - DEC.bh.vol)],
+    ['frein de volatilité (½ variance)', pc(DEC.v1.drag), pc(DEC.bh.drag), pc(DEC.v1.drag - DEC.bh.drag)],
+    ['croissance logarithmique', pc(DEC.v1.logg), pc(DEC.bh.logg), pc(DEC.v1.logg - DEC.bh.logg)],
+  ]), '',
+  `L'écart de croissance vient ${Math.abs(DEC.v1.arith - DEC.bh.arith) < Math.abs(DEC.v1.drag - DEC.bh.drag) ? 'surtout de la moindre volatilité (moindre frein de volatilité), pas d\'un rendement moyen plus élevé' : 'surtout d\'un rendement moyen plus élevé'} ; son incertitude est dominée par la volatilité du buy & hold.`, '',
   '## Lecture', '',
   `- **Sharpe.** ${n(SRV1.sr)} sur les rendements journaliers, intervalle à 95 % ${iv(b21(SRV1.boot), 2, n)} ; toutes les méthodes (analytiques non iid, bootstrap de 5 à 126 jours, mois) donnent entre ${n(Math.min(...SRV1.boot.map(b => b.lo), ...SRV1.se.hac.map(h => SRV1.sr - 1.96 * h.se)))} et ${n(Math.max(...SRV1.boot.map(b => b.hi), ...SRV1.se.hac.map(h => SRV1.sr + 1.96 * h.se)))}. `
   + `Les rendements journaliers sont positivement autocorrélés (Ljung–Box p ${n(SRV1.lbP, 3)}) : l'annualisation par √365 surestime le Sharpe annuel. Corrigé (Lo) ou mesuré sur semaines ou mois, il vaut ${n(Math.min(SRV1.srLo, SRV1.srWeekly, SRV1.srMonthly))} à ${n(Math.max(SRV1.srLo, SRV1.srWeekly, SRV1.srMonthly))}, toujours nettement au-dessus de 0 et du buy & hold (${n(srBH)}).`,
   `- **Alpha.** Après neutralisation du buy & hold et des six facteurs de tendance, l'appraisal ratio vaut ${n(M2.ar)} ${iv(b21(ARB), 2, n)}, stable quelle que soit la longueur des blocs : l'alpha par unité de risque résiduel est la mesure la plus solide de l'étude.`,
   `- **IR contre le buy & hold : ≈ 0** (${n(irPoint)} ${iv(b21(IRB))}). V1 obtient un rendement moyen comparable à celui du buy & hold avec un bêta de ${n(beta, 2)} et beaucoup moins de risque ; la différence de rendements est dominée par la volatilité du buy & hold (tracking error ${pc(te, 0)}). Ce n'est pas la bonne mesure pour une stratégie peu exposée, mais le résultat est conservé tel quel.`,
+  `- **Croissance composée contre le buy & hold : grande mais incertaine.** CAGR ${pc(DEC.cagrV1)} contre ${pc(DEC.cagrBH)}, soit ${pc(dg)} par an d'écart logarithmique ; intervalle à 95 % ${iv(b21(DGB), 1, (x: number) => pc(x)).replace(/[+]/g, '')}, P(écart ≤ 0) = ${n(b21(DGB).pNeg, 2)}. `
+  + `Le rendement moyen est le même (${pc(DEC.v1.arith)} contre ${pc(DEC.bh.arith)}) : tout l'écart vient du moindre frein de volatilité, et la volatilité du buy & hold rend l'écart de croissance statistiquement non significatif sur 8 ans. `
+  + `Ce qui est significatif, c'est l'écart de rendement ajusté du risque : Sharpe ${sg(SRV1.sr - srBH)} ${iv(b21(DSB))}, P(≤ 0) = ${n(b21(DSB).pNeg, 3)}.`,
   `- **IC du score : ≈ 0** à tous les horizons (de ${sg(Math.min(...IC[0].h.map(x => x.ic.est)), 3)} à ${sg(Math.max(...IC[0].h.map(x => x.ic.est)), 3)}, aucun significatif après Holm). Un choc plus fort que le seuil n'annonce pas une meilleure continuation. `
   + `En revanche, la continuation moyenne après un signal est nettement positive à tous les horizons (${sg(IC[0].h[0].mean.est, 2)} ATR à 1 bougie, ${sg(IC[0].h[3].mean.est, 2)} ATR à 64 bougies, intervalles hors de zéro) : la valeur vient de l'occurrence du signal, pas de l'intensité du score. Il n'y a donc pas lieu de moduler la taille des positions selon |z|.`, '',
   '## Limites', '',
@@ -331,6 +355,6 @@ mkdirSync(OUT, { recursive: true })
 writeFileSync(join(OUT, 'report.md'), L.join('\n'))
 writeFileSync(join(OUT, 'results.json'), JSON.stringify({ protocol: 'research/preregistration/v1-inference.md', controls: CONTROLS, T, sharpe: SRV1, psr: PSR, srBH, ir: { point: irPoint, t: irT, boot: IRB, te, beta },
   appraisal: { M0: { alphaAnn: M0.alphaAnn, t: M0.tAlpha, ar: M0.ar }, M1: { alphaAnn: M1.alphaAnn, t: M1.tAlpha, ar: M1.ar }, M2: { alphaAnn: M2.alphaAnn, t: M2.tAlpha, ar: M2.ar }, boot: ARB },
-  ic: { events: EV.length, gaps, groups: IC, holm: holmIC, quintiles: QUINT, trades: ICT } },
+  ic: { events: EV.length, gaps, groups: IC, holm: holmIC, quintiles: QUINT, trades: ICT }, growth: { dg, dgT, boot: DGB, sharpeDiffBoot: DSB, decomposition: DEC } },
 (_, x) => (typeof x === 'number' ? (Number.isFinite(x) ? +x.toPrecision(8) : String(x)) : x), 1) + '\n')
 console.log(`Sharpe ${SRV1.sr.toFixed(2)} [${b21(SRV1.boot).lo.toFixed(2)} ; ${b21(SRV1.boot).hi.toFixed(2)}] · IR ${irPoint.toFixed(2)} · AR ${M2.ar.toFixed(2)} · IC64 ${IC[0].h[3].ic.est.toFixed(3)}`)
