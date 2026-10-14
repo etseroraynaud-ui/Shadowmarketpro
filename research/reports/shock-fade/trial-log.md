@@ -42,5 +42,6 @@ commité (fichiers nouveaux non détectés par l'ancien marqueur) ; ce code est 
 | 2026-10-13 19:35 | 713d08f | `v1/be-volume-study.ts` | Point mort / volume : arrêt sur un contrôle mécanique trop strict (égalité de flottants), aucun résultat produit | 2018-09 → 2026-09 (V1) |
 | 2026-10-13 19:37 | 713d08f+modif | `v1/be-volume-study.ts` | Point mort / volume : 8 variantes + 6 contrôles de prix + 2 rejeux de diagnostic, pré-enregistrés | 2018-09 → 2026-09 (V1) |
 | 2026-10-13 19:45 | 713d08f+modif | `v1/be-volume-study.ts` | Idem ; décompte des décisions limité aux 716 trades de la fenêtre, interprétation du critère 6, DSR du candidat (hors règle) ; mêmes résultats de performance | 2018-09 → 2026-09 (V1) |
+| 2026-10-14 08:10 | ba93f54+modif | `v1/dsr-e2-v1-b2.ts` | Sharpe dégonflé de E2, V1, B2 et des gains V1 − E2, B2 − V1 (méthode calm-only, aucun nouvel essai ; 2 exécutions, mise en forme) | 2018-09 → 2026-09 |
 
 Note : pour `shockfade/v1_hawkes.py`, les exécutions antérieures à la dernière groupaient les erreurs types sur 3 « jours » (conversion des dates en microsecondes avec pandas 3) ; corrigé, seuls les résultats de la dernière exécution sont rapportés.
