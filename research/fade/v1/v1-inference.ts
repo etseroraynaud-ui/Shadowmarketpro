@@ -287,7 +287,7 @@ const pp = (x: number) => (x > 0.9999 ? '> 99,99 %' : pc(x, 2))
 const bg = (h: number) => `${h} bougie${h > 1 ? 's' : ''}`
 const iv = (b: { lo: number; hi: number }, d = 2, f = sg) => `[${f(b.lo, d)} ; ${f(b.hi, d)}]`
 const tb = (h: string[], rows: (string | number)[][]) => [`| ${h.join(' | ')} |`, `|${h.map((_, k) => (k ? '---:' : '---')).join('|')}|`, ...rows.map(r => `| ${r.join(' | ')} |`)]
-const b21 = (xs: { L: number; lo: number; hi: number }[]) => xs.find(x => x.L === 21)!
+const b21 = <X extends { L: number; lo: number; hi: number }>(xs: X[]) => xs.find(x => x.L === 21)!
 const L: string[] = []
 L.push('# Shock Engine V1 — inférence statistique : IC, IR, appraisal ratio, intervalle du Sharpe', '',
   'Protocole : `research/preregistration/v1-inference.md` (commité avant tout calcul). Généré par `research/fade/v1/v1-inference.ts`. V1 figée, lecture seule, aucune optimisation. '
