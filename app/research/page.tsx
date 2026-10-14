@@ -5,7 +5,7 @@ import '../_site/site.css'
 import SiteHeader from '../_site/SiteHeader'
 import { SubNav } from '../_site/interactive'
 import { Arrow, CtaBand, Disclaimer, EvidenceCard, Section, SiteFooter, StatusList, Table, Verdict, type VerdictKind } from '../_site/ui'
-import { CAPACITY_FINDING, DOSSIER, DOWNLOADS, FACTOR_NAMES, MANIFEST, P, PAPER, RA, SELECTION, raVerdict, verdictOf } from '../_site/data'
+import { CAPACITY_FINDING, DOSSIER, DOWNLOADS, DSR_V1, FACTOR_NAMES, MANIFEST, P, PAPER, RA, SELECTION, raVerdict, verdictOf } from '../_site/data'
 import { int, num, pct } from '../_site/format'
 
 export const metadata: Metadata = {
@@ -23,6 +23,7 @@ const yrs = (p: readonly string[]) => `${p[0].slice(0, 4)}–${p[1].slice(0, 4)}
 const SECTIONS = [
   { id: 'principles', label: 'Principles' },
   { id: 'studies', label: 'Studies' },
+  { id: 'selection-risk', label: 'Selection risk' },
   { id: 'residual-alpha', label: 'Residual alpha' },
   { id: 'short-condition', label: 'Short condition' },
   { id: 'forward', label: 'Forward' },
@@ -45,6 +46,7 @@ export default function ResearchPage() {
     { name: 'ETH: independent price feed (Dukascopy)', period: yrs(EV.ethDukascopy.period), finding: `Same verdict on a different data source: Sharpe ${num(EV.ethDukascopy.sharpe)}, ${int(EV.ethDukascopy.trades)} trades.`, verdict: verdictOf(EV.ethDukascopy) },
     { name: 'ETH: parameter neighborhood (1,810 runs)', period: yrs(EV.robEth.period), finding: `At ±20 %, median Sharpe ${num(rob('robEth').medianSharpe)} against ${num(rob('robEth').preset)}; ${pct(rob('robEth').profitable, 0)} profitable. The rules sit mid-neighborhood: a plateau, not a peak.`, verdict: { kind: 'pass', label: 'pass' } },
     { name: 'Rule selection risk (CSCV)', period: `${P.commonPeriod.start.slice(0, 4)}–${P.commonPeriod.end.slice(0, 4)}`, finding: `The ${SELECTION.variants} rule variants actually tried on the portfolio, compared over ${int(SELECTION.splits)} splits of the history: the variant that is best on one half ranks above the median on the other half in ${pct(1 - SELECTION.pbo, 0)} of splits (probability of backtest overfitting ${pct(SELECTION.pbo, 0)}). The gain of the calm-regime restriction over the previous rules is consistent over time but not significant once the number of variants tried is accounted for (deflated Sharpe ${pct(SELECTION.gainDsr, 0)}).`, verdict: { kind: 'partial', label: 'low overfitting, gain not proven' } },
+    { name: <a className="s-link" href="#selection-risk">V1 selection risk (deflated Sharpe)</a>, period: DSR_V1.period, finding: `Historical Sharpe ${num(P.headline.portfolioSharpe)}; deflated Sharpe ${pct(DSR_V1.prudent.p)} in the prudent scenario, corrected for the number of trials, the correlations between configurations and the selection of the parameters. Historical result, not a prospective validation.`, verdict: { kind: 'pass', label: 'pass · historical' } },
     { name: <a className="s-link" href={DOSSIER} download>Execution costs and capacity</a>, period: '2020–2026', finding: CAPACITY_FINDING, verdict: { kind: 'partial', label: 'Binance measured' } },
   ]
   const passed = studies.filter(s => s.verdict.kind === 'pass').length
@@ -90,6 +92,15 @@ export default function ResearchPage() {
               </div>
             ))}
           </div>
+        </Section>
+
+        <Section id="selection-risk" eyebrow="Selection risk" title="Could the reference version’s Sharpe be a product of selection?" intro={<p>The deflated Sharpe ratio is the probability that the true Sharpe exceeds what the best of all the configurations tried would reach by chance. It is computed for V1, the reference version (new positions in the calm regime only).</p>}>
+          <div className="s-metrics s-reveal">
+            <div className="s-metric"><div className="s-metric-l">Historical Sharpe</div><div className="s-metric-v">{num(P.headline.portfolioSharpe)}</div><div className="s-metric-s">BTC/ETH portfolio, daily returns</div></div>
+            <div className="s-metric"><div className="s-metric-l">Deflated Sharpe, prudent scenario</div><div className="s-metric-v s-pos">{pct(DSR_V1.prudent.p)}</div><div className="s-metric-s">chance threshold: Sharpe {num(DSR_V1.prudent.threshold)}</div></div>
+            <div className="s-metric"><div className="s-metric-l">Period</div><div className="s-metric-v">{DSR_V1.period}</div><div className="s-metric-s">{P.commonPeriod.start} to {P.commonPeriod.end}</div></div>
+          </div>
+          <p className="s-small">Corrected for the number of trials, the correlations between configurations and the selection of the parameters. This is a historical result, measured on the data used to design the rules: it is not a prospective validation, which only the forward test below can provide. The gain of the calm-regime restriction over the previous rules is a separate question, assessed in the studies above (not proven). <Link className="s-link" href="/research/selection-risk">Methodology and all scenarios</Link>.</p>
         </Section>
 
         <Section id="residual-alpha" eyebrow="Residual alpha" title="Is it just trend following?" intro={<p>Could simple, well-known trend strategies reproduce the result? The daily returns of the portfolio are regressed on buy &amp; hold BTC and ETH and on six standard trend strategies whose parameters were fixed before the study: momentum over 30, 90 and 180 days, a 55/20-day breakout, a 20/100-day moving-average crossover and an intraday breakout on 15-minute bars. Same bars, same commission, positions decided at the close and applied to the next day.</p>}>

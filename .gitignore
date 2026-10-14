@@ -37,3 +37,6 @@ research/data/hl-tardis/
 # Market Flow : secret du serveur (jeton d'envoi) et fichiers locaux
 flow/deploy/*.env
 flow/**/__pycache__/
+# Shock Fade Engine : caches Python
+research/fade/**/__pycache__/
+research/fade/.pytest_cache/

@@ -1,0 +1,255 @@
+{
+ "source": "https://data.binance.vision/data",
+ "start": "2017-08",
+ "end": "2019-12",
+ "series": {
+  "spot-BTCUSDT": {
+   "rows": 1242004,
+   "first_open_ms": 1502942400000,
+   "last_open_ms": 1577836740000,
+   "array_sha256": "64c3cac999bbc050711f1d2a23e09b9b6002e4c1dce798dc9163ad4aebce2e32",
+   "archives": [
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2017-08.zip",
+     "sha256": "4f96569190147d64b7ce55f6760dc3e7962aeb3e209c969b200200e3d7045e70"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2017-09.zip",
+     "sha256": "b4e525fa0549688dca9e09cc24093f50526db2a255d03961791da3bfd7c24d81"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2017-10.zip",
+     "sha256": "98c3fbfe77892a5af8bbc43dae6142da5b9bbe3a176be3f59541e047bd208213"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2017-11.zip",
+     "sha256": "0ebedd17183039d66b8a11bd85b0726b9cd7e0072a02f1ce69152ba6e98d7871"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2017-12.zip",
+     "sha256": "3d41da2da488a69a21e9223221863c3a8ed6ccb9263d30cf1d3a012a48cfffc1"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-01.zip",
+     "sha256": "9fbad8f35c0694a2aca3552ccc9da73d95ccf1546dd4e4c67fcc8a3707d80a90"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-02.zip",
+     "sha256": "131667f0d4ff73685852d84a406e07f8a3fdf7037798b1bdb0519e7e987e19ad"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-03.zip",
+     "sha256": "48cd88c26da0b9ebd16e2a474a957d066053475cca17bac0922103873614dd5a"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-04.zip",
+     "sha256": "13d5b16dd1fcbd7a2f03c911fb6624351812756cb0826b52281b2f08db6f6b36"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-05.zip",
+     "sha256": "80c181ac104619d0a89209a2b38831aa91147140b728f736b356853555c78dfd"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-06.zip",
+     "sha256": "37645243b11525adb1fb04c64cfd03ba64407d488640a9c94aadac145b1e2c85"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-07.zip",
+     "sha256": "84e642279217d5577111c0ea8800a9a14439582c2c9860369f1adcdcb7a5f83e"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-08.zip",
+     "sha256": "9590e63677c5db65d02a698543087fa38a51084369ccceaa7251fe107a8db080"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-09.zip",
+     "sha256": "487853790000fb2be2a45588d9ffe69c9877e3a982d674c9831aaa3b8ffe83f3"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-10.zip",
+     "sha256": "566429da1b107e73e18af6c865bf23c8ae9dd049d24be36b45da3d36874366e0"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-11.zip",
+     "sha256": "930aa36136ca5f814fcd16765feb637d6e56f16c080f32291a207d0ae66b6572"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2018-12.zip",
+     "sha256": "9000ed4af64f13ad7c13020fda026154c57006de99f6d4c91ea7fc35b1978903"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-01.zip",
+     "sha256": "08dd2f7306258d1b9fd0b9fc00ee807c1c96e9803c74c78c00a0072bfc826728"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-02.zip",
+     "sha256": "5ef0c96cb6f7cadb70cdceeb190ac350bf605dcde3930cdb3cc8942dc0ac98bc"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-03.zip",
+     "sha256": "30f0b1d9a47950ced20f62045291669f984a55552181769ff3f1df8433a93e09"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-04.zip",
+     "sha256": "617647d93837bc5a9a4866c089b87b21f9780d479dece0f623e8354be36216fe"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-05.zip",
+     "sha256": "7a32f26d7f878332384dc61dde639e49c5007c2b45d6bc360b0bec37817baa08"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-06.zip",
+     "sha256": "8c7acbfa0d71c87f6ba965e8d62ec83b258b4a3aaab9a8c17f708ece35214a1a"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-07.zip",
+     "sha256": "f907354d0d2ce079c828d1654093729b4e571b4e1134159bf8f9a023ba955739"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-08.zip",
+     "sha256": "367c5ece72129de80347c34bbd24e6f5f868711ce66b0a830c6945c4259e7d33"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-09.zip",
+     "sha256": "6bed8bcf250caedf243cd890cdffd93b6266e7f3007a8bb7e6d13b95a15645f1"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-10.zip",
+     "sha256": "11c16f00ee0a568336fae0929f758416be94e78bd250ea31b60d083d1cb6494b"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-11.zip",
+     "sha256": "6a896c7a603a2c8deb12233e53c3f8fbc2676b8c0b7b85fcf53a3b57fad021d7"
+    },
+    {
+     "rel": "spot/monthly/klines/BTCUSDT/1m/BTCUSDT-1m-2019-12.zip",
+     "sha256": "bb30eef0f17336dccac395b3ff60df077160548485a3230c6fe62387f48fc79a"
+    }
+   ]
+  },
+  "spot-ETHUSDT": {
+   "rows": 1242004,
+   "first_open_ms": 1502942400000,
+   "last_open_ms": 1577836740000,
+   "array_sha256": "fdb37f2aae7abb4e68fc49fc99f6031d08a79abc706056b7d9a5eb53945239ad",
+   "archives": [
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2017-08.zip",
+     "sha256": "0d3142f0c1b70ab25c29ac39e0bfb72e83a92e9ee2d361a4a0bfb9f3452cf369"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2017-09.zip",
+     "sha256": "6b3e1f5b06de675e502583b3fb9b41c52453767dd02905a3af844be334b28eb0"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2017-10.zip",
+     "sha256": "42cf28bcf668b95db1d357f27c91e5d2e88093908376df5126355af564bfb4f9"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2017-11.zip",
+     "sha256": "4c45970612e3c1d06b8e9e6384dfd41da912276634418e986ea33f63d5d2a4b5"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2017-12.zip",
+     "sha256": "3b6a9be23a2f36d0a2934f9c3b979ada13d0e405f73d69978db637b685389b16"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-01.zip",
+     "sha256": "443e6c12be2d2581b37fed9d3c951b9c8f2561693120fc861c289b1fe6368e45"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-02.zip",
+     "sha256": "efc4785f374ecfe70b5dd85f81e04e7c06f32acc9770f50602e6e57e41c8ee69"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-03.zip",
+     "sha256": "298bcbe00eb55e5e00524eec21784c7b8088a447f7d1f9a1a28a26bbd90765bf"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-04.zip",
+     "sha256": "5b9dfcb4bc7c43837e03d2740e6f445385762deefbcaa271d897f8056b3ed508"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-05.zip",
+     "sha256": "bb68208a8332c4a4306fc5b054cd781e0939a402c3644c543babb698d1f0976b"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-06.zip",
+     "sha256": "5cf7c83b15874def8620fff0a3433415bfd8ef98ca8b10b16aeb494a72ce1ccd"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-07.zip",
+     "sha256": "2483b96e4c16d4159b167ad24df9a7521c27cf8db5de2c506f4589b3fe444777"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-08.zip",
+     "sha256": "f465f15f7e8fe9be9ea69360022e3a1730b77d929778059a4bdeb6f06df7a850"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-09.zip",
+     "sha256": "ed475d572f29a07a777fe44dc343381395036a07fb76340c070d7cea7c9883f3"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-10.zip",
+     "sha256": "23ff0402110107ad15f91fed445e709b40ff721f15fbe01c62637e8a9df3523d"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-11.zip",
+     "sha256": "8e6c1cd6113a5d81efa6076f9286c0d41adac5fba4063edc2e8fbf9a4fd134cc"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2018-12.zip",
+     "sha256": "e3a5735d413f21fe5ac1276a1f841f3cacd6357e224146686e22ecc0c72f317e"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-01.zip",
+     "sha256": "86e6770246976d2ab0b21a22084bffd3a4c11c7cab9d4cda1dcaf30e1a772cf4"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-02.zip",
+     "sha256": "4b320265d1c632ed6fc174201d20a7fe5112f26c5ddf9aad822d29040c2dc5c4"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-03.zip",
+     "sha256": "e8c2e8180a1253b2128adabe6d59e6be1669ba24f2d7c9427b5ef2771eddd94d"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-04.zip",
+     "sha256": "edc798b17340883d5b0c779d4077a75cb80f1ce4d22155532ba0e024dc56d1b3"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-05.zip",
+     "sha256": "fdb21c1b49a831073898dc060b35ee8a4cb93cdfd901d4ed2fc0439b0bd33dc8"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-06.zip",
+     "sha256": "fe214b966bf8ca7472eeb8a52120a995c6df9119788b0801a1ec10f84ec1b517"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-07.zip",
+     "sha256": "2e8794d8f1c30c8640617289a3f072d581746ea9e299f623936ac9ab0f0d024b"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-08.zip",
+     "sha256": "c0e04e35b1e512355708abd81e882ef185c7f1469f290539872de8bb2197b145"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-09.zip",
+     "sha256": "ed943b86487a8a94eda85b2f526ede929dbbd1f41aefe7b8311552aa47827976"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-10.zip",
+     "sha256": "e36eadbbde9973e4596f6f5cab7e864bddd6b8bf64e0c98f1949e907877125f1"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-11.zip",
+     "sha256": "fcfe68f4c98deb2ec57e191413082f8cad63c9af194d322c16f13589f8a040e5"
+    },
+    {
+     "rel": "spot/monthly/klines/ETHUSDT/1m/ETHUSDT-1m-2019-12.zip",
+     "sha256": "b0bdcb05d6a7a210ad53b96cc8a2db844281461880f508afd1cfbacdf759e1cc"
+    }
+   ]
+  }
+ }
+}
