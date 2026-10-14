@@ -2,6 +2,8 @@
 
 Méthode et comptes d'essais pré-enregistrés dans `research/preregistration/calm-only.md` §5, appliqués à l'identique aux trois stratégies. Généré par `research/fade/v1/dsr-e2-v1-b2.ts`, en lecture seule. Portefeuille BTC/ETH 50/50, rendements journaliers du 2018-09-01 au 2026-09-30 (2952 jours), commissions de la fiche. B2 = V1 + point mort dès +3 R (`research/reports/shock-fade/v1-be-volume/`).
 
+**Scénario conservateur initial.** La réévaluation méthodologique (essais réellement en concurrence, corrélations, critère de sélection) est dans `research/reports/shock-fade/dsr-reeval/`.
+
 Contrôles : Sharpe de E2, V1 et B2 identiques aux références publiées ; DSR de E2 et de V1 et DSR du gain V1 − E2 identiques à `research/reports/calm-only/` (écart < 10⁻⁶).
 
 ## 1. Sharpe absolu

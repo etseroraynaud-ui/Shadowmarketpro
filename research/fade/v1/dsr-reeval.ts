@@ -17,7 +17,7 @@ import type { SleeveKey } from '../../lib/frozen-shock.ts'
 import { dailyOf, simulateSized } from '../../lib/variant-eval.ts'
 import { simulateEarlyExit } from '../../lib/early-exit.ts'
 import { calmOnly } from '../../lib/calm-only.ts'
-import { EULER, moments, normInv, psr, sharpe } from '../../lib/overfit.ts'
+import { EULER, moments, normCdf, normInv, psr, sharpe } from '../../lib/overfit.ts'
 import { simulate } from '../../../lib/strategies/shock/engine.ts'
 import { prepare } from '../../../lib/strategies/shock/market.ts'
 import type { Market } from '../../../lib/strategies/shock/market.ts'
@@ -160,19 +160,22 @@ const DRAWS = Array.from({ length: B }, () => Int32Array.from({ length: M }, () 
 interface Stage { id: string; label: string; meas: number[][]; sel?: ArrayLike<number>[]; extraN?: number }
 function stageNoise(st: Stage) {
   const am = st.meas.map(agg), as = (st.sel ?? st.meas).map(agg)
-  const full = st.meas.map(x => SR(x)), fullS = (st.sel ?? st.meas).map(x => SR(x))
-  const draws = new Float64Array(B), sdAcc = new Float64Array(st.meas.length)
+  // Bruit = Sharpe du tirage − moyenne bootstrap de cet essai (centrage sur la moyenne bootstrap : le biais propre du
+  // bootstrap, mesuré à part, ne compte pas comme inflation de sélection).
+  const mu = new Float64Array(am.length), muS = new Float64Array(as.length), sdAcc = new Float64Array(am.length)
+  for (const d of DRAWS) { for (let i = 0; i < am.length; i++) { const v = shAgg(am[i], d); mu[i] += v / B; sdAcc[i] += v * v / B } for (let i = 0; i < as.length; i++) muS[i] += shAgg(as[i], d) / B }
+  const draws = new Float64Array(B)
   DRAWS.forEach((d, b) => {
     let best = -Infinity, arg = 0
-    for (let i = 0; i < as.length; i++) { const z = shAgg(as[i], d) - fullS[i]; if (z > best) { best = z; arg = i } }
-    draws[b] = shAgg(am[arg], d) - full[arg]
-    for (let i = 0; i < am.length; i++) sdAcc[i] += (shAgg(am[i], d) - full[i]) ** 2
+    for (let i = 0; i < as.length; i++) { const z = shAgg(as[i], d) - muS[i]; if (z > best) { best = z; arg = i } }
+    draws[b] = shAgg(am[arg], d) - mu[arg]
   })
-  const se = Math.sqrt(P.mean(Array.from(sdAcc).map(v => v / B)))
+  const se = Math.sqrt(P.mean(Array.from(sdAcc).map((q, i) => q - mu[i] ** 2)))
+  const bias = P.mean(st.meas.map((x, i) => mu[i] - SR(x)))
   // Alternatives sans série (règles Hawkes) : N équivalent augmenté au prorata, inflation remise à l'échelle.
   const m0 = P.mean(draws), n0 = st.meas.length, k = st.extraN ? emax(impliedN(m0, se) * (n0 + st.extraN) / n0) / emax(impliedN(m0, se)) : 1
   if (k !== 1) for (let b = 0; b < B; b++) draws[b] *= k
-  return { draws, mean: m0 * k, se }
+  return { draws, mean: m0 * k, se, bias }
 }
 const emax = (N: number) => (N <= 1 ? 0 : (1 - EULER) * normInv(1 - 1 / N) + EULER * normInv(1 - 1 / (N * Math.E)))
 /** N d'essais indépendants qui donnerait le même maximum attendu (au même niveau de bruit). */
@@ -218,14 +221,15 @@ const res = Object.entries(VERS).map(([id, v]) => {
   const sr0R2 = P.sum(st.map(s => s.mean))
   const sr0Port = P.sum(v.stages.map(s => (s in STp ? STp[s] : ST[s].mean)))
   const sr0Proc = P.sum(v.stages.map(s => (s in STp ? (ST[s].mean * emax(7 * ST[s].nImp)) / emax(ST[s].nImp) : ST[s].mean)))
-  const tot = new Float64Array(B); v.stages.forEach(s => ST[s].draws.forEach((d, b) => { tot[b] += d }))
+  const both = (s: string) => { const m = STp[s], ni = impliedN(m, ST[s].se); return (m * emax(7 * ni)) / emax(ni) }
+  const sr0Both = P.sum(v.stages.map(s => (s in STp ? both(s) : ST[s].mean)))
   return {
     id, sr: SR(v.x), psr0: psr(v.x, 0).p, rawN: P.sum(st.map(s => s.n)),
     C: { N: 222, sr0: SD_INIT * emax(222), p: dsrAt(v.x, SD_INIT * emax(222)) },
     C6266: dsrAt(v.x, SD_INIT * emax(6266)), C128k: dsrAt(v.x, SD_INIT * emax(128547)),
     R1: { sr0: sr0R1, p: dsrAt(v.x, sr0R1) },
-    R2: { sr0: sr0R2, p: dsrAt(v.x, sr0R2), q95: P.quantile(tot, 0.95), pQ95: dsrAt(v.x, P.quantile(tot, 0.95)) },
-    sensPort: { sr0: sr0Port, p: dsrAt(v.x, sr0Port) }, sensProc: { sr0: sr0Proc, p: dsrAt(v.x, sr0Proc) },
+    R2: { sr0: sr0R2, p: dsrAt(v.x, sr0R2) },
+    sensPort: { sr0: sr0Port, p: dsrAt(v.x, sr0Port) }, sensProc: { sr0: sr0Proc, p: dsrAt(v.x, sr0Proc) }, sensBoth: { sr0: sr0Both, p: dsrAt(v.x, sr0Both) },
     terms: v.stages.map(s => ({ stage: s, r1: ST[s].sd * emax(ST[s].n), r2: ST[s].mean })),
   }
 })
@@ -249,11 +253,12 @@ const rankEth = 1 + ethFull.filter(v => v > ethFull[SEL[2]]).length, rankBtc = 1
 const top = p2.map((c, i) => ({ i, sr: SR(c.port), btc: btcFull[i], eth: ethFull[i] })).sort((a, b) => b.sr - a.sr).slice(0, 5)
 const spearmanBE = P.spearman(btcFull, ethFull)
 let hits = 0
-{ const ab = p2.map(c => agg(c.btc)), ae = p2.map(c => agg(c.eth))
-  for (const d of DRAWS.slice(0, 1000)) {
+{ const ab = p2.map(c => agg(c.btc)), ae = p2.map(c => agg(c.eth)), D = DRAWS.slice(0, 1000)
+  const mb = ab.map(a => P.mean(D.map(d => shAgg(a, d)))), me = ae.map(a => P.mean(D.map(d => shAgg(a, d))))
+  for (const d of D) {
     let best = -Infinity, arg = 0
-    for (let i = 0; i < ab.length; i++) { const z = shAgg(ab[i], d) - btcFull[i]; if (z > best) { best = z; arg = i } }
-    const ze = ae.map((a, i) => shAgg(a, d) - ethFull[i]), mine = ze[arg]
+    for (let i = 0; i < ab.length; i++) { const z = shAgg(ab[i], d) - mb[i]; if (z > best) { best = z; arg = i } }
+    const ze = ae.map((a, i) => shAgg(a, d) - me[i]), mine = ze[arg]
     if (ze.every(v => v <= mine)) hits++
   } }
 const pEthTop = (hits + 1) / 1001
@@ -265,10 +270,16 @@ const n = (x: number, d = 2) => (Number.isFinite(x) ? fr((x < 0 ? '−' : '') + 
 const pc = (x: number, d = 1) => (Number.isFinite(x) ? fr((100 * x).toFixed(d)) + ' %' : '—')
 const tb = (h: string[], rows: (string | number)[][]) => [`| ${h.join(' | ')} |`, `|${h.map((_, k) => (k ? '---' : '---')).join('|')}|`, ...rows.map(r => `| ${r.join(' | ')} |`)]
 const R = Object.fromEntries(res.map(r => [r.id, r]))
+const ord = (k: number) => (k === 1 ? '1ᵉʳ' : `${k}ᵉ`)
 const L: string[] = []
 L.push('# Réévaluation du Sharpe dégonflé de E2, V1 et B2', '',
   `Généré par \`research/fade/v1/dsr-reeval.ts\` (populations : \`audit-e2-population.ts\`), en lecture seule et sans nouvel essai : seules des configurations déjà évaluées sont rejouées. Portefeuille BTC/ETH 50/50, ${T} jours (${P.isoDay(PD0)} → ${P.isoDay(PD1)}), Sharpe annualisés.`, '',
   'Contrôles : les Sharpe publiés des 16 configurations de l\'univers A et des 19 variantes de sortie sont retrouvés à 10⁻⁶ près. Chaque population de candidats, rejouée avec le préréglage, redonne E2 (rôles calme et agité) et V1 au bit près. Le jeu agité n\'a aucun effet sur les trades de V1.', '',
+  '## Verdict', '',
+  `- **N = 222 et σ = 0,602 ne représentaient pas fidèlement la sélection.** σ venait d'une population qui n'était pas en concurrence avec V1 ; N mélangeait des étapes différentes, comptait des essais sans effet et en oubliait d'autres.`,
+  `- **Sharpe absolu, hypothèses justifiées (R2) : E2 ${pc(R.E2.R2.p)}, V1 ${pc(R.V1.R2.p)}, B2 ${pc(R.B2.R2.p)}** (initial : ${pc(R.E2.C.p)}, ${pc(R.V1.C.p)}, ${pc(R.B2.C.p)}). Borne prudente : ${pc(R.E2.sensBoth.p)}, ${pc(R.V1.sensBoth.p)}, ${pc(R.B2.sensBoth.p)}.`,
+  `- **Gains : V1 sur E2 ${pc(GAINS[0].R2.p)}, B2 sur V1 ${pc(GAINS[1].R2.p)}** (initial : ${pc(GAINS[0].C.p)}, ${pc(GAINS[1].C.p)}).`,
+  `- **Indice indépendant de la sélection :** le jeu calme de V1, choisi sur BTC seul, est aussi le 1ᵉʳ des ${p2.length} jeux possibles sur ETH (probabilité sous le bruit seul : ${n(pEthTop, 3)}).`, '',
   '## 1. Chronologie : qui a réellement participé à la sélection', '',
   ...tb(['date (UTC)', 'commit', 'essais', 'fonction', 'E2', 'V1', 'B2'], [
     ['10-04 16:18', '0c612af', 'premier passage, 54 configurations et test d\'entrées aléatoires', 'diagnostic', 'non', 'non', 'non'],
@@ -291,26 +302,50 @@ L.push('# Réévaluation du Sharpe dégonflé de E2, V1 et B2', '',
   'Pour chaque étape de sélection : N = alternatives réellement en concurrence ; σ = écart type de leurs Sharpe (portefeuille) ; ρ̄ = corrélation moyenne de leurs rendements quotidiens ; N spectral = N² / Σ corrélations². '
   + '**Inflation attendue** = maximum attendu du bruit d\'estimation parmi ces alternatives, mesuré par bootstrap joint par mois (2 000 tirages ; mêmes mois pour toutes les alternatives, donc corrélations et queues épaisses conservées). '
   + 'Si la sélection s\'est faite sur BTC seul, on retient l\'alternative au plus grand bruit sur BTC et on mesure son bruit sur le portefeuille. N équivalent = nombre d\'essais indépendants qui donnerait la même inflation.', '',
-  ...tb(['étape', 'N', 'σ des Sharpe', 'ρ̄', 'N spectral', 'erreur type d\'un Sharpe', 'inflation attendue (bootstrap)', 'N équivalent', 'inflation, formule DSR (σ, N bruts)'],
-    Object.values(STAGES).map(s => { const x = ST[s.id]; return [s.label, x.n, n(x.sd, 3), n(x.rho), n(x.nPR, 1), n(x.se, 3), n(x.mean, 3), n(x.nImp, 0), n(x.sd * emax(x.n), 3)] })), '',
+  ...tb(['étape', 'N', 'σ des Sharpe', 'ρ̄', 'N spectral', 'erreur type d\'un Sharpe', 'inflation attendue (bootstrap)', 'N équivalent', 'inflation, formule DSR (σ, N bruts)', 'biais propre du bootstrap'],
+    Object.values(STAGES).map(s => { const x = ST[s.id]; return [s.label, x.n, n(x.sd, 3), n(x.rho), n(x.nPR, 1), n(x.se, 3), n(x.mean, 3), n(x.nImp, 0), n(x.sd * emax(x.n), 3), n(x.bias, 3)] })), '',
   `- **σ = 0,602 ne représente pas les opportunités de V1.** Il venait des 206 candidats de la graine 5 rejoués « tels quels » (un seul jeu, tous régimes, sans E2) : Sharpe moyen −0,25, maximum 1,18. Rejoués comme V1 (même structure), les 606 jeux possibles ont σ = ${n(ST.Pv.sd, 3)}. `
   + `Et une partie de cette dispersion est réelle, pas du bruit : l'erreur type d'un Sharpe vaut ${n(ST.Pv.se, 3)} et les jeux sont corrélés (ρ̄ ${n(ST.Pv.rho)}).`,
-  `- **Le jeu de V1 est hors norme, y compris là où il n'a pas été choisi.** Parmi les ${p2.length} jeux calmes possibles, le n° 178 est 1ᵉʳ sur le portefeuille (${n(SR(V1s))}), ${rankBtc}ᵉ sur BTC (données de la sélection) et ${rankEth}ᵉ sur ETH, actif jamais utilisé pour le choisir. `
+  `- **Le jeu de V1 est hors norme, y compris là où il n'a pas été choisi.** Parmi les ${p2.length} jeux calmes possibles, le n° 178 est 1ᵉʳ sur le portefeuille (${n(SR(V1s))}), ${ord(rankBtc)} sur BTC (données de la sélection) et ${ord(rankEth)} sur ETH, actif jamais utilisé pour le choisir. `
   + `Sous le bruit seul, la probabilité que le jeu choisi sur BTC soit aussi le premier sur ETH vaut ${n(pEthTop, 4)} (bootstrap, corrélations BTC / ETH comprises). Corrélation de rang BTC / ETH entre jeux : ${n(spearmanBE)}. `
   + `Cinq meilleurs (portefeuille, BTC, ETH) : ${top.map(t => `${n(t.sr)} / ${n(t.btc)} / ${n(t.eth)}`).join(' ; ')}.`, '',
   '## 3. Sharpe dégonflé', '',
   '- **C (conservateur initial)** : un seul maximum sur N = 222 essais, σ = 0,602.',
   '- **R1 (comptes fidèles, estimateur standard)** : somme, sur les étapes de la version, de σ × maximum attendu de N essais indépendants (σ et N bruts de chaque étape, sélection supposée faite sur le portefeuille).',
   '- **R2 (hypothèses justifiées)** : somme des inflations attendues mesurées par bootstrap (hypothèse nulle du DSR : aucune différence réelle entre alternatives d\'une même étape ; corrélations réelles ; paramètres choisis sur BTC). '
-  + 'Variante prudente : 95ᵉ centile de l\'inflation totale au lieu de sa moyenne.', '',
-  ...tb(['version', 'Sharpe', 'PSR(0)', 'C : N = 222, σ = 0,602', 'R1', 'R2', 'R2, 95ᵉ centile', 'sens. : sélection sur le portefeuille', 'sens. : × 7 procédures', 'C à N = 6 266 / 128 547'],
-    res.map(r => [r.id, n(r.sr), pc(r.psr0, 2), `${pc(r.C.p)} (seuil ${n(r.C.sr0)})`, `${pc(r.R1.p)} (seuil ${n(r.R1.sr0)})`, `**${pc(r.R2.p)}** (seuil ${n(r.R2.sr0)})`, `${pc(r.R2.pQ95)} (seuil ${n(r.R2.q95)})`,
-      `${pc(r.sensPort.p)} (seuil ${n(r.sensPort.sr0)})`, `${pc(r.sensProc.p)} (seuil ${n(r.sensProc.sr0)})`, `${pc(r.C6266)} / ${pc(r.C128k)}`])), '',
+  + 'Sensibilités de R2 : jeux de paramètres choisis comme si la sélection portait sur le portefeuille (et non sur BTC seul) ; choix de la procédure (2 horizons × découpages, non rejouables ici) compté comme 7 fois plus d\'essais indépendants pour les jeux de paramètres ; les deux à la fois.', '',
+  ...tb(['version', 'Sharpe', 'PSR(0)', 'C : N = 222, σ = 0,602', 'R1', '**R2**', 'R2, sélection sur le portefeuille', 'R2, × 7 procédures', 'R2, les deux', 'C à N = 6 266 / 128 547'],
+    res.map(r => [r.id, n(r.sr), pc(r.psr0, 2), `${pc(r.C.p)} (seuil ${n(r.C.sr0)})`, `${pc(r.R1.p)} (seuil ${n(r.R1.sr0)})`, `**${pc(r.R2.p)}** (seuil ${n(r.R2.sr0)})`,
+      `${pc(r.sensPort.p)} (seuil ${n(r.sensPort.sr0)})`, `${pc(r.sensProc.p)} (seuil ${n(r.sensProc.sr0)})`, `${pc(r.sensBoth.p)} (seuil ${n(r.sensBoth.sr0)})`, `${pc(r.C6266)} / ${pc(r.C128k)}`])), '',
   `Décomposition du seuil R2 (inflation par étape) : ${res.map(r => `${r.id} = ${r.terms.map(t => `${t.stage} ${n(t.r2)}`).join(' + ')}`).join(' ; ')}. Étapes : Pc / Pa / Pv = jeux de paramètres, S2 = règle E2, S1 = V1, SB = B2.`, '',
   '**Gains d\'une étape sur la précédente**', '',
   ...tb(['gain', 'ratio d\'information', 'PSR(0)', 'C (initial)', 'R1 (comptes fidèles)', 'R2 (bootstrap)', 'N équivalent (R2)'],
     GAINS.map(g => [g.id, n(g.ir, 3), pc(g.psr0), `${pc(g.C.p)} (N ${g.C.N}, σ ${n(g.C.sd, 3)})`, `${pc(g.R1.p)} (N ${g.R1.N}, σ ${n(g.R1.sd, 3)})`, `**${pc(g.R2.p)}** (seuil ${n(g.R2.sr0, 3)})`, n(g.R2.nImp, 1)])), '',
   'Gain V1 − E2 : alternatives à E2 au moment du choix de V1 (n° 8 à 16) ; les n° 1 à 6, antérieures à E2, avaient perdu contre E2 et ne sont pas des alternatives au gain. Gain B2 − V1 : les 19 variantes de sortie et les 2 règles Hawkes.', '')
+// Holm et DSR : z requis selon la correction, à hypothèses égales (essais indépendants, σ = bruit)
+const zReq = [1, 8, 21, 222, 606].map(N => ({ N, bonf: normInv(1 - 0.05 / N), dsr: emax(N) + normInv(0.95), fwer: 1 - Math.pow(1 - (1 - normCdf(emax(N) + normInv(0.95))), N) }))
+const bootB2 = BV.configs.find((c: any) => c.id === 'B2').boot.port
+const gB2 = GAINS[1], gV1 = GAINS[0]
+L.push('## 4. Holm et DSR', '',
+  `- **Un seul test : même verdict.** Bootstrap par mois du ΔSharpe de B2 : p brut ${n(bootB2.p, 4)} (plancher de résolution du bootstrap) ; PSR(0) de la série d'écart B2 − V1 : ${pc(gB2.psr0)}.`,
+  '- **Deux corrections différentes.** Holm ou Bonferroni contrôlent la probabilité d\'au moins un faux positif parmi N essais. Le DSR à 95 % exige de dépasser le maximum **attendu** de N essais nuls, puis encore 1,645 erreur type : il équivaut à un risque global bien inférieur à 5 %.', '',
+  ...tb(['N', 'z requis, Bonferroni 5 %', 'z requis, DSR 95 %', 'risque global équivalent au DSR 95 %'], zReq.map(r => [r.N, n(r.bonf), n(r.dsr), pc(r.fwer, 2)])), '',
+  `- **Pour B2, une fois les hypothèses corrigées, les deux convergent.** Holm sur les 8 variantes : p ${n(bootB2.pHolm, 3)} ; Bonferroni sur les 21 tentatives réelles : ${n(Math.min(1, 21 * bootB2.p), 3)} ; DSR du gain (R2, N équivalent ${n(gB2.R2.nImp, 1)}) : ${pc(gB2.R2.p)}. `
+  + 'L\'écart entre 99 % et 64,9 % venait surtout de σ (dispersion de règles réellement différentes, prise pour du bruit) et du critère plus strict du DSR, pas d\'une sélection massive.', '',
+  '## 5. Réponse : N = 222 et σ = 0,602 représentent-ils les opportunités de sélection ?', '',
+  `- **Non, pour σ.** 0,602 mesure la dispersion d'une population qui n'était pas en concurrence avec V1 : des jeux rejoués seuls, sans structure de régime ni filtre E2 (Sharpe moyen −0,25). Parmi les jeux réellement substituables au jeu de V1, σ = ${n(ST.Pv.sd, 3)}. Sous l'hypothèse nulle du DSR, la dispersion pertinente est celle du bruit, ≈ ${n(ST.Pv.se, 2)}.`,
+  `- **Non, pour N, et dans les deux sens.** Le décompte gonflait certaines étapes : le jeu agité est sans effet sur V1, les variantes de structure sont corrélées à 0,85 – 0,94 (≈ 2 essais indépendants chacune) et les paramètres ont été choisis sur BTC seul. Il en oubliait d'autres : les graines 9 et 13 (400 candidats), le choix de l'horizon et du découpage, les 21 tentatives d'amélioration de V1 pour B2. `
+  + `Compter fidèlement en supposant les essais indépendants (R1) ne rend pas le DSR plus favorable (E2 ${pc(R.E2.R1.p)}, V1 ${pc(R.V1.R1.p)}, B2 ${pc(R.B2.R1.p)}) : c'est la mesure des corrélations, du niveau de bruit et du critère de sélection (BTC) qui change la conclusion.`,
+  `- **Avec les hypothèses justifiées (R2)**, le seuil dû à la sélection vaut ${n(R.E2.R2.sr0)} pour E2, ${n(R.V1.R2.sr0)} pour V1 et ${n(R.B2.R2.sr0)} pour B2, contre 1,69 dans le scénario initial ; les trois DSR sont proches de 100 %. `
+  + `Borne prudente (sélection supposée faite sur le portefeuille et 7 fois plus de procédures) : E2 ${pc(R.E2.sensBoth.p)}, V1 ${pc(R.V1.sensBoth.p)}, B2 ${pc(R.B2.sensBoth.p)}.`,
+  `- **Les gains restent la question ouverte.** V1 sur E2 : ${pc(gV1.R2.p)} (initial ${pc(gV1.C.p)}). B2 sur V1 : ${pc(gB2.R2.p)} (initial ${pc(gB2.C.p)}), sous 95 % : B2 reste une candidate exploratoire.`, '',
+  '## 6. Limites', '',
+  '- Seuls les essais enregistrés dans le dépôt sont comptés ; des essais antérieurs non tracés (réglages essayés à la main sur TradingView) ne peuvent pas l\'être. La sensibilité « × 7 procédures » en couvre une partie.',
+  '- Le critère réel de choix des jeux (t-stat des trades en régime calme ou agité sur BTC 2017 → 2026, minimum des deux moitiés) est approché par le Sharpe de la sleeve BTC sur la fenêtre 2018-09 → 2026-09. Une partie de la sélection portait sur 2017-2018, hors de la fenêtre mesurée : l\'inflation transmise est plutôt surestimée.',
+  '- Les challengers de la surface adaptative (M1 à M4) et le walk-forward sur plateaux n\'ont pas modifié le préréglage : ils sont classés validation. Les compter comme sélection ajouterait une petite étape, du même ordre que S2 (≈ 0,15).',
+  '- L\'hypothèse nulle du DSR (aucune différence réelle entre essais d\'une même étape) est elle-même prudente quand les essais diffèrent réellement, ce que montre σ > erreur type.',
+  '- Le N spectral (participation des valeurs propres) sous-estime le nombre d\'essais indépendants pour un problème de maximum ; il est donné à titre indicatif. Le N équivalent vient du bootstrap.',
+  '- Tout repose sur le même historique, déjà utilisé pour développer E2, V1 et B2 : seule une validation prospective tranchera.', '')
 mkdirSync(OUT, { recursive: true })
 writeFileSync(join(OUT, 'report.md'), L.join('\n'))
 writeFileSync(join(OUT, 'results.json'), JSON.stringify({ T, stages: Object.fromEntries(Object.entries(ST).map(([k, v]) => [k, { n: v.n, sd: v.sd, rho: v.rho, nPR: v.nPR, se: v.se, mean: v.mean, nImp: v.nImp }])), stPort: STp,

@@ -117,6 +117,7 @@ L.push('# Sharpe dégonflé (DSR) de E2, V1 et B2', '',
   + 'Généré par `research/fade/v1/dsr-e2-v1-b2.ts`, en lecture seule. Portefeuille BTC/ETH 50/50, rendements journaliers du '
   + `${P.isoDay(PD0)} au ${P.isoDay(PD1)} (${E2.length} jours), commissions de la fiche. B2 = V1 + point mort dès +3 R (`
   + '`research/reports/shock-fade/v1-be-volume/`).', '',
+  '**Scénario conservateur initial.** La réévaluation méthodologique (essais réellement en concurrence, corrélations, critère de sélection) est dans `research/reports/shock-fade/dsr-reeval/`.', '',
   'Contrôles : Sharpe de E2, V1 et B2 identiques aux références publiées ; DSR de E2 et de V1 et DSR du gain V1 − E2 identiques à `research/reports/calm-only/` (écart < 10⁻⁶).', '',
   '## 1. Sharpe absolu', '',
   `Écart type des Sharpe des essais (annualisé) : univers A (16 variantes proches de E2) ${n(CO.sdA, 3)} ; univers B (206 candidats de la recherche des réglages) ${n(CO.sdB, 3)}. `
