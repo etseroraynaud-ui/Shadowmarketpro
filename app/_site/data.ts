@@ -34,6 +34,27 @@ export const CAPACITY_FINDING = 'All 1,150 executions since 2020 were replayed o
  * Sharpe dégonflé du gain sur les règles précédentes.
  */
 export const SELECTION = { variants: 16, splits: 12870, pbo: 0.192, gainDsr: 0.18, gainPsr: 0.937 }
+/**
+ * Sharpe dégonflé du Sharpe de V1, version de référence (research/reports/shock-fade/dsr-reeval/results.json, que le
+ * site ne lit pas). Chiffre mis en avant : scénario prudent. Seuil = Sharpe que la sélection atteindrait par hasard.
+ * Scénarios détaillés sur /research/selection-risk : pré-enregistré (calm-only : un seul maximum sur 222 essais,
+ * σ = 0,602), réévalué (essais réellement en concurrence étape par étape, corrélations mesurées par bootstrap,
+ * réglages choisis sur BTC seul), prudent (réévalué, avec sélection supposée faite sur le portefeuille et 7 fois plus
+ * de procédures). Étapes de la sélection de V1 : jeu calme parmi 606 candidats, règle E2 parmi 7, régime calme parmi 10.
+ */
+export const DSR_V1 = {
+  period: '2018–2026',
+  prudent: { p: 0.989, threshold: 1.35 },
+  audited: { threshold: 0.81 },
+  preregistered: { p: 0.876, threshold: 1.69, trials: 222, sigma: 0.602 },
+  stages: [
+    { step: 'Parameter set, chosen on Bitcoin', alternatives: 606, inflation: 0.54 },
+    { step: 'Short-entry rule', alternatives: 7, inflation: 0.15 },
+    { step: 'Calm-regime restriction', alternatives: 10, inflation: 0.12 },
+  ],
+  sigma: { candidates: 0.45, noise: 0.32 },
+  ethRank: { candidates: 606, pByChance: 0.005 },
+}
 /** Nombre d'exécutions rejouées sur les transactions Binance (fills-500k-1m.json, results[…].executions.all.n). */
 export const EXECUTIONS = '1,150'
 

@@ -307,7 +307,7 @@ for (const [ci, c] of CFGS.entries()) {
     saved: losers.filter(r => r.d > 1e-9).length, worsenedLosers: losers.filter(r => r.d < -1e-9).length, recovered: sumD(losers),
     cut: winners.filter(r => r.d < -1e-9).length, sacrificed: sumD(winners),
     topTouched: rows.filter(r => r.top && r.changed).length, topD: sumD(rows.filter(r => r.top)),
-    meanD: monthBootStat(rows, xs => P.mean(xs.map(x => x.d)), 11 + ci), total: monthBootStat(rows, sumD, 31 + ci),
+    meanD: monthBootStat(rows, xs => P.mean(xs.map(x => x.d)), 11 + ci), total: monthBootStat(rows, xs => sumD(xs), 31 + ci),
     totalBTC: sumD(rows.filter(r => r.t.j === 0)), totalETH: sumD(rows.filter(r => r.t.j === 1)),
     byYear: Object.fromEntries(YEARS.map(y => [y, sumD(rows.filter(r => r.t.year === y))])),
   }
