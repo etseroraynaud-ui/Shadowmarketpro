@@ -105,3 +105,23 @@ Chacun avec l'erreur type (b) (PSR standard) et avec (c) (non iid).
 Toutes les mesures portent sur l'historique qui a servi à concevoir V1 : elles décrivent la précision et la
 significativité du résultat historique, pas sa persistance. Aucun seuil de décision n'est attaché à cette
 étude. Un résultat défavorable (IC nul, IR négatif, intervalle large) est rapporté sans reformulation.
+
+## 6. Addendum (2026-10-14, avant calcul) — croissance composée contre le buy & hold
+
+Ajouté après les résultats des sections 1 à 4, **avant tout calcul de la mesure ci-dessous**.
+
+**Mesure.**
+- Écart des rendements logarithmiques annualisés : Δg = 365,25 · moyenne(ln(1 + r_V1,t) − ln(1 + r_BH,t)), sur les
+  mêmes jours. C'est exactement ln((1 + CAGR_V1) / (1 + CAGR_BH)).
+- Croissance relative équivalente : e^Δg − 1.
+
+**Incertitude.**
+- Intervalle à 95 % par bootstrap circulaire par blocs des jours appariés : 21 jours en principal ; 5, 63, 126 jours
+  et mois calendaires en sensibilité ; 5 000 tirages. P(Δg ≤ 0) bootstrap.
+- t de Newey–West (retard 8).
+
+**Décomposition descriptive.** Δg ≈ Δ(rendement arithmétique annualisé) − ½ Δ(variance annualisée). Elle dit si
+l'écart de croissance vient du rendement moyen ou de la moindre volatilité.
+
+**Rapporté aussi.** Écart de Sharpe V1 − BH, avec son intervalle par le même bootstrap apparié. Aucun seuil de
+décision.
