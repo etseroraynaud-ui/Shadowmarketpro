@@ -4,6 +4,7 @@
 import { loadBtc } from '../lib/data.ts'
 import { ema, sma, stdev, atr } from '../../lib/backtest/indicators.ts'
 import { resample } from '../../lib/backtest/data.ts'
+import type { Bars } from '../../lib/backtest/types.ts'
 
 export interface Entry { zMin: number; reentry: number; wickThr: number; volMin: number; volDiv: boolean }
 export interface Exit { stop: number; tpR: number; trail: boolean }
@@ -13,15 +14,15 @@ export const BASE_ENTRY: Entry = { zMin: 2.2, reentry: 3, wickThr: 0.6, volMin: 
 export const BASE_EXIT: Exit = { stop: 3.3, tpR: 0, trail: false }
 
 /** Marché d'un timeframe (15, 30, 60 ; 240 regroupé depuis 60) : séries de l'indicateur, signaux, simulation. */
-export function ouMarket(TF: number) {
+export function ouMarket(TF: number, src?: { bars: Bars; start?: number }) {
   const DAY = 864e5
   const FEE = 0.00045
   const T0 = Date.parse('2017-01-01'), T1 = Date.parse('2023-01-01'), T2 = Date.parse('2026-10-01')
-  const b = TF === 240 ? resample(loadBtc(60), 4 * 3600000) : loadBtc(TF)
+  const b = src ? src.bars : TF === 240 ? resample(loadBtc(60), 4 * 3600000) : loadBtc(TF)
   const { t, o, h, l, c, v } = b
   const n = b.n
   const idx = (ms: number) => { let a = 0, z = n; while (a < z) { const k = (a + z) >> 1; if (t[k] < ms) a = k + 1; else z = k } return a }
-  const iTr = idx(T0), iVa = idx(T1), iEnd = idx(T2) - 1
+  const iTr = idx(Math.max(T0, src?.start ?? T0)), iVa = idx(T1), iEnd = idx(T2) - 1
 
   // ---------------------------------------------------------------- indicateur (parties qui font les croix)
   const bs = ema(c, 34)
@@ -56,7 +57,8 @@ export function ouMarket(TF: number) {
   }
 
   // ---------------------------------------------------------------- simulation
-  function simulate(sig: Int8Array, ex: Exit, a: number, z1: number, fee = FEE): Res {
+  // gate : entrées permises par sens, lues à la bougie du signal ; un signal opposé bloqué ferme quand même la position.
+  function simulate(sig: Int8Array, ex: Exit, a: number, z1: number, fee = FEE, gate?: { long: Uint8Array; short: Uint8Array }): Res {
     let eq = 1, dir = 0, entry = 0, units = 0, base = 0, stop = 0, tp = 0, dist = 0, ext = 0, eqIn = 1, j0 = 0, inPos = 0
     const tr: number[] = [], dailyEq: number[] = [], list: Trade[] = [], days: number[] = []
     let pending = 0
@@ -65,7 +67,7 @@ export function ouMarket(TF: number) {
       if (pending && pending !== dir) {
         if (dir) close(o[j], j, 'signal')
         const A = atr30[j - 1]
-        if (A > 0) {
+        if (A > 0 && (!gate || (pending === 1 ? gate.long[j - 1] : gate.short[j - 1]))) {
           dir = pending; entry = o[j]; eqIn = eq; units = eq / entry; base = eq - fee * eq
           dist = ex.stop * A; stop = entry - dir * dist; tp = ex.tpR ? entry + dir * ex.tpR * dist : NaN; ext = entry; j0 = j
         }
