@@ -21,7 +21,7 @@ import { cscv, dsr, sharpe as sharpeOf } from '../lib/overfit.ts'
 import { prepare } from '../../lib/strategies/shock/market.ts'
 import type { Bars } from '../../lib/backtest/types.ts'
 import { kGrid, signature, effectiveConfigs } from './lib/k-grid.ts'
-import { loadCsv, sessionDays, coverageStart, auditData, newYorkClock, BLOCKS, MAIN_SESSION, SLOTS, inAnySlot, DAY } from './lib/proxy-data.ts'
+import { loadCsv, sessionDays, coverageStart, auditData, newYorkClock, BLOCKS, MAIN_SESSION, SLOTS, inAnySlot, DAY, PROXY_LIMITS } from './lib/proxy-data.ts'
 import type { DataAudit } from './lib/proxy-data.ts'
 import { CONTRACTS, SCENARIOS, scenario, scaled, universe, setsFor, v1Signals, runV1, withCosts, daily, idxAt } from './lib/harness.ts'
 import type { Universe, Contract, Run } from './lib/harness.ts'
@@ -108,7 +108,7 @@ function loadMarket(def: MarketDef): Mkt {
   const y0 = new Date(after).getUTCFullYear()
   const E0 = Math.max(Date.UTC(after === Date.UTC(y0, 0, 1) ? y0 : y0 + 1, 0, 1), Date.UTC(2012, 0, 1))
   const lo = idxAt(bars.t, E0), end = bars.n - 1, devEnd = idxAt(bars.t, HOLD0) - 1
-  const audit = auditData(bars, lo, end)
+  const audit = auditData(bars, lo, end, PROXY_LIMITS)
   const mintick = def.mintick ?? audit.priceStep
   const u = universe(bars, sessionDays(bars), mintick)
   const firstFold = Math.max(2015, new Date(E0).getUTCFullYear() + 2)
@@ -311,7 +311,7 @@ function dev(M: Mkt) {
   const offsetSteps = (k: number) => (Number.isFinite(k) && Number.isFinite(finalA.k) ? Math.round((k - finalA.k) * 10) : null)
   const publicOut = {
     schema: 'futures-k-transfer-dev/1', market: M.def.key, label: M.def.label, generatedAt: new Date().toISOString(),
-    data: { file: M.def.file, sha256: sha256(readFileSync(join(ROOT, M.def.file))), coverageStart: new Date(M.dExt).toISOString(), E0: isoDay(M.E0), devEnd: isoDay(HOLD0 - DAY), folds: M.folds, audit: M.audit, ok: dataOK },
+    data: { file: M.def.file, sha256: sha256(readFileSync(join(ROOT, M.def.file))), coverageStart: new Date(M.dExt).toISOString(), E0: isoDay(M.E0), devEnd: isoDay(HOLD0 - DAY), folds: M.folds, audit: M.audit, ok: dataOK, integrityOk: M.audit.checks.filter(c => !c.coverage).every(c => c.ok) },
     eventStudy: { families: ev.families, random: ev.random, shifts: ev.shifts.map(x => ({ s: x.s, ...x.fam })), splits: ev.splits, sessions: ev.sessions, slots: ev.slots, utc: ev.utc, holm: ev.holmTable, gate: ev.gate, present: ev.present },
     grid: {
       size: ks.length, effective: groups.length, groupSizes: groups.map(g => g.ks.length),
@@ -512,7 +512,9 @@ function holdout() {
   for (const key of MARKETS) {
     const { M, devPub, devPriv, out } = ctxs[key]
     const C1 = devPub.eventStudy.present && devPub.data.ok
-    const crit = (m: 'A' | 'B') => {
+    // Analyse secondaire (additif n° 2) : contrôles de couverture ignorés, intégrité exigée.
+    const C1sec = devPub.eventStudy.present && devPub.data.integrityOk
+    const crit = (m: 'A' | 'B', C1: boolean) => {
       const o = out[m], V = devPub.validation[m]
       const c = {
         C1, C2: V.C2,
@@ -524,9 +526,11 @@ function holdout() {
       }
       return { ...c, all: Object.values(c).every(Boolean) }
     }
-    const cA = crit('A'), cB = crit('B')
+    const cA = crit('A', C1), cB = crit('B', C1)
     const verdict = !devPub.data.ok ? 'D' : !C1 ? 'C' : cA.all || cB.all ? 'A' : 'B'
-    res[key] = { verdict, criteria: { A: cA, B: cB }, out, privateFinal: { kFinalA: devPriv.finalA.k, tradeA: devPriv.finalA.trade, kFinalB: devPriv.finalB } }
+    const sA = crit('A', C1sec), sB = crit('B', C1sec)
+    const secondary = devPub.data.ok ? null : { verdict: !devPub.data.integrityOk ? 'D' : !C1sec ? 'C' : sA.all || sB.all ? 'A' : 'B', criteria: { A: sA, B: sB }, failed: devPub.data.audit.checks.filter((c: any) => !c.ok).map((c: any) => c.name) }
+    res[key] = { verdict, criteria: { A: cA, B: cB }, secondary, out, privateFinal: { kFinalA: devPriv.finalA.k, tradeA: devPriv.finalA.trade, kFinalB: devPriv.finalB } }
     void M
   }
   return { res, ctxs, hyps: hyps.map((h, j) => ({ ...h, pHolm: adj[j] })) }
@@ -545,9 +549,14 @@ function finalReport(key: MarketKey, R: any, devPub: any, hyps: any[]): string {
   L.push(`# Shock Engine V1 sur ${D.futures} — dossier (étude sur substitut)`, '')
   L.push(`**Substitut, pas des futures** : ${D.label}. Protocole \`research/preregistration/futures-k-transfer.md\`, additif \`futures-k-transfer-proxy.md\`. Étape de développement : [\`dev.md\`](dev.md) ; données : \`research/futures-transfer/DATA.md\` ; audit de la méthode : \`research/futures-transfer/AUDIT.md\`. Aucune valeur absolue de seuil (dépôt public).`, '')
   L.push(`## Conclusion sur le substitut : **${V} — ${words[V]}**`, '')
+  if (R.secondary) {
+    L.push(`Contrôle(s) de données en échec : ${R.secondary.failed.join(' ; ')}. Conclusion principale D selon l'additif. **Analyse secondaire** (additif n° 2, contrôles de couverture ignorés, mêmes calculs et mêmes critères, non confirmatoire) : **${R.secondary.verdict} — ${words[R.secondary.verdict]}** (méthode A : ${R.secondary.criteria.A.all ? 'tous les critères' : 'critères non tous remplis'} ; méthode B : ${R.secondary.criteria.B.all ? 'tous les critères' : 'critères non tous remplis'}).`, '')
+  }
   L.push(`Conclusion sur les futures ${D.futures} : **D** (aucune donnée de futures ; un résultat sur substitut ne vaut ni validation sur futures ni recommandation d'usage réel). Les règles de V1 BTC/ETH, le bot et le site ne sont pas modifiés.`, '')
   L.push('## Critères (fixés avant calcul)', '')
-  const row = (name: string, k: keyof typeof R.criteria.A) => [name, yes(R.criteria.A[k]), yes(R.criteria.B[k])]
+  const CR = R.secondary ? R.secondary.criteria : R.criteria
+  if (R.secondary) L.push('Tableau de l\'analyse secondaire (C1 sans les contrôles de couverture) ; en analyse principale, C1 est **non** pour les deux méthodes.', '')
+  const row = (name: string, k: keyof typeof R.criteria.A) => [name, yes(CR.A[k]), yes(CR.B[k])]
   table(L, ['critère', 'méthode A (seuil fixe)', 'méthode B (Q99 %)'], [
     row('C1 — phénomène présent (porte de l\'étude d\'événement) et données conformes', 'C1'),
     row('C2 — validation : Sharpe > 0,3, PF > 1,1, ≥ ½ des années positives', 'C2'),
@@ -556,7 +565,7 @@ function finalReport(key: MarketKey, R: any, devPub: any, hyps: any[]): string {
     row('C5 — bat ≥ 90 % des entrées au hasard ; retard d\'une bougie ≥ 50 % du gain moyen', 'C5'),
     row('C6 — plateau ± 2 crans et PBO < 0,5 (méthode A)', 'C6'),
     row('C7 — Sharpe dégonflé ≥ 0,95 (N = configurations effectives + 1)', 'C7'),
-    ['**toutes**', R.criteria.A.all ? '**oui**' : '**non**', R.criteria.B.all ? '**oui**' : '**non**'],
+    ['**toutes**', CR.A.all ? '**oui**' : '**non**', CR.B.all ? '**oui**' : '**non**'],
   ])
   const es = devPub.eventStudy
   L.push('## Étude d\'événement au seuil figé (avant calibration)', '')
@@ -618,7 +627,7 @@ function main() {
     const { res, ctxs, hyps } = holdout()
     for (const key of MARKETS) {
       const R = res[key] as any
-      writeFileSync(join(PUB, key, 'final.json'), json({ schema: 'futures-k-transfer-final/1', market: key, verdict: R.verdict, criteria: R.criteria, out: R.out, hyps, devCommit: execSync('git rev-parse HEAD', { cwd: ROOT }).toString().trim() }))
+      writeFileSync(join(PUB, key, 'final.json'), json({ schema: 'futures-k-transfer-final/1', market: key, verdict: R.verdict, criteria: R.criteria, secondary: R.secondary, out: R.out, hyps, devCommit: execSync('git rev-parse HEAD', { cwd: ROOT }).toString().trim() }))
       writeFileSync(join(PUB, key, 'README.md'), finalReport(key, R, ctxs[key].devPub, hyps) + '\n')
       writeFileSync(join(PRIV, `${key}-final.json`), json(R.privateFinal))
       process.stderr.write(`écrit ${join(PUB, key)}/README.md · conclusion ${R.verdict} (substitut)\n`)

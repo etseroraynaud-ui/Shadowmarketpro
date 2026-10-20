@@ -149,11 +149,17 @@ export interface DataAudit {
   nonPositive: number
   priceStep: number
   largestMoves: { t: string; z: number; afterGap: boolean }[]
-  checks: { name: string; ok: boolean; detail: string }[]
+  /** `coverage` : contrôle de couverture (bougies manquantes, trous), le seul que l'analyse secondaire peut ignorer. */
+  checks: { name: string; ok: boolean; detail: string; coverage?: boolean }[]
 }
 
+/** Seuils des contrôles de couverture : protocole futures (1 %, 10) ou additif sur substituts (2 %, 25). */
+export interface AuditLimits { maxMissing: number; maxGaps60: number; maxBadTicks: number }
+export const FUTURES_LIMITS: AuditLimits = { maxMissing: 0.01, maxGaps60: 10, maxBadTicks: 20 }
+export const PROXY_LIMITS: AuditLimits = { maxMissing: 0.02, maxGaps60: 25, maxBadTicks: 20 }
+
 /** Audit des données du § 1 du protocole sur [lo, end] (contrôles bloquants listés dans `checks`). */
-export function auditData(b: Bars, lo: number, end: number): DataAudit {
+export function auditData(b: Bars, lo: number, end: number, lim: AuditLimits = FUTURES_LIMITS): DataAudit {
   const { t, o, h, l, c, v } = b
   const iso = (i: number) => new Date(t[i]).toISOString().slice(0, 16).replace('T', ' ')
   let nonMonotonic = 0, ohlcErrors = 0, nonPositive = 0, zeroVolume = 0, gapsAfterClosure = 0
@@ -212,9 +218,9 @@ export function auditData(b: Bars, lo: number, end: number): DataAudit {
     { name: 'horodatages strictement croissants', ok: nonMonotonic === 0, detail: String(nonMonotonic) },
     { name: 'bas ≤ ouverture, clôture ≤ haut', ok: ohlcErrors === 0, detail: String(ohlcErrors) },
     { name: 'prix > 0', ok: nonPositive === 0, detail: String(nonPositive) },
-    { name: 'bougies manquantes < 1 % par an (heures prévues, fériés exclus)', ok: full.every(y => y.missingShare < 0.01), detail: full.map(y => `${y.y} ${(y.missingShare * 100).toFixed(2)} %`).join(' · ') },
-    { name: 'au plus 10 trous imprévus de plus de 60 min par an', ok: full.every(y => y.unscheduledGaps60 <= 10), detail: full.map(y => `${y.y} ${y.unscheduledGaps60}`).join(' · ') },
-    { name: 'au plus 20 mauvais ticks (> 8 ATR de la clôture précédente et de la clôture)', ok: badTicks.length <= 20, detail: String(badTicks.length) },
+    { name: `bougies manquantes < ${lim.maxMissing * 100} % par an (heures prévues, fériés exclus)`, ok: full.every(y => y.missingShare < lim.maxMissing), detail: full.map(y => `${y.y} ${(y.missingShare * 100).toFixed(2)} %`).join(' · '), coverage: true },
+    { name: `au plus ${lim.maxGaps60} trous imprévus de plus de 60 min par an`, ok: full.every(y => y.unscheduledGaps60 <= lim.maxGaps60), detail: full.map(y => `${y.y} ${y.unscheduledGaps60}`).join(' · '), coverage: true },
+    { name: `au plus ${lim.maxBadTicks} mauvais ticks (> 8 ATR de la clôture précédente et de la clôture)`, ok: badTicks.length <= lim.maxBadTicks, detail: String(badTicks.length) },
   ]
   return {
     first: iso(lo), last: iso(end), bars: end - lo + 1, years: yrs, gapsAfterClosure, zeroVolume, badTicks: badTicks.slice(0, 40),
