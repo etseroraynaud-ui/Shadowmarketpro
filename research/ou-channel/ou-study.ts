@@ -1,6 +1,10 @@
 // OU Trend Channel Pro v2.3 (indicateur Pine du propriétaire) transformé en stratégie sur BTC/USD 15 min.
 //
-//   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/ou-channel/ou-study.ts
+//   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/ou-channel/ou-study.ts [--tf 15|30|60|240]
+//
+// --tf : timeframe (15 par défaut ; 30 et 60 depuis les fichiers Bitstamp, 240 regroupé depuis 60).
+// Réglages en nombre de bougies du timeframe. Le Sharpe dégonflé compte les essais des quatre
+// timeframes (4 × la grille) dès que l'on sort de 15 min.
 //
 // Signaux (logique « trap » du script, base EMA 34 par défaut) : croix violette bearTrapNew = LONG,
 // croix orange bullTrapNew = SHORT. Une position à la fois, sans levier, 100 % du capital ; signal lu à
@@ -13,12 +17,15 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { loadBtc } from '../lib/data.ts'
 import { ema, sma, stdev, atr } from '../../lib/backtest/indicators.ts'
+import { resample } from '../../lib/backtest/data.ts'
 import { dsr } from '../lib/overfit.ts'
 
 const DAY = 864e5
 const FEE = 0.00045
 const T0 = Date.parse('2017-01-01'), T1 = Date.parse('2023-01-01'), T2 = Date.parse('2026-10-01')
-const b = loadBtc(15)
+const TF = Number(process.argv.includes('--tf') ? process.argv[process.argv.indexOf('--tf') + 1] : 15)
+const b = TF === 240 ? resample(loadBtc(60), 4 * 3600000) : loadBtc(TF)
+const TAG = TF === 15 ? '' : `-${TF}m`
 const { t, o, h, l, c, v } = b
 const n = b.n
 const idx = (ms: number) => { let a = 0, z = n; while (a < z) { const k = (a + z) >> 1; if (t[k] < ms) a = k + 1; else z = k } return a }
@@ -145,7 +152,8 @@ const baseVa = valid(sigOf(BASE_ENTRY), BASE_EXIT)
 const baseTr = train(sigOf(BASE_ENTRY), BASE_EXIT)
 // Dispersion réelle des Sharpe journaliers des essais (pour le Sharpe dégonflé).
 const trialSd = (() => { const s = rows.map(x => { const r = x.tr.r, m = r.reduce((a, y) => a + y, 0) / r.length; const sd = Math.sqrt(r.reduce((a, y) => a + (y - m) ** 2, 0) / r.length); return sd > 0 ? m / sd : 0 }); const m = s.reduce((a, y) => a + y, 0) / s.length; return Math.sqrt(s.reduce((a, y) => a + (y - m) ** 2, 0) / (s.length - 1)) })()
-for (const x of candOut) x.dsrTrain = dsr(x.tr.r, trials, trialSd).p
+const nTrials = TF === 15 ? trials : 4 * trials
+for (const x of candOut) x.dsrTrain = dsr(x.tr.r, nTrials, trialSd).p
 
 // ---------------------------------------------------------------- 4. Shock Engine V1 (sleeve BTC publiée), mêmes périodes
 const v1 = readFileSync('research/reports/reference/reference_daily_returns.csv', 'utf8').trim().split('\n').slice(1).map(s => s.split(',')).map(p => ({ d: Date.parse(p[0]), r: +p[1] }))
@@ -164,8 +172,8 @@ const nm = (x: number, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : '—').rep
 const desc = (e: Entry, ex: Exit) => `z ${e.zMin} · réintégration ${e.reentry} · mèche ${e.wickThr} · ${e.volDiv ? `vol z < ${e.volMin}` : 'sans filtre volume'} · stop ${ex.stop} ATR${ex.tpR ? ` · TP ${ex.tpR}R` : ''}${ex.trail ? ' · suiveur' : ''}`
 const row = (name: string, tr: Res, va: Res | null) => `| ${name} | ${pc(tr.cagr)} | ${nm(tr.sharpe)} | ${pc(tr.mdd)} | ${nm(tr.pf)} | ${tr.trades} | ${pc(tr.win)} | ${va ? nm(va.sharpe) : '—'} |`
 const L: string[] = []
-L.push('# OU Trend Channel Pro v2.3 · stratégie « trap » sur BTC/USD 15 min', '')
-L.push(`Bitstamp 15 min. Entraînement 2017-01-01 → 2022-12-31 ; validation 2023-01-01 → 2026-09-30 (jamais utilisée pour choisir). Croix violette = long, croix orange = short ; signal à la clôture, exécution à l'ouverture suivante ; une position, 100 % du capital, sans levier ; commission 0,045 % par ordre. Sélection : Sharpe journalier d'entraînement, au moins ${MIN_TRADES} trades. Essais : ${trials} (${rows.length} entrées + ${exitRows.length - 1} sorties). Produit par \`node research/ou-channel/ou-study.ts\`.`, '')
+L.push(`# OU Trend Channel Pro v2.3 · stratégie « trap » sur BTC/USD ${TF >= 60 ? `${TF / 60} h` : `${TF} min`}`, '')
+L.push(`Bitstamp ${TF} min${TF === 240 ? ' (regroupé depuis 60 min)' : ''}, réglages en bougies du timeframe. Entraînement 2017-01-01 → 2022-12-31 ; validation 2023-01-01 → 2026-09-30 (jamais utilisée pour choisir). Croix violette = long, croix orange = short ; signal à la clôture, exécution à l'ouverture suivante ; une position, 100 % du capital, sans levier ; commission 0,045 % par ordre. Sélection : Sharpe journalier d'entraînement, au moins ${MIN_TRADES} trades. Essais : ${trials} (${rows.length} entrées + ${exitRows.length - 1} sorties)${TF === 15 ? '' : ` ; Sharpe dégonflé avec ${nTrials} essais (quatre timeframes)`}. Produit par \`node research/ou-channel/ou-study.ts${TF === 15 ? '' : ` --tf ${TF}`}\`.`, '')
 L.push('| Version | CAGR | Sharpe | MDD | PF | Trades | Win rate | OOS Sharpe |', '|---|---|---|---|---|---|---|---|')
 L.push(row('Baseline (réglages d\'origine, stop 3,3 ATR)', baseTr, baseVa))
 top5.forEach((x, k) => L.push(row(`Top ${k + 1} entraînement · ${desc(x.e, x.ex)}`, x.tr, valid(sigOf(x.e), x.ex))))
@@ -176,7 +184,7 @@ L.push('', '## Sorties testées sur la meilleure entrée (entraînement)', '', '
 for (const x of exitRows) L.push(`| stop ${x.ex.stop} · ${x.ex.tpR ? `TP ${x.ex.tpR}R` : 'sans TP'} · ${x.ex.trail ? 'suiveur' : 'sans suiveur'} | ${nm(x.tr.sharpe)} | ${pc(x.tr.cagr)} | ${pc(x.tr.mdd)} | ${nm(x.tr.pf)} | ${x.tr.trades} |`)
 L.push('', `## Shock Engine V1 (sleeve BTC publiée, même source, mêmes frais)`, '', `Entraînement (${v1Train.from} → 2022-12-31) : CAGR ${pc(v1Train.cagr)}, Sharpe ${nm(v1Train.sharpe)}, MDD ${pc(v1Train.mdd)} · validation 2023-01-01 → 2026-09-30 : CAGR ${pc(v1Valid.cagr)}, Sharpe ${nm(v1Valid.sharpe)}, MDD ${pc(v1Valid.mdd)}.`)
 mkdirSync('research/reports/ou-channel', { recursive: true })
-writeFileSync('research/reports/ou-channel/ou-channel.md', L.join('\n') + '\n')
+writeFileSync(`research/reports/ou-channel/ou-channel${TAG}.md`, L.join('\n') + '\n')
 const strip = (r: Res) => { const { r: _r, ...x } = r; return x }
-writeFileSync('research/reports/ou-channel/ou-channel.json', JSON.stringify({ trials, baseline: { train: strip(baseTr), valid: strip(baseVa) }, top5: top5.map(x => ({ entry: x.e, exit: x.ex, train: strip(x.tr), valid: strip(valid(sigOf(x.e), x.ex)) })), candidates: candOut.map(x => ({ entry: x.e, exit: x.ex, train: strip(x.tr), valid: strip(x.va), validFees2: strip(x.va2), nbTrain: x.nbTrain, nbValid: x.nbValid, nbValidPos: x.nbValidPos, dsrTrain: x.dsrTrain })), exits: exitRows.map(x => ({ exit: x.ex, train: strip(x.tr) })), v1: { train: v1Train, valid: v1Valid }, trialSd }, null, 1))
-console.log(L.join('\n'))
+writeFileSync(`research/reports/ou-channel/ou-channel${TAG}.json`, JSON.stringify({ tf: TF, trials, nTrials, baseline: { train: strip(baseTr), valid: strip(baseVa) }, top5: top5.map(x => ({ entry: x.e, exit: x.ex, train: strip(x.tr), valid: strip(valid(sigOf(x.e), x.ex)) })), candidates: candOut.map(x => ({ entry: x.e, exit: x.ex, train: strip(x.tr), valid: strip(x.va), validFees2: strip(x.va2), nbTrain: x.nbTrain, nbValid: x.nbValid, nbValidPos: x.nbValidPos, dsrTrain: x.dsrTrain })), exits: exitRows.map(x => ({ exit: x.ex, train: strip(x.tr) })), v1: { train: v1Train, valid: v1Valid }, trialSd }, null, 1))
+console.log([`TF ${TF}`, ...L.slice(4, 11), `pos ${positive}/${rows.length}`, ...candOut.map(x => `cand ${desc(x.e, x.ex)} | tr ${nm(x.tr.sharpe)} va ${nm(x.va.sharpe)} cagrVa ${pc(x.va.cagr)} mddVa ${pc(x.va.mdd)} pfVa ${nm(x.va.pf)} nVa ${x.va.trades} fx2 ${nm(x.va2.sharpe)} nb ${nm(x.nbValid)} ${pc(x.nbValidPos)} dsr ${nm(x.dsrTrain, 3)}`)].join('\n'))
