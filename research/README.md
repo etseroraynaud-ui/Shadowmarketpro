@@ -181,6 +181,12 @@ de la recherche des réglages) et du gain sur E2. Verdict : candidate fragile ; 
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/calm-only.ts
 ```
 
+Transfert de V1 aux futures or (GC) et Nasdaq-100 (NQ) (plan : `research/preregistration/futures-k-transfer.md`,
+commité avant toute donnée ; dossier : `research/futures-transfer/`). Étude d'événement au seuil figé,
+puis seul le seuil de choc k varie (grille 1,5 – 4,0, critère de `regime-wf.ts`, walk-forward et test
+final), seuil quantile en comparaison. Au 2026-10-20, aucune donnée de futures n'est accessible depuis
+l'environnement : rien n'est calculé et les deux marchés concluent D (données insuffisantes).
+
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
 
