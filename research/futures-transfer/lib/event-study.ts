@@ -19,6 +19,8 @@ export interface Ctx {
   end: number
   /** true : créneau de la référence en quart d'heure UTC (sensibilité) au lieu de New York. */
   utcSlot?: boolean
+  /** Durée d'une bougie en ms (15 min par défaut) : une fermeture traversée = écart de plus de 45 min au-delà. */
+  tfMs?: number
 }
 
 const yearOf = (t: number) => new Date(t).getUTCFullYear()
@@ -98,7 +100,8 @@ export function familyStats(x: Ctx, base: (j: number, i: number) => number, key:
       const y = yearOf(x.t[i]); if (!byYear.has(y)) byYear.set(y, []); byYear.get(y)!.push(e)
       half[i < mid ? 0 : 1].push(e)
       dailySum[Math.floor(x.t[i] / DAY) - d0] += e
-      for (let q = i + 1; q <= i + h; q++) if (x.t[q] - x.t[q - 1] > 3600000) { spans++; break }
+      const closure = (x.tfMs ?? 900000) + 2700000
+      for (let q = i + 1; q <= i + h; q++) if (x.t[q] - x.t[q - 1] > closure) { spans++; break }
     })
     const b = bootMonths(byMonth, draws, rand)
     const yr = [...byYear.values()].map(v => mean(v))

@@ -54,12 +54,13 @@ export interface Universe {
   agitated: ShockParams
 }
 
-export function universe(bars: Bars, daily: Bars, mintick: number): Universe {
-  const m = marketFor(bars, 15, mintick)
-  const regime = volatilitySelect(classify(m.bars, 15, daily), m.bars.n, 0, 1).select
-  const trend = trendDown(m.bars, daily)
+export function universe(bars: Bars, daily: Bars, mintick: number, tfMin = 15): Universe {
+  const m = marketFor(bars, tfMin, mintick)
+  const regime = volatilitySelect(classify(m.bars, tfMin, daily), m.bars.n, 0, 1).select
+  const trend = trendDown(m.bars, daily, tfMin)
   const gap = new Uint8Array(bars.n)
-  for (let i = 1; i < bars.n; i++) gap[i] = bars.t[i] - bars.t[i - 1] > M15 ? 1 : 0
+  const step = tfMin === 15 ? M15 : tfMin * 60000
+  for (let i = 1; i < bars.n; i++) gap[i] = bars.t[i] - bars.t[i - 1] > step ? 1 : 0
   return { bars, daily, m, regime, trend, gap, mintick, calm: calmSet(), agitated: agitatedSet() }
 }
 

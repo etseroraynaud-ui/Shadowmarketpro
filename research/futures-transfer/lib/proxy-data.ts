@@ -88,6 +88,8 @@ export const SLOTS: [string, (mn: number) => boolean][] = [
   ['14 h – 14 h 45 ET (FOMC)', mn => mn >= 14 * 60 && mn < 14 * 60 + 45],
 ]
 export const inAnySlot = (mn: number) => SLOTS.some(([, f]) => f(mn))
+/** Une bougie de `tfMin` minutes ouverte à la minute `mn` (heure de New York) contient-elle un quart d'heure qui vérifie `test` ? */
+export const hitsSlot = (mn: number, tfMin: number, test: (mn: number) => boolean) => { for (let d = 0; d < tfMin; d += 15) if (test((mn + d) % 1440)) return true; return false }
 
 /**
  * Heures prévues de cotation (Globex et CFD) : du dimanche 18 h au vendredi 17 h, heure de New York,
