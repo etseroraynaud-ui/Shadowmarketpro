@@ -75,9 +75,10 @@ export const BLOCKS: [string, (mn: number) => boolean][] = [
 ]
 
 /** Séance principale de l'instrument visé (lecture seulement) : NQ 9 h 30 – 16 h ET, GC 8 h 20 – 13 h 30 ET. */
-export const MAIN_SESSION: Record<'gold' | 'nasdaq', [string, (mn: number) => boolean]> = {
+export const MAIN_SESSION: Record<'gold' | 'nasdaq' | 'test', [string, (mn: number) => boolean]> = {
   nasdaq: ['séance régulière 9 h 30 – 16 h ET', mn => mn >= 9 * 60 + 30 && mn < 16 * 60],
   gold: ['séance de jour COMEX 8 h 20 – 13 h 30 ET', mn => mn >= 8 * 60 + 15 && mn < 13 * 60 + 30],
+  test: ['séance régulière 9 h 30 – 16 h ET', mn => mn >= 9 * 60 + 30 && mn < 16 * 60],
 }
 
 /** Créneaux d'annonces (étiquette de la bougie du choc, heure de New York) ; sans calendrier officiel. */
