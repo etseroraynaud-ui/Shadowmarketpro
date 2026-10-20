@@ -188,8 +188,9 @@ final), seuil quantile en comparaison. Au 2026-10-20, aucune donnée de futures 
 l'environnement : les deux marchés concluent D sur futures. À la demande du propriétaire, l'étude a été
 faite sur substituts Dukascopy (XAU/USD comptant, CFD Nasdaq-100 USATECH ; additifs commités avant
 calcul) : conclusion principale D pour les deux (contrôles de couverture des données en échec), analyse
-secondaire C pour les deux (phénomène non démontré au seuil figé de V1). Commande :
-`node research/futures-transfer/study.ts --stage dev`, commit, puis `--stage holdout`.
+secondaire C pour les deux (phénomène non démontré au seuil figé de V1). Suite exploratoire en H1 et H4
+(additif n° 3) : même résultat (principal D, secondaire C) pour les quatre cas. Commande :
+`node research/futures-transfer/study.ts --stage dev [--tf 60]`, commit, puis `--stage holdout [--tfs 60,240]`.
 
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.

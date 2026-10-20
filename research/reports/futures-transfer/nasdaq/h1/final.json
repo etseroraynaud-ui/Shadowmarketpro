@@ -1,0 +1,882 @@
+{
+ "schema": "futures-k-transfer-final/1",
+ "market": "nasdaq",
+ "timeframe": 60,
+ "verdict": "D",
+ "criteria": {
+  "A": {
+   "C1": false,
+   "C2": false,
+   "C3": false,
+   "C4": false,
+   "C5": false,
+   "C6": false,
+   "C7": false,
+   "all": false
+  },
+  "B": {
+   "C1": false,
+   "C2": false,
+   "C3": true,
+   "C4": false,
+   "C5": false,
+   "C6": true,
+   "C7": false,
+   "all": false
+  }
+ },
+ "secondary": {
+  "verdict": "C",
+  "criteria": {
+   "A": {
+    "C1": false,
+    "C2": false,
+    "C3": false,
+    "C4": false,
+    "C5": false,
+    "C6": false,
+    "C7": false,
+    "all": false
+   },
+   "B": {
+    "C1": false,
+    "C2": false,
+    "C3": true,
+    "C4": false,
+    "C5": false,
+    "C6": true,
+    "C7": false,
+    "all": false
+   }
+  },
+  "failed": [
+   "bougies manquantes < 2 % par an (heures prévues, fériés exclus)",
+   "au plus 25 trous imprévus de plus de 60 min par an"
+  ]
+ },
+ "out": {
+  "A": {
+   "holdout": {
+    "from": "2023-01-01",
+    "to": "2026-09-30",
+    "cagr": 0,
+    "totalReturn": 0,
+    "sharpe": "NaN",
+    "loSharpe": 0,
+    "sortino": "NaN",
+    "calmar": "NaN",
+    "maxDD": 0,
+    "vol": 0,
+    "pf": "NaN",
+    "trades": 0,
+    "exposure": 0,
+    "winRate": "NaN",
+    "avgWin": "NaN",
+    "avgLoss": "NaN",
+    "payoff": "NaN",
+    "skew": "NaN",
+    "top5Share": "NaN",
+    "meanTrade": "NaN",
+    "medianTrade": "NaN",
+    "tNW": "NaN",
+    "years": [
+     {
+      "y": 2023,
+      "ret": 0,
+      "trades": 0
+     },
+     {
+      "y": 2024,
+      "ret": 0,
+      "trades": 0
+     },
+     {
+      "y": 2025,
+      "ret": 0,
+      "trades": 0
+     },
+     {
+      "y": 2026,
+      "ret": 0,
+      "trades": 0
+     }
+    ],
+    "halves": [
+     "NaN",
+     "NaN"
+    ],
+    "scenarios": [
+     {
+      "key": "zero",
+      "label": "sans coûts",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0,
+      "totalReturn": 0,
+      "sharpe": "NaN",
+      "loSharpe": 0,
+      "sortino": "NaN",
+      "calmar": "NaN",
+      "maxDD": 0,
+      "vol": 0,
+      "pf": "NaN",
+      "trades": 0,
+      "exposure": 0,
+      "winRate": "NaN",
+      "avgWin": "NaN",
+      "avgLoss": "NaN",
+      "payoff": "NaN",
+      "skew": "NaN",
+      "top5Share": "NaN",
+      "meanTrade": "NaN",
+      "medianTrade": "NaN",
+      "tNW": "NaN",
+      "years": [
+       {
+        "y": 2023,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2024,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2025,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2026,
+        "ret": 0,
+        "trades": 0
+       }
+      ],
+      "halves": [
+       "NaN",
+       "NaN"
+      ]
+     },
+     {
+      "key": "low",
+      "label": "bas (2,00 $ ; 0,5 pas)",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0,
+      "totalReturn": 0,
+      "sharpe": "NaN",
+      "loSharpe": 0,
+      "sortino": "NaN",
+      "calmar": "NaN",
+      "maxDD": 0,
+      "vol": 0,
+      "pf": "NaN",
+      "trades": 0,
+      "exposure": 0,
+      "winRate": "NaN",
+      "avgWin": "NaN",
+      "avgLoss": "NaN",
+      "payoff": "NaN",
+      "skew": "NaN",
+      "top5Share": "NaN",
+      "meanTrade": "NaN",
+      "medianTrade": "NaN",
+      "tNW": "NaN",
+      "years": [
+       {
+        "y": 2023,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2024,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2025,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2026,
+        "ret": 0,
+        "trades": 0
+       }
+      ],
+      "halves": [
+       "NaN",
+       "NaN"
+      ]
+     },
+     {
+      "key": "base",
+      "label": "référence (3,50 $ ; 1 pas)",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0,
+      "totalReturn": 0,
+      "sharpe": "NaN",
+      "loSharpe": 0,
+      "sortino": "NaN",
+      "calmar": "NaN",
+      "maxDD": 0,
+      "vol": 0,
+      "pf": "NaN",
+      "trades": 0,
+      "exposure": 0,
+      "winRate": "NaN",
+      "avgWin": "NaN",
+      "avgLoss": "NaN",
+      "payoff": "NaN",
+      "skew": "NaN",
+      "top5Share": "NaN",
+      "meanTrade": "NaN",
+      "medianTrade": "NaN",
+      "tNW": "NaN",
+      "years": [
+       {
+        "y": 2023,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2024,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2025,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2026,
+        "ret": 0,
+        "trades": 0
+       }
+      ],
+      "halves": [
+       "NaN",
+       "NaN"
+      ]
+     },
+     {
+      "key": "high",
+      "label": "haut (5,00 $ ; 2 pas)",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0,
+      "totalReturn": 0,
+      "sharpe": "NaN",
+      "loSharpe": 0,
+      "sortino": "NaN",
+      "calmar": "NaN",
+      "maxDD": 0,
+      "vol": 0,
+      "pf": "NaN",
+      "trades": 0,
+      "exposure": 0,
+      "winRate": "NaN",
+      "avgWin": "NaN",
+      "avgLoss": "NaN",
+      "payoff": "NaN",
+      "skew": "NaN",
+      "top5Share": "NaN",
+      "meanTrade": "NaN",
+      "medianTrade": "NaN",
+      "tNW": "NaN",
+      "years": [
+       {
+        "y": 2023,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2024,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2025,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2026,
+        "ret": 0,
+        "trades": 0
+       }
+      ],
+      "halves": [
+       "NaN",
+       "NaN"
+      ]
+     },
+     {
+      "key": "stress",
+      "label": "stress (5,00 $ ; 4 pas)",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0,
+      "totalReturn": 0,
+      "sharpe": "NaN",
+      "loSharpe": 0,
+      "sortino": "NaN",
+      "calmar": "NaN",
+      "maxDD": 0,
+      "vol": 0,
+      "pf": "NaN",
+      "trades": 0,
+      "exposure": 0,
+      "winRate": "NaN",
+      "avgWin": "NaN",
+      "avgLoss": "NaN",
+      "payoff": "NaN",
+      "skew": "NaN",
+      "top5Share": "NaN",
+      "meanTrade": "NaN",
+      "medianTrade": "NaN",
+      "tNW": "NaN",
+      "years": [
+       {
+        "y": 2023,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2024,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2025,
+        "ret": 0,
+        "trades": 0
+       },
+       {
+        "y": 2026,
+        "ret": 0,
+        "trades": 0
+       }
+      ],
+      "halves": [
+       "NaN",
+       "NaN"
+      ]
+     }
+    ],
+    "costCurve": {
+     "pts": [
+      {
+       "f": 0,
+       "sharpe": "NaN"
+      },
+      {
+       "f": 0.5,
+       "sharpe": "NaN"
+      },
+      {
+       "f": 1,
+       "sharpe": "NaN"
+      },
+      {
+       "f": 2,
+       "sharpe": "NaN"
+      },
+      {
+       "f": 4,
+       "sharpe": "NaN"
+      }
+     ],
+     "breakEven": "NaN"
+    }
+   },
+   "combined": {
+    "from": "2017-01-01",
+    "to": "2026-09-30",
+    "sharpe": "NaN",
+    "loSharpe": 0,
+    "cagr": 0,
+    "maxDD": 0,
+    "sortino": "NaN",
+    "calmar": "NaN",
+    "tNW": "NaN",
+    "p": 1,
+    "pf": "NaN",
+    "pfHigh": "NaN",
+    "trades": 0,
+    "meanTrade": "NaN",
+    "meanDelayed": "NaN",
+    "random": {
+     "draws": 500,
+     "beaten": 0,
+     "median": "NaN",
+     "q95": "NaN"
+    },
+    "dsr": {
+     "N": 81,
+     "sr0": 0.02571660101,
+     "p": 0.06249214789
+    },
+    "lineage": [
+     {
+      "N": 222,
+      "p": 0.04014095377
+     },
+     {
+      "N": 6266,
+      "p": 0.009649973953
+     }
+    ],
+    "pHolm": 1
+   }
+  },
+  "B": {
+   "holdout": {
+    "from": "2023-01-01",
+    "to": "2026-09-30",
+    "cagr": 0.0003570609992,
+    "totalReturn": 0.001338963401,
+    "sharpe": 0.02762530548,
+    "loSharpe": 0.02624104518,
+    "sortino": 0.03808876867,
+    "calmar": 0.005801989252,
+    "maxDD": -0.0615411342,
+    "vol": 0.0345184257,
+    "pf": 1.038984778,
+    "trades": 12,
+    "exposure": 0.04224204283,
+    "winRate": 0.3333333333,
+    "avgWin": 0.01939947967,
+    "avgLoss": -0.009335786281,
+    "payoff": 2.077969556,
+    "skew": 1.334933089,
+    "top5Share": 31.52273588,
+    "meanTrade": 0.0002426357027,
+    "medianTrade": -0.006983034256,
+    "tNW": 0.05654085036,
+    "years": [
+     {
+      "y": 2023,
+      "ret": -0.04404836776,
+      "trades": 7
+     },
+     {
+      "y": 2024,
+      "ret": 0.00910913416,
+      "trades": 3
+     },
+     {
+      "y": 2025,
+      "ret": -0.004849627244,
+      "trades": 1
+     },
+     {
+      "y": 2026,
+      "ret": 0.04308175509,
+      "trades": 1
+     }
+    ],
+    "halves": [
+     -0.9341571972,
+     0.79200518
+    ],
+    "scenarios": [
+     {
+      "key": "zero",
+      "label": "sans coûts",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0.000523908616,
+      "totalReturn": 0.001965085213,
+      "sharpe": 0.03245517864,
+      "loSharpe": 0.03081547113,
+      "sortino": 0.04479578252,
+      "calmar": 0.008570571729,
+      "maxDD": -0.0611287826,
+      "vol": 0.03449925622,
+      "pf": 1.047624249,
+      "trades": 12,
+      "exposure": 0.04224204283,
+      "winRate": 0.3333333333,
+      "avgWin": 0.01944372295,
+      "avgLoss": -0.00927991261,
+      "payoff": 2.095248497,
+      "skew": 1.335178731,
+      "top5Share": 21.50353561,
+      "meanTrade": 0.0002946325768,
+      "medianTrade": -0.006925653707,
+      "tNW": 0.06642585201,
+      "years": [
+       {
+        "y": 2023,
+        "ret": -0.04363863825,
+        "trades": 7
+       },
+       {
+        "y": 2024,
+        "ret": 0.009236458778,
+        "trades": 3
+       },
+       {
+        "y": 2025,
+        "ret": -0.004814650493,
+        "trades": 1
+       },
+       {
+        "y": 2026,
+        "ret": 0.04311853278,
+        "trades": 1
+       }
+      ],
+      "halves": [
+       -0.9269006824,
+       0.7942228394
+      ]
+     },
+     {
+      "key": "low",
+      "label": "bas (2,00 $ ; 0,5 pas)",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0.0004355746293,
+      "totalReturn": 0.001633562348,
+      "sharpe": 0.02989753078,
+      "loSharpe": 0.02839359513,
+      "sortino": 0.0412423127,
+      "calmar": 0.007100165722,
+      "maxDD": -0.06134710743,
+      "vol": 0.03450938606,
+      "pf": 1.043037463,
+      "trades": 12,
+      "exposure": 0.04224204283,
+      "winRate": 0.3333333333,
+      "avgWin": 0.01942029991,
+      "avgLoss": -0.009309492993,
+      "payoff": 2.086074927,
+      "skew": 1.335048894,
+      "top5Share": 25.85184783,
+      "meanTrade": 0.0002671046424,
+      "medianTrade": -0.006956031854,
+      "tNW": 0.06119130011,
+      "years": [
+       {
+        "y": 2023,
+        "ret": -0.04385557417,
+        "trades": 7
+       },
+       {
+        "y": 2024,
+        "ret": 0.009169049962,
+        "trades": 3
+       },
+       {
+        "y": 2025,
+        "ret": -0.004833167673,
+        "trades": 1
+       },
+       {
+        "y": 2026,
+        "ret": 0.04309906216,
+        "trades": 1
+       }
+      ],
+      "halves": [
+       -0.9307455185,
+       0.7930487882
+      ]
+     },
+     {
+      "key": "base",
+      "label": "référence (3,50 $ ; 1 pas)",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0.0003570609992,
+      "totalReturn": 0.001338963401,
+      "sharpe": 0.02762530548,
+      "loSharpe": 0.02624104518,
+      "sortino": 0.03808876867,
+      "calmar": 0.005801989252,
+      "maxDD": -0.0615411342,
+      "vol": 0.0345184257,
+      "pf": 1.038984778,
+      "trades": 12,
+      "exposure": 0.04224204283,
+      "winRate": 0.3333333333,
+      "avgWin": 0.01939947967,
+      "avgLoss": -0.009335786281,
+      "payoff": 2.077969556,
+      "skew": 1.334933089,
+      "top5Share": 31.52273588,
+      "meanTrade": 0.0002426357027,
+      "medianTrade": -0.006983034256,
+      "tNW": 0.05654085036,
+      "years": [
+       {
+        "y": 2023,
+        "ret": -0.04404836776,
+        "trades": 7
+       },
+       {
+        "y": 2024,
+        "ret": 0.00910913416,
+        "trades": 3
+       },
+       {
+        "y": 2025,
+        "ret": -0.004849627244,
+        "trades": 1
+       },
+       {
+        "y": 2026,
+        "ret": 0.04308175509,
+        "trades": 1
+       }
+      ],
+      "halves": [
+       -0.9341571972,
+       0.79200518
+      ]
+     },
+     {
+      "key": "high",
+      "label": "haut (5,00 $ ; 2 pas)",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0.0002294873281,
+      "totalReturn": 0.0008604167878,
+      "sharpe": 0.02393544249,
+      "loSharpe": 0.02274363123,
+      "sortino": 0.03297447941,
+      "calmar": 0.003710004481,
+      "maxDD": -0.06185634795,
+      "vol": 0.03453318596,
+      "pf": 1.03244774,
+      "trades": 12,
+      "exposure": 0.04224204283,
+      "winRate": 0.3333333333,
+      "avgWin": 0.01936564725,
+      "avgLoss": -0.009378512101,
+      "payoff": 2.06489548,
+      "skew": 1.334744115,
+      "top5Share": 49.01197586,
+      "meanTrade": 0.0002028743489,
+      "medianTrade": -0.007026912368,
+      "tNW": 0.04898890586,
+      "years": [
+       {
+        "y": 2023,
+        "ret": -0.04436158043,
+        "trades": 7
+       },
+       {
+        "y": 2024,
+        "ret": 0.009011777296,
+        "trades": 3
+       },
+       {
+        "y": 2025,
+        "ret": -0.004876373756,
+        "trades": 1
+       },
+       {
+        "y": 2026,
+        "ret": 0.04305363141,
+        "trades": 1
+       }
+      ],
+      "halves": [
+       -0.939689202,
+       0.7903093045
+      ]
+     },
+     {
+      "key": "stress",
+      "label": "stress (5,00 $ ; 4 pas)",
+      "from": "2023-01-01",
+      "to": "2026-09-30",
+      "cagr": 0.00003324667912,
+      "totalReturn": 0.0001246181602,
+      "sharpe": 0.01826483135,
+      "loSharpe": 0.01736422211,
+      "sortino": 0.02513101816,
+      "calmar": 0.0005333027397,
+      "maxDD": -0.06234109944,
+      "vol": 0.03455606511,
+      "pf": 1.022506517,
+      "trades": 12,
+      "exposure": 0.04224204283,
+      "winRate": 0.3333333333,
+      "avgWin": 0.01931359852,
+      "avgLoss": -0.009444242265,
+      "payoff": 2.045013033,
+      "skew": 1.33445148,
+      "top5Share": 337.942218,
+      "meanTrade": 0.0001417046629,
+      "medianTrade": -0.007094415239,
+      "tNW": 0.03738286178,
+      "years": [
+       {
+        "y": 2023,
+        "ret": -0.04484326016,
+        "trades": 7
+       },
+       {
+        "y": 2024,
+        "ret": 0.008862012768,
+        "trades": 3
+       },
+       {
+        "y": 2025,
+        "ret": -0.004917521534,
+        "trades": 1
+       },
+       {
+        "y": 2026,
+        "ret": 0.04301036496,
+        "trades": 1
+       }
+      ],
+      "halves": [
+       -0.9481709621,
+       0.7877002419
+      ]
+     }
+    ],
+    "costCurve": {
+     "pts": [
+      {
+       "f": 0,
+       "sharpe": 0.03245517864
+      },
+      {
+       "f": 0.5,
+       "sharpe": 0.03003958367
+      },
+      {
+       "f": 1,
+       "sharpe": 0.02762530548
+      },
+      {
+       "f": 2,
+       "sharpe": 0.02280072664
+      },
+      {
+       "f": 4,
+       "sharpe": 0.01316766793
+      }
+     ],
+     "breakEven": "NaN"
+    }
+   },
+   "combined": {
+    "from": "2017-01-01",
+    "to": "2026-09-30",
+    "sharpe": 0.1749904995,
+    "loSharpe": 0.159888017,
+    "cagr": 0.004061871457,
+    "maxDD": -0.0615411342,
+    "sortino": 0.2567789714,
+    "calmar": 0.06600254464,
+    "tNW": 0.5595163453,
+    "p": 0.2879046656,
+    "pf": 1.422050317,
+    "pfHigh": 1.409216797,
+    "trades": 19,
+    "meanTrade": 0.002244732629,
+    "meanDelayed": 0.002558223434,
+    "random": {
+     "draws": 500,
+     "beaten": 0.464,
+     "median": 0.2046970607,
+     "q95": 0.6722915314
+    },
+    "dsr": {
+     "N": 81,
+     "sr0": 0.02571660101,
+     "p": 0.1615216169
+    },
+    "lineage": [
+     {
+      "N": 222,
+      "p": 0.1144586807
+     },
+     {
+      "N": 6266,
+      "p": 0.03641036272
+     }
+    ],
+    "pHolm": 1
+   }
+  }
+ },
+ "hyps": [
+  {
+   "market": "gold",
+   "tf": 60,
+   "method": "A",
+   "p": 0.589207281,
+   "unit": "gold-h1",
+   "pHolm": 1
+  },
+  {
+   "market": "gold",
+   "tf": 60,
+   "method": "B",
+   "p": 0.005922521145,
+   "unit": "gold-h1",
+   "pHolm": 0.04738016916
+  },
+  {
+   "market": "nasdaq",
+   "tf": 60,
+   "method": "A",
+   "p": 1,
+   "unit": "nasdaq-h1",
+   "pHolm": 1
+  },
+  {
+   "market": "nasdaq",
+   "tf": 60,
+   "method": "B",
+   "p": 0.2879046656,
+   "unit": "nasdaq-h1",
+   "pHolm": 1
+  },
+  {
+   "market": "gold",
+   "tf": 240,
+   "method": "A",
+   "p": 1,
+   "unit": "gold-h4",
+   "pHolm": 1
+  },
+  {
+   "market": "gold",
+   "tf": 240,
+   "method": "B",
+   "p": 0.1127356857,
+   "unit": "gold-h4",
+   "pHolm": 0.7891498
+  },
+  {
+   "market": "nasdaq",
+   "tf": 240,
+   "method": "A",
+   "p": 1,
+   "unit": "nasdaq-h4",
+   "pHolm": 1
+  },
+  {
+   "market": "nasdaq",
+   "tf": 240,
+   "method": "B",
+   "p": 0.4474486363,
+   "unit": "nasdaq-h4",
+   "pHolm": 1
+  }
+ ],
+ "devCommit": "8844d4e2f4d1a7f1af2e89afdbae0c82bf0abdbe"
+}

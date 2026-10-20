@@ -14,6 +14,16 @@ les futures or (GC) et E-mini Nasdaq-100 (NQ), et une recalibration du seul seui
 Dossiers : [`gold`](../reports/futures-transfer/gold/README.md) et [`nasdaq`](../reports/futures-transfer/nasdaq/README.md)
 (conclusion, critères, résultats hors échantillon), avec leurs étapes de développement (`dev.md`).
 
+**Suite exploratoire en H1 et H4** (additif n° 3, décidée après les résultats à 15 min, test final déjà
+regardé à 15 min ; réglages de V1 inchangés en nombre de bougies, seul k varie) :
+
+| substitut | H1 (60 min) | H4 (240 min) |
+| --- | --- | --- |
+| Or | principal D · secondaire **C** : 193 entrées, excès positif mais borne basse à 4 bougies −0,006 ; méthode A non tradée au test final (PBO 81 %) ; méthode B remplit C2 à C7 (Sharpe hors échantillon 0,79, Holm p = 0,047 sur 8) | principal D · secondaire **C** : 66 entrées (< 150) |
+| Nasdaq | principal D · secondaire **C** : 45 entrées | principal D · secondaire **C** : 13 entrées |
+
+Dossiers : `../reports/futures-transfer/{gold,nasdaq}/{h1,h4}/README.md`.
+
 ## Étapes
 
 | étape | où |
