@@ -15,97 +15,14 @@
 // research/reports/reference/reference_daily_returns.csv.
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { loadBtc } from '../lib/data.ts'
-import { ema, sma, stdev, atr } from '../../lib/backtest/indicators.ts'
-import { resample } from '../../lib/backtest/data.ts'
+import { ouMarket, BASE_ENTRY, BASE_EXIT } from './lib.ts'
+import type { Entry, Exit, Res } from './lib.ts'
 import { dsr } from '../lib/overfit.ts'
 
-const DAY = 864e5
-const FEE = 0.00045
-const T0 = Date.parse('2017-01-01'), T1 = Date.parse('2023-01-01'), T2 = Date.parse('2026-10-01')
 const TF = Number(process.argv.includes('--tf') ? process.argv[process.argv.indexOf('--tf') + 1] : 15)
-const b = TF === 240 ? resample(loadBtc(60), 4 * 3600000) : loadBtc(TF)
 const TAG = TF === 15 ? '' : `-${TF}m`
-const { t, o, h, l, c, v } = b
-const n = b.n
-const idx = (ms: number) => { let a = 0, z = n; while (a < z) { const k = (a + z) >> 1; if (t[k] < ms) a = k + 1; else z = k } return a }
-const iTr = idx(T0), iVa = idx(T1), iEnd = idx(T2) - 1
-
-// ---------------------------------------------------------------- indicateur (parties qui font les croix)
-const bs = ema(c, 34)
-const resid = Float64Array.from(c, (x, i) => x - bs[i])
-const rsd = ema(stdev(resid, 20), 5)
-const z = Float64Array.from(resid, (x, i) => (rsd[i] > 0 && Number.isFinite(rsd[i]) && Number.isFinite(x) ? x / rsd[i] : 0))
-const vm = sma(v, 20), vs = stdev(v, 20)
-const volZ = Float64Array.from(v, (x, i) => (vs[i] > 0 ? (x - vm[i]) / vs[i] : 0))
-const wick = Float64Array.from(c, (_, i) => { const r = h[i] - l[i]; return r > 0 ? Math.max(h[i] - Math.max(c[i], o[i]), Math.min(c[i], o[i]) - l[i]) / r : 0 })
-const atr30 = atr(h, l, c, 30)
-
-interface Entry { zMin: number; reentry: number; wickThr: number; volMin: number; volDiv: boolean }
-interface Exit { stop: number; tpR: number; trail: boolean }
-const BASE_ENTRY: Entry = { zMin: 2.2, reentry: 3, wickThr: 0.6, volMin: 1.0, volDiv: true }
-const BASE_EXIT: Exit = { stop: 3.3, tpR: 0, trail: false }
-
-/** +1 = long (bearTrapNew), −1 = short (bullTrapNew), 0 sinon ; logique du script ligne à ligne. */
-function signals(p: Entry): Int8Array {
-  const out = new Int8Array(n)
-  const up = new Int32Array(n), dn = new Int32Array(n)
-  let bullTrap = false, bearTrap = false
-  for (let i = 1; i < n; i++) {
-    const bu = z[i] > p.zMin, bd = z[i] < -p.zMin
-    up[i] = bu ? up[i - 1] + 1 : 0
-    dn[i] = bd ? dn[i - 1] + 1 : 0
-    const reUp = i >= p.reentry && up[i - p.reentry] > 0 && up[i] === 0
-    const reDn = i >= p.reentry && dn[i - p.reentry] > 0 && dn[i] === 0
-    const extra = wick[i] >= p.wickThr || (p.volDiv && !(volZ[i] >= p.volMin))
-    const prevBull = bullTrap, prevBear = bearTrap
-    if (reUp && extra) bullTrap = true; else if (!bu) bullTrap = false
-    if (reDn && extra) bearTrap = true; else if (!bd) bearTrap = false
-    const sh = bullTrap && !prevBull, lg = bearTrap && !prevBear
-    out[i] = lg && !sh ? 1 : sh && !lg ? -1 : 0
-  }
-  return out
-}
-
-// ---------------------------------------------------------------- simulation
-interface Res { cagr: number; sharpe: number; mdd: number; pf: number; trades: number; win: number; r: number[] }
-function simulate(sig: Int8Array, ex: Exit, a: number, z1: number, fee = FEE): Res {
-  let eq = 1, dir = 0, entry = 0, units = 0, base = 0, stop = 0, tp = 0, dist = 0, ext = 0, eqIn = 1
-  const tr: number[] = [], dailyEq: number[] = []
-  let pending = 0
-  const close = (px: number) => { eq = base + dir * units * (px - entry) - fee * units * px; tr.push(eq / eqIn - 1); dir = 0 }
-  for (let j = a; j <= z1; j++) {
-    if (pending && pending !== dir) {
-      if (dir) close(o[j])
-      const A = atr30[j - 1]
-      if (A > 0) {
-        dir = pending; entry = o[j]; eqIn = eq; units = eq / entry; base = eq - fee * eq
-        dist = ex.stop * A; stop = entry - dir * dist; tp = ex.tpR ? entry + dir * ex.tpR * dist : NaN; ext = entry
-      }
-    }
-    pending = 0
-    if (dir === 1) {
-      if (l[j] <= stop) close(Math.min(o[j], stop))
-      else if (ex.tpR && h[j] >= tp) close(Math.max(o[j], tp))
-    } else if (dir === -1) {
-      if (h[j] >= stop) close(Math.max(o[j], stop))
-      else if (ex.tpR && l[j] <= tp) close(Math.min(o[j], tp))
-    }
-    if (dir && ex.trail) { ext = dir === 1 ? Math.max(ext, h[j]) : Math.min(ext, l[j]); stop = dir === 1 ? Math.max(stop, ext - dist) : Math.min(stop, ext + dist) }
-    if (j < z1) pending = sig[j]
-    if (j === z1 && dir) close(c[j])
-    const mark = dir ? base + dir * units * (c[j] - entry) : eq
-    if (j === z1 || Math.floor(t[j + 1] / DAY) !== Math.floor(t[j] / DAY)) dailyEq.push(mark)
-  }
-  const r = dailyEq.map((x, k) => x / (k ? dailyEq[k - 1] : 1) - 1)
-  const m = r.reduce((s, x) => s + x, 0) / r.length, sd = Math.sqrt(r.reduce((s, x) => s + (x - m) ** 2, 0) / r.length)
-  let pk = 1, mdd = 0
-  for (const x of dailyEq) { pk = Math.max(pk, x); mdd = Math.min(mdd, x / pk - 1) }
-  const gp = tr.filter(x => x > 0).reduce((s, x) => s + x, 0), gl = tr.filter(x => x <= 0).reduce((s, x) => s + x, 0)
-  return { cagr: Math.pow(dailyEq.at(-1)!, 365.25 / r.length) - 1, sharpe: sd > 0 ? (m / sd) * Math.sqrt(365.25) : 0, mdd, pf: gl < 0 ? gp / -gl : NaN, trades: tr.length, win: tr.filter(x => x > 0).length / Math.max(1, tr.length), r }
-}
-const train = (sig: Int8Array, ex: Exit, fee?: number) => simulate(sig, ex, iTr, iVa - 1, fee)
-const valid = (sig: Int8Array, ex: Exit, fee?: number) => simulate(sig, ex, iVa, iEnd, fee)
+const { signals, train, valid, FEE } = ouMarket(TF)
+const T1 = Date.parse('2023-01-01'), T2 = Date.parse('2026-10-01')
 
 // ---------------------------------------------------------------- 1. baseline et grille d'entrée
 const Z = [1.8, 2.2, 2.6, 3.0], R = [1, 2, 3, 5], W = [0.5, 0.6, 0.7], V = [0.5, 1.0, 1.5]
@@ -185,6 +102,6 @@ for (const x of exitRows) L.push(`| stop ${x.ex.stop} · ${x.ex.tpR ? `TP ${x.ex
 L.push('', `## Shock Engine V1 (sleeve BTC publiée, même source, mêmes frais)`, '', `Entraînement (${v1Train.from} → 2022-12-31) : CAGR ${pc(v1Train.cagr)}, Sharpe ${nm(v1Train.sharpe)}, MDD ${pc(v1Train.mdd)} · validation 2023-01-01 → 2026-09-30 : CAGR ${pc(v1Valid.cagr)}, Sharpe ${nm(v1Valid.sharpe)}, MDD ${pc(v1Valid.mdd)}.`)
 mkdirSync('research/reports/ou-channel', { recursive: true })
 writeFileSync(`research/reports/ou-channel/ou-channel${TAG}.md`, L.join('\n') + '\n')
-const strip = (r: Res) => { const { r: _r, ...x } = r; return x }
+const strip = (r: Res) => { const { r: _r, list: _l, days: _d, ...x } = r; return x }
 writeFileSync(`research/reports/ou-channel/ou-channel${TAG}.json`, JSON.stringify({ tf: TF, trials, nTrials, baseline: { train: strip(baseTr), valid: strip(baseVa) }, top5: top5.map(x => ({ entry: x.e, exit: x.ex, train: strip(x.tr), valid: strip(valid(sigOf(x.e), x.ex)) })), candidates: candOut.map(x => ({ entry: x.e, exit: x.ex, train: strip(x.tr), valid: strip(x.va), validFees2: strip(x.va2), nbTrain: x.nbTrain, nbValid: x.nbValid, nbValidPos: x.nbValidPos, dsrTrain: x.dsrTrain })), exits: exitRows.map(x => ({ exit: x.ex, train: strip(x.tr) })), v1: { train: v1Train, valid: v1Valid }, trialSd }, null, 1))
 console.log([`TF ${TF}`, ...L.slice(4, 11), `pos ${positive}/${rows.length}`, ...candOut.map(x => `cand ${desc(x.e, x.ex)} | tr ${nm(x.tr.sharpe)} va ${nm(x.va.sharpe)} cagrVa ${pc(x.va.cagr)} mddVa ${pc(x.va.mdd)} pfVa ${nm(x.va.pf)} nVa ${x.va.trades} fx2 ${nm(x.va2.sharpe)} nb ${nm(x.nbValid)} ${pc(x.nbValidPos)} dsr ${nm(x.dsrTrain, 3)}`)].join('\n'))
