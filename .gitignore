@@ -37,3 +37,5 @@ research/data/hl-tardis/
 # Market Flow : secret du serveur (jeton d'envoi) et fichiers locaux
 flow/deploy/*.env
 flow/**/__pycache__/
+# Étude de transfert GC / NQ : données futures sous licence du fournisseur, jamais versionnées (dépôt public)
+research/data/futures/
