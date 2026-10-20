@@ -54,3 +54,17 @@ Le fichier `research/data/xauusd_15m.csv.gz` déjà présent dans le dépôt est
 
 Une fois les données présentes, l'étude suit le protocole commité sans changement ; ses scripts seront
 écrits contre ce protocole et commités avant le premier calcul sur GC ou NQ.
+
+## Substituts utilisés à la demande du propriétaire (2026-10-20)
+
+Sur demande explicite, l'étude a été faite sur des données gratuites Dukascopy, étiquetées partout
+« substitut, pas des futures » (additifs `research/preregistration/futures-k-transfer-proxy.md` et
+`-proxy-2.md`) ; la conclusion sur les futures reste D.
+
+| substitut | fichier | période utilisée | contrôles de données (additif) |
+| --- | --- | --- | --- |
+| XAU/USD comptant (prix acheteur) pour GC | `research/data/xauusd_15m.csv.gz` (déjà dans le dépôt) | couverture continue dès 2012-01-02, évaluation 2014-01-01 → 2026-09-30 | intégrité OK ; **31 trous imprévus de plus de 60 min en 2014** (pause quotidienne du flux de 17 h à 19 h, heure de New York, de mars à mi-avril 2014, plus les clôtures anticipées des jours fériés) : au-dessus de 25 |
+| CFD Nasdaq-100 USATECH.IDX/USD (prix acheteur) pour NQ | `research/data/usatechidxusd_15m.csv.gz` (`fetch-dukascopy.py USATECHIDXUSD 2012-01-01 2026-10-01`) | séance au comptant seule en 2012 – 2013 ; couverture continue dès 2013-07-04, évaluation 2015-01-01 → 2026-09-30 | intégrité OK ; **14 à 39 % de bougies manquantes en 2015 – 2018** et 3,7 à 4,5 % depuis 2019 (seuil 2 %), 78 à 255 trous imprévus par an en 2015 – 2018 |
+
+Limites communes : volume de ticks Dukascopy (pas le volume de la bourse) dans les filtres de V1, prix
+acheteur, aucune base future – comptant modélisée, mode de construction du CFD non documenté.

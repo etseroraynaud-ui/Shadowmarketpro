@@ -185,7 +185,11 @@ Transfert de V1 aux futures or (GC) et Nasdaq-100 (NQ) (plan : `research/preregi
 commité avant toute donnée ; dossier : `research/futures-transfer/`). Étude d'événement au seuil figé,
 puis seul le seuil de choc k varie (grille 1,5 – 4,0, critère de `regime-wf.ts`, walk-forward et test
 final), seuil quantile en comparaison. Au 2026-10-20, aucune donnée de futures n'est accessible depuis
-l'environnement : rien n'est calculé et les deux marchés concluent D (données insuffisantes).
+l'environnement : les deux marchés concluent D sur futures. À la demande du propriétaire, l'étude a été
+faite sur substituts Dukascopy (XAU/USD comptant, CFD Nasdaq-100 USATECH ; additifs commités avant
+calcul) : conclusion principale D pour les deux (contrôles de couverture des données en échec), analyse
+secondaire C pour les deux (phénomène non démontré au seuil figé de V1). Commande :
+`node research/futures-transfer/study.ts --stage dev`, commit, puis `--stage holdout`.
 
 L'adresse du bouton de contact de `/institutional` vient de la variable d'environnement
 `NEXT_PUBLIC_INSTITUTIONAL_EMAIL` (lue au build) ; sans elle, le bouton ouvre le rapport complet.
