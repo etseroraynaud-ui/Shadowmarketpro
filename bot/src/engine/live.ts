@@ -45,6 +45,7 @@ import type { BotState, LivePosition } from './state.ts'
 import { StateStore, indexOfTime, loadStrategy, saveStrategy } from './state.ts'
 import { newRunner, newSession } from './short-trend.ts'
 import type { Session } from './short-trend.ts'
+import { applyExits, extremesSince, variantOf } from './plugin.ts'
 
 export interface LiveOptions {
   cfg: BotConfig
@@ -137,7 +138,7 @@ export class LiveEngine {
     const now = o.now ? o.now() : Date.now()
     let eng: LiveEngine
     if (!saved) {
-      const session = newSession(o.shock, handoffCosts(o.cfg, o.shock), chart, 0, { regimeBars: daily }, o.cfg.shortTrendFilter)
+      const session = newSession(o.shock, handoffCosts(o.cfg, o.shock), chart, 0, { regimeBars: daily }, variantOf(o.cfg))
       const state: BotState = {
         version: 1, network: o.network, coin: o.cfg.coin, account: tradedAccount(o.cfg) ?? '', anchor: chart.t[0], lastBarTime: chart.t[chart.n - 1],
         strategy: saveStrategy(session.runner.strategy.state, chart.t), position: null, seenFills: [], lastFillTime: now, lastFundingTime: now, halted: null, pending: null,
@@ -150,12 +151,12 @@ export class LiveEngine {
       const bad = saved.anchor !== chart.t[0] ? 'première bougie de l\'historique différente' : saved.network !== o.network || saved.coin !== o.cfg.coin || saved.account !== (tradedAccount(o.cfg) ?? '') ? 'réseau, actif ou compte différent' : null
       const idx = indexOfTime(chart.t, saved.lastBarTime)
       if (bad || idx < 0) {
-        const runner = newRunner(o.shock, chart, { regimeBars: daily }, o.cfg.shortTrendFilter)
+        const runner = newRunner(o.shock, chart, { regimeBars: daily }, variantOf(o.cfg))
         eng = new LiveEngine(o, runner, null, saved)
         eng.halt(`état sauvegardé incompatible avec l'historique : ${bad ?? 'dernière bougie traitée absente'}`)
         return eng
       }
-      const runner = newRunner(o.shock, head(chart, idx + 1), { regimeBars: daily, state: loadStrategy(saved.strategy, chart.t) }, o.cfg.shortTrendFilter)
+      const runner = newRunner(o.shock, head(chart, idx + 1), { regimeBars: daily, state: loadStrategy(saved.strategy, chart.t) }, variantOf(o.cfg))
       eng = new LiveEngine(o, runner, null, saved)
       o.journal.event('live_restart', { lastBar: iso(saved.lastBarTime), missed: chart.n - 1 - idx, position: saved.position ? (saved.position.dir === 1 ? 'long' : 'short') : 'flat', halted: saved.halted })
       if (!saved.halted) {
@@ -504,6 +505,14 @@ export class LiveEngine {
     if (missing > 0) this.journal.event('gap', { before: iso(bar.t), missing })
     const view = pos ? { dir: pos.dir, set: pos.set, avg: pos.avg } : null
     const d = this.runner.decide(i, view, false)
+    // Sorties d'un module de variante (BOT_PLUGIN) : extrêmes lus sur les bougies, comme dans le backtest.
+    if (pos && this.o.cfg.plugin?.exits) {
+      const ex = extremesSince(this.runner.m.bars, pos.entryBar, i, pos.avg)
+      const before = d.exits ? { ...d.exits } : null
+      if (applyExits(d, { dir: pos.dir, set: pos.set, avg: pos.avg, hi: ex.hi, lo: ex.lo, atrAtEntry: pos.atrAtEntry }, this.o.shock.sets, this.o.shock.mintick, this.o.cfg.plugin) && d.exits && d.exits.stop !== pos.stop) {
+        this.journal.event('exits_adjusted', { bar: iso(bar.t + this.tfMs), module: this.o.cfg.plugin.name, script: before, sent: d.exits })
+      }
+    }
     this.mark('decided')
     const ctx = this.runner.context(i)
     this.state.lastBarTime = bar.t

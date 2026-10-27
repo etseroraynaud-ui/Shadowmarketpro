@@ -4,4 +4,7 @@
 !bot/package.json
 !bot/package-lock.json
 !bot/src/
+# Modules privés (bot/private, hors du dépôt), sans leurs tests : image de bot/private/Dockerfile.
+!bot/private/
+bot/private/**/tests/
 lib/**/tests/
