@@ -7,4 +7,7 @@
 # Modules privés (bot/private, hors du dépôt), sans leurs tests : image de bot/private/Dockerfile.
 !bot/private/
 bot/private/**/tests/
+# Clés des services réels : jamais dans une image.
+bot/private/env/
+**/*.env
 lib/**/tests/
