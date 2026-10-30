@@ -15,14 +15,13 @@ import { join, resolve } from 'node:path'
 import type { Bars } from '../../../lib/backtest/types.ts'
 import { adaptivePreset, marketFor, selectFor } from '../../../lib/strategies/shock/live.ts'
 import type { Bar } from '../../../lib/strategies/shock/live.ts'
-import { simulate } from '../../../lib/strategies/shock/engine.ts'
 import { loadConfig } from '../config.ts'
 import { CandleStore, toBars } from '../data/candles.ts'
 import { midOf } from '../data/quotes.ts'
 import { PaperExchange } from '../exec/paper.ts'
 import { LiveEngine, handoffCosts } from '../engine/live.ts'
 import { StateStore } from '../engine/state.ts'
-import { shortTrendEntries } from '../engine/short-trend.ts'
+import { loadPlugin, simulateVariant, variantEntries, variantOf } from '../engine/plugin.ts'
 import { Journal } from '../journal.ts'
 import { readFileSync } from 'node:fs'
 
@@ -42,7 +41,8 @@ const head = (b: Bars, k: number): Bars => ({ n: k, t: b.t.subarray(0, k), o: b.
 
 const dir = mkdtempSync(join(tmpdir(), 'paper-replay-'))
 // Réglages de production, sans plafond de taille (comparaison avec le backtest à 100 % du capital).
-const cfg = loadConfig({ BOT_MODE: 'shadow', BOT_STATE_DIR: dir, BOT_LOG_DIR: dir, BOT_DATA_DIR: dir, BOT_MAX_NOTIONAL_USD: '10000000', ...Object.fromEntries(Object.entries(process.env).filter(([k]) => k.startsWith('BOT_TRAIL') || k === 'BOT_MAX_SPREAD_BPS' || k === 'BOT_SHORT_TREND_FILTER')) })
+const cfg = loadConfig({ BOT_MODE: 'shadow', BOT_STATE_DIR: dir, BOT_LOG_DIR: dir, BOT_DATA_DIR: dir, BOT_MAX_NOTIONAL_USD: '10000000', ...Object.fromEntries(Object.entries(process.env).filter(([k]) => k.startsWith('BOT_TRAIL') || k === 'BOT_MAX_SPREAD_BPS' || k === 'BOT_SHORT_TREND_FILTER' || k === 'BOT_PLUGIN')) })
+cfg.plugin = await loadPlugin(cfg.pluginPath, cfg.shortTrendFilter)
 const shock = adaptivePreset(15, 1)
 const clock = { t: chart.t[k0 - 1] + M15 }
 const quote = (px: number, t: number) => ({ bid: px - spread / 2, ask: px + spread / 2, bidSz: 10, askSz: 10, time: t, recv: t, source: 'paper' as const })
@@ -74,7 +74,8 @@ for (let i = k0; i < chart.n; i++) {
 
 const m = marketFor(chart, 15, 1)
 const sel = selectFor(shock, m, daily).select
-const ref = simulate(m, shock.sets, handoffCosts(cfg, shock), 0, chart.n - 1, sel, cfg.shortTrendFilter ? shortTrendEntries(m, shock.sets, sel, 15, daily) : undefined)
+const variant = variantOf(cfg)
+const ref = simulateVariant(m, shock.sets, handoffCosts(cfg, shock), 0, chart.n - 1, sel, variantEntries(m, shock.sets, sel, 15, daily, variant), variant.plugin)
 const csv = readFileSync(join(dir, 'trades-shadow-paper.csv'), 'utf8').trim().split('\n')
 const cols = csv[0].split(',')
 const live = csv.slice(1).map(r => Object.fromEntries(r.split(',').map((v, k) => [cols[k], v])))

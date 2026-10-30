@@ -15,7 +15,9 @@ import type { Decision } from '../../../lib/strategies/shock/strategy.ts'
 import { marketFor, selectFor } from '../../../lib/strategies/shock/live.ts'
 import type { ShockConfig } from '../../../lib/strategies/shock/live.ts'
 import type { Costs } from '../../../lib/strategies/shock/params.ts'
-import { newSession, shortTrendEntries } from '../engine/short-trend.ts'
+import { newSession } from '../engine/short-trend.ts'
+import { simulateVariant, variantEntries, variantOf } from '../engine/plugin.ts'
+import type { Variant } from '../engine/plugin.ts'
 
 export interface ParityReport {
   ok: boolean
@@ -35,18 +37,21 @@ const head = (b: Bars, k: number): Bars => ({ n: k, t: b.t.subarray(0, k), o: b.
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
-export function checkParity(cfg: ShockConfig, costs: Costs, chart: Bars, daily: Bars | undefined, steps: number, shortTrendFilter = false): ParityReport {
+export function checkParity(cfg: ShockConfig, costs: Costs, chart: Bars, daily: Bars | undefined, steps: number, shortTrendFilter: boolean | Variant = false): ParityReport {
+  const v = variantOf(shortTrendFilter)
   const n = chart.n
   if (steps < 1 || steps >= n) throw new Error(`steps doit être entre 1 et ${n - 1}`)
   // 1. Backtester.
   const m = marketFor(chart, cfg.tfMin, cfg.mintick)
   const { select, agitated } = selectFor(cfg, m, daily)
   const ref: Decision[] = []
-  const override = shortTrendFilter ? shortTrendEntries(m, cfg.sets, select, cfg.tfMin, daily) : undefined
-  const bt = simulate(m, cfg.sets, costs, 0, n - 1, select, override, (i, d) => { ref[i] = structuredClone(d) })
+  const override = variantEntries(m, cfg.sets, select, cfg.tfMin, daily, v)
+  const trace = (i: number, d: Decision) => { ref[i] = structuredClone(d) }
+  // Sorties d'un module : le backtest en bloc est la boucle de simulate() avec le module (simulateVariant).
+  const bt = v.plugin?.exits ? simulateVariant(m, cfg.sets, costs, 0, n - 1, select, override, v.plugin, trace) : simulate(m, cfg.sets, costs, 0, n - 1, select, override, trace)
   // 2. Moteur du bot.
   const k0 = n - steps
-  const s = newSession(cfg, costs, head(chart, k0), 0, { regimeBars: daily }, shortTrendFilter)
+  const s = newSession(cfg, costs, head(chart, k0), 0, { regimeBars: daily }, v)
   const decisionDiffs: ParityReport['decisionDiffs'] = []
   const regimeDiffs: ParityReport['regimeDiffs'] = []
   let signals = 0

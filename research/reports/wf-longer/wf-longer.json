@@ -1,6 +1,7 @@
 {
- "generatedAt": "2026-10-13T06:18:28.500Z",
+ "generatedAt": "2026-10-13T14:22:58.432Z",
  "prespec": "research/preregistration/wf-longer-windows.md",
+ "variant": "calm",
  "period": "2020-01-01 → 2026-10-04",
  "rule": {
   "shortWindows": 1.2,
@@ -27,6 +28,16 @@
  },
  "configs": [
   {
+   "calm": {
+    "changes": 16,
+    "distinct": 10,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 28
+   },
    "train": "36",
    "test": 3,
    "file": "shock-15m-wf-plateau-36-3-calm.md",
@@ -42,6 +53,16 @@
    "ratio": 0.5354838709677419
   },
   {
+   "calm": {
+    "changes": 6,
+    "distinct": 6,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 14
+   },
    "train": "36",
    "test": 6,
    "file": "shock-15m-wf-plateau-36-6-calm.md",
@@ -57,6 +78,16 @@
    "ratio": 0.5354838709677419
   },
   {
+   "calm": {
+    "changes": 3,
+    "distinct": 4,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 7
+   },
    "train": "36",
    "test": 12,
    "file": "shock-15m-wf-plateau-36-12-calm.md",
@@ -72,6 +103,16 @@
    "ratio": 0.5935483870967742
   },
   {
+   "calm": {
+    "changes": 10,
+    "distinct": 6,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 28
+   },
    "train": "48",
    "test": 3,
    "file": "shock-15m-wf-plateau-48-3-calm.md",
@@ -87,6 +128,16 @@
    "ratio": 0.5870967741935484
   },
   {
+   "calm": {
+    "changes": 6,
+    "distinct": 5,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 14
+   },
    "train": "48",
    "test": 6,
    "file": "shock-15m-wf-plateau-48-6-calm.md",
@@ -102,6 +153,16 @@
    "ratio": 0.6838709677419355
   },
   {
+   "calm": {
+    "changes": 1,
+    "distinct": 2,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 7
+   },
    "train": "48",
    "test": 12,
    "file": "shock-15m-wf-plateau-48-12-calm.md",
@@ -117,6 +178,16 @@
    "ratio": 0.6129032258064515
   },
   {
+   "calm": {
+    "changes": 5,
+    "distinct": 5,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 28
+   },
    "train": "60",
    "test": 3,
    "file": "shock-15m-wf-plateau-60-3-calm.md",
@@ -132,6 +203,16 @@
    "ratio": 0.6387096774193548
   },
   {
+   "calm": {
+    "changes": 5,
+    "distinct": 5,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 14
+   },
    "train": "60",
    "test": 6,
    "file": "shock-15m-wf-plateau-60-6-calm.md",
@@ -147,6 +228,16 @@
    "ratio": 0.6451612903225806
   },
   {
+   "calm": {
+    "changes": 5,
+    "distinct": 5,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 7
+   },
    "train": "60",
    "test": 12,
    "file": "shock-15m-wf-plateau-60-12-calm.md",
@@ -162,6 +253,16 @@
    "ratio": 0.5612903225806452
   },
   {
+   "calm": {
+    "changes": 7,
+    "distinct": 4,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 28
+   },
    "train": "exp",
    "test": 3,
    "file": "shock-15m-wf-plateau-exp-3-calm.md",
@@ -177,6 +278,16 @@
    "ratio": 0.6387096774193548
   },
   {
+   "calm": {
+    "changes": 2,
+    "distinct": 2,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 14
+   },
    "train": "exp",
    "test": 6,
    "file": "shock-15m-wf-plateau-exp-6-calm.md",
@@ -192,6 +303,16 @@
    "ratio": 0.8774193548387097
   },
   {
+   "calm": {
+    "changes": 1,
+    "distinct": 2,
+    "off": 0
+   },
+   "agitated": {
+    "changes": 0,
+    "distinct": 0,
+    "off": 7
+   },
    "train": "exp",
    "test": 12,
    "file": "shock-15m-wf-plateau-exp-12-calm.md",

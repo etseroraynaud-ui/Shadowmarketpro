@@ -16,6 +16,8 @@ import type { EntryOverride } from '../../../lib/strategies/shock/strategy.ts'
 import type { StrategyState } from '../../../lib/strategies/shock/strategy.ts'
 import { SimBroker } from '../../../lib/strategies/shock/broker.ts'
 import { entriesWithShortTrend, shortTrendEntries, shortTrendMask } from '../../../lib/strategies/short-trend.ts'
+import { VariantSession, variantOf, withEntries } from './plugin.ts'
+import type { Variant } from './plugin.ts'
 
 export { shortTrendEntries, shortTrendMask }
 
@@ -46,10 +48,12 @@ export function withShortTrendFilter(runner: ShockRunner): ShockRunner {
   return runner
 }
 
-/** Runner du bot, avec ou sans la condition. */
-export function newRunner(cfg: ShockConfig, history: Bars, opts: { regimeBars?: Bars; state?: StrategyState }, filter: boolean): ShockRunner {
+/** Runner du bot : moteur, version publique (`filter` = true) ou variante d'un module (engine/plugin.ts). */
+export function newRunner(cfg: ShockConfig, history: Bars, opts: { regimeBars?: Bars; state?: StrategyState }, filter: boolean | Variant): ShockRunner {
+  const v = variantOf(filter)
   const r = new ShockRunner(cfg, history, opts)
-  return filter ? withShortTrendFilter(r) : r
+  if (v.plugin?.entries) return withEntries(r, v)
+  return v.shortTrend ? withShortTrendFilter(r) : r
 }
 
 /**
@@ -90,10 +94,15 @@ export class FilteredSession {
   }
 }
 
-/** Ce que le bot utilise d'une session (ShockSession ou FilteredSession). */
+/** Ce que le bot utilise d'une session (ShockSession, FilteredSession ou VariantSession). */
 export type Session = Pick<ShockSession, 'runner' | 'broker' | 'equity' | 'entries' | 'start' | 'push'>
 
-/** Session du bot : celle du moteur sans la condition (comportement inchangé), la filtrée avec. */
-export function newSession(cfg: ShockConfig, costs: Costs, history: Bars, start: number, opts: { regimeBars?: Bars }, filter: boolean): Session {
-  return filter ? new FilteredSession(cfg, costs, history, start, opts) : new ShockSession(cfg, costs, history, start, opts)
+/**
+ * Session du bot : celle du moteur sans la condition (comportement inchangé), la filtrée avec, la
+ * session de variante avec un module (engine/plugin.ts).
+ */
+export function newSession(cfg: ShockConfig, costs: Costs, history: Bars, start: number, opts: { regimeBars?: Bars }, filter: boolean | Variant): Session {
+  const v = variantOf(filter)
+  if (v.plugin) return new VariantSession(cfg, costs, history, start, opts, v)
+  return v.shortTrend ? new FilteredSession(cfg, costs, history, start, opts) : new ShockSession(cfg, costs, history, start, opts)
 }

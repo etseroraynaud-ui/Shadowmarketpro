@@ -18,6 +18,7 @@ import type { LiveEngine } from './live.ts'
 import { coalesce } from '../runtime.ts'
 import { newSession } from './short-trend.ts'
 import type { Session } from './short-trend.ts'
+import type { Variant } from './plugin.ts'
 
 export const SET_NAMES = ['calm', 'agitated']
 
@@ -26,8 +27,8 @@ export class ShadowEngine {
   readonly journal: Journal
   readonly tfMs: number
 
-  /** `shortTrendFilter` : version publique (shorts seulement en tendance journalière baissière). */
-  constructor(cfg: ShockConfig, costs: Costs, chart: Bars, daily: Bars, journal: Journal, shortTrendFilter = false) {
+  /** `shortTrendFilter` : version publique (shorts seulement en tendance journalière baissière), ou variante. */
+  constructor(cfg: ShockConfig, costs: Costs, chart: Bars, daily: Bars, journal: Journal, shortTrendFilter: boolean | Variant = false) {
     this.journal = journal
     this.tfMs = cfg.tfMin * 60000
     // Tout le cache est rejoué : l'état de la stratégie est celui du backtest sur le même historique.

@@ -2,20 +2,20 @@
 
 Protocole : `research/preregistration/wf-longer-windows.md` (commité avant calcul). Règles publiées (entrées en régime calme, shorts en tendance baissière), BTC/USD Bitstamp 15 min, même méthode de plateaux, même période de test pour toutes : 2020-01-01 → 2026-10-04. Préréglage fixe sur la même période : Sharpe 1,55 (flatteur : choisi sur 2017–2026). Sharpe et Sortino sur les rendements par bougie de 15 min.
 
-| Calibration / test | fenêtres | Sharpe | Sortino | CAGR | pire baisse | trades | walk-forward / fixe |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| **36 mois / 3 mois (référence publiée)** | 28 | 0,83 | 1,20 | 14,3 % | −27,6 % | 390 | 54 % |
-| 36 mois / 6 mois | 14 | 0,83 | 1,20 | 14,3 % | −25,9 % | 382 | 54 % |
-| 36 mois / 12 mois | 7 | 0,92 | 1,34 | 16,0 % | −24,4 % | 363 | 59 % |
-| 48 mois / 3 mois | 28 | 0,91 | 1,31 | 16,5 % | −23,9 % | 360 | 59 % |
-| 48 mois / 6 mois | 14 | 1,06 | 1,53 | 20,9 % | −25,1 % | 351 | 68 % |
-| 48 mois / 12 mois | 7 | 0,95 | 1,37 | 17,8 % | −25,6 % | 342 | 61 % |
-| 60 mois / 3 mois | 28 | 0,99 | 1,42 | 18,2 % | −21,2 % | 352 | 64 % |
-| 60 mois / 6 mois | 14 | 1,00 | 1,43 | 18,4 % | −21,2 % | 351 | 65 % |
-| 60 mois / 12 mois | 7 | 0,87 | 1,24 | 14,6 % | −27,6 % | 342 | 56 % |
-| croissante / 3 mois | 28 | 0,99 | 1,40 | 19,7 % | −38,6 % | 291 | 64 % |
-| croissante / 6 mois | 14 | 1,36 | 1,95 | 30,4 % | −27,6 % | 280 | 88 % |
-| croissante / 12 mois | 7 | 1,35 | 1,94 | 30,3 % | −28,3 % | 281 | 87 % |
+| Calibration / test | fenêtres | Sharpe | Sortino | CAGR | pire baisse | trades | walk-forward / fixe | réglages calmes : changements · distincts |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **36 mois / 3 mois (référence publiée)** | 28 | 0,83 | 1,20 | 14,3 % | −27,6 % | 390 | 54 % | 16 · 10 |
+| 36 mois / 6 mois | 14 | 0,83 | 1,20 | 14,3 % | −25,9 % | 382 | 54 % | 6 · 6 |
+| 36 mois / 12 mois | 7 | 0,92 | 1,34 | 16,0 % | −24,4 % | 363 | 59 % | 3 · 4 |
+| 48 mois / 3 mois | 28 | 0,91 | 1,31 | 16,5 % | −23,9 % | 360 | 59 % | 10 · 6 |
+| 48 mois / 6 mois | 14 | 1,06 | 1,53 | 20,9 % | −25,1 % | 351 | 68 % | 6 · 5 |
+| 48 mois / 12 mois | 7 | 0,95 | 1,37 | 17,8 % | −25,6 % | 342 | 61 % | 1 · 2 |
+| 60 mois / 3 mois | 28 | 0,99 | 1,42 | 18,2 % | −21,2 % | 352 | 64 % | 5 · 5 |
+| 60 mois / 6 mois | 14 | 1,00 | 1,43 | 18,4 % | −21,2 % | 351 | 65 % | 5 · 5 |
+| 60 mois / 12 mois | 7 | 0,87 | 1,24 | 14,6 % | −27,6 % | 342 | 56 % | 5 · 5 |
+| croissante / 3 mois | 28 | 0,99 | 1,40 | 19,7 % | −38,6 % | 291 | 64 % | 7 · 4 |
+| croissante / 6 mois | 14 | 1,36 | 1,95 | 30,4 % | −27,6 % | 280 | 88 % | 2 · 2 |
+| croissante / 12 mois | 7 | 1,35 | 1,94 | 30,3 % | −28,3 % | 281 | 87 % | 1 · 2 |
 
 **Médiane des 12 Sharpe : 0,97** (étendue 0,83 pour 36 mois / 3 mois à 1,36 pour croissante / 6 mois) ; rapport médian au préréglage fixe 63 %. 12 configurations sur 12 restent sous le préréglage fixe. Pire baisse médiane −25,8 %, la plus forte −38,6 %.
 

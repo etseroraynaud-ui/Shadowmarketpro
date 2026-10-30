@@ -20,6 +20,9 @@
 //                         0 (défaut) : le moteur v1, sans cette condition. À changer seulement compte
 //                         à plat avec BOT_RESET_STATE=1 : les signaux à partir de là ne sont plus les
 //                         mêmes que ceux de l'état sauvegardé.
+//   BOT_PLUGIN            chemin d'un module de variante gardé hors du dépôt (engine/plugin.ts) : entrées
+//                         et sorties modifiées sans toucher au moteur ; vide (défaut) : aucun. Comme
+//                         BOT_SHORT_TREND_FILTER, à changer seulement compte à plat avec BOT_RESET_STATE=1
 //
 // Exécution et risque (ne changent pas les signaux, seulement la taille et les garde-fous) :
 //   BOT_EQUITY_PCT        part du capital engagée par position, en % (défaut 100, comme le backtest)
@@ -49,6 +52,7 @@
 //   BOT_PAPER_MAKER_FEE_PCT 0.015 (maker Hyperliquid, palier de base)
 
 import { join, resolve } from 'node:path'
+import type { StrategyPlugin } from './engine/plugin.ts'
 
 export type Mode = 'shadow' | 'testnet' | 'mainnet'
 
@@ -60,6 +64,9 @@ export interface BotConfig {
   tfMin: 15
   /** Version publique : shorts seulement en régime de tendance journalier baissier. */
   shortTrendFilter: boolean
+  /** Module de variante (BOT_PLUGIN) : chemin, puis module chargé par loadPlugin au démarrage. */
+  pluginPath: string | null
+  plugin: StrategyPlugin | null
   account: `0x${string}` | null
   subAccount: `0x${string}` | null
   agentKey: `0x${string}` | null
@@ -123,12 +130,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): BotConfig {
   if (mode !== 'shadow' && (!account || !agentKey)) throw new Error(`mode ${mode} : HL_ACCOUNT_ADDRESS et HL_AGENT_PRIVATE_KEY sont obligatoires`)
   const stateDir = resolve(env.BOT_STATE_DIR ?? join(ROOT, 'state'))
   const emergency = env.BOT_EMERGENCY_STOP_PCT
+  const shortTrendFilter = flag(env, 'BOT_SHORT_TREND_FILTER')
   return {
     mode,
     dataNetwork,
     coin: env.BOT_COIN ?? 'BTC',
     tfMin: 15,
-    shortTrendFilter: flag(env, 'BOT_SHORT_TREND_FILTER'),
+    shortTrendFilter,
+    pluginPath: env.BOT_PLUGIN?.trim() ? resolve(env.BOT_PLUGIN.trim()) : null,
+    plugin: null,
     account,
     subAccount,
     agentKey,
@@ -161,6 +171,6 @@ export function tradedAccount(c: Pick<BotConfig, 'account' | 'subAccount'>): `0x
 
 /** Configuration sans secret, pour le journal. */
 export function publicConfig(c: BotConfig): Record<string, unknown> {
-  const { agentKey: _k, ...rest } = c
-  return { ...rest, agentKey: c.agentKey ? '***' : null }
+  const { agentKey: _k, plugin, ...rest } = c
+  return { ...rest, agentKey: c.agentKey ? '***' : null, plugin: plugin?.name ?? null }
 }

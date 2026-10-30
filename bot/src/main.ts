@@ -25,6 +25,7 @@ import { HyperliquidData, HyperliquidExchange, HyperliquidStream } from './hl/cl
 import { Journal } from './journal.ts'
 import { ShadowEngine, ShadowRunner } from './engine/shadow.ts'
 import { LiveEngine } from './engine/live.ts'
+import { loadPlugin, variantName, variantOf } from './engine/plugin.ts'
 import { StateStore } from './engine/state.ts'
 import { PaperExchange } from './exec/paper.ts'
 import { BotLoop, coalesce } from './runtime.ts'
@@ -57,6 +58,7 @@ async function retry<T>(what: string, f: () => Promise<T>, journal: Journal, tri
 
 async function main() {
   const cfg = loadConfig()
+  cfg.plugin = await loadPlugin(cfg.pluginPath, cfg.shortTrendFilter)
   const journal = new Journal(cfg.logDir, cfg.mode)
   const network = cfg.dataNetwork
   journal.event('start', { ...publicConfig(cfg), pid: process.pid })
@@ -68,7 +70,7 @@ async function main() {
   const data = new HyperliquidData(network === 'testnet')
   const asset = await retry('meta', () => data.assetInfo(cfg.coin), journal)
   const shock = adaptivePreset(15, asset.tick)
-  journal.event('strategy', { preset: 'adaptive volatility 15 min', mintick: asset.tick, szDecimals: asset.szDecimals, sets: shock.sets.length, shortTrendFilter: cfg.shortTrendFilter })
+  journal.event('strategy', { preset: 'adaptive volatility 15 min', mintick: asset.tick, szDecimals: asset.szDecimals, sets: shock.sets.length, shortTrendFilter: cfg.shortTrendFilter, variant: variantName(variantOf(cfg)) })
 
   // Horloge : l'heure du carnet de l'exchange, comparée à l'heure locale de réception.
   const book = await retry('book', () => data.book(cfg.coin), journal)
@@ -87,7 +89,7 @@ async function main() {
   let shadow: ShadowRunner | null = null
   if (cfg.mode === 'shadow') {
     const costs = { capital: cfg.shadowCapital, qtyPct: cfg.equityPct, commissionPct: cfg.shadowFeePct, slippageTicks: 0, slippagePct: 0, mintick: asset.tick, leverage: cfg.leverage, maintenancePct: 0.5, fundingPct: 0 }
-    const sim = new ShadowEngine(shock, costs, feed.chartBars(), feed.dailyBars(), journal, cfg.shortTrendFilter)
+    const sim = new ShadowEngine(shock, costs, feed.chartBars(), feed.dailyBars(), journal, variantOf(cfg))
     let paper: LiveEngine | null = null
     let paperEx: PaperExchange | null = null
     if (cfg.shadowPaper) {

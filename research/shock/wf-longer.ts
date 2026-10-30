@@ -1,12 +1,13 @@
 // Walk-forward Bitcoin à fenêtres plus longues (research/preregistration/wf-longer-windows.md) :
-// synthèse des 12 configurations calculées par wf-plateau.ts (--calm), sans rien recalculer.
+// synthèse des 12 configurations calculées par wf-plateau.ts, sans rien recalculer. Règles publiées
+// (--calm) par défaut ; --variant e2 : règles précédentes à deux régimes (addendum § 6 du protocole).
 //
 //   for t in 36 48 60 exp; do for s in 3 6 12; do
-//     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/wf-plateau.ts --train $t --test $s --calm
+//     node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/wf-plateau.ts --train $t --test $s --calm   # ou --e2
 //   done; done
-//   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/wf-longer.ts
+//   node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON research/shock/wf-longer.ts [--variant e2]
 //
-// Écrit research/reports/wf-longer/wf-longer.{md,json}.
+// Écrit research/reports/wf-longer/wf-longer.{md,json} (wf-longer-e2.{md,json} avec --variant e2).
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -16,25 +17,33 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const OUT = join(ROOT, 'research/reports/wf-longer')
 const TRAINS = ['36', '48', '60', 'exp'] as const
 const TESTS = [3, 6, 12] as const
+const VARIANT = process.argv.includes('--variant') ? process.argv[process.argv.indexOf('--variant') + 1] : 'calm'
+if (VARIANT !== 'calm' && VARIANT !== 'e2') throw new Error(`variante inconnue : ${VARIANT}`)
+const SFX = VARIANT === 'calm' ? '' : `-${VARIANT}`
 /** Résultat publié de la configuration de référence, à retrouver à l'identique (contrôle bloquant). */
-const PUBLISHED = { sharpe: 0.83, trades: 390, fixed: 1.55 }
+const PUBLISHED = VARIANT === 'calm' ? { sharpe: 0.83, trades: 390, fixed: 1.55 } : { sharpe: 1.11, trades: 502, fixed: 1.49 }
+const RULES_TXT = VARIANT === 'calm' ? 'Règles publiées (entrées en régime calme, shorts en tendance baissière)' : 'Règles précédentes à deux régimes (E2 : régimes calme et agité tradés, chacun re-sélectionné ; shorts en tendance baissière)'
 /** Règle de lecture pré-enregistrée (§ 5). */
 const RULE = { shortWindows: 1.2, notWindows: 1.0 }
 
 const n = (s: string) => Number(s.replace('−', '-').replace(/[^\d.-]/g, ''))
 const median = (xs: number[]) => { const s = [...xs].sort((a, b) => a - b); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2 }
 
-interface Config { train: string; test: number; file: string; windows: number; period: string; sharpe: number; sortino: number; cagr: number; maxDD: number; trades: number; fixedSharpe: number; fixedCagr: number; ratio: number }
+interface Stability { changes: number; distinct: number; off: number }
+interface Config { train: string; test: number; file: string; windows: number; period: string; sharpe: number; sortino: number; cagr: number; maxDD: number; trades: number; fixedSharpe: number; fixedCagr: number; ratio: number; calm: Stability; agitated: Stability }
+/** Stabilité des réglages retenus d'une fenêtre à la suivante (« pas de trade » compté à part). */
+const stability = (labels: string[]): Stability => ({ changes: labels.slice(1).filter((l, k) => l !== labels[k]).length, distinct: new Set(labels.filter(l => l !== 'pas de trade')).size, off: labels.filter(l => l === 'pas de trade').length })
 const configs: Config[] = []
 for (const train of TRAINS) for (const test of TESTS) {
-  const file = `shock-15m-wf-plateau-${train}-${test}-calm.md`
+  const file = `shock-15m-wf-plateau-${train}-${test}-${VARIANT}.md`
   const md = readFileSync(join(ROOT, 'research/reports', file), 'utf8')
   const row = (re: RegExp) => { const l = md.split('\n').find(x => re.test(x)); if (!l) throw new Error(`${file} : ligne ${re} absente`); return l.split('|').map(x => x.trim()) }
   const wf = row(/^\| \*\*Walk-forward, plateaux\*\*/), fx = row(/^\| Préréglage fixe/)
   const head = md.split('\n').find(l => l.startsWith('BTC/USD Bitstamp'))!
   const win = head.match(/de (\d{4}-\d{2}-\d{2}) au (\d{4}-\d{2}-\d{2}) \((\d+) fenêtres\)/)
   if (!win) throw new Error(`${file} : période introuvable`)
-  configs.push({ train, test, file, windows: Number(win[3]), period: `${win[1]} → ${win[2]}`, sharpe: n(wf[4]), sortino: n(wf[5]), cagr: n(wf[3]) / 100, maxDD: n(wf[6]) / 100, trades: n(wf[8]), fixedSharpe: n(fx[4]), fixedCagr: n(fx[3]) / 100, ratio: n(wf[4]) / n(fx[4]) })
+  const W = JSON.parse(readFileSync(join(ROOT, 'research/reports', file.replace(/\.md$/, '.json')), 'utf8')).windows as { calm: string; agitated: string }[]
+  configs.push({ calm: stability(W.map(w => w.calm)), agitated: stability(W.map(w => w.agitated)), train, test, file, windows: Number(win[3]), period: `${win[1]} → ${win[2]}`, sharpe: n(wf[4]), sortino: n(wf[5]), cagr: n(wf[3]) / 100, maxDD: n(wf[6]) / 100, trades: n(wf[8]), fixedSharpe: n(fx[4]), fixedCagr: n(fx[3]) / 100, ratio: n(wf[4]) / n(fx[4]) })
 }
 
 // ---------------------------------------------------------------- contrôles
@@ -64,15 +73,17 @@ const summary = {
 const high = configs.filter(c => c.sharpe > HIGH)
 const highOther = configs.filter(c => !high.includes(c) && high.some(h => h.train === c.train))
 mkdirSync(OUT, { recursive: true })
-writeFileSync(join(OUT, 'wf-longer.json'), JSON.stringify({ generatedAt: new Date().toISOString(), prespec: 'research/preregistration/wf-longer-windows.md', period: ref.period, rule: RULE, summary, configs, checks }, null, 1) + '\n')
+writeFileSync(join(OUT, `wf-longer${SFX}.json`), JSON.stringify({ generatedAt: new Date().toISOString(), prespec: 'research/preregistration/wf-longer-windows.md', variant: VARIANT, period: ref.period, rule: RULE, summary, configs, checks }, null, 1) + '\n')
 
 const f2 = (x: number) => x.toFixed(2).replace('.', ',').replace('-', '−')
 const p1 = (x: number) => `${(x * 100).toFixed(1).replace('.', ',').replace('-', '−')} %`
 const L: string[] = []
-L.push('# Walk-forward Bitcoin à fenêtres plus longues — 12 configurations', '')
-L.push(`Protocole : \`research/preregistration/wf-longer-windows.md\` (commité avant calcul). Règles publiées (entrées en régime calme, shorts en tendance baissière), BTC/USD Bitstamp 15 min, même méthode de plateaux, même période de test pour toutes : ${ref.period}. Préréglage fixe sur la même période : Sharpe ${f2(ref.fixedSharpe)} (flatteur : choisi sur 2017–2026). Sharpe et Sortino sur les rendements par bougie de 15 min.`, '')
-L.push('| Calibration / test | fenêtres | Sharpe | Sortino | CAGR | pire baisse | trades | walk-forward / fixe |', '|---|---:|---:|---:|---:|---:|---:|---:|')
-for (const c of configs) L.push(`| ${c === ref ? `**${key(c)} (référence publiée)**` : key(c)} | ${c.windows} | ${f2(c.sharpe)} | ${f2(c.sortino)} | ${p1(c.cagr)} | ${p1(c.maxDD)} | ${c.trades} | ${Math.round(c.ratio * 100)} % |`)
+L.push(`# Walk-forward Bitcoin à fenêtres plus longues — 12 configurations${VARIANT === 'e2' ? ' — règles à deux régimes (E2)' : ''}`, '')
+L.push(`Protocole : \`research/preregistration/wf-longer-windows.md\`${VARIANT === 'e2' ? ' (addendum § 6)' : ''} (commité avant calcul). ${RULES_TXT}, BTC/USD Bitstamp 15 min, même méthode de plateaux, même période de test pour toutes : ${ref.period}. Préréglage fixe sur la même période : Sharpe ${f2(ref.fixedSharpe)} (flatteur : choisi sur 2017–2026). Sharpe et Sortino sur les rendements par bougie de 15 min.`, '')
+const stab = (x: Stability) => `${x.changes} · ${x.distinct}${x.off ? ` · ${x.off} sans trade` : ''}`
+const E2V = VARIANT === 'e2'
+L.push(`| Calibration / test | fenêtres | Sharpe | Sortino | CAGR | pire baisse | trades | walk-forward / fixe | réglages calmes : changements · distincts${E2V ? ' | réglages agités : changements · distincts' : ''} |`, `|---|---:|---:|---:|---:|---:|---:|---:|---:|${E2V ? '---:|' : ''}`)
+for (const c of configs) L.push(`| ${c === ref ? `**${key(c)} (référence publiée)**` : key(c)} | ${c.windows} | ${f2(c.sharpe)} | ${f2(c.sortino)} | ${p1(c.cagr)} | ${p1(c.maxDD)} | ${c.trades} | ${Math.round(c.ratio * 100)} % | ${stab(c.calm)}${E2V ? ` | ${stab(c.agitated)}` : ''} |`)
 L.push('')
 L.push(`**Médiane des 12 Sharpe : ${f2(med)}** (étendue ${f2(lo.sharpe)} pour ${key(lo)} à ${f2(hi.sharpe)} pour ${key(hi)}) ; rapport médian au préréglage fixe ${Math.round(summary.medianRatio * 100)} %. ${summary.belowFixed} configurations sur 12 restent sous le préréglage fixe. Pire baisse médiane ${p1(summary.medianMaxDD)}, la plus forte ${p1(summary.worstMaxDD)}.`, '')
 L.push('## Lecture (règle fixée avant calcul)', '')
@@ -81,8 +92,8 @@ L.push(verdict === 'not-windows'
   : verdict === 'short-windows'
     ? `La médiane (${f2(med)}) est ≥ ${f2(RULE.shortWindows)} : la faiblesse tient en partie à des fenêtres trop courtes.`
     : `La médiane (${f2(med)}) est entre ${f2(RULE.notWindows)} et ${f2(RULE.shortWindows)} : résultat mitigé.`, '')
-L.push('La configuration 36/3 reste la référence publiée : elle a été fixée avant de connaître son résultat, alors que cette étude a été demandée après. Un walk-forward reste un test sur l\'historique déjà utilisé pour concevoir la stratégie ; il mesure le coût de la re-sélection des réglages, pas la performance future.', '')
+L.push(VARIANT === 'e2' ? 'La configuration 36/3 est le walk-forward publié auparavant pour ces règles. Un walk-forward reste un test sur l\'historique déjà utilisé pour concevoir la stratégie ; il mesure le coût de la re-sélection des réglages, pas la performance future.' : 'La configuration 36/3 reste la référence publiée : elle a été fixée avant de connaître son résultat, alors que cette étude a été demandée après. Un walk-forward reste un test sur l\'historique déjà utilisé pour concevoir la stratégie ; il mesure le coût de la re-sélection des réglages, pas la performance future.', '')
 L.push('## Contrôles', '')
 for (const c of checks) L.push(`- ${c.ok ? 'OK' : 'ÉCHEC'} — ${c.name} : ${c.detail}`)
-writeFileSync(join(OUT, 'wf-longer.md'), L.join('\n') + '\n')
-process.stderr.write(`médiane ${med.toFixed(3)}, étendue ${lo.sharpe}–${hi.sharpe}, verdict ${verdict} → research/reports/wf-longer/\n`)
+writeFileSync(join(OUT, `wf-longer${SFX}.md`), L.join('\n') + '\n')
+process.stderr.write(`${VARIANT} : médiane ${med.toFixed(3)}, étendue ${lo.sharpe}–${hi.sharpe}, verdict ${verdict} → research/reports/wf-longer/\n`)
